@@ -16,20 +16,31 @@
    state comes up.
 
    BAR_C, C1 to C3, on the canvas's own pixels (luma, Rec. 709 on the
-   sRGB bytes): no thing is brighter than the disc where it is still
-   whole; the table's light falls with distance from under the disc
-   (a fit over its pixels); the same thing is darker set down far
-   from the glass than near it (each of the six is compared with
-   itself in tests/chamber.test.mjs: across different shapes the
-   light received depends on the shape as much as on the distance),
-   and brighter held up than at rest; a thing's shadow
-   lies away from the disc (where the table brightens when the thing
-   leaves its place, the centre of that change lies on the side of
-   the thing away from the disc); the table carries no drawn line (no
-   plate's ellipse); the being is whole in the frame and lit on its
-   side facing the disc; under reduced motion it is still; and the
-   ink is achromatic (G11: its inked pixels carry no more chroma than
-   the fog's own uninked pixels in the same disc).
+   sRGB bytes): no thing, held or at rest, and no part of the being
+   is brighter than the disc where it is still whole; the table's
+   light falls with distance from under the disc (a fit over its
+   pixels); the light the pale things receive falls with the square
+   of their distance from the fog (a fit over pixels the page names:
+   points of their surfaces that face the fog, read from the canvas,
+   the page's response undone, the sheen and the light of the
+   visitor's side that the page gives with each point taken off, and
+   the cosine divided out, so what is left is the inverse square or
+   it is not; the dark things and the being's rim are too dark to
+   read so in eight bits and are checked on the computation by
+   tests/chamber.test.mjs); the
+   same points show each thing lit where it faces the fog and dark
+   where it faces away; the same thing is darker set down far from
+   the glass than near it, and brighter held up than at rest; a
+   thing's shadow lies away from the disc (where the table brightens
+   when the thing leaves its place, the centre of that change lies on
+   the side of the thing away from the disc); the table carries no
+   drawn line (no plate's ellipse); the being is whole in the frame
+   (the box of its drawn cells) at 1440 and 390 px and in a room
+   narrowed to a laptop's, a fifth of the room tall or more; it
+   turns to a thing held up; under reduced motion it is still when
+   drawn again (and, as a control, it is not without the reduction);
+   and the ink is achromatic (G11: its inked pixels carry no more
+   chroma than the fog's own uninked pixels in the same disc).
    ============================================================ */
 
 /* The canvas's luma in a rectangle of the viewport (CSS pixels), row by row, at one sample a CSS pixel. */
@@ -42,6 +53,14 @@ const ROWS = `window.__rows = (x0, y0, x1, y1) => {
     const i = 4 * (Y * cv.width + X); row.push(0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]); } out.push(row); }
   return out;
 };`;
+/* The canvas's colour at points of the viewport (CSS pixels): [[r, g, b], ...]. */
+const RGB = `window.__rgb = (pts) => {
+  const cv = document.getElementById('pod'), r = cv.getBoundingClientRect(), k = cv.width / r.width, c = cv.getContext('2d');
+  return pts.map(([x, y]) => { const d = c.getImageData(Math.floor((x - r.left) * k), Math.floor((y - r.top) * k), 1, 1).data; return [d[0], d[1], d[2]]; });
+};`;
+const lin8 = (v) => { const c = v / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+const luma = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+
 /* A straight-line fit of y on x: slope and R^2. */
 const fitLine = (X, Y) => {
   const n = X.length, mx = X.reduce((a, b) => a + b, 0) / n, my = Y.reduce((a, b) => a + b, 0) / n;
@@ -73,7 +92,7 @@ const PIX = `window.__pix = (x0, y0, x1, y1, mask) => {
   return { n: L.length, mean: L.reduce((a, b) => a + b, 0) / Math.max(1, L.length), p50: q(0.5), p75: q(0.75), p95: q(0.95), max: L[L.length - 1], chroma, chromaDark };
 };`;
 
-export default async function heptapod(p, { base }) {
+export default async function heptapod(p, { base, width }) {
   const probe = () => p.ev('document.getElementById("pod").probe()');
   const ringNo = () => p.ev('(document.querySelector("#panel .pp-lamp .mini") || {}).textContent || ""');
   const entries = () => p.ev('document.querySelectorAll("#nb .nb-entry").length');
@@ -123,6 +142,42 @@ export default async function heptapod(p, { base }) {
   p.check('no horizontal scroll', await p.ev('document.documentElement.scrollWidth <= innerWidth'), await p.ev('`${document.documentElement.scrollWidth} > ${innerWidth}`'));
   await p.shot('01-greeting');
 
+  /* The light received, read from the canvas at points the page names (see the header): the inverse square, or not.
+     Run on the recorded day (?at=mid), whose things stand where its seed puts them, so the pale things stand at
+     different distances from the fog on every run (on a random day they may all stand on one row). */
+  const paleFit = async (g) => {
+    const things = Object.entries(g.things).filter(([, t]) => t.box);
+    await p.ev(RGB);
+    const { exposure: X, cap } = g.response, pts = [];
+    for (const [o, t] of things) for (const s of t.samples.lit) pts.push({ ...s, what: o, fill: s.fill || 0, spec: s.spec || 0 });
+    const rgb = await p.ev(`window.__rgb(${JSON.stringify(pts.map((s) => [s.x, s.y]))})`);
+    const by = {};
+    pts.forEach((s, i) => {
+      const b = rgb[i][2];
+      if (b < 30) return;                                  // too dark to read in eight bits
+      const y = (lin8(b) - s.air) / s.T;
+      if (!(y > 0) || y >= 0.995 * cap) return;            // the response cannot be undone at its ceiling
+      const e = ((cap * Math.atanh(y / cap)) / X - s.spec) / s.alb - s.fill;
+      if (!(e > 0)) return;
+      (by[s.what] = by[s.what] || []).push([Math.log(s.d), Math.log(e / s.cos)]);
+    });
+    // one point for each pale thing: the medians of its readings (a single pixel read off a picture drawn to scale mixes
+    // its neighbours; the median of many does not). Only the pale things are read: on a dark glaze or wax, and on the
+    // being's rim, the light left once the sheen is taken off is too little to read in eight bits (it came out up to
+    // 2.2 times off on 2026-11-18), so they are checked by tests/chamber.test.mjs on the computation instead
+    const med = (A) => { const B = A.slice().sort((x, y) => x - y); return B[Math.floor(B.length / 2)]; };
+    const pt = (v) => [med(v.map((q) => q[0])), med(v.map((q) => q[1]))];
+    const pale = new Set(things.filter(([, t]) => t.alb >= 0.4).map(([o]) => o));
+    const kept = Object.entries(by).filter(([k, v]) => pale.has(k) && v.length >= 5).map(([k, v]) => [k, pt(v), v.length]);
+    const f = fitLine(kept.map(([, q]) => q[0]), kept.map(([, q]) => q[1]));
+    const span = kept.length ? Math.max(...kept.map(([, q]) => q[0])) - Math.min(...kept.map(([, q]) => q[0])) : 0;
+    const res = (q) => q[1] + 2 * q[0];
+    const thingsRes = kept.length ? med(kept.map(([, q]) => res(q))) : NaN;
+    p.check('C1: the light the pale things receive falls with the square of their distance from the fog (read from the canvas)',
+      kept.length >= 3 && span > 0.12 && f.slope < -1.4 && f.slope > -2.6 && f.r2 > 0.7,
+      `slope ${f.slope.toFixed(2)} (the inverse square: -2), R^2 ${f.r2.toFixed(2)} over ${kept.length} pale things (distances ${Math.exp(span).toFixed(2)} to 1): `
+      + kept.map(([k, q, n]) => `${k} ${n} (${res(q).toFixed(2)})`).join(', '));
+  };
   // BAR_C on the pixels: the brightest thing is darker than the disc where it is still whole
   g = await probe();
   const edge = await discEdge(g);
@@ -130,7 +185,9 @@ export default async function heptapod(p, { base }) {
   const stats = {};
   for (const [o, t] of things) stats[o] = await pix(t.box);
   const brightest = Math.max(...Object.values(stats).map((s) => s.max));
-  p.check('C1: no thing is brighter than the disc where it is whole', brightest < edge, `brightest thing ${brightest.toFixed(1)}, disc ${edge}`);
+  const beingPix = await pix(g.being.drawn);
+  p.check('C1: no thing and no part of the being is brighter than the disc where it is whole', brightest < edge && beingPix.max < edge,
+    `brightest thing ${brightest.toFixed(1)}, being ${beingPix.max.toFixed(1)}, disc ${edge}`);
   // the fog's light falls off with distance. On the pixels: the table, away from every thing and its shadow, against
   // the distance from the point under the disc's centre on the sill
   {
@@ -147,23 +204,36 @@ export default async function heptapod(p, { base }) {
     const f = fitLine(X, Y);
     p.check('C1: the table\'s light falls with distance from under the disc (a fit over its pixels)', f.n > 50 && f.slope < -0.2 && f.r2 > 0.5, JSON.stringify({ slope: +f.slope.toFixed(2), r2: +f.r2.toFixed(2), n: f.n }));
   }
-  // each thing is brighter where it faces the fog than where it faces away (its pixels as written, split by its surface)
-  const unlit = things.filter(([, t]) => !(t.light && t.light.lumNear > t.light.lumFar));
-  p.check('C3: each thing is lit where it faces the fog and dark where it faces away', unlit.length === 0, unlit.map(([o, t]) => `${o} ${JSON.stringify(t.light)}`).join('; '));
+  {
+    // each thing lit where it faces the fog and dark where it faces away, on the same canvas
+    await p.ev(RGB);
+    const bad = [];
+    for (const [o, t] of things) {
+      if (!t.samples.lit.length || !t.samples.dark.length) continue;
+      const a = await p.ev(`window.__rgb(${JSON.stringify(t.samples.lit.map((s) => [s.x, s.y]))})`), b = await p.ev(`window.__rgb(${JSON.stringify(t.samples.dark.map((s) => [s.x, s.y]))})`);
+      const la = a.reduce((m, c) => m + luma(c), 0) / a.length, lb = b.reduce((m, c) => m + luma(c), 0) / b.length;
+      if (!(la > lb + 4)) bad.push(`${o} ${la.toFixed(1)} vs ${lb.toFixed(1)}`);
+    }
+    p.check('C3: each thing is lit where it faces the fog and dark where it faces away (on the canvas)', bad.length === 0, bad.join('; '));
+  }
   const line = await ridge(g);
   p.check('C1: the table carries no drawn line (no plate)', line < 4, `largest one-row ridge ${line} luma`);
   // G11: the ink in the disc is achromatic: its pixels (the darkest fifth of the whole disc, where the greeting's ink
   // is) carry no more chroma than the fog's own colours
   const fogChroma = 24;           // the largest max-min of light.js FOG_STOPS (#6E7786: 0x86 - 0x6E)
+  // the ink gathered in the field (a change of tier lays the field again, and its ink gathers again)
+  await p.until('(() => { const f = document.getElementById("pod").probe().field; return f.mass > 10 && f.fit > 0.8; })()', 6000);
+  g = await probe();
   const inDisc = `(x, y) => Math.hypot(x - ${g.disc.x}, y - ${g.disc.y}) < ${g.disc.R * 0.7}`;
   const box7 = { x0: g.disc.x - g.disc.R * 0.7, y0: g.disc.y - g.disc.R * 0.7, x1: g.disc.x + g.disc.R * 0.7, y1: g.disc.y + g.disc.R * 0.7 };
   const inked = await pix(box7, `(x, y) => (${inDisc})(x, y) && document.getElementById('pod').inkAt(x, y) > 0.5`);
   const bare = await pix(box7, `(x, y) => (${inDisc})(x, y) && document.getElementById('pod').inkAt(x, y) < 0.01`);
   p.check('G11: the ink carries no colour beyond the fog\'s own', inked.n > 50 && bare.n > 50 && inked.chroma <= bare.chroma + 1,
-    `inked pixels ${inked.n}, chroma at most ${inked.chroma}; uninked fog ${bare.n}, at most ${bare.chroma} (its stops' ${fogChroma})`);
+    `inked pixels ${inked.n}, chroma at most ${inked.chroma}; uninked fog ${bare.n}, at most ${bare.chroma} (its stops' ${fogChroma}); field ${JSON.stringify(g.field)}, tier ${g.tier}`);
   // C2: the being is whole in the frame, and lit on the side facing the disc
-  const bb = g.being.box, cvr = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }; })()');
-  p.check('C2: the being is whole in the frame', bb.x0 >= cvr.x0 - 1 && bb.x1 <= cvr.x1 + 1 && bb.y0 >= cvr.y0 - 1 && bb.y1 <= cvr.y1 + 1, `${JSON.stringify(bb)} in ${JSON.stringify(cvr)}`);
+  const bb = g.being.drawn, cvr = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }; })()');
+  p.check('C2: the being is whole in the frame (the box of its drawn cells), a fifth of the room tall or more', bb.x0 >= cvr.x0 - 1 && bb.x1 <= cvr.x1 + 1 && bb.y0 >= cvr.y0 - 1 && bb.y1 <= cvr.y1 + 1 && bb.y1 - bb.y0 > 0.2 * (cvr.y1 - cvr.y0),
+    `${JSON.stringify(bb)} in ${JSON.stringify(cvr)}`);
   const third = (bb.x1 - bb.x0) / 3, toward = g.disc.x < (bb.x0 + bb.x1) / 2;
   const sideA = await pix({ x0: toward ? bb.x0 : bb.x1 - third, x1: toward ? bb.x0 + third : bb.x1, y0: bb.y0, y1: bb.y1 });
   const sideB = await pix({ x0: toward ? bb.x1 - third : bb.x0, x1: toward ? bb.x1 : bb.x0 + third, y0: bb.y0, y1: bb.y1 });
@@ -190,6 +260,7 @@ export default async function heptapod(p, { base }) {
     await p.sleep(600);
     const h = await probe(), ht = h.things[name];
     const heldStat = await pix(ht.box);
+    p.check('C1: a thing held up is no brighter than the disc where it is whole', heldStat.max < edge, `${name}: ${heldStat.max.toFixed(1)}, disc ${edge}`);
     p.check('C3: a thing held up enters the disc\'s light (it is brighter than at rest)', heldStat.p95 > restStat.p95 && ht.light.all > t.light.all && ht.dist < t.dist,
       `${name}: brightest 5% ${restStat.p95.toFixed(1)} at rest, ${heldStat.p95.toFixed(1)} held; light ${t.light.all.toFixed(4)}, ${ht.light.all.toFixed(4)}; ${t.dist} px from the fog, then ${ht.dist}`);
   }
@@ -274,6 +345,16 @@ export default async function heptapod(p, { base }) {
   await p.until('document.getElementById("pod").probe().crop', 6000);
   await p.sleep(500);
   await p.shot('04-held-at-the-glass');
+  {
+    // once the ring has gathered the being turns to what is held: its attention points from its head to the thing
+    await p.sleep(2600);
+    const a = await probe(), held = Object.values(a.things).find((v) => v.held);
+    const [ax, ay] = a.being.key.split('|').map(Number);
+    const hx = held.x - a.being.head.x, hy = -(held.y - a.being.head.y);
+    const cos = (ax * hx + ay * hy) / (Math.hypot(ax, ay) * Math.hypot(hx, hy) || 1);
+    p.check('C2: the being attends to the thing held up', cos > 0.8, `the cosine between its attention and the thing ${cos.toFixed(2)}`);
+    await p.shot('04b-attends-held');
+  }
 
   // the keyboard: W keeps the top of the ring, Enter sets the thing down
   await p.ev('document.getElementById("pod").focus()');
@@ -354,15 +435,41 @@ export default async function heptapod(p, { base }) {
     await p.sleep(2600);
     await p.shot(shot);
     if (q.includes('still')) {
-      // C2: with motion reduced the being does not breathe: its pixels are the same a second and a half apart
-      const b = (await probe()).being.box;
-      const read = () => p.ev(`(() => { const cv = document.getElementById('pod'), r = cv.getBoundingClientRect(), k = cv.width / r.width;
-        const d = cv.getContext('2d').getImageData(Math.round((${b.x0} - r.left) * k), Math.round((${b.y0} - r.top) * k), Math.round((${b.x1 - b.x0}) * k), Math.round((${b.y1 - b.y0}) * k)).data;
-        let s = 0; for (let i = 0; i < d.length; i += 4) s = (s * 31 + d[i] + 7 * d[i + 1] + 13 * d[i + 2]) % 1000000007; return s; })()`);
-      const a = await read();
-      await p.sleep(1500);
-      const b2 = await read();
-      p.check('C2: with motion reduced the being is still', a === b2, a === b2 ? 'the same pixels 1.5 s apart' : 'its pixels changed');
+      // C2: with motion reduced the being does not breathe: drawn again a second and a half later, its pixels are the
+      // same (the page is asked to draw it again, so the check does not rest on the page drawing nothing)
+      const stillness = async () => {
+        const b = (await probe()).being.box;
+        const read = () => p.ev(`(() => { const cv = document.getElementById('pod'), r = cv.getBoundingClientRect(), k = cv.width / r.width;
+          const d = cv.getContext('2d').getImageData(Math.round((${b.x0} - r.left) * k), Math.round((${b.y0} - r.top) * k), Math.round((${b.x1 - b.x0}) * k), Math.round((${b.y1 - b.y0}) * k)).data;
+          let s = 0; for (let i = 0; i < d.length; i += 4) s = (s * 31 + d[i] + 7 * d[i + 1] + 13 * d[i + 2]) % 1000000007; return s; })()`);
+        await p.ev('document.getElementById("pod").redraw()'); await p.sleep(300);
+        const a = await read();
+        await p.sleep(1500);
+        await p.ev('document.getElementById("pod").redraw()'); await p.sleep(300);
+        return a === (await read());
+      };
+      p.check('C2: with motion reduced the being is still', await stillness(), 'drawn again 1.5 s apart');
+      // the control: the same day without the reduction breathes
+      await p.go(`${base}/labs/heptapod.html?at=mid`);
+      await ready(); await p.sleep(1500);
+      p.check('C2: without the reduction the same check sees it breathe (the control)', !(await stillness()));
+      await p.until('(() => { const f = document.getElementById("pod").probe().field; return f.mass > 10 && f.fit > 0.8; })()', 6000);
+      await paleFit(await probe());
+    }
+  }
+  // C2: in a room as narrow as a laptop's (the chamber's column at 1024 to 1180 px, the caption over it), the being
+  // stays whole and at least a fifth of the room tall as it stands (the review of 2026-11-18 found it 6 px tall at 1024;
+  // tests/chamber.test.mjs holds every pose it can take to a quarter)
+  if (width >= 1000) {
+    for (const w of [640, 716, 796]) {
+      await p.go(`${base}/labs/heptapod.html?species=0`);
+      await ready();
+      await p.ev(`(() => { const r = document.querySelector('.room'); r.style.width = '${w}px'; r.style.maxWidth = '${w}px'; })()`);
+      await p.sleep(900);
+      const b = (await probe()).being.drawn, c = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }; })()');
+      p.check(`C2: in a room ${w} px wide the being is whole and a fifth of the room tall or more`, b && b.x0 >= c.x0 - 1 && b.x1 <= c.x1 + 1 && b.y0 >= c.y0 - 1 && b.y1 - b.y0 >= 0.2 * (c.y1 - c.y0),
+        `${JSON.stringify(b)} in ${JSON.stringify(c)}`);
+      if (w === 640) await p.shot('16-room-640');
     }
   }
   // C2: the three species, side by side (and each being whole in the frame)
@@ -371,7 +478,7 @@ export default async function heptapod(p, { base }) {
     await ready();
     await p.ev('document.getElementById("pod").scrollIntoView({ block: "center" })');
     await p.sleep(1200);
-    const b = (await probe()).being.box, c = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }; })()');
+    const b = (await probe()).being.drawn, c = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }; })()');
     p.check(`C2: species ${k}'s being is whole in the frame`, b.x0 >= c.x0 - 1 && b.x1 <= c.x1 + 1 && b.y0 >= c.y0 - 1 && b.y1 <= c.y1 + 1, JSON.stringify(b));
     await p.shot(`15-species-${k}`);
   }

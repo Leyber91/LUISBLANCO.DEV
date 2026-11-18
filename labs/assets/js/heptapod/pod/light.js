@@ -54,7 +54,12 @@
    occluding sphere is the overlap of their two discs as seen from
    the point, in the small-angle plane [ILLUSTRATIVE: exact for small
    discs, approximate for the near ones]. Each thing and the being
-   are given to it as a few spheres.
+   are given to it as a few spheres. The table is polished, so it
+   also shows the fog's reflection; a thing standing on it hides
+   that reflection in front of itself as well (mirrorVisibility: the
+   same overlap, taken on the cone of the reflected view), and that
+   dark pool is its contact with the table. The lacquer's gloss and
+   body vary a little in long streaks (grainAt) [ILLUSTRATIVE].
 
    One bounce. The fog's light that crosses the glass reaches the
    visitor's side of the room and comes back: the wall behind the
@@ -110,8 +115,20 @@ export const LIGHT = Object.freeze({
   BOUNCE: 0.6,        // albedo of the visitor's side of the room (the wall behind the viewer), which returns the fog's light
 });
 
-/* The light of the disc's edge (the fog at 0.8 of its radius), as linear luminance, and the most any lit surface
-   gives back: 0.95 of it, in the light's colour (whose luminance is lum(RGB) of its blue). */
+/* The disc is whole (its fog not yet fading into the dark) to this share of its radius; scene.js draws its mask so. */
+export const DISC_WHOLE = 0.74;
+/* The fog's colour at a share of the disc's radius, as the canvas lays the gradient (between stops, in sRGB). */
+export function fogAt(f) {
+  let i = 0;
+  while (i < FOG_STOPS.length - 2 && f > FOG_STOPS[i + 1][0]) i++;
+  const [a, ca] = FOG_STOPS[i], [b, cb] = FOG_STOPS[i + 1], t = Math.max(0, Math.min(1, (f - a) / (b - a)));
+  return [1, 3, 5].map((k) => { const x = parseInt(ca.slice(k, k + 2), 16), y = parseInt(cb.slice(k, k + 2), 16); return Math.round(x + (y - x) * t); });
+}
+/* The disc's edge: the fog where the disc is still whole, as the luma of its sRGB colour (Rec. 709 weights on the
+   bytes, as the drive measures the frame). Nothing the fog lights may be brighter. */
+export const EDGE_LUMA = (() => { const c = fogAt(DISC_WHOLE); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; })();
+/* The most any lit surface gives back (respond's ceiling), in linear light before the light's colour: 0.95 of the fog's
+   stop at 0.8 of the radius, which is darker than the fog where the disc is whole, so the bound has a margin. */
 export const EDGE_LUM = lum(hexLin(FOG_STOPS[2][1]));
 export const CAP = (0.95 * EDGE_LUM) / lum(LIGHT.RGB);
 
@@ -210,6 +227,45 @@ export function glossy(cosA, a, rho) {
   return Math.exp(-(out * out) / (2 * rho * rho)) * (a * a) / (a * a + 2 * rho * rho);
 }
 
+/* The view ray from the eye to a point P of the table, reflected about the table's normal; cosV: the cosine of the
+   angle between the view and the normal (for Fresnel). */
+export function reflected(R, P) {
+  const ex = P[0] - R.eye[0], ey = P[1] - R.eye[1], ez = P[2] - R.eye[2], el = Math.hypot(ex, ey, ez);
+  return { r: [ex / el, -ey / el, ez / el], cosV: -ey / el };
+}
+
+/* The table's grain, 0 to 1: two octaves of smooth value noise, stretched across the table into long streaks. */
+function hash2(i, j) { const h = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return h - Math.floor(h); }
+function vnoise(x, y) {
+  const i = Math.floor(x), j = Math.floor(y), fx = x - i, fy = y - j, sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+  const a = hash2(i, j), b = hash2(i + 1, j), c = hash2(i, j + 1), d = hash2(i + 1, j + 1);
+  return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+}
+export const grainAt = (x, z) => 0.65 * vnoise(1.5 * x, 22 * z) + 0.35 * vnoise(4 * x + 7, 61 * z + 3);
+
+/**
+ * How much of the fog's reflection a point P of the table still shows past occluding spheres: the reflected view ray
+ * spreads into a cone as wide as the table's roughness, and each sphere hides the overlap of its disc with that cone.
+ * A thing standing on the polish so hides the fog's reflection in front of it (its own reflection is dark). The cone
+ * is taken at the reflection's whole spread (twice the roughness), so a thing's reflection is as soft as the fog's.
+ */
+export function mirrorVisibility(R, P, spheres) {
+  const { r } = reflected(R, P);
+  const aL = 2 * LIGHT.TABLE_ROUGH;
+  let v = 1;
+  for (const o of spheres) {
+    const dx = o.c[0] - P[0], dy = o.c[1] - P[1], dz = o.c[2] - P[2];
+    const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (d <= o.r) return 0;
+    const cos = (dx * r[0] + dy * r[1] + dz * r[2]) / d;
+    if (cos <= 0) continue;
+    const aO = Math.asin(Math.min(1, o.r / d)), t = Math.acos(Math.min(1, cos));
+    v *= 1 - Math.min(1, lens(aL, aO, t) / (Math.PI * aL * aL));
+    if (v <= 0) return 0;
+  }
+  return v;
+}
+
 /* The overlap area of two discs of radii a and b whose centres are t apart. */
 function lens(a, b, t) {
   if (t >= a + b) return 0;
@@ -247,13 +303,14 @@ export function visibility(R, P, spheres, skip = 0) {
 
 /**
  * The room beyond the glass and the table, per cell of q device pixels: linear RGB (3 floats a cell) and, for the
- * table, the direct share of each cell's light (so a shadow can take away only that). Rows above the horizon are the
- * dark beyond, lit only by the air; rows to the sill are the being's floor; rows below the sill are the table.
+ * table, the shares of each cell's light that come straight from the fog (direct) and from its reflection (mirror),
+ * so a thing standing there can take away what it hides of each. Rows above the horizon are the dark beyond, lit only
+ * by the air; rows to the sill are the being's floor; rows below the sill are the table.
  */
 export function paintRoom(R, q, occluders = []) {
   const cw = Math.ceil(R.W / q), ch = Math.ceil(R.H / q);
   const rgb = new Float32Array(cw * ch * 3);
-  const direct = new Float32Array(cw * ch);
+  const direct = new Float32Array(cw * ch), mirror = new Float32Array(cw * ch);
   const up = [0, 1, 0];
   const [lr, lg, lb] = LIGHT.RGB;
   const X = LIGHT.EXPOSURE;
@@ -262,7 +319,7 @@ export function paintRoom(R, q, occluders = []) {
     for (let i = 0; i < cw; i++) {
       const x = (i + 0.5) * q;
       const r = Math.hypot(x - R.disc.cx, v - R.disc.cy);
-      let lin = 0, dir = 0;
+      let lin = 0, dir = 0, ref = 0;
       if (v < R.horizon) lin = airlight(R, r, R.eyeZ, Infinity);
       else if (v < R.glassB) {
         const z = floorZ(R, v);
@@ -274,23 +331,27 @@ export function paintRoom(R, q, occluders = []) {
         }
       } else {
         const z = tableZ(R, v), P = [x, 0, z];
-        dir = LIGHT.TABLE * X * lightAt(R, P, up);
+        // the lacquer's grain: its gloss and its body vary a little across the table, in long low streaks
+        const g = grainAt(x / R.H, z / R.H);
+        dir = LIGHT.TABLE * X * lightAt(R, P, up) * (0.85 + 0.3 * g);
         // the polish: the fog's reflection, blurred by the table's roughness and weighted by Fresnel
-        const ex = x - R.eye[0], ey = -R.eye[1], ez = z - R.eye[2], el = Math.hypot(ex, ey, ez);
-        const rx = ex / el, ry = -ey / el, rz = ez / el;            // the view ray reflected about the table's normal
+        const rd = reflected(R, P);
         const L = toLight(R, P);
-        const refl = LIGHT.TABLE_GLOSS * fresnel(-ey / el) * X * glossy(rx * L.l[0] + ry * L.l[1] + rz * L.l[2], Math.asin(L.s), LIGHT.TABLE_ROUGH);
+        let refl = LIGHT.TABLE_GLOSS * fresnel(rd.cosV) * X * glossy(rd.r[0] * L.l[0] + rd.r[1] * L.l[1] + rd.r[2] * L.l[2], Math.asin(L.s), LIGHT.TABLE_ROUGH);
+        refl *= 0.8 + 0.4 * g;
         const tot = respond(dir + refl);
-        dir = tot * (dir / Math.max(1e-9, dir + refl));
+        ref = tot * (refl / Math.max(1e-9, dir + refl));
+        dir = tot - ref;
         lin = haze(R, z) * tot + airlight(R, r, R.eyeZ, z);
-        dir *= haze(R, z);
+        dir *= haze(R, z); ref *= haze(R, z);
       }
       const c = 3 * (j * cw + i);
       rgb[c] = lin * lr; rgb[c + 1] = lin * lg; rgb[c + 2] = lin * lb;
       direct[j * cw + i] = lin > 0 ? dir / lin : 0;
+      mirror[j * cw + i] = lin > 0 ? ref / lin : 0;
     }
   }
-  return { cw, ch, q, rgb, direct };
+  return { cw, ch, q, rgb, direct, mirror };
 }
 
 /** Linear RGB to an RGBA byte buffer (alpha 255), for putImageData. */

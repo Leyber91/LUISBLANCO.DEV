@@ -37,19 +37,22 @@
    The being (pod/body.js) stands in the dark beyond the glass, to
    the disc's side and in front of it, so the fog lights only the
    edge of it that faces the disc. Its anatomy is grown from the
-   species' seed: a stalk on a broad foot, fronds along it set by the
-   golden angle, and a head the neck turns toward what it attends to
-   (the thing in your hand, the ring it is writing, your slate). It
-   breathes. It never writes with a limb: the ink condenses in the
-   disc.
+   species' seed: a stalk on a broad foot, fronds that alternate sides
+   up it, and a head the neck turns toward what it attends to (the
+   ring while it gathers, then the thing in your hand, your slate).
+   It breathes, and a thing in your hand moves a little with the
+   hand. It never writes with a limb: the ink condenses in the disc.
 
    On this side of the glass everything is the visitor's: a polished
    black table that holds the fog's reflection, and six things on it
    (pod/things.js), solids lit from beyond the glass, pale or dark,
-   made or grown, each with its soft shadow cast away from the disc.
-   The disc's bezel, a ring of ticks every six degrees with the four
-   quarters the keys keep marked longer, is the visitor's instrument,
-   and the only line in the room besides the script. No view holds a
+   made or grown, each with its soft shadow cast away from the disc
+   and a dark reflection in the polish where it hides the fog's. Held
+   low over the table, a thing shows where it will be set down by the
+   shadow it will cast there. The visitor's instruments are the only
+   lines besides the script: the disc's bezel (a hairline ring with
+   the four quarters the keys keep marked), the mark under the thing
+   the keyboard has chosen, and a crop's corners. No view holds a
    bright glass wall, a fog wall behind it and a limb throwing ink
    (research/ip.md rule 7): the glass is dark and shows only as its
    sill, the fog is a sphere, and the being is in the dark.
@@ -76,7 +79,7 @@ import { ringSpec, podStrokes, recognise, sectorRect, INK } from './ring.js';
 import { DAY, GREETING, whereIs, freeSlot } from './day.js';
 import { objW, objH, THING_NAME } from './objects.js';
 import { InkField, fogNoise, flowFor } from './medium.js';
-import { LIGHT, FOG_STOPS, makeRoom, paintRoom, encode, tableZ, lightAt, visibility, toSRGB } from './light.js';
+import { LIGHT, CAP, EDGE_LUMA, FOG_STOPS, DISC_WHOLE, makeRoom, paintRoom, encode, tableZ, lightAt, visibility, mirrorVisibility, toSRGB } from './light.js';
 import { gbuffer, relight, occluders, placeOf, albedoOf } from './things.js';
 import { growBody, poseBody, reachOf, fitBody, rasterBody, shadeBody, bodyOccluders } from './body.js';
 
@@ -90,8 +93,48 @@ const INK_SPREAD = 1.5;                  // a ring-script stroke's width in the 
 const ease = (t) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const ROOM_Q = 3;                        // the still layers (room, table, shadows) are lit per cell of 3 device pixels
-const DISC_WHOLE = 0.74;                 // the disc is whole to this share of its radius, then its edge fades
-const BREATH_MS = 90;                    // while it only breathes, the being is redrawn about eleven times a second
+const BREATH_MS = 110;                   // while it only breathes, the being is redrawn about nine times a second
+
+/* The room beside the disc that the being keeps, as a share of the canvas's width, on a wide canvas. */
+export const BEING_ROOM = 0.25;
+
+/**
+ * Where the disc, the glass, the floor and the being go on a canvas of W x H device pixels. cap: the page caption's
+ * bottom right corner in device pixels when it lies over the room (wide screens), else null. reach: the being's
+ * reach (pod/body.js reachOf). Pure: tests/chamber.test.mjs lays out the widths a laptop has.
+ */
+export function chamberLayout(W, H, cap, reach) {
+  const portrait = H > W * 1.05;
+  // on a phone the disc stands a little left of the middle, so the being has room beside it, whole
+  let Rd = Math.round(portrait ? Math.min(0.31 * W, 0.25 * H) : Math.min(0.26 * H, 0.3 * W));
+  const disc = { cx: Math.round(portrait ? W / 2 - 0.15 * W : W / 2), cy: Math.round(0.045 * H + Rd), Rd };
+  // the page's caption may lie over the room's top left: the disc and its bezel (1.1 of its radius) keep clear of
+  // the caption's corner, first by moving right as far as the room allows (leaving the being BEING_ROOM of the
+  // width beside its bezel), then down, then by growing smaller, the sill kept above 0.64 of the room's height
+  // (found at 1024 px, where the caption lay on the disc; the being's room, by review on 2026-11-18, where the disc
+  // moved right until the being was 6 px tall)
+  if (cap) {
+    const x1 = cap.x1 + 0.02 * W, y1 = cap.y1 + 0.01 * H;
+    const clear = () => Math.hypot(Math.max(0, disc.cx - x1), Math.max(0, disc.cy - y1)) >= 1.1 * disc.Rd;
+    for (let i = 0; i < 60 && !clear(); i++) {
+      const need = 1.1 * disc.Rd, dy = Math.max(0, disc.cy - y1);
+      const most = W - (1.13 + 0.02) * disc.Rd - (0.045 + BEING_ROOM) * W;
+      disc.cx = Math.min(Math.max(disc.Rd, most), Math.max(disc.cx, x1 + (dy < need ? Math.sqrt(need * need - dy * dy) : 0)));
+      if (clear()) break;
+      const down = Math.min(0.64 * H - 0.03 * H - disc.Rd, y1 + 1.1 * disc.Rd);   // the lowest the centre may go
+      if (down > disc.cy) { disc.cy = down; continue; }
+      disc.Rd = Rd = Math.round(0.95 * disc.Rd);
+      disc.cy = Math.round(0.045 * H + Rd);
+    }
+  }
+  const glassB = Math.round(disc.cy + Rd + 0.03 * H);
+  // their floor: it meets the far dark at a horizon a little above the sill; the being stands on it a little nearer
+  // the glass than the fog's foot, whole, in the room right of the disc's bezel: scaled so that every pose it can
+  // take (pod/body.js reachOf) fits
+  const horizon = Math.round(glassB - 0.075 * H), foot = Math.round(glassB - 0.016 * H);
+  const fit = fitBody(reach, { x0: disc.cx + 1.13 * Rd + 0.02 * W, x1: W - 0.025 * W, top: 0.04 * H, foot });
+  return { portrait, disc, Rd, glassB, horizon, foot, fit };
+}
 
 export function initPod(canvas, hooks) {
   const { sp } = hooks;
@@ -153,36 +196,12 @@ export function initPod(canvas, hooks) {
   /* ---------------- layout ---------------- */
   function layout() {
     const { w: W, h: H } = fitCanvas(canvas);
-    const portrait = H > W * 1.05;
-    // on a phone the disc stands a little left of the middle, so the being has room beside it, whole
-    let Rd = Math.round(portrait ? Math.min(0.33 * W, 0.25 * H) : Math.min(0.26 * H, 0.3 * W));
-    const disc = { cx: Math.round(portrait ? W / 2 - 0.13 * W : W / 2), cy: Math.round(0.045 * H + Rd), Rd };
-    // the page's caption may lie over the room's top left: the disc and its bezel (1.1 of its radius) keep clear of
-    // the caption's corner, first by moving right as far as the room allows, then down, then by growing smaller, the
-    // sill kept above 0.64 of the room's height (found at 1024 px, where the caption lay on the disc)
-    const cap = hooks.keepClear?.();
-    if (cap) {
-      const k = W / Math.max(1, canvas.getBoundingClientRect().width), x1 = cap.x1 * k + 0.02 * W, y1 = cap.y1 * k + 0.01 * H;
-      const clear = () => Math.hypot(Math.max(0, disc.cx - x1), Math.max(0, disc.cy - y1)) >= 1.1 * disc.Rd;
-      for (let i = 0; i < 40 && !clear(); i++) {
-        const need = 1.1 * disc.Rd, dy = Math.max(0, disc.cy - y1);
-        disc.cx = Math.min(W - 1.12 * disc.Rd, Math.max(disc.cx, x1 + (dy < need ? Math.sqrt(need * need - dy * dy) : 0)));
-        if (clear()) break;
-        const down = Math.min(0.64 * H - 0.03 * H - disc.Rd, y1 + 1.1 * disc.Rd);   // the lowest the centre may go
-        if (down > disc.cy) { disc.cy = down; continue; }
-        disc.Rd = Rd = Math.round(0.95 * disc.Rd);
-        disc.cy = Math.round(0.045 * H + Rd);
-      }
-    }
-    const glassB = Math.round(disc.cy + Rd + 0.03 * H);
+    const c0 = hooks.keepClear?.(), kc = W / Math.max(1, canvas.getBoundingClientRect().width);
+    const { portrait, disc, Rd, glassB, horizon, foot, fit } = chamberLayout(W, H, c0 ? { x1: c0.x1 * kc, y1: c0.y1 * kc } : null, reach);
     const u = Math.min(H * 0.125, W * 0.1);
     const near = { place: 'near', cx: W / 2, cy: Math.max(0.735 * H, glassB + 0.11 * H), rx: Math.min(0.31 * W, 4.3 * u), ry: 0.02 * H, k: 0.84 };
     const far = { place: 'far', cx: W / 2, cy: 0.915 * H, rx: Math.min(0.43 * W, 5.8 * u), ry: 0.046 * H, k: 1 };
     const dpr = W / Math.max(1, canvas.getBoundingClientRect().width);
-    // their floor: it meets the far dark at a horizon a little above the sill, and the being stands on it, whole, in
-    // the room right of the disc's bezel: scaled so that every pose it can take (pod/body.js reachOf) fits
-    const horizon = Math.round(glassB - 0.075 * H), foot = Math.round(glassB - 0.032 * H);
-    const fit = fitBody(reach, { x0: disc.cx + 1.13 * Rd + 0.02 * W, x1: W - 0.025 * W, top: 0.04 * H, foot });
     L = {
       W, H, glassB, u, near, far, disc, dpr, portrait,
       ring: { cx: disc.cx, cy: disc.cy, R: Rd / DISC_OVER_RING },
@@ -207,7 +226,10 @@ export function initPod(canvas, hooks) {
       fogPat = null;
     }
     paintStill();
-    for (const o of OBJ) { delete sprites[o]; delete patches[o]; }
+    // the things' geometry stays while their size does (spriteOf marches again only when it changes); their light and
+    // shadows are taken again
+    for (const o of OBJ) { if (sprites[o]) sprites[o].key = ''; delete patches[o]; }
+    delete patches.landing;
     shadeKey = ''; bodyKey = '';
     // the ink field: about 0.8 cells per CSS pixel of the disc, fewer on the light tier
     const N = clamp(Math.round(((2 * Rd) / dpr) * (Tier.name === 'lite' ? 0.55 : 0.8)), 160, 360);
@@ -255,7 +277,9 @@ export function initPod(canvas, hooks) {
     }
     if (st.held && st.held.obj === obj) {
       const pl = plate(hover ? hover.place : st.held.over);
-      return { x: hover ? hover.x : slotX(pl, st.held.slot ?? 2), y: L.hoverY[pl.place], k: pl.k, tau: OBJECTS[obj].size === 'large' ? 230 : 150 };
+      // a hand is never quite still: what it holds rises and falls a little (still with motion reduced)
+      const bob = reduced ? 0 : 0.03 * L.u * Math.sin(performance.now() / 520);
+      return { x: hover ? hover.x : slotX(pl, st.held.slot ?? 2), y: L.hoverY[pl.place] + bob, k: pl.k, tau: OBJECTS[obj].size === 'large' ? 230 : 150 };
     }
     const at = whereIs(st, obj);
     if (!at) return null;
@@ -338,7 +362,8 @@ export function initPod(canvas, hooks) {
     const b = L.body;
     const att = { x: gaze.x, y: -gaze.y, w: 0.55 + 0.45 * gaze.lean };
     const key = `${att.x.toFixed(3)}|${att.y.toFixed(3)}|${att.w.toFixed(3)}`;
-    if (key !== bodyKey || (!reduced && now - bodyAt > BREATH_MS)) {
+    const every = Tier.name === 'lite' ? 2 * BREATH_MS : BREATH_MS;
+    if (!bodyKey || (key !== bodyKey && now - bodyAt > 45) || (!reduced && now - bodyAt > every)) {
       bodyKey = key; bodyAt = now;
       const prims = poseBody(anat, reduced ? 0 : now / 1000, att);
       const F = rasterBody(prims, b.at, b.k, b.c, b.box);
@@ -457,42 +482,71 @@ export function initPod(canvas, hooks) {
     ctx.drawImage(s0.cv, v.x - s0.gb.ox * f, v.y - s0.gb.oy * f, s0.gb.w * f, s0.gb.h * f);
     ctx.restore();
   }
-  /* The things' shadows: for each cell of the table near a thing, the share of the fog the thing hides (light.js
-     visibility), taken from the cell's direct light only. A thing's cells are kept until it moves. */
+  /* The cells of the table near a thing at v: for each, the share of the fog it still sees past the thing (light.js
+     visibility) and the share of the fog's reflection it still shows (mirrorVisibility: in front of a thing the
+     polish shows the thing's dark reflection instead). A thing that is moving is taken at every second cell. */
+  function patchOf(o, v, coarse) {
+    const q = ROOM_Q, { cw, ch } = room;
+    const w = worldOf(v), occ = occluders(o, w.W, w.s);
+    const hw = 1.5 * objW(o, w.s), down = 2.4 * w.s + 1.4 * objH(o, w.s);
+    const i0 = clamp(Math.floor((v.x - hw) / q), 0, cw - 1), i1 = clamp(Math.ceil((v.x + hw) / q), 0, cw - 1);
+    const j0 = clamp(Math.floor(Math.max(L.glassB, v.y - 0.5 * w.s) / q), 0, ch - 1), j1 = clamp(Math.ceil((w.ground + down) / q), 0, ch - 1);
+    const pw = i1 - i0 + 1, ph = j1 - j0 + 1, visA = new Float32Array(pw * ph), mirA = new Float32Array(pw * ph);
+    const st = coarse ? 2 : 1;
+    for (let j = 0; j < ph; j += st) {
+      const y = (j0 + j + 0.5) * q;
+      for (let i = 0; i < pw; i += st) {
+        const x = (i0 + i + 0.5) * q, P = [x, 0, tableZ(R, y)];
+        const a = y < L.glassB ? 1 : visibility(R, P, occ), m = y < L.glassB ? 1 : mirrorVisibility(R, P, occ);
+        for (let dj = 0; dj < st && j + dj < ph; dj++) for (let di = 0; di < st && i + di < pw; di++) { visA[(j + dj) * pw + i + di] = a; mirA[(j + dj) * pw + i + di] = m; }
+      }
+    }
+    return { i0, j0, w: pw, h: ph, vis: visA, mir: mirA };
+  }
+  /* Where letting go now would set the thing down: the place on the table and its scale, or null. */
+  function landing() {
+    const z = dragZone();
+    if (!z || z.kind !== 'putdown') return null;
+    const st = hooks.getState(), pl = plate(z.place);
+    const slot = freeSlot(st, z.place, slotAt(pl, drag.p.x + drag.dx));
+    return slot < 0 ? null : { x: slotX(pl, slot), y: slotY(pl), k: pl.k };
+  }
+  /* The things' shadows on the table, taken from each cell's direct light and its reflection by what the things hide,
+     and, while a thing is held low over the table, the shadow it will cast where letting go sets it down. A thing's
+     cells are kept until it moves. The darkening is laid in linear light: a cell keeping a share s of its light is
+     drawn at s of its linear value (black at alpha 1 - s^(1/2.2) over the sRGB bytes). */
   function drawShadows(ctx) {
     const q = ROOM_Q, { cw, ch } = room;
     let key = '';
     for (const o of OBJ) {
       const v = vis[o];
       if (!v || v.a < 0.5 || givers.some((g) => g.obj === o)) { delete patches[o]; continue; }
-      const pk = `${Math.round(v.x)}|${Math.round(v.y)}|${v.k.toFixed(3)}`;
+      const moving = !!(drag && drag.obj === o);
+      const pk = `${Math.round(v.x)}|${Math.round(v.y)}|${v.k.toFixed(3)}|${moving ? 'c' : 'f'}`;
       key += o + pk;
       if (patches[o] && patches[o].key === pk) continue;
-      const w = worldOf(v), occ = occluders(o, w.W, w.s);
-      const hw = 1.5 * objW(o, w.s), down = 2.4 * w.s + 1.4 * objH(o, w.s);
-      const i0 = clamp(Math.floor((v.x - hw) / q), 0, cw - 1), i1 = clamp(Math.ceil((v.x + hw) / q), 0, cw - 1);
-      const j0 = clamp(Math.floor(Math.max(L.glassB, v.y - 0.5 * w.s) / q), 0, ch - 1), j1 = clamp(Math.ceil((w.ground + down) / q), 0, ch - 1);
-      const pw = i1 - i0 + 1, ph = j1 - j0 + 1, visA = new Float32Array(pw * ph);
-      for (let j = 0; j < ph; j++) {
-        const y = (j0 + j + 0.5) * q;
-        for (let i = 0; i < pw; i++) {
-          const x = (i0 + i + 0.5) * q;
-          visA[j * pw + i] = y < L.glassB ? 1 : visibility(R, [x, 0, tableZ(R, y)], occ);
-        }
-      }
-      patches[o] = { key: pk, i0, j0, w: pw, h: ph, vis: visA };
+      patches[o] = { key: pk, ...patchOf(o, v, moving) };
     }
+    const land = landing();
+    if (land) {
+      const lk = `${drag.obj}|${Math.round(land.x)}|${Math.round(land.y)}`;
+      key += 'L' + lk;
+      if (!patches.landing || patches.landing.key !== lk) patches.landing = { key: lk, ...patchOf(drag.obj, land, false) };
+    } else delete patches.landing;
     if (key !== shadeKey) {
       shadeKey = key;
       const d = shadeImg.data;
       d.fill(0);
-      const keep = new Float32Array(cw * ch).fill(1);
+      const keep = new Float32Array(cw * ch).fill(1), keepM = new Float32Array(cw * ch).fill(1);
       for (const p of Object.values(patches)) {
-        for (let j = 0; j < p.h; j++) for (let i = 0; i < p.w; i++) keep[(p.j0 + j) * cw + p.i0 + i] *= p.vis[j * p.w + i];
+        for (let j = 0; j < p.h; j++) for (let i = 0; i < p.w; i++) {
+          const c = (p.j0 + j) * cw + p.i0 + i;
+          keep[c] *= p.vis[j * p.w + i]; keepM[c] *= p.mir[j * p.w + i];
+        }
       }
       for (let c = 0; c < cw * ch; c++) {
-        const a = (1 - keep[c]) * room.direct[c];
-        if (a > 0.002) d[4 * c + 3] = Math.round(255 * Math.min(1, a));
+        const lost = (1 - keep[c]) * room.direct[c] + (1 - keepM[c]) * room.mirror[c];
+        if (lost > 0.002) d[4 * c + 3] = Math.round(255 * (1 - Math.pow(Math.max(0, 1 - lost), 1 / 2.2)));
       }
       shadeCv.getContext('2d').putImageData(shadeImg, 0, 0);
     }
@@ -539,7 +593,6 @@ export function initPod(canvas, hooks) {
     const w = Math.min(L.W * 0.8, ctx.measureText(slate.text).width + fs * 1.6), h = fs * 2, x = L.W / 2 - w / 2, y = L.glassB - h - 0.012 * L.H;
     ctx.globalAlpha = a;
     ctx.fillStyle = 'rgba(6, 8, 13, .88)'; ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = P.lineB; ctx.lineWidth = Math.max(1, L.dpr); ctx.strokeRect(x, y, w, h);
     ctx.fillStyle = P.ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(slate.text, L.W / 2, y + h / 2 + 1, w - fs);
     ctx.restore();
@@ -595,14 +648,13 @@ export function initPod(canvas, hooks) {
       inkCv.getContext('2d').putImageData(inkImg, 0, 0);
       inkBlank = targetKey === 'none';
     }
-    Tier.sample(performance.now() - t0);   // the codec page's rule: a median of 60 over 20 ms takes the light tier
 
     // where the being looks
     let tx = L.W / 2, ty = slotY(L.near), lean = 0;
     if (slate) { ty = L.glassB - 0.05 * L.H; lean = 1; }
     else if (drag && drag.kind === 'thing') { tx = drag.p.x + drag.dx; ty = drag.p.y + drag.dy - 0.5 * L.u; lean = 0.6; }
-    else if (ph && !ink.still && now - ink.t0 < TIME.bloom + Math.min(ink.hang, TIME.hang)) { tx = L.ring.cx; ty = L.ring.cy; lean = 1; }
-    else if (st.held && vis[st.held.obj]) { tx = vis[st.held.obj].x; ty = vis[st.held.obj].y - 0.5 * L.u; lean = 0.3; }
+    else if (ph && !ink.still && now - ink.t0 < TIME.bloom) { tx = L.ring.cx; ty = L.ring.cy; lean = 1; }   // the ring while it gathers
+    else if (st.held && vis[st.held.obj]) { tx = vis[st.held.obj].x; ty = vis[st.held.obj].y - 0.5 * L.u; lean = 0.8; }   // then what you hold
     else if (pointer && now - pointerAt < 4000) { tx = pointer.x; ty = pointer.y; }
     const gx = tx - L.body.x, gy = ty - L.body.y, gl = Math.hypot(gx, gy) || 1;
     gaze.tx = gx / gl; gaze.ty = gy / gl;
@@ -620,6 +672,9 @@ export function initPod(canvas, hooks) {
     drawSlate(ctx, now);
     drawDesk(ctx, st, now);
     drawCrop(ctx, now);
+    // the codec page's rule, on the whole frame (the ink, the being, the things, their shadows): a median of 60 frames
+    // over 20 ms takes the light tier, which lays the ink on a coarser grid and redraws the being's breath half as often
+    Tier.sample(performance.now() - t0);
 
     if (drag || moving || slate || flash || (!reduced && busy)) kick();
     else if (!reduced) idle(50);                       // at rest the fog drifts and the ink breathes
@@ -776,8 +831,8 @@ export function initPod(canvas, hooks) {
     const things = onPlates(st);
     let used = true;
     if (!st.held) {
-      if (key === 'ArrowRight') { sel = (Math.min(sel, things.length - 1) + 1) % things.length; hooks.say?.(`${THING_NAME[things[sel]]}, on the plate ${whereIs(st, things[sel]).place === 'near' ? 'at the glass' : 'far from the glass'}.`); }
-      else if (key === 'ArrowLeft') { sel = (Math.min(sel, things.length - 1) + things.length - 1) % things.length; hooks.say?.(`${THING_NAME[things[sel]]}, on the plate ${whereIs(st, things[sel]).place === 'near' ? 'at the glass' : 'far from the glass'}.`); }
+      if (key === 'ArrowRight') { sel = (Math.min(sel, things.length - 1) + 1) % things.length; hooks.say?.(`${THING_NAME[things[sel]]}, on the table ${whereIs(st, things[sel]).place === 'near' ? 'at the glass' : 'far from the glass'}.`); }
+      else if (key === 'ArrowLeft') { sel = (Math.min(sel, things.length - 1) + things.length - 1) % things.length; hooks.say?.(`${THING_NAME[things[sel]]}, on the table ${whereIs(st, things[sel]).place === 'near' ? 'at the glass' : 'far from the glass'}.`); }
       else if (key === 'Enter' || key === ' ') lift(things[Math.min(sel, things.length - 1)]);
       else used = false;
     } else {
@@ -825,11 +880,14 @@ export function initPod(canvas, hooks) {
     /** Test and preview hook: do an act as the hand would, without a pointer. */
     perform(kind, opts = {}) { return kind === 'lift' ? lift(opts.obj) : held(kind, opts.place || 'near', opts.x ?? L.W / 2); },
     keepSector,
+    /** Draw the being again at this moment (for the drive: with motion reduced it must come out the same). */
+    redraw() { bodyKey = ''; kick(); },
     /** The density of ink in the disc's field at a point of the viewport (CSS pixels): for the drive's G11 check. */
     inkAt(x, y) {
       const r = canvas.getBoundingClientRect(), k = L.W / r.width, { disc } = L;
       const i = Math.floor((((x - r.left) * k - (disc.cx - disc.Rd)) / (2 * disc.Rd)) * field.N), j = Math.floor((((y - r.top) * k - (disc.cy - disc.Rd)) / (2 * disc.Rd)) * field.N);
-      return i < 0 || j < 0 || i >= field.N || j >= field.N ? 0 : field.D[j * field.N + i] + field.O[j * field.N + i];
+      if (!(i >= 0 && j >= 0 && i < field.N && j < field.N)) return 0;
+      return field.D[j * field.N + i] + field.O[j * field.N + i];
     },
     /** Where things are, in CSS pixels of the viewport: for tools/drives/heptapod.mjs, which drives the page by hand. */
     probe() {
@@ -843,8 +901,11 @@ export function initPod(canvas, hooks) {
         const f = s0 ? (L.u * v.k) / s0.gb.res : 0;
         const box = s0 ? { x0: at(v.x - s0.gb.ox * f, 0).x, x1: at(v.x + (s0.gb.w - s0.gb.ox) * f, 0).x, y0: at(0, v.y - s0.gb.oy * f).y, y1: at(0, v.y + (s0.gb.h - s0.gb.oy) * f).y } : null;
         const w = L ? worldOf(v) : null;
+        const sm = (A) => A.map((p) => ({ ...p, ...at(p.x, p.y) }));
         things[o] = { ...at(v.x, v.y - objH(o, L.u * v.k) / 2), held: !!(st.held && st.held.obj === o), place: whereIs(st, o)?.place || null,
-          base: at(v.x, v.y), box, alb: albedoOf(o), u: L.u * v.k * k, light: s0 && s0.m ? { ...s0.m } : null,
+          base: at(v.x, v.y), box, alb: albedoOf(o), u: L.u * v.k * k,
+          light: s0 && s0.m ? { ...s0.m, samples: undefined } : null,
+          samples: s0 && s0.m ? { lit: sm(s0.m.samples.lit), dark: sm(s0.m.samples.dark) } : null,
           dist: w ? Math.round(Math.hypot(w.W[0] - R.S[0], w.W[1] - R.S[1], w.W[2] - R.S[2]) * k) : null };
       }
       return {
@@ -855,12 +916,15 @@ export function initPod(canvas, hooks) {
         plates: { near: at(L.near.cx, slotY(L.near)), far: at(L.far.cx, slotY(L.far)) },
         air: { near: at(L.W / 2, L.hoverY.near), far: at(L.W / 2, L.hoverY.far) },
         glass: at(L.W / 2, 0.3 * L.H), ink: !!ph, crop: !!(ph && ph.crop), dragging: drag ? drag.kind : null, lastKeep, age: ink ? Math.round(performance.now() - ink.t0) : null,
-        field: { N: field.N, fit: +field.fit().toFixed(3), mass: +field.mass().toFixed(1) },
+        field: { N: field.N, fit: +field.fit().toFixed(3), mass: +field.mass().toFixed(1) }, tier: Tier.name,
         being: {
-          foot: at(L.body.at.x, L.body.at.y), k: L.body.k * k, limbs: anat.fronds.length,
+          foot: at(L.body.at.x, L.body.at.y), head: at(L.body.x, L.body.y), k: L.body.k * k, limbs: anat.fronds.length,
           box: { x0: at(L.body.box.x0, 0).x, x1: at(L.body.box.x1, 0).x, y0: at(0, L.body.box.y0).y, y1: at(0, L.body.box.y1).y },
-          light: bodyM, still: reduced, key: bodyKey,
+          light: bodyM ? { near: bodyM.near, far: bodyM.far, top: bodyM.top, low: bodyM.low, lit: bodyM.lit } : null,
+          drawn: bodyM && bodyM.drawn.x1 > bodyM.drawn.x0 ? { x0: at(bodyM.drawn.x0, 0).x, x1: at(bodyM.drawn.x1, 0).x, y0: at(0, bodyM.drawn.y0).y, y1: at(0, bodyM.drawn.y1).y } : null,
+          still: reduced, key: bodyKey,
         },
+        response: { exposure: LIGHT.EXPOSURE, cap: CAP, edge: EDGE_LUMA },
         whole: DISC_WHOLE,
       };
     },

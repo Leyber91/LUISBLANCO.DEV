@@ -23,12 +23,15 @@
       a constant); the being's floor likewise.
    3. Nothing lit is brighter than the disc's edge: respond never
       exceeds CAP, and CAP in the light's colour, encoded, is darker
-      than the fog's stop at 0.8 of the disc's radius.
+      than the fog where the disc is whole (fogAt(DISC_WHOLE), the
+      gradient as the canvas lays it, independent of CAP).
    4. The air: airlight falls with distance from the disc, and a ray
       that ends sooner collects less of it; haze falls with depth.
    5. Shadows: a point inside an occluder sees none of the fog; beside
       a thing on the table, the point on the side away from the fog is
-      darker than its mirror on the side toward it.
+      darker than its mirror on the side toward it; just in front of
+      it the polish loses the fog's reflection (the thing's dark
+      reflection), and away from it keeps all of it.
    6. The sRGB table is within one level of the exact encoding.
    C3, the things
    7. Each of the six, at rest on the table either side of the
@@ -41,10 +44,12 @@
    9. A held thing enters the disc's light: placeOf brings it nearer
       the fog, and it receives more light held than resting.
    10. No pixel of any thing, wherever it is put (the brightest place,
-      held under the disc at the glass), is brighter than the disc's
-      edge.
+      held under the disc at the glass), nor of the being, is brighter
+      than the fog where the disc is whole.
    C2, the being
-   11. Rule 7 on 400 anatomies and the three of the page: never seven
+   11. Rule 7 on 400 anatomies and the three of the page, with a
+      control that must fail (a body on seven legs splayed from one
+      height to the floor, built in the same parts): never seven
       limbs (its fronds), the fronds' roots spread up the stalk (a
       standard deviation over 0.1 of its height), no frond reaches
       within 0.15 of its height of the floor, and its silhouette is not radial (turned by
@@ -52,20 +57,26 @@
       by less than 0.7).
    12. The three species differ: 1 - IoU of their silhouettes is over
       0.2 for each pair.
-   13. It is rim-lit: the half facing the disc receives more than three
-      times the light of the other half.
+   13. It is lit at its edge facing the disc: the half facing the
+      disc receives more than three times the light of the other half,
+      and the fog lights less than a third of its area.
    14. It breathes when time runs and is the same at the same time
       (the scene passes time 0 with motion reduced, so it is still).
    15. It attends: its head's point moves toward what it attends to.
    16. It fits: fitBody keeps every pose it can take inside the region
-      given, on the desktop and the phone rooms.
+      given, on the desktop and the phone rooms; and chamberLayout (the
+      page's layout) leaves it at least a quarter of the canvas tall,
+      inside the canvas, at every width from 1024 to 1920 px with the
+      page's caption over the room (the review of 2026-11-18 found it
+      6 px tall at 1024).
    17. The same seed grows the same being.
    Exits 1 on any failure, and on a run that checked nothing.
    ============================================================ */
 
-import { LIGHT, FOG_STOPS, CAP, makeRoom, lightAt, wrapSphere, respond, airlight, haze, visibility, paintRoom, tableZ, toSRGB, srgbExact } from '../pod/light.js';
+import { LIGHT, FOG_STOPS, CAP, DISC_WHOLE, fogAt, makeRoom, lightAt, wrapSphere, respond, airlight, haze, visibility, mirrorVisibility, paintRoom, tableZ, toSRGB, srgbExact } from '../pod/light.js';
+import { chamberLayout } from '../pod/scene.js';
 import { gbuffer, relight, occluders, placeOf, SHAPES } from '../pod/things.js';
-import { growBody, poseBody, reachOf, fitBody, rasterBody, shadeBody, silhouette, iou, radialSelfSimilarity, rule7, LIMB_COUNTS } from '../pod/body.js';
+import { growBody, poseBody, reachOf, fitBody, rasterBody, shadeBody, bodyOccluders, silhouette, iou, radialSelfSimilarity, rule7, LIMB_COUNTS } from '../pod/body.js';
 import { GATE_SPECIES } from '../pod/species.js';
 
 let checks = 0, failures = 0;
@@ -75,8 +86,8 @@ const near = (a, b, tol) => Math.abs(a - b) <= tol;
 /* The two rooms, laid out as scene.js lays them (portrait: the disc left of the middle). */
 function roomFor(W, H) {
   const portrait = H > W * 1.05;
-  const Rd = Math.round(portrait ? Math.min(0.33 * W, 0.25 * H) : Math.min(0.26 * H, 0.3 * W));
-  const disc = { cx: Math.round(portrait ? W / 2 - 0.13 * W : W / 2), cy: Math.round(0.045 * H + Rd), Rd };
+  const Rd = Math.round(portrait ? Math.min(0.31 * W, 0.25 * H) : Math.min(0.26 * H, 0.3 * W));
+  const disc = { cx: Math.round(portrait ? W / 2 - 0.15 * W : W / 2), cy: Math.round(0.045 * H + Rd), Rd };
   const glassB = Math.round(disc.cy + Rd + 0.03 * H);
   const horizon = Math.round(glassB - 0.075 * H), foot = Math.round(glassB - 0.032 * H);
   const u = Math.min(H * 0.125, W * 0.1);
@@ -85,7 +96,13 @@ function roomFor(W, H) {
 }
 const DESK = roomFor(1056, 838), PHONE = roomFor(780, 978);
 const lum = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
-const edge = (() => { const h = FOG_STOPS[2][1]; return lum(...[1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))); })();
+// the disc's edge: the fog where the disc is still whole, as the canvas lays the gradient (computed from the stops
+// here, apart from light.js's CAP and EDGE_LUMA)
+const edge = (() => {
+  const st = FOG_STOPS.map(([f, h]) => [f, [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))]);
+  const k = st.findIndex(([f]) => f >= DISC_WHOLE), [a, ca] = st[k - 1], [b, cb] = st[k], t = (DISC_WHOLE - a) / (b - a);
+  return lum(...ca.map((x, i) => Math.round(x + (cb[i] - x) * t)));
+})();
 
 /* ---------------- C1 ---------------- */
 {
@@ -145,7 +162,8 @@ const edge = (() => { const h = FOG_STOPS[2][1]; return lum(...[1, 3, 5].map((i)
   for (let x = 0; x < 50; x += 0.01) { const y = respond(x); if (y < prev || y > CAP) mono = false; prev = y; }
   ok(mono, '3 respond rises and never passes CAP');
   const capL = lum(...LIGHT.RGB.map((c) => toSRGB(c * CAP)));
-  ok(capL < edge, '3 CAP in the light\'s colour is darker than the fog at 0.8 of the disc\'s radius', `${capL.toFixed(1)} < ${edge.toFixed(1)}`);
+  ok(capL < edge, '3 CAP in the light\'s colour is darker than the fog where the disc is whole', `${capL.toFixed(1)} < ${edge.toFixed(1)}`);
+  ok(Math.abs(lum(...fogAt(DISC_WHOLE)) - edge) < 0.5, '3 light.js lays the fog\'s gradient as this test does', `${lum(...fogAt(DISC_WHOLE)).toFixed(1)} and ${edge.toFixed(1)}`);
 }
 {
   // 4. the air
@@ -166,6 +184,9 @@ const edge = (() => { const h = FOG_STOPS[2][1]; return lum(...[1, 3, 5].map((i)
   const d = 0.75 * u;
   const away = visibility(R, [P0[0] + dx * d, 0, P0[2] + dz * d], occ), toward = visibility(R, [P0[0] - dx * d, 0, P0[2] - dz * d], occ);
   ok(away < toward && away < 0.9, '5 the shadow falls on the side away from the fog', `away ${away.toFixed(3)} toward ${toward.toFixed(3)}`);
+  const front = [P0[0], 0, P0[2] - 0.35 * u], aside = [P0[0] + 3 * u, 0, P0[2] - 0.35 * u];
+  const mf = mirrorVisibility(R, front, occ), ma = mirrorVisibility(R, aside, occ);
+  ok(mf < 0.6 && ma > 0.99, '5 in front of a thing the polish loses the fog\'s reflection, and away from it keeps it', `front ${mf.toFixed(3)}, aside ${ma.toFixed(3)}`);
 }
 {
   // 6. the sRGB table
@@ -228,6 +249,11 @@ for (const [rname, Rm] of [['desktop', DESK], ['phone', PHONE]]) {
     worst.low = Math.min(worst.low, r.lowestLimb);
   }
   ok(sevens === 0, '11 rule 7: no being has seven limbs', `${sevens} of ${seeds.length}`);
+  // the control: the same parts built as the film's kind of body, seven legs from one height down to the floor
+  const legs = { ...growBody(1, 14) };
+  legs.fronds = Array.from({ length: 7 }, (_, i) => ({ s: 0.42, phi: (2 * Math.PI * i) / 7, len: 3.2, r0: 0.12, rise: -1.15, curl: 0, blade: 0 }));
+  const c7 = rule7(legs);
+  ok(c7.limbs === 7 && c7.rootSpread < 0.1 && c7.lowestLimb < 0.15, '11 rule 7: the measures fail a body on seven legs splayed from one height to the floor (the control)', JSON.stringify(c7));
   ok(worst.spread > 0.1, '11 rule 7: the fronds leave the stalk at different heights (no centre they radiate from)', worst.spread.toFixed(3));
   ok(worst.low > 0.15, '11 rule 7: no frond comes within 0.15 of its height of the floor (it stands on its foot, not on limbs)', worst.low.toFixed(3));
   for (const [a, sd] of seeds.slice(0, 23)) {
@@ -266,8 +292,29 @@ for (const [rname, Rm] of [['desktop', DESK], ['phone', PHONE]]) {
       const prims = poseBody(B, 0, { x: -1, y: -0.4, w: 1 });
       const F = rasterBody(prims, fit.at, fit.k, fit.c, fit.box);
       const m = shadeBody(F, R, fit.at, fit.k, B, new Uint8ClampedArray(F.gw * F.gh * 4));
-      ok(m.near > 3 * m.far, `13 ${rname}: being ${a}/${sd} is lit on its side facing the disc`, `${m.near.toFixed(4)} > 3 x ${m.far.toFixed(4)}`);
+      ok(m.near > 3 * m.far && m.lit < 1 / 3, `13 ${rname}: being ${a}/${sd} is lit at its edge facing the disc`, `${m.near.toFixed(4)} > 3 x ${m.far.toFixed(4)}; lit share ${m.lit.toFixed(3)}`);
+      // 10. and no pixel of it is brighter than the disc where it is whole
+      const px = new Uint8ClampedArray(F.gw * F.gh * 4);
+      shadeBody(F, R, fit.at, fit.k, B, px, bodyOccluders(B, fit.at, fit.k, R.Zb));
+      let bmax = 0;
+      for (let i = 0; i < px.length; i += 4) if (px[i + 3] > 200) bmax = Math.max(bmax, lum(px[i], px[i + 1], px[i + 2]));
+      ok(bmax < edge, `10 ${rname}: no pixel of being ${a}/${sd} is brighter than the disc where it is whole`, `${bmax.toFixed(1)} < ${edge.toFixed(1)}`);
     }
+  }
+  // 16. the page's layout at a laptop's widths, and a phone's, the caption over the room on the wide ones (its corner as measured at 1440, and a
+  // smaller and a larger one)
+  for (const [vw, vh] of [[1024, 768], [1024, 900], [1100, 800], [1180, 900], [1280, 800], [1366, 768], [1440, 900], [1920, 1080]]) {
+    const W = vw - 384, H = vh - 62;
+    for (const cap of [{ x1: 315, y1: 90 }, { x1: 260, y1: 75 }, { x1: 345, y1: 115 }]) for (const [a, sd] of GATE_SPECIES) {
+      const reach = reachOf(growBody(a, sd)), lay = chamberLayout(W, H, cap, reach), f = lay.fit, tall = f.k * reach.y1;
+      ok(tall >= 0.25 * H && f.box.x0 >= 0 && f.box.x1 <= W && f.box.y0 >= 0 && f.box.x0 >= lay.disc.cx + lay.disc.Rd,
+        `16 at ${vw} x ${vh} px (caption to ${cap.x1}, ${cap.y1}) being ${a}/${sd} stands whole beside the disc, a quarter of the canvas tall or more`, `${tall.toFixed(0)} px tall in ${H}; box ${JSON.stringify(f.box)}; disc ${JSON.stringify(lay.disc)}`);
+    }
+  }
+  for (const [W, H] of [[390, 489], [780, 978], [360, 400], [414, 520]]) for (const [a, sd] of GATE_SPECIES) {
+    const reach = reachOf(growBody(a, sd)), lay = chamberLayout(W, H, null, reach), f = lay.fit, tall = f.k * reach.y1;
+    ok(tall >= 0.25 * H && f.box.x1 <= W && f.box.y0 >= 0 && lay.disc.cx - 1.105 * lay.disc.Rd >= 0,
+      `16 a phone's chamber ${W} x ${H}: being ${a}/${sd} whole, a quarter of it tall or more, and the disc's ticks inside`, `${tall.toFixed(0)} px tall; box ${JSON.stringify(f.box)}; disc ${JSON.stringify(lay.disc)}`);
   }
   const B = growBody(...GATE_SPECIES[0]);
   const same = JSON.stringify(poseBody(B, 2.5)) === JSON.stringify(poseBody(B, 2.5));

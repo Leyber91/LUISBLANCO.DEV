@@ -72,7 +72,7 @@ export const SHAPES = {
   /* small, dark, made, rigid: a block with eased edges */
   cube: {
     box: [0.31, 0, 0.56, 0.28],
-    sd: (x, y, z) => sdBox(x, y - 0.27, z, 0.3, 0.27, 0.27, 0.028),
+    sd: (x, y, z) => sdBox(x, y - 0.27, z, 0.3, 0.27, 0.27, 0.05),
     mat: () => MAT.lacquer,
     occ: [[0, 0.27, 0, 0.31]],
   },
@@ -86,7 +86,7 @@ export const SHAPES = {
       return Math.min(shell, foot);
     },
     mat: () => MAT.glaze,
-    occ: [[-0.32, 0.27, 0, 0.27], [0.32, 0.27, 0, 0.27], [0, 0.22, 0, 0.3]],
+    occ: [[-0.4, 0.28, 0, 0.25], [0, 0.24, 0, 0.3], [0.4, 0.28, 0, 0.25]],
   },
   /* large, dark, made, a vessel: a jug with a neck, a lip and a handle */
   jug: {
@@ -127,7 +127,7 @@ export const SHAPES = {
       return Math.min(a, b, c);
     },
     mat: () => MAT.cloth,
-    occ: [[-0.42, 0.16, 0, 0.19], [0, 0.17, 0, 0.2], [0.42, 0.16, 0, 0.19]],
+    occ: [[-0.5, 0.16, 0, 0.17], [-0.25, 0.17, 0, 0.18], [0, 0.17, 0, 0.18], [0.25, 0.17, 0, 0.18], [0.5, 0.16, 0, 0.17]],
   },
   /* small, light, grown, rigid: a stone with one broken face */
   stone: {
@@ -139,7 +139,7 @@ export const SHAPES = {
       return Math.max(smin(d, sdEll(x - 0.13, y - 0.21, z + 0.06, 0.2, 0.16, 0.18) + wob, 0.12), BROKEN[0] * x + BROKEN[1] * (y - 0.2) + BROKEN[2] * z - 0.21);
     },
     mat: () => MAT.stone,
-    occ: [[0, 0.23, 0, 0.3]],
+    occ: [[-0.14, 0.2, 0, 0.24], [0.14, 0.2, 0, 0.24]],
   },
 };
 
@@ -230,6 +230,10 @@ export function gbuffer(name, res) {
  * what it measured, over the pixels whose surface faces the fog (its normal turned toward the fog's centre, as seen
  * from the base) and over those that face away: the mean light received (E) and the mean luma of the pixels
  * written (sRGB, 0 to 255). Inside a vessel the wall that faces the fog is the far one, and it is counted there.
+ * samples: up to 24 pixels well inside the picture that face the fog past the sphere's horizon (lit by the cosine
+ * law) and up to 24 that face away, each with its screen pixel, its distance from the fog's centre, its cosine,
+ * albedo, haze, airlight, the visitor's side's light on it (fill) and its sheen (spec), so the drive can read the
+ * canvas there, take the sheen and the fill off and recover the light received from the fog.
  */
 export function relight(gb, R, at, W, s, out) {
   const { w, h, a, P, N, alb, f0, rough } = gb;
@@ -239,6 +243,7 @@ export function relight(gb, R, at, W, s, out) {
   const vx = VIEW_IN[0], vy = VIEW_IN[1], vz = VIEW_IN[2];
   const Pw = [0, 0, 0], Nw = [0, 0, 0];
   let near = 0, nN = 0, far = 0, nF = 0, lNear = 0, lFar = 0, all = 0, nA = 0;
+  const lit = [], dark = [];
   const L0 = toLight(R, W).l;
   for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
     const c = j * w + i, o = 4 * c;
@@ -254,7 +259,8 @@ export function relight(gb, R, at, W, s, out) {
     const spec = vn < 0 ? fresnel(-vn, f0[c]) * glossy(rx * L.l[0] + ry * L.l[1] + rz * L.l[2], Math.asin(L.s), rough[c]) : 0;
     const sx = at.x + k * (i + 0.5 - gb.ox), sy = at.y + k * (j + 0.5 - gb.oy);
     const lin = respond(X * (alb[c] * (E + F) + spec));
-    const out1 = haze(R, Pw[2]) * lin + airlight(R, Math.hypot(sx - R.disc.cx, sy - R.disc.cy), R.eyeZ, Pw[2]);
+    const T = haze(R, Pw[2]), air = airlight(R, Math.hypot(sx - R.disc.cx, sy - R.disc.cy), R.eyeZ, Pw[2]);
+    const out1 = T * lin + air;
     out[o] = toSRGB(out1 * lr); out[o + 1] = toSRGB(out1 * lg); out[o + 2] = toSRGB(out1 * lb);
     out[o + 3] = Math.round(255 * a[c]);
     // facing the fog (its normal turned toward the fog's centre as seen from the base), or away from it
@@ -262,8 +268,17 @@ export function relight(gb, R, at, W, s, out) {
     all += E; nA++;
     const face = Nw[0] * L0[0] + Nw[1] * L0[1] + Nw[2] * L0[2], luma = 0.2126 * out[o] + 0.7152 * out[o + 1] + 0.0722 * out[o + 2];
     if (face > 0.2) { near += E; lNear += luma; nN++; } else if (face < -0.2) { far += E; lFar += luma; nF++; }
+    // a sample for the frame: interior (all eight neighbours covered), lit by the cosine law with no sheen, or dark
+    if (i > 1 && j > 1 && i < w - 2 && j < h - 2 && a[c - 1] && a[c + 1] && a[c - w] && a[c + w] && a[c - w - 1] && a[c - w + 1] && a[c + w - 1] && a[c + w + 1]) {
+      const cosL = Nw[0] * L.l[0] + Nw[1] * L.l[1] + Nw[2] * L.l[2];
+      const s0 = { x: sx, y: sy, d: L.d, cos: cosL, alb: alb[c], T, air, fill: F, spec };
+      if (cosL > L.s + 0.01) lit.push(s0);
+      else if (cosL < -L.s - 0.1) dark.push(s0);
+    }
   }
-  return { near: nN ? near / nN : 0, far: nF ? far / nF : 0, lumNear: nN ? lNear / nN : 0, lumFar: nF ? lFar / nF : 0, nNear: nN, nFar: nF, all: nA ? all / nA : 0 };
+  const pickN = (A, n) => (A.length <= n ? A : Array.from({ length: n }, (_, k) => A[Math.floor((k * A.length) / n)]));
+  return { near: nN ? near / nN : 0, far: nF ? far / nF : 0, lumNear: nN ? lNear / nN : 0, lumFar: nF ? lFar / nF : 0, nNear: nN, nFar: nF, all: nA ? all / nA : 0,
+    samples: { lit: pickN(lit, 24), dark: pickN(dark, 24) } };
 }
 
 /** The spheres a thing hides the fog with, in the room: for light.js's visibility. */

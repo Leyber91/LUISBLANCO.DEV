@@ -194,7 +194,7 @@ function mount() {
   panel = mountPanel($('panel'), {
     ...hooks,
     onRaise(text) {
-      if (!state.acts.length) return 'Do something on the tray first: a mark needs a ring to be counted against.';
+      if (!state.acts.length) return 'Do something with a thing first: a mark needs a ring to be counted against.';
       const rec = raiseMark(state, text);
       if (!rec) return text.trim() ? 'That mark is already raised for this ring.' : '';
       pod.raise(rec.mark); save();
@@ -229,6 +229,7 @@ function mount() {
   redraw();
   $('pod').probe = () => pod.probe();      // for the drive tool: where things are on screen
   $('pod').inkAt = (x, y) => pod.inkAt(x, y);
+  $('pod').redraw = () => pod.redraw();
   if (state.phase === 'day') pod.greet(); else evening();
   const keysText = keysHelp(script);
   $('pod').setAttribute('aria-label', keysText.label);

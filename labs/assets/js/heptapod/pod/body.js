@@ -60,7 +60,7 @@ import { LIGHT, lightAt, toLight, airlight, haze, fresnel, glossy, respond, visi
 export const LIMB_COUNTS = Object.freeze([4, 5, 6, 8, 9, 10]);   // never seven (rule 7)
 const STALK = 26;                                        // round cones along the stalk
 const FROND = 14;                                        // round cones along a frond
-const HEAD_SEG = 12;                                     // round cones along the head
+const HEAD_SEG = 18;                                     // round cones along the head
 
 const SKIN = { alb: 0.4, f0: 0.05, rough: 0.38, lines: true };
 const HEAD = { alb: 0.4, f0: 0.05, rough: 0.38, lines: false };
@@ -90,8 +90,9 @@ function profileAt(P, s) {
 
 /* A chain of points [{ x, y, z, r, s }] to round cones, each carrying the taper's angle at both its ends (from the
    radii either side of each point), so the normals turn smoothly along the chain instead of by segment. */
+let CHAIN = 0;
 function chain(prims, pts, extra) {
-  const n = pts.length;
+  const n = pts.length, id = ++CHAIN;
   const slope = pts.map((p, i) => {
     const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)];
     const l = Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z) || 1e-9;
@@ -99,7 +100,7 @@ function chain(prims, pts, extra) {
   });
   for (let i = 0; i < n - 1; i++) {
     const p = pts[i], q = pts[i + 1];
-    prims.push({ a: [p.x, p.y, p.z], b: [q.x, q.y, q.z], ra: p.r, rb: q.r, ga: slope[i], gb: slope[i + 1], s0: p.s, s1: q.s, ...extra(i) });
+    prims.push({ a: [p.x, p.y, p.z], b: [q.x, q.y, q.z], ra: p.r, rb: q.r, ga: slope[i], gb: slope[i + 1], s0: p.s, s1: q.s, chain: id, ...extra(i) });
   }
 }
 
@@ -125,7 +126,7 @@ export function growBody(target, sSeed) {
     const phi = (i % 2 ? -1 : 1) * (Math.PI / 2 + phi0) + r(-0.3, 0.3);
     return { s, phi, len, r0: r(0.08, 0.13) * Math.sqrt(len / L0) + 0.02, rise: r(0.2, 0.75), curl: r(0.8, 2.2), blade };
   });
-  const head = { r: r(0.24, 0.32), len: r(3.0, 4.2) };
+  const head = { r: r(0.2, 0.36), len: r(2.4, 4.8), bow: r(0.15, 0.7), lift: r(-0.15, 0.2) };
   return {
     target, seed: sSeed, H, profile, bend, sac, fronds, head,
     lines: r(9, 16),                 // growth lines along the stalk, per unit of its height
@@ -142,6 +143,7 @@ export function growBody(target, sSeed) {
  */
 export function poseBody(B, t = 0, att = { x: 0, y: 1, w: 0 }) {
   const prims = [];
+  CHAIN = 0;                                   // chains are numbered within one pose
   const ph = (2 * Math.PI * t) / B.breath + B.breathPh;
   const breath = (s) => 1 + BODY.BREATH * Math.sin(ph - 2.4 * s);
   const w = att.w ?? 0;
@@ -172,14 +174,14 @@ export function poseBody(B, t = 0, att = { x: 0, y: 1, w: 0 }) {
   // thickness is one smooth swell to its point, cut in HEAD_SEG cones
   const tip = pts[STALK], prev = pts[STALK - 2];
   const a0 = Math.atan2(tip.x - prev.x, tip.y - prev.y);
-  const a1 = w > 0 ? a0 + (want - a0) * w : a0 + 0.35;                  // at rest it bows a little
+  const a1 = w > 0 ? a0 + (want - a0) * w : a0 + B.head.bow;            // at rest it bows, by its seed
   const hr = B.head.r * (1 + 0.5 * BODY.BREATH * Math.sin(ph - 2.4));
   const thick = (u) => 0.9 + 0.32 * Math.sin(Math.PI * Math.min(1, u * 1.3)) - 0.6 * u * u;   // the neck's width, a swell, a blunt point
   const L = (B.head.len * hr) / HEAD_SEG;
   const hp = [{ x: tip.x, y: tip.y, z: tip.z, r: hr * thick(0), s: B.H }];
   for (let j = 0; j < HEAD_SEG; j++) {
     const u1 = (j + 1) / HEAD_SEG, ang = a0 + (a1 - a0) * smooth(0, 0.55, u1), p = hp[j];
-    hp.push({ x: p.x + L * Math.sin(ang), y: p.y + L * Math.cos(ang), z: p.z + 0.1 * L, r: hr * Math.max(0.3, thick(u1)), s: B.H + (j + 1) * L });
+    hp.push({ x: p.x + L * Math.sin(ang), y: p.y + L * Math.cos(ang), z: p.z + B.head.lift * L, r: hr * Math.max(0.3, thick(u1)), s: B.H + (j + 1) * L });
   }
   chain(prims, hp, (j) => ({ mat: j / HEAD_SEG >= 0.86 ? MOUTH : HEAD }));
   // the fronds
@@ -190,7 +192,7 @@ export function poseBody(B, t = 0, att = { x: 0, y: 1, w: 0 }) {
     const ox = Math.sin(f.phi), oz = Math.cos(f.phi);              // outward from the stalk (z toward the viewer)
     const lift = BODY.SWAY * Math.sin(ph - 2.4 * f.s + 0.6 * fi);
     // a frond tapers from the stalk and widens to a blade before its point
-    const width = (u) => f.r0 * ((1 - 0.88 * u) + f.blade * 0.9 * Math.pow(Math.sin(Math.PI * Math.min(1, u * 1.12)), 3) * u);
+    const width = (u) => f.r0 * ((1 - 0.85 * u) + f.blade * 2.2 * Math.pow(Math.sin(Math.PI * Math.min(1, u * 1.1)), 2) * u);
     const fp = [{ x: rx + 0.72 * rr * ox, y: ry, z: rz + 0.72 * rr * oz, r: width(0), s: 0 }];
     for (let k = 0; k < FROND; k++) {
       const u1 = (k + 1) / FROND, p = fp[k];
@@ -227,14 +229,14 @@ export function reachOf(B) {
 /**
  * Where the being stands and how large it is drawn: the largest scale at which every pose it can take (reach, from
  * reachOf) fits the region { x0, x1, top, foot } of the canvas, centred across it, its foot on the foot row. Returns
- * k (device pixels per body unit), at (the foot's centre), c (its grid's cell, about 260 cells tall at most) and box
+ * k (device pixels per body unit), at (the foot's centre), c (its grid's cell, 280 cells tall at most) and box
  * (the grid's extent, device pixels).
  */
 export function fitBody(reach, region) {
   const w = Math.max(1, region.x1 - region.x0), hgt = Math.max(1, region.foot - region.top);
   const k = Math.max(1, Math.min(hgt / reach.y1, w / (reach.x1 - reach.x0)));
   const at = { x: region.x0 - k * reach.x0 + Math.max(0, w - k * (reach.x1 - reach.x0)) / 2, y: region.foot };
-  const c = Math.max(1, Math.round((k * reach.y1) / 260));
+  const c = Math.max(1, (k * reach.y1) / 280);
   return { k, at, c, box: { x0: at.x + k * reach.x0 - 2 * c, x1: at.x + k * reach.x1 + 2 * c, y0: region.foot - k * reach.y1 - 2 * c, y1: region.foot + c } };
 }
 
@@ -249,7 +251,7 @@ export function rasterBody(prims, at, k, c, box) {
   const n = gw * gh;
   const h = new Float32Array(n).fill(-Infinity), cov = new Float32Array(n);
   const N = new Float32Array(3 * n), thick = new Float32Array(n), u = new Float32Array(n);
-  const mat = new Array(n).fill(null);
+  const mat = new Array(n).fill(null), ch = new Int32Array(n);
   for (const p of prims) {
     const Ax = at.x + k * p.a[0], Ay = at.y - k * p.a[1], Az = k * p.a[2];
     const Bx = at.x + k * p.b[0], By = at.y - k * p.b[1], Bz = k * p.b[2];
@@ -286,8 +288,12 @@ export function rasterBody(prims, at, k, c, box) {
         const dx = px - cx, dy = py - cy, d2 = dx * dx + dy * dy;
         // a cell inside a cone always wins over a cell only at another cone's soft edge
         const hz = inside && d2 < r * r ? zc + Math.sqrt(r * r - d2) : -1e6 + zc - (Math.sqrt(d2) - r);
-        if (hz <= h[q]) continue;
-        h[q] = hz;
+        // a neighbour along the same chain whose surface meets this one here: their normals are averaged, so a joint
+        // does not show as a ring
+        const blend = p.chain && ch[q] === p.chain && hz > -1e5 && Math.abs(hz - h[q]) < 1.5 * c;
+        if (hz <= h[q] && !blend) continue;
+        const keep = blend ? [N[3 * q], N[3 * q + 1], N[3 * q + 2]] : null;
+        h[q] = Math.max(h[q], hz); ch[q] = p.chain || 0;
         // the normal: from the axis point to the surface point, tilted along the axis by the cone's taper (so joints
         // between cones of different taper do not show as rings)
         let nx, ny, nz;
@@ -296,6 +302,7 @@ export function rasterBody(prims, at, k, c, box) {
         else { const d = Math.sqrt(d2) || 1; nx = dx / d; ny = dy / d; nz = 0; thick[q] = 0; }
         const gam = g0 + t * (g1 - g0), cg = Math.cos(gam), sg = Math.sin(gam);
         nx = nx * cg + tx * sg; ny = ny * cg + ty * sg; nz = nz * cg + tz * sg;
+        if (keep) { const l0 = Math.hypot(nx, ny, nz) || 1; nx = nx / l0 + keep[0]; ny = ny / l0 + keep[1]; nz = nz / l0 + keep[2]; }
         const nl = Math.hypot(nx, ny, nz) || 1;
         N[3 * q] = nx / nl; N[3 * q + 1] = ny / nl; N[3 * q + 2] = nz / nl;
         u[q] = p.s0 + t * (p.s1 - p.s0);
@@ -309,7 +316,8 @@ export function rasterBody(prims, at, k, c, box) {
 /**
  * Light the body's height field in the room R (light.js) and write RGBA bytes (gw * gh * 4). Its cells stand at depth
  * R.Zb less their height. Returns the light (lightAt) on the half of the body facing the disc and on the other half,
- * and on its top and bottom thirds, for the probe.
+ * and on its top and bottom thirds, the share of its area the fog lights (lit), and the box its covered cells span
+ * (drawn, device pixels).
  */
 export function shadeBody(F, R, at, k, B, out, occ = [], cache = {}) {
   const { gw, gh, c, box, h, cov, N, thick, u, mat } = F;
@@ -327,7 +335,8 @@ export function shadeBody(F, R, at, k, B, out, occ = [], cache = {}) {
   const [lr, lg, lb] = LIGHT.RGB, X = LIGHT.EXPOSURE;
   const P = [0, 0, 0], n = [0, 0, 0];
   const toward = Math.sign(R.disc.cx - at.x) || 1;
-  const m = { near: 0, nN: 0, far: 0, nF: 0, top: 0, nT: 0, low: 0, nL: 0 };
+  const m = { near: 0, nN: 0, far: 0, nF: 0, top: 0, nT: 0, low: 0, nL: 0, area: 0, litA: 0 };
+  const drawn = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
   let ytop = Infinity;
   for (let q = 0; q < gw * gh; q++) if (cov[q] > 0) { ytop = box.y0 + Math.floor(q / gw) * c; break; }
   const tall = Math.max(1, at.y - ytop);
@@ -342,7 +351,7 @@ export function shadeBody(F, R, at, k, B, out, occ = [], cache = {}) {
       let E = lightAt(R, P, n);
       // its own body hides the fog from the parts below it (the foot under the torso): the spheres that stand for
       // it, less any that this point lies on
-      if (E > 0 && occ.length) E *= visibility(R, P, occ, 1.15);
+      if (E > 0 && occ.length) E *= visibility(R, P, occ, 1.6);
       const M = mat[q];
       const L = toLight(R, P);
       // thin tissue lets the fog's light through when the fog is behind it
@@ -360,22 +369,28 @@ export function shadeBody(F, R, at, k, B, out, occ = [], cache = {}) {
       const v = T * lin + AIR[q];
       out[o] = toSRGB(v * lr); out[o + 1] = toSRGB(v * lg); out[o + 2] = toSRGB(v * lb);
       out[o + 3] = Math.round(255 * cov[q]);
+      if (cov[q] > 0.05) { drawn.x0 = Math.min(drawn.x0, px - c / 2); drawn.x1 = Math.max(drawn.x1, px + c / 2); drawn.y0 = Math.min(drawn.y0, py - c / 2); drawn.y1 = Math.max(drawn.y1, py + c / 2); }
       if (cov[q] < 1) continue;
+      m.area++;
+      if (E > 0.002) m.litA++;
       if ((px - at.x) * toward > 0) { m.near += E; m.nN++; } else { m.far += E; m.nF++; }
       const fy = (at.y - py) / tall;
       if (fy > 2 / 3) { m.top += E; m.nT++; } else if (fy < 1 / 3) { m.low += E; m.nL++; }
     }
   }
-  return { near: m.nN ? m.near / m.nN : 0, far: m.nF ? m.far / m.nF : 0, top: m.nT ? m.top / m.nT : 0, low: m.nL ? m.low / m.nL : 0 };
+  return { near: m.nN ? m.near / m.nN : 0, far: m.nF ? m.far / m.nF : 0, top: m.nT ? m.top / m.nT : 0, low: m.nL ? m.low / m.nL : 0,
+    lit: m.area ? m.litA / m.area : 0, drawn };
 }
 
 /** Spheres that stand for the body when it hides the fog from its floor (light.js visibility), in the room. */
 export function bodyOccluders(B, at, k, Zb) {
   const prims = poseBody(B, 0);
   const out = [];
-  for (const s of [0.06, 0.2, 0.36, 0.52, 0.68, 0.84]) {
+  for (const s of [0.16, 0.3, 0.44, 0.58, 0.72, 0.86]) {
     const p = prims[Math.min(STALK - 1, Math.floor(s * STALK))];
-    out.push({ c: [at.x + k * p.a[0], k * p.a[1], Zb - k * p.a[2]], r: k * p.ra * 0.95 });
+    // a sphere for the stalk there, never reaching below the floor (where it would cut a hole of shadow)
+    const r = Math.min(k * p.ra * 0.95, k * p.a[1]);
+    out.push({ c: [at.x + k * p.a[0], k * p.a[1], Zb - k * p.a[2]], r });
   }
   return out;
 }
