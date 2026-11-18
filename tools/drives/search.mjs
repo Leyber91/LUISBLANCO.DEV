@@ -13,6 +13,7 @@
 // rules about a model's reading are tested: it is asked only for what the page left unread, a reply that
 // arrives after the visitor moved on is set aside, and a reply that fails its checks changes nothing.
 import { exomaniaRules } from './exomania.mjs';
+import { seedRandom, buildPrograms } from './survey.mjs';
 
 /* ---- run inside the page ---- */
 
@@ -77,6 +78,8 @@ function onFirstScreen() {
 /* ---- the scenario ---- */
 
 export default async function search(p, { base }) {
+  await seedRandom(p);
+  await buildPrograms(p, { base });   // before any frame is judged (tools/drives/survey.mjs, ticket 2.22)
   for (const [n, e] of exomaniaRules()) p.invariant(n, e);
   p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)   // after every step: tools/invariants.mjs, as exomania.mjs registers them
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
