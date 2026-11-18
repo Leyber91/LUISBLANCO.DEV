@@ -205,7 +205,7 @@ for (const k of [0.08, 0.12]) {
     let over = 0, flipsEdge = 0, flipsOff = 0;
     for (let n = 0; n < W * H; n++) {
       const { sx, sy } = at(n % W, Math.floor(n / W));
-      const r = probeRay(view, sx, sy, { k: t.k, maxSteps: t.maxSteps });
+      const r = probeRay(view, sx, sy, { k: t.k, maxSteps: K.stepBudget(t.maxSteps) });
       if ((r.drift ?? 0) > DRIFT_LIMIT) over++;
       if (fate(r) !== ref[n]) { if (edge[n]) flipsEdge++; else flipsOff++; }
     }
@@ -219,28 +219,61 @@ for (const k of [0.08, 0.12]) {
     rows.map(([n, o, fe, fo]) => `${n}: ${o} over ${DRIFT_LIMIT}, ${fe} edge flips, ${fo} other`).join('; '));
 }
 
-/* 3d. at a fall's stop, rays that run out of steps are drawn as shadow: with each tier's budget near the horizon
-   (kerr.js stepBudget), under 1% of the frame is drawn black while the ray escapes or lands on the disk, at M87*'s stop
-   and at Cygnus X-1's (review_s5 2: with the tier's budget it was 8 to 11%; at the old 3 M stop, 0.5%). The reference
-   is k 0.01 with 20000 steps, 64 x 40 rays of the journey's camera (i 75, fov 70). */
+/* 3d. the frame at the closest cameras (review_s5b 1, ledger row 12). A ray still winding when its steps run out is
+   drawn as shadow. At 3 M, the floor of every camera, the worst cases measured on 2026-11-18 (a = 0.998 with the disk
+   off, every observer; M87* with and without the disk) drew up to 3.5% of the frame so while the ray escapes; with each
+   pass's budget at 4 times its base (kerr.js stepBudget), none. Counted as the review counts it: a ray drawn as shadow
+   whose reference escapes or lands on the disk, whatever the cause (out of steps or integrated into the horizon). The
+   reference divides each step by the ray's momentum, max(|p|, 1): a positive factor on the Hamiltonian field keeps the
+   null orbits, so only the step changes; k 0.0025, 400000 steps. 48 x 30 rays of a 1440 x 900 frame. A case may have at
+   most 2 such rays (0.14%); half the budget gives up to 6. And no pass on the GPU asks for more than the shader's loop. */
 {
-  const { probeRay, screenToTangent } = await import('./probe.js');
+  const { screenToTangent, camFor } = await import('./probe.js');
   const { TIERS } = await import('./config.js');
-  const W = 64, H = 40, rows = [];
-  for (const [name, a] of [['M87*', 0.94], ['Cygnus X-1', 0.998]]) {
-    const rh = K.horizon(a), view = { a, q: 0, incl: 75, rcam: 1.08 * rh, fov: 70, tilt: 0, observer: 'faller', rout: 20, emit: 'thick' };
-    const at = (n) => screenToTangent((n % W + 0.5) / W * 1440, (Math.floor(n / W) + 0.5) / H * 900, 1440, 900, view.fov);
+  const fine = (a, cam, nr, nu, nf, { rIn, rOut, disk }) => {
+    const rEscape = Math.max(80, cam.r * 1.02), p = K.rayMomentum(cam, nr, nu, nf);
+    const s = new Float64Array([cam.pos[0], cam.pos[1], cam.pos[2], p[1], p[2], p[3]]), pt = p[0], rh = K.horizon(a, 0);
+    for (let i = 0; i < 400000; i++) {
+      const r = K.ksR(a, s[0], s[1], s[2]);
+      if (r < rh * 0.98) return 'captured';
+      if (r > rEscape && s[0] * s[3] + s[1] * s[4] + s[2] * s[5] > 0) return 'escaped';
+      const z0 = s[2], x0 = s[0], y0 = s[1];
+      K.rk4(a, s, pt, K.stepSize(r, rh, 0.0025) / Math.max(Math.hypot(s[3], s[4], s[5]), 1), 0);
+      if (z0 * s[2] < 0) {
+        const t = z0 / (z0 - s[2]), hx = x0 + t * (s[0] - x0), hy = y0 + t * (s[1] - y0);
+        const rr = Math.sqrt(Math.max(0, hx * hx + hy * hy - a * a));
+        if (disk && rr >= rIn && rr <= rOut) return 'disk';
+      }
+    }
+    return 'maxed';
+  };
+  const W = 48, H = 30, rows = [];
+  const CASES = [[0.998, 'zamo', 90, 70, false], [0.998, 'faller', 75, 70, false], [0.998, 'orbiter', 90, 70, false],
+    [0.998, 'orbiter', 75, 140, false], [0.94, 'zamo', 75, 70, true], [0.94, 'zamo', 75, 70, false]];
+  let refMaxed = 0;
+  for (const [a, observer, incl, fov, disk] of CASES) {
+    const view = { a, q: 0, incl, rcam: 3, fov, tilt: 0, observer, rout: 20, emit: disk ? 'thick' : 'off', az: 0 };
+    const cam = camFor(view), rIn = K.isco(a, 1, 0);
+    const at = (n) => screenToTangent((n % W + 0.5) / W * 1440, (Math.floor(n / W) + 0.5) / H * 900, 1440, 900, fov);
     const ref = [];
-    for (let n = 0; n < W * H; n++) { const { sx, sy } = at(n); ref.push(probeRay(view, sx, sy, { k: 0.01, maxSteps: 20000 }).fate); }
+    for (let n = 0; n < W * H; n++) { const { sx, sy } = at(n); ref.push(fine(a, cam, sx, sy, 1, { rIn, rOut: 20, disk })); }
+    refMaxed += ref.filter((f) => f === 'maxed').length;
     for (const [tier, t] of Object.entries(TIERS)) {
       let wrong = 0;
-      const budget = K.stepBudget(t.maxSteps, view.rcam, rh);
-      for (let n = 0; n < W * H; n++) { const { sx, sy } = at(n); const r = probeRay(view, sx, sy, { k: t.k, maxSteps: budget }); if (r.maxed && ref[n] !== 'captured') wrong++; }
-      rows.push([name, tier, budget, wrong / (W * H)]);
+      for (let n = 0; n < W * H; n++) {
+        const { sx, sy } = at(n);
+        const r = K.traceRay(a, cam, sx, sy, 1, { q: 0, k: t.k, maxSteps: K.stepBudget(t.maxSteps), disk, rIn, rOut: 20 });
+        if (r.fate === 'captured' && (ref[n] === 'escaped' || ref[n] === 'disk')) wrong++;
+      }
+      rows.push([`a ${a} ${observer} i ${incl} fov ${fov}${disk ? '' : ' no disk'} ${tier}`, wrong]);
     }
   }
-  ok(`at a fall's stop under 1% of the frame is drawn as shadow while its ray escapes or lands on the disk, at every tier (M87* and Cygnus X-1 at 1.08 r+)`,
-    rows.every((r) => r[3] < 0.01), rows.map((r) => `${r[0]} ${r[1]} (${r[2]} steps): ${(100 * r[3]).toFixed(2)}%`).join('; '));
+  const bad = rows.filter((r) => r[1] > 2);
+  ok(`at 3 M, the closest camera, at most 2 of ${W * H} rays per frame drawn as shadow while they escape or land on the disk, every tier and observer (${CASES.length} worst cases, review_s5b)`,
+    bad.length === 0 && refMaxed === 0, `${bad.length ? bad.map((r) => `${r[0]}: ${r[1]}`).join('; ') : `worst ${Math.max(...rows.map((r) => r[1]))} rays`}; reference out of steps ${refMaxed}`);
+  const gpu = [...Object.values(TIERS).map((t) => K.stepBudget(t.maxSteps)), K.stepBudget(720), K.stepBudget(600)];
+  ok('every pass on the GPU asks for 4 times its base and at most the shader\'s loop bound (2880)',
+    K.stepBudget(220) === 880 && K.STEP_LOOP_MAX === 2880 && Math.max(...gpu) <= K.STEP_LOOP_MAX, JSON.stringify(gpu));
 }
 
 /* 4. Schwarzschild numbers */

@@ -184,6 +184,15 @@ export function hamiltonian(a, s, pt, q = 0) {
 }
 
 /** The step rule shared with the shader: affine step ~ distance to the horizon. */
+/** The steps a trace pass may take: 4 times its base. A ray still winding near the photon orbit when its steps run
+ *  out is drawn as shadow. At 3 M, the closest a camera comes, up to 4.2% of the frame was drawn so while the ray
+ *  escapes (review_s5b, measured 2026-11-18 against a fine trace); 4 times the base brought every case measured at
+ *  3, 4 and 6 M to none, for 2 to 7% more steps per ray on average, since only the winding rays use them.
+ *  STEP_LOOP_MAX is the shader's loop bound (shaders.js MAXLOOP): no pass on the GPU asks for more. */
+export const STEP_BUDGET = 4;
+export const STEP_LOOP_MAX = 2880;
+export const stepBudget = (base) => base * STEP_BUDGET;
+
 export function stepSize(r, rh, k) {
   return k * Math.max(r - 0.92 * rh, 0.04) * clamp(r / 3, 0.45, 1.0) + 0.002;
 }

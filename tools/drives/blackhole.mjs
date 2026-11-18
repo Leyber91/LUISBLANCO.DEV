@@ -439,11 +439,12 @@ export async function FALL_STEP(p, { base, width, ready }) {
   const t0 = Date.now();
   // the fall takes 22 s of the page's frame time, and a frame counts at most 250 ms (main.js): under a slow software
   // renderer it takes longer, so the wait is long and the time it took is printed
-  // Known miss, queued (ROAD 1.05, the fall): the journey aims at 1.08 r+, but the state's floor for the camera's
-  // radius is 3 M (config.js SCHEMA rcam min, there for a static camera), so every fall and every scrub stops at
-  // max(3 M, 1.08 r+). This checks the stop the page has today, by that rule, so a change to either shows here.
+  // One rule for where a fall stops (review_s5b 3): the camera's floor, config.js SCHEMA rcam min, 3 M. The fall below
+  // it waits for an integrator that steps by the ray's momentum (ledger row 12, level 2).
   const stopped = await p.until(`(() => { const a = window.__bh, s = a.store.all(); return s.view === 'journey' && s.observer === 'faller' && s.rcam <= Math.max(3, a.model.rh * 1.08) + 1e-4; })()`, 150000);
-  p.check('a fall pressed on the Fall card runs to its stop, today max(3 M, 1.08 r+)', !!stopped, `${((Date.now() - t0) / 1000).toFixed(1)} s`);
+  p.check('a fall pressed on the Fall card runs to its stop, the camera\'s floor of 3 M', !!stopped, `${((Date.now() - t0) / 1000).toFixed(1)} s`);
+  const atStop = await p.ev(`window.__bh.store.get('rcam')`);
+  p.check('the fall\'s stop is 3 M to 0.001 M, from both sides', Math.abs(atStop - 3) < 1e-3, String(atStop));
   const f = await p.ev(`(async () => { const P = await import('/labs/assets/js/blackhole/physics.js'); const a = window.__bh, s = a.store.all(), m = a.model;
     const rows = P.fall(s.a, s.incl, 40, s.q), row = rows.find((r) => r.r <= s.rcam) || rows[0];
     const rw = [...document.querySelectorAll('#bh-fallread .rw')].find((r) => /your clock/.test(r.textContent));
@@ -460,6 +461,22 @@ export async function FALL_STEP(p, { base, width, ready }) {
   const r2 = await p.ev('window.__bh.store.get("rcam")');
   p.check('a scrub let go off the Fall chart has ended: moving over the chart afterwards with no button held leaves the fall where it was', r1 === r2, JSON.stringify({ r1, r2 }));
   await sheet(false);
+  // a fall that stops falling (hover pressed on the way) ends there, unrecorded (review_s5 3: the journey went on and
+  // recorded a fall with a hovering camera); and the fall this step ran to its stop is in the record (2026-11-18: a done
+  // test that never fired recorded none while every other check here passed)
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87`);
+  await p.until(ready, 60000);
+  await p.sleep(1200);
+  const falls0 = await p.ev('window.__bh.keep.record.falls.length');
+  p.check('the fall this step ran to its stop was recorded', falls0 >= 1, String(falls0));
+  await sheet(true);
+  await press('#bh-fallgo');
+  await sheet(false);
+  await p.until(`window.__bh.store.get('view') === 'journey' && window.__bh.store.get('rcam') < 6`, 120000);
+  await p.ev(`[...document.querySelectorAll('#bh-obs button')].find((b) => /hover/.test(b.textContent)).click()`);
+  await p.sleep(25000);
+  const after = await p.ev(`(() => { const a = window.__bh, s = a.store.all(), v = a.store.view(); return { observer: s.observer, rcam: s.rcam, shown: v.rcam, falls: a.keep.record.falls.length }; })()`);
+  p.check('a fall that stops falling (hover pressed on the way) is not recorded, and its camera stands at 3 M or more', after.observer === 'zamo' && after.rcam >= 3 && after.shown >= 3 - 1e-9 && after.falls === falls0, JSON.stringify({ ...after, falls0 }));
 }
 
 /* The record (road 1.09): keep a hole, a reload, a ray the visitor presses and one a link opens, the privacy export,

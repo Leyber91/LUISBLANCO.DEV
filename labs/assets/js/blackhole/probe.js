@@ -73,7 +73,7 @@ export function anchors({ view, aspect, nx = 72, ny = 44, tpeakK = 0, fcol = 1.7
   const th = tanHalfV(view.fov, aspect);
   const rIn = K.isco(a, 1, q), rOut = view.rout;
   const disk = view.emit === 'thick';
-  const opts = { q, k: 0.1, maxSteps: 900, disk, rIn, rOut };
+  const opts = { q, k: 0.1, maxSteps: K.stepBudget(900), disk, rIn, rOut };
   const cells = [];
   let capMinX = Infinity, capMaxX = -Infinity, capMinY = Infinity, capMaxY = -Infinity, nCap = 0;
   let limb = null, ring = null, isco = null;

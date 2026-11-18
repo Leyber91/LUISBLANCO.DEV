@@ -628,14 +628,20 @@ export function buildUI(app) {
     stop() { this.playing = false; },
     tick(dt) {
       if (!this.playing || !this.rows) return;
+      // a camera that stopped falling (hover, orbit, another view) ends the fall, unrecorded (review_s5 3: the journey went
+      // on and recorded a fall with a hovering camera)
+      if (store.get('observer') !== 'faller' || store.get('view') !== 'journey') { this.playing = false; return; }
       const total = this.rows[this.rows.length - 1].tau;
       // under reduced motion the finished frame at once (labs-design), so the fall still reaches its stop and the
       // record (review_s3 minor: it advanced at total / 1e9 per second and never arrived)
       this.tau = store.reduced ? total : Math.min(total, this.tau + dt / 1000 * total / 22);
       const row = this.rows.find((r) => r.tau >= this.tau) || this.rows[this.rows.length - 1];
-      const rStop = Math.max(row.r, app.model.rh * 1.08);
+      // one rule for where a fall stops: the camera's floor (config.js SCHEMA rcam min, 3 M). The fall is done when it
+      // reaches it (review_s5b 3: the journey went on falling unseen to 1.08 r+ while the camera waited at 3 M)
+      const floor = BY_KEY.rcam.min;
+      const rStop = Math.max(row.r, floor);
       store.set({ rcam: +rStop.toFixed(4), az: ((row.phi * 180 / Math.PI) % 360 + 540) % 360 - 180 }, { instant: true, src: 'journey' });
-      if (rStop <= app.model.rh * 1.08 + 1e-6) {
+      if (row.r <= floor + 1e-6) {
         this.playing = false; this.done = true; app.request();
         if (this.by === 'visitor') keep.fall({ tau: fallRow(store.all()).tau * app.model.tg });
       }
@@ -676,7 +682,7 @@ export function buildUI(app) {
     const r = rh + (fallGeom.r1 - rh) * Math.pow((fallGeom.r0 - rh) / (fallGeom.r1 - rh), 1 - u);
     journey.stop();
     if (store.get('view') !== 'journey') store.set({ ...store.viewPatch('journey') }, { instant: true });
-    store.set({ rcam: Math.max(r, app.model.rh * 1.08), observer: 'faller' }, { instant: true, src: 'scrub' });
+    store.set({ rcam: Math.max(r, BY_KEY.rcam.min), observer: 'faller' }, { instant: true, src: 'scrub' });
   };
   // the pointer is held by the chart's box, which stays, never by a part of the chart, which each redraw replaces: a
   // capture held by a replaced part was lost, and a scrub let go off the chart never ended (the class of setHTML)
