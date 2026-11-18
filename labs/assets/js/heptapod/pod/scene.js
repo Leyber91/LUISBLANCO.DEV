@@ -2,15 +2,15 @@
    heptapod/pod/scene.js — the chamber.
 
    Material and motion (written before the code, the labs-design
-   method; restaged by road item 1.07 under decision H8 and the
-   direction of 2026-11-17: the feeling of being in the room, and
-   modern):
+   method; restaged by road item 1.07 under decision H8, and again
+   by BAR_C slices C1 to C3, approved by Luis on 2026-11-18: one
+   light, one air; the being grown and present; the things solid):
 
-   The room is dark and large, and almost nothing in it gives light.
-   The one thing that does is a disc of fog hanging beyond the glass:
-   the being's air, held in a circle, lit from inside. That disc is
-   the focal living element. Everything the being says happens in it,
-   as ink in the fog: dark where the ink is, light where the fog
+   The room is dark and large, and one thing in it gives light: a
+   sphere of fog hanging beyond the glass, the being's air held in a
+   ball and lit from inside. Seen from the table it is a disc, and it
+   is the focal living element. Everything the being says happens in
+   it, as ink in the fog: dark where the ink is, light where the fog
    shows through, never darker than about half of the fog's light.
    The fog moves only inside the disc, and it stirs harder while the
    being writes.
@@ -24,23 +24,35 @@
    lightest ink goes back into the fog first and the stroke the being
    pressed on is the last thing left (pod/medium.js computes this).
 
-   The being stands in the dark beside the disc, taller than the room
-   shows. It gives no light of its own. The disc lights the side of
-   its body that faces it, and the growth lines of its body show only
-   where that light falls. One more light moves on it: its gaze, a
-   glow on the side facing what it attends to (the thing in your hand,
-   the ring it is writing, your slate). Its outline, its lines and
-   where it stands are grown from the species' seed and mean nothing
-   more. It never writes with a limb: the ink condenses in the disc.
+   One light, one air (pod/light.js). Nothing else in the room gives
+   light: no lamp over the table, no glow of a gaze. Every surface is
+   lit by the sphere through one function, falling off with the
+   square of its distance and with the angle it turns from it; every
+   view ray crosses the same faintly scattering air; a thing far
+   from the glass is dimmer than one near it, and a thing held up to
+   the glass enters the light. Nothing is drawn with an outline but
+   the script: things and the being are matter, and a line on them
+   is where the light falls.
 
-   On this side of the glass everything is the visitor's and modern:
-   a polished black table that reflects the disc, two plates engraved
-   as hairlines under one lamp that burns down with the day, and the
-   disc's bezel, a ring of ticks every six degrees with the four
-   quarters the keys keep marked longer. No view holds a bright glass
-   wall, a fog wall behind it and a limb throwing ink (research/ip.md
-   rule 7): the glass is dark and shows only as its sill and two faint
-   reflections, the fog is a disc, and the being is in the dark.
+   The being (pod/body.js) stands in the dark beyond the glass, to
+   the disc's side and in front of it, so the fog lights only the
+   edge of it that faces the disc. Its anatomy is grown from the
+   species' seed: a stalk on a broad foot, fronds along it set by the
+   golden angle, and a head the neck turns toward what it attends to
+   (the thing in your hand, the ring it is writing, your slate). It
+   breathes. It never writes with a limb: the ink condenses in the
+   disc.
+
+   On this side of the glass everything is the visitor's: a polished
+   black table that holds the fog's reflection, and six things on it
+   (pod/things.js), solids lit from beyond the glass, pale or dark,
+   made or grown, each with its soft shadow cast away from the disc.
+   The disc's bezel, a ring of ticks every six degrees with the four
+   quarters the keys keep marked longer, is the visitor's instrument,
+   and the only line in the room besides the script. No view holds a
+   bright glass wall, a fog wall behind it and a limb throwing ink
+   (research/ip.md rule 7): the glass is dark and shows only as its
+   sill, the fog is a sphere, and the being is in the dark.
 
    Gold appears only when a crop kept a radical.
 
@@ -58,26 +70,28 @@
 
 import { drawInk, fitCanvas, palette, prefersReduced } from '../render.js';
 import { Tier } from '../stage.js';
-import { mulberry32 } from '../raster.js';
 import { OBJECTS, OBJ } from './world.js';
 import { seedOf } from './species.js';
 import { ringSpec, podStrokes, recognise, sectorRect, INK } from './ring.js';
 import { DAY, GREETING, whereIs, freeSlot } from './day.js';
-import { drawObject, drawShadow, objW, objH, THING_NAME } from './objects.js';
-import { InkField, MEDIUM, fogNoise, flowFor } from './medium.js';
+import { objW, objH, THING_NAME } from './objects.js';
+import { InkField, fogNoise, flowFor } from './medium.js';
+import { LIGHT, FOG_STOPS, makeRoom, paintRoom, encode, tableZ, lightAt, visibility, toSRGB } from './light.js';
+import { gbuffer, relight, occluders, placeOf, albedoOf } from './things.js';
+import { growBody, poseBody, reachOf, fitBody, rasterBody, shadeBody, bodyOccluders } from './body.js';
 
 export const TIME = { bloom: 2200, hang: 4000, thin: 3400, slate: 2800, giveOut: 640, giveBack: 760, flash: 700 };
 /* The disc holds the ring with room for its longest threads: the disc's radius over the ring's. */
 export const DISC_OVER_RING = 1.72;
 const SPAN = 2 * DISC_OVER_RING;        // the field's side, in ring radii
 const FOG_Q = 2;                         // the fog is drawn at half size and scaled up
-const TALL = 2.1;                        // the being's half height in body radii (its half width is 0.8): taller than the room shows
 const INK_RGB = [7, 9, 13];              // what the ink lets through is the fog's own light: this is the absorber
 const INK_SPREAD = 1.5;                  // a ring-script stroke's width in the fog, over its width on the bench
 const ease = (t) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const rgba = (c, a) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a.toFixed(3)})`;
-const HORIZON = [159, 179, 214];
+const ROOM_Q = 3;                        // the still layers (room, table, shadows) are lit per cell of 3 device pixels
+const DISC_WHOLE = 0.74;                 // the disc is whole to this share of its radius, then its edge fades
+const BREATH_MS = 90;                    // while it only breathes, the being is redrawn about eleven times a second
 
 export function initPod(canvas, hooks) {
   const { sp } = hooks;
@@ -85,15 +99,10 @@ export function initPod(canvas, hooks) {
   const script = inked ? 'inked' : 'ring';
   const P = palette();
   const reduced = hooks.reduced ?? prefersReduced();   // the platform's scene lifecycle passes it in
-  const rnd = mulberry32(seedOf('body', sp.target, sp.seed));
-  const body = {
-    side: rnd() < 0.5 ? -1 : 1,
-    // its outline: an ellipse bent by the four lowest harmonics that change its shape (2 to 5 bulges round it), each
-    // with a seeded strength and phase, weaker the higher it is, so the outline stays smooth and counts no limbs
-    lobes: [[2, 0.1], [3, 0.12], [4, 0.07], [5, 0.04]].map(([k, a]) => ({ k, a: a * (0.7 + 0.6 * rnd()), ph: rnd() * Math.PI * 2 })),
-    // its folds: lines that run down the body between its two sides, each from a seeded place across it
-    folds: Array.from({ length: 11 }, () => ({ u: -0.92 + 1.84 * rnd(), t0: 0.03 + 0.12 * rnd(), len: 0.5 + 0.45 * rnd(), amp: 0.015 + 0.035 * rnd(), ph: rnd() * Math.PI * 2, f: 2 + 4 * rnd() })),
-  };
+  // the being's anatomy, grown from the species' seed (pod/body.js); it stands to the right of the disc, where the
+  // page's caption is not
+  const anat = growBody(sp.target, sp.seed);
+  const reach = reachOf(anat);
   const fogSeed = seedOf('fog', sp.target, sp.seed);
 
   /* offscreen layers */
@@ -106,11 +115,18 @@ export function initPod(canvas, hooks) {
   }
   const discCv = document.createElement('canvas');           // fog and ink, at full size
   const fogCv = document.createElement('canvas');            // the fog alone, at half size
-  const bgCv = document.createElement('canvas');             // the room beyond the glass
+  const roomCv = document.createElement('canvas');           // the room and the table, lit, one pixel a cell of ROOM_Q
+  const shadeCv = document.createElement('canvas');          // the things' shadows on the table, one pixel a cell
+  const bodyCv = document.createElement('canvas');           // the being, one pixel a cell of its grid
   const maskCv = document.createElement('canvas');           // the disc's soft edge
   const inkCv = document.createElement('canvas');            // the ink field, one pixel a cell
   const targetCv = document.createElement('canvas');         // where a ring-script ring's ink belongs
   let fogPat = null, field = null, inkImg = null, inkPx = null;
+  let R = null, room = null, shadeImg = null;                // the room's light (light.js) and its still layer
+  const sprites = {};                                        // thing -> { gb, cv, img, key, m }
+  const patches = {};                                        // thing -> { key, i0, j0, w, h, vis } its shadow's cells
+  let shadeKey = '', bodyAt = 0, bodyKey = '', bodyM = null, bodyOcc = null;
+  const bodyCache = {};
 
   let L = null;                      // layout, device pixels
   let raf = 0, timer = 0, running = true, dead = false, lastT = 0, fogT = 0, stir = 1;
@@ -138,8 +154,9 @@ export function initPod(canvas, hooks) {
   function layout() {
     const { w: W, h: H } = fitCanvas(canvas);
     const portrait = H > W * 1.05;
-    let Rd = Math.round(portrait ? Math.min(0.43 * W, 0.26 * H) : Math.min(0.26 * H, 0.3 * W));
-    const disc = { cx: W / 2, cy: Math.round(0.045 * H + Rd), Rd };
+    // on a phone the disc stands a little left of the middle, so the being has room beside it, whole
+    let Rd = Math.round(portrait ? Math.min(0.33 * W, 0.25 * H) : Math.min(0.26 * H, 0.3 * W));
+    const disc = { cx: Math.round(portrait ? W / 2 - 0.13 * W : W / 2), cy: Math.round(0.045 * H + Rd), Rd };
     // the page's caption may lie over the room's top left: the disc and its bezel (1.1 of its radius) keep clear of
     // the caption's corner, first by moving right as far as the room allows, then down, then by growing smaller, the
     // sill kept above 0.64 of the room's height (found at 1024 px, where the caption lay on the disc)
@@ -162,12 +179,10 @@ export function initPod(canvas, hooks) {
     const near = { place: 'near', cx: W / 2, cy: Math.max(0.735 * H, glassB + 0.11 * H), rx: Math.min(0.31 * W, 4.3 * u), ry: 0.02 * H, k: 0.84 };
     const far = { place: 'far', cx: W / 2, cy: 0.915 * H, rx: Math.min(0.43 * W, 5.8 * u), ry: 0.046 * H, k: 1 };
     const dpr = W / Math.max(1, canvas.getBoundingClientRect().width);
-    // their floor: it meets the far dark at a horizon a little above the sill, and the being stands on it, whole in
-    // width on the canvas beside the disc (on a narrow portrait screen there is no room beside the disc, and only
-    // its edge is in the picture)
+    // their floor: it meets the far dark at a horizon a little above the sill, and the being stands on it, whole, in
+    // the room right of the disc's bezel: scaled so that every pose it can take (pod/body.js reachOf) fits
     const horizon = Math.round(glassB - 0.075 * H), foot = Math.round(glassB - 0.032 * H);
-    const sideRoom = body.side > 0 ? W - (disc.cx + Rd) : disc.cx - Rd;
-    const rb = portrait ? 0.34 * W : Math.max(0.06 * W, Math.min(0.42 * glassB, (sideRoom - 0.04 * W) / 2.4));
+    const fit = fitBody(reach, { x0: disc.cx + 1.13 * Rd + 0.02 * W, x1: W - 0.025 * W, top: 0.04 * H, foot });
     L = {
       W, H, glassB, u, near, far, disc, dpr, portrait,
       ring: { cx: disc.cx, cy: disc.cy, R: Rd / DISC_OVER_RING },
@@ -175,21 +190,25 @@ export function initPod(canvas, hooks) {
       // held far, set down far. A thing at rest in the hand sits in the middle of its "held" band.
       z: { give: glassB - 0.04 * H, nearDown: near.cy - 0.03 * H, split: near.cy + 0.022 * H, farDown: far.cy - 0.053 * H },
       hoverY: { near: near.cy - near.ry - 0.95 * u * near.k, far: far.cy - far.ry - 0.6 * u },
-      body: { x: disc.cx + body.side * (Rd + (portrait ? 0.42 * rb : 0.02 * W + 1.18 * rb)), y: foot - TALL * rb, r: rb, foot },
+      // x, y: where its head is about, for the direction of its attention
+      body: { ...fit, x: fit.at.x, y: foot - fit.k * anat.H, foot },
       horizon,
     };
+    R = makeRoom({ W, H, glassB, horizon, foot, disc });
     const D = 2 * Rd;
     if (discCv.width !== D) {
       discCv.width = discCv.height = D;
       maskCv.width = maskCv.height = D;
       const m = maskCv.getContext('2d');
       const g = m.createRadialGradient(Rd, Rd, 0, Rd, Rd, Rd);
-      g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.74, 'rgba(0,0,0,1)'); g.addColorStop(0.9, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(DISC_WHOLE, 'rgba(0,0,0,1)'); g.addColorStop(0.9, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
       m.clearRect(0, 0, D, D); m.fillStyle = g; m.fillRect(0, 0, D, D);
       fogCv.width = fogCv.height = Math.ceil(D / FOG_Q);
       fogPat = null;
     }
-    paintRoom();
+    paintStill();
+    for (const o of OBJ) { delete sprites[o]; delete patches[o]; }
+    shadeKey = ''; bodyKey = '';
     // the ink field: about 0.8 cells per CSS pixel of the disc, fewer on the light tier
     const N = clamp(Math.round(((2 * Rd) / dpr) * (Tier.name === 'lite' ? 0.55 : 0.8)), 160, 360);
     if (!field || field.N !== N) {
@@ -202,6 +221,12 @@ export function initPod(canvas, hooks) {
     }
   }
   const plate = (place) => L[place];
+  /* Where a thing is in the room of light.js, from where it is drawn: its base's centre, and its scale. A thing on a
+     plate rests on the table at that row's depth; a thing in the hand is lifted and brought toward the glass. */
+  function worldOf(v) {
+    const pl = v.y < L.z.split ? L.near : L.far, ground = slotY(pl);
+    return { W: placeOf(R, v.x, v.y, ground), s: L.u * v.k, ground };
+  }
   const slotX = (pl, s) => pl.cx + ((s - 2.5) / 3) * pl.rx * 0.86;
   const slotY = (pl) => pl.cy + pl.ry * 0.15;
   const slotAt = (pl, x) => clamp(Math.round(((x - pl.cx) / (pl.rx * 0.86)) * 3 + 2.5), 0, DAY.SLOTS - 1);
@@ -290,97 +315,41 @@ export function initPod(canvas, hooks) {
   }
 
   /* ---------------- drawing: beyond the glass ---------------- */
-  /* A point of the outline at angle a (0 at the top, clockwise), its lobes from the species' seed. */
-  function outlineAt(bx, by, r, a) {
-    let k = 1;
-    for (const l of body.lobes) k += l.a * Math.cos(l.k * a + l.ph);
-    return [bx + r * k * 0.8 * Math.sin(a), by - r * k * TALL * Math.cos(a)];
+  /* The room's still layer: the dark beyond, the being's floor with the being's shadow on it, and the table, each lit
+     by light.js once per layout (it changes only with the layout). */
+  function paintStill() {
+    const occ = bodyOcc = bodyOccluders(anat, L.body.at, L.body.k, R.Zb);
+    room = paintRoom(R, ROOM_Q, occ);
+    roomCv.width = room.cw; roomCv.height = room.ch;
+    const c = roomCv.getContext('2d');
+    const img = c.createImageData(room.cw, room.ch);
+    encode(room.rgb, img.data);
+    c.putImageData(img, 0, 0);
+    shadeCv.width = room.cw; shadeCv.height = room.ch;
+    shadeImg = shadeCv.getContext('2d').createImageData(room.cw, room.ch);
   }
-  function bodyPath(c, bx, by, r) {
-    c.beginPath();
-    for (let d = 0; d <= 360; d += 4) {
-      const a = d * Math.PI / 180;
-      let k = 1;
-      for (const l of body.lobes) k += l.a * Math.cos(l.k * a + l.ph);
-      const x = bx + r * k * 0.8 * Math.sin(a), y = by - r * k * TALL * Math.cos(a);
-      if (d) c.lineTo(x, y); else c.moveTo(x, y);
+  function drawRoom(ctx) {
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(roomCv, 0, 0, room.cw * ROOM_Q, room.ch * ROOM_Q);
+  }
+  /* The being: posed for this moment and what it attends to, lit, drawn. Redrawn when it turns, and every BREATH_MS
+     while it breathes (a breath takes five to eight seconds). */
+  function drawBeing(ctx, now) {
+    const b = L.body;
+    const att = { x: gaze.x, y: -gaze.y, w: 0.55 + 0.45 * gaze.lean };
+    const key = `${att.x.toFixed(3)}|${att.y.toFixed(3)}|${att.w.toFixed(3)}`;
+    if (key !== bodyKey || (!reduced && now - bodyAt > BREATH_MS)) {
+      bodyKey = key; bodyAt = now;
+      const prims = poseBody(anat, reduced ? 0 : now / 1000, att);
+      const F = rasterBody(prims, b.at, b.k, b.c, b.box);
+      if (bodyCv.width !== F.gw || bodyCv.height !== F.gh) { bodyCv.width = F.gw; bodyCv.height = F.gh; }
+      const c = bodyCv.getContext('2d');
+      const img = c.createImageData(F.gw, F.gh);
+      bodyM = shadeBody(F, R, b.at, b.k, anat, img.data, bodyOcc, bodyCache);
+      c.putImageData(img, 0, 0);
     }
-    c.closePath();
-  }
-  /* The room beyond the glass, which changes only with the layout: drawn once into bgCv. */
-  function paintRoom() {
-    const { W, H, glassB, disc } = L;
-    bgCv.width = W; bgCv.height = glassB;
-    const ctx = bgCv.getContext('2d');
-    // the far dark, a little less dark toward the floor the disc lights
-    const room = ctx.createLinearGradient(0, 0, 0, glassB);
-    room.addColorStop(0, '#04060A'); room.addColorStop(1, '#090C12');
-    ctx.fillStyle = room; ctx.fillRect(0, 0, W, glassB);
-    // the disc's light in the air around it, and on the floor beneath it
-    const air = ctx.createRadialGradient(disc.cx, disc.cy, disc.Rd * 0.8, disc.cx, disc.cy, disc.Rd * 2.9);
-    air.addColorStop(0, rgba(HORIZON, 0.085)); air.addColorStop(0.4, rgba(HORIZON, 0.03)); air.addColorStop(1, rgba(HORIZON, 0));
-    ctx.fillStyle = air; ctx.fillRect(0, 0, W, glassB);
-    // their floor, from the horizon to the sill, lit under the disc and fading toward the sides
-    const hz = L.horizon;
-    const fg = ctx.createLinearGradient(0, hz, 0, glassB);
-    fg.addColorStop(0, '#0A0D14'); fg.addColorStop(1, '#0D111A');
-    ctx.fillStyle = fg; ctx.fillRect(0, hz, W, glassB - hz);
-    ctx.save();
-    ctx.translate(disc.cx, (hz + glassB) / 2); ctx.scale(1, (glassB - hz) / (1.6 * disc.Rd));
-    const fl = ctx.createRadialGradient(0, 0, 0, 0, 0, 2.2 * disc.Rd);
-    fl.addColorStop(0, rgba(HORIZON, 0.11)); fl.addColorStop(0.5, rgba(HORIZON, 0.035)); fl.addColorStop(1, rgba(HORIZON, 0));
-    ctx.fillStyle = fl; ctx.beginPath(); ctx.arc(0, 0, 2.2 * disc.Rd, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-    ctx.fillStyle = rgba(HORIZON, 0.05); ctx.fillRect(0, hz, W, Math.max(1, Math.round(L.dpr)));
-  }
-  function drawBeyond(ctx) {
-    const { W, glassB, disc } = L;
-    ctx.drawImage(bgCv, 0, 0);
-
-    // the being, in the dark, standing on their floor: it leans toward the disc from its foot
-    const lean = gaze.lean, foot = L.body.foot;
-    const bx = L.body.x - body.side * lean * 0.018 * W + gaze.x * L.body.r * 0.03, by = L.body.y, r = L.body.r;
-    ctx.save();                                                  // its shadow on the floor, from the disc's light
-    ctx.translate(bx - body.side * 0.25 * r, foot); ctx.scale(1, 0.08);
-    const sh = ctx.createRadialGradient(0, 0, 0, 0, 0, 1.3 * r);
-    sh.addColorStop(0, 'rgba(0, 0, 0, .75)'); sh.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = sh; ctx.beginPath(); ctx.arc(0, 0, 1.3 * r, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-    ctx.save();
-    ctx.beginPath(); ctx.rect(0, 0, W, foot); ctx.clip();      // it stands on the floor: nothing of it below its foot
-    bodyPath(ctx, bx, by, r);
-    ctx.fillStyle = '#020305'; ctx.fill();
-    ctx.clip();
-    const lit = (a0, a1) => {
-      const g = ctx.createRadialGradient(disc.cx, disc.cy, disc.Rd * 0.9, disc.cx, disc.cy, disc.Rd * 0.9 + 1.25 * r);
-      g.addColorStop(0, rgba(HORIZON, a0)); g.addColorStop(0.3, rgba(HORIZON, a1)); g.addColorStop(1, rgba(HORIZON, 0));
-      return g;
-    };
-    ctx.fillStyle = lit(0.2, 0.05); ctx.fillRect(bx - 1.5 * r, 0, 3 * r, glassB);
-    // its folds, seen only where the disc's light reaches: each runs from top to foot between the two sides
-    ctx.strokeStyle = lit(0.42, 0.08); ctx.lineWidth = Math.max(1, 0.9 * L.dpr);
-    if (!L.portrait) for (const f of body.folds) {
-      ctx.beginPath();
-      for (let i = 0; i <= 28; i++) {
-        const t = f.t0 + (f.len * i) / 28, a = Math.PI * t;
-        const [xr, yr] = outlineAt(bx, by, r, a), [xl, yl] = outlineAt(bx, by, r, 2 * Math.PI - a);
-        const w = (f.u + 1) / 2, x = xl + (xr - xl) * w + f.amp * r * Math.sin(f.f * t * Math.PI + f.ph), y = yl + (yr - yl) * w;
-        if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
-      }
-      ctx.stroke();
-    }
-    // its gaze: light on the side of the body that faces what it attends to
-    const lx = bx + gaze.x * r * 0.75, ly = by + gaze.y * r * 1.2;
-    const gz = ctx.createRadialGradient(lx, ly, 0, lx, ly, r * 0.9);
-    gz.addColorStop(0, rgba(HORIZON, 0.2 + 0.12 * lean)); gz.addColorStop(1, rgba(HORIZON, 0));
-    ctx.fillStyle = gz; ctx.fillRect(bx - 1.5 * r, 0, 3 * r, glassB);
-    ctx.restore();
-    // its edge where the disc's light grazes it
-    ctx.save();
-    ctx.beginPath(); ctx.rect(0, 0, W, foot); ctx.clip();
-    bodyPath(ctx, bx, by, r);
-    ctx.strokeStyle = lit(0.62, 0.14); ctx.lineWidth = Math.max(1, 1.2 * L.dpr); ctx.stroke();
-    ctx.restore();
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bodyCv, b.box.x0, b.box.y0, bodyCv.width * b.c, bodyCv.height * b.c);
   }
 
   function drawDisc(ctx) {
@@ -391,7 +360,7 @@ export function initPod(canvas, hooks) {
     c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
     // the fog gives light from inside: brightest a little above its centre
     const base = c.createRadialGradient(Rd * 0.94, Rd * 0.86, 0, Rd, Rd, Rd);
-    base.addColorStop(0, '#D3D9E3'); base.addColorStop(0.45, '#B0B8C5'); base.addColorStop(0.8, '#6E7786'); base.addColorStop(1, '#2A303A');
+    for (const [at, col] of FOG_STOPS) base.addColorStop(at, col);   // light.js: the fog's light is the room's one light
     c.fillStyle = base; c.fillRect(0, 0, D, D);
     // its body: one texture at two scales, each carried its own way
     if (!fogPat) fogPat = c.createPattern(fogTex, 'repeat');
@@ -449,59 +418,93 @@ export function initPod(canvas, hooks) {
   }
 
   /* ---------------- drawing: this side of the glass ---------------- */
-  function drawTable(ctx) {
-    const { W, H, glassB, disc } = L;
-    const t = ctx.createLinearGradient(0, glassB, 0, H);
-    t.addColorStop(0, '#0C1018'); t.addColorStop(0.3, '#080B11'); t.addColorStop(1, '#06080D');
-    ctx.fillStyle = t; ctx.fillRect(0, glassB, W, H - glassB);
-    // the disc's light on the table's near edge, falling off away from the glass
-    ctx.save();
-    ctx.translate(disc.cx, glassB); ctx.scale(1, 0.22);
-    const tl = ctx.createRadialGradient(0, 0, 0, 0, 0, 1.6 * disc.Rd);
-    tl.addColorStop(0, rgba(HORIZON, 0.07)); tl.addColorStop(1, rgba(HORIZON, 0));
-    ctx.fillStyle = tl; ctx.beginPath(); ctx.arc(0, 0, 1.6 * disc.Rd, 0, Math.PI); ctx.fill();
-    ctx.restore();
-    // the sill: where the glass meets the table
-    const sill = ctx.createLinearGradient(0, glassB, 0, glassB + 0.06 * H);
-    sill.addColorStop(0, rgba(HORIZON, 0.06)); sill.addColorStop(1, rgba(HORIZON, 0));
-    ctx.fillStyle = sill; ctx.fillRect(0, glassB, W, 0.06 * H);
-    ctx.fillStyle = dragZone()?.kind === 'give' ? P.horizon : P.lineB;
+  /* The sill: the glass's lower edge, catching the fog's light where it is near the disc. A thing held over it lights
+     it fully: let go there, the thing is passed through the glass. */
+  function drawSill(ctx) {
+    const { W, glassB } = L;
+    const g = ctx.createLinearGradient(0, 0, W, 0);
+    const rgb = LIGHT.RGB.map((c) => toSRGB(c * 0.9)).join(', ');
+    for (let i = 0; i <= 8; i++) {
+      const x = (i / 8) * W, e = lightAt(R, [x, 0, 0], [0, 0.6, -0.8]);
+      g.addColorStop(i / 8, `rgba(${rgb}, ${Math.min(0.5, 6 * e).toFixed(3)})`);
+    }
+    ctx.fillStyle = dragZone()?.kind === 'give' ? P.horizon : g;
     ctx.fillRect(0, glassB, W, Math.max(1, Math.round(L.dpr)));
   }
-  function drawDesk(ctx, st, now) {
-    const lamp = 1 - 0.5 * Math.min(1, st.acts.length / DAY.ACTS);
-    const target = dragZone();
-    for (const pl of [L.near, L.far]) {
-      ctx.save();
-      ctx.translate(pl.cx, pl.cy); ctx.scale(1, (pl.ry * 2.6) / pl.rx);
-      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, pl.rx * 1.25);
-      g.addColorStop(0, `rgba(234, 240, 251, ${(0.1 * lamp).toFixed(3)})`); g.addColorStop(1, 'rgba(234, 240, 251, 0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, pl.rx * 1.25, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-      ctx.beginPath(); ctx.ellipse(pl.cx, pl.cy, pl.rx, pl.ry, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(14, 18, 26, .7)'; ctx.fill();
-      ctx.strokeStyle = target && target.kind === 'putdown' && target.place === pl.place ? P.horizon : P.lineB;
-      ctx.lineWidth = Math.max(1, L.dpr); ctx.stroke();
-      ctx.beginPath(); ctx.ellipse(pl.cx, pl.cy, pl.rx * 0.97, pl.ry * 0.82, 0, Math.PI * 0.08, Math.PI * 0.92);   // the engraving's inner line
-      ctx.strokeStyle = P.line; ctx.stroke();
+  /* A thing's picture, lit where it is now; the geometry is marched once per size (things.js). */
+  function spriteOf(o, v) {
+    const res = clamp(Math.round(L.u), 40, 140);
+    let s0 = sprites[o];
+    if (!s0 || s0.gb.res !== res) {
+      const gb = gbuffer(o, res), cv = document.createElement('canvas');
+      cv.width = gb.w; cv.height = gb.h;
+      s0 = sprites[o] = { gb, cv, img: cv.getContext('2d').createImageData(gb.w, gb.h), key: '', m: null };
     }
-    const order = OBJ.filter((o) => vis[o] && vis[o].a > 0.01).sort((a, b) => vis[a].y - vis[b].y);
-    for (const o of order) {
-      const v = vis[o], u = L.u * v.k;
-      const held = (st.held && st.held.obj === o) || (drag && drag.obj === o);
-      const pl = v.y < L.z.split ? L.near : L.far;
-      const ground = slotY(pl);
-      const lift = clamp((ground - v.y) / (1.2 * L.u), 0, 1);
-      if (v.y > L.glassB) drawShadow(ctx, o, v.x, ground, u, lift);
-      if (held && (target ? target.kind === 'hold' : !(drag && drag.obj === o && !drag.lifted))) {   // the hand under a thing held up
-        ctx.strokeStyle = P.horizonDim; ctx.lineWidth = Math.max(1, L.dpr);
-        ctx.beginPath(); const hw = objW(o, u) * 0.55; ctx.moveTo(v.x - hw, v.y + u * 0.06); ctx.quadraticCurveTo(v.x, v.y + u * 0.3, v.x + hw, v.y + u * 0.06); ctx.stroke();
+    const key = `${Math.round(v.x)}|${Math.round(v.y)}|${v.k.toFixed(3)}`;
+    if (key !== s0.key) {
+      const w = worldOf(v);
+      s0.key = key;
+      s0.m = relight(s0.gb, R, { x: v.x, y: v.y }, w.W, w.s, s0.img.data);
+      s0.cv.getContext('2d').putImageData(s0.img, 0, 0);
+    }
+    return s0;
+  }
+  function drawThing(ctx, o, v, alpha = 1) {
+    const s0 = spriteOf(o, v), f = (L.u * v.k) / s0.gb.res;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(s0.cv, v.x - s0.gb.ox * f, v.y - s0.gb.oy * f, s0.gb.w * f, s0.gb.h * f);
+    ctx.restore();
+  }
+  /* The things' shadows: for each cell of the table near a thing, the share of the fog the thing hides (light.js
+     visibility), taken from the cell's direct light only. A thing's cells are kept until it moves. */
+  function drawShadows(ctx) {
+    const q = ROOM_Q, { cw, ch } = room;
+    let key = '';
+    for (const o of OBJ) {
+      const v = vis[o];
+      if (!v || v.a < 0.5 || givers.some((g) => g.obj === o)) { delete patches[o]; continue; }
+      const pk = `${Math.round(v.x)}|${Math.round(v.y)}|${v.k.toFixed(3)}`;
+      key += o + pk;
+      if (patches[o] && patches[o].key === pk) continue;
+      const w = worldOf(v), occ = occluders(o, w.W, w.s);
+      const hw = 1.5 * objW(o, w.s), down = 2.4 * w.s + 1.4 * objH(o, w.s);
+      const i0 = clamp(Math.floor((v.x - hw) / q), 0, cw - 1), i1 = clamp(Math.ceil((v.x + hw) / q), 0, cw - 1);
+      const j0 = clamp(Math.floor(Math.max(L.glassB, v.y - 0.5 * w.s) / q), 0, ch - 1), j1 = clamp(Math.ceil((w.ground + down) / q), 0, ch - 1);
+      const pw = i1 - i0 + 1, ph = j1 - j0 + 1, visA = new Float32Array(pw * ph);
+      for (let j = 0; j < ph; j++) {
+        const y = (j0 + j + 0.5) * q;
+        for (let i = 0; i < pw; i++) {
+          const x = (i0 + i + 0.5) * q;
+          visA[j * pw + i] = y < L.glassB ? 1 : visibility(R, [x, 0, tableZ(R, y)], occ);
+        }
       }
-      drawObject(ctx, o, v.x, v.y, u, v.a);
+      patches[o] = { key: pk, i0, j0, w: pw, h: ph, vis: visA };
     }
+    if (key !== shadeKey) {
+      shadeKey = key;
+      const d = shadeImg.data;
+      d.fill(0);
+      const keep = new Float32Array(cw * ch).fill(1);
+      for (const p of Object.values(patches)) {
+        for (let j = 0; j < p.h; j++) for (let i = 0; i < p.w; i++) keep[(p.j0 + j) * cw + p.i0 + i] *= p.vis[j * p.w + i];
+      }
+      for (let c = 0; c < cw * ch; c++) {
+        const a = (1 - keep[c]) * room.direct[c];
+        if (a > 0.002) d[4 * c + 3] = Math.round(255 * Math.min(1, a));
+      }
+      shadeCv.getContext('2d').putImageData(shadeImg, 0, 0);
+    }
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(shadeCv, 0, 0, cw * q, ch * q);
+  }
+  function drawDesk(ctx, st, now) {
+    const order = OBJ.filter((o) => vis[o] && vis[o].a > 0.01).sort((a, b) => vis[a].y - vis[b].y);
+    for (const o of order) drawThing(ctx, o, vis[o], vis[o].a);
     for (const g of givers) {                                      // a thing passing through the glass
       const f = (now - g.t0) / TIME.giveOut;
-      if (f < 1) drawObject(ctx, g.obj, g.x, g.y - ease(f) * 0.16 * L.H, L.u * g.k * (1 - 0.25 * f), 1 - f);
+      if (f < 1) drawThing(ctx, g.obj, { x: g.x, y: g.y - ease(f) * 0.16 * L.H, k: g.k * (1 - 0.25 * f) }, 1 - f);
     }
     if (keys && st.phase === 'day' && !st.held) {                  // the keyboard's choice of thing
       const things = onPlates(st);
@@ -609,9 +612,11 @@ export function initPod(canvas, hooks) {
     if (Math.abs(gaze.x + gaze.y + gaze.lean - before) > 0.002) moving = true;
 
     ctx.fillStyle = P.void; ctx.fillRect(0, 0, L.W, L.H);
-    drawBeyond(ctx);
+    drawRoom(ctx);
+    drawBeing(ctx, now);
     drawDisc(ctx);
-    drawTable(ctx);
+    drawSill(ctx);
+    drawShadows(ctx);
     drawSlate(ctx, now);
     drawDesk(ctx, st, now);
     drawCrop(ctx, now);
@@ -820,12 +825,28 @@ export function initPod(canvas, hooks) {
     /** Test and preview hook: do an act as the hand would, without a pointer. */
     perform(kind, opts = {}) { return kind === 'lift' ? lift(opts.obj) : held(kind, opts.place || 'near', opts.x ?? L.W / 2); },
     keepSector,
+    /** The density of ink in the disc's field at a point of the viewport (CSS pixels): for the drive's G11 check. */
+    inkAt(x, y) {
+      const r = canvas.getBoundingClientRect(), k = L.W / r.width, { disc } = L;
+      const i = Math.floor((((x - r.left) * k - (disc.cx - disc.Rd)) / (2 * disc.Rd)) * field.N), j = Math.floor((((y - r.top) * k - (disc.cy - disc.Rd)) / (2 * disc.Rd)) * field.N);
+      return i < 0 || j < 0 || i >= field.N || j >= field.N ? 0 : field.D[j * field.N + i] + field.O[j * field.N + i];
+    },
     /** Where things are, in CSS pixels of the viewport: for tools/drives/heptapod.mjs, which drives the page by hand. */
     probe() {
       const r = canvas.getBoundingClientRect(), k = r.width / L.W, st = hooks.getState(), ph = phaseOf(ink, performance.now());
       const at = (x, y) => ({ x: r.left + x * k, y: r.top + y * k });
       const things = {};
-      for (const o of OBJ) if (vis[o]) things[o] = { ...at(vis[o].x, vis[o].y - objH(o, L.u * vis[o].k) / 2), held: !!(st.held && st.held.obj === o), place: whereIs(st, o)?.place || null };
+      for (const o of OBJ) {
+        if (!vis[o]) continue;
+        const v = vis[o], s0 = sprites[o];
+        // its picture's box on the screen, and the light the fog gives the half of it facing the disc and the other
+        const f = s0 ? (L.u * v.k) / s0.gb.res : 0;
+        const box = s0 ? { x0: at(v.x - s0.gb.ox * f, 0).x, x1: at(v.x + (s0.gb.w - s0.gb.ox) * f, 0).x, y0: at(0, v.y - s0.gb.oy * f).y, y1: at(0, v.y + (s0.gb.h - s0.gb.oy) * f).y } : null;
+        const w = L ? worldOf(v) : null;
+        things[o] = { ...at(v.x, v.y - objH(o, L.u * v.k) / 2), held: !!(st.held && st.held.obj === o), place: whereIs(st, o)?.place || null,
+          base: at(v.x, v.y), box, alb: albedoOf(o), u: L.u * v.k * k, light: s0 && s0.m ? { ...s0.m } : null,
+          dist: w ? Math.round(Math.hypot(w.W[0] - R.S[0], w.W[1] - R.S[1], w.W[2] - R.S[2]) * k) : null };
+      }
       return {
         width: r.width, height: r.height, things, script,
         ring: { ...at(L.ring.cx, L.ring.cy), R: L.ring.R * k },
@@ -835,7 +856,12 @@ export function initPod(canvas, hooks) {
         air: { near: at(L.W / 2, L.hoverY.near), far: at(L.W / 2, L.hoverY.far) },
         glass: at(L.W / 2, 0.3 * L.H), ink: !!ph, crop: !!(ph && ph.crop), dragging: drag ? drag.kind : null, lastKeep, age: ink ? Math.round(performance.now() - ink.t0) : null,
         field: { N: field.N, fit: +field.fit().toFixed(3), mass: +field.mass().toFixed(1) },
-        being: { ...at(L.body.x, L.body.y), side: body.side },
+        being: {
+          foot: at(L.body.at.x, L.body.at.y), k: L.body.k * k, limbs: anat.fronds.length,
+          box: { x0: at(L.body.box.x0, 0).x, x1: at(L.body.box.x1, 0).x, y0: at(0, L.body.box.y0).y, y1: at(0, L.body.box.y1).y },
+          light: bodyM, still: reduced, key: bodyKey,
+        },
+        whole: DISC_WHOLE,
       };
     },
     pause() { running = false; cancelAnimationFrame(raf); clearTimeout(timer); raf = 0; timer = 0; },

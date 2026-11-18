@@ -228,6 +228,7 @@ function mount() {
   });
   redraw();
   $('pod').probe = () => pod.probe();      // for the drive tool: where things are on screen
+  $('pod').inkAt = (x, y) => pod.inkAt(x, y);
   if (state.phase === 'day') pod.greet(); else evening();
   const keysText = keysHelp(script);
   $('pod').setAttribute('aria-label', keysText.label);

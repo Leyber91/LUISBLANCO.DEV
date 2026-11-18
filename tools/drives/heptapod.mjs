@@ -14,7 +14,64 @@
    labs' store, the evening runs to its count, the inked script
    turns on only by its link on this machine, and every deep-linked
    state comes up.
+
+   BAR_C, C1 to C3, on the canvas's own pixels (luma, Rec. 709 on the
+   sRGB bytes): no thing is brighter than the disc where it is still
+   whole; the table's light falls with distance from under the disc
+   (a fit over its pixels); the same thing is darker set down far
+   from the glass than near it (each of the six is compared with
+   itself in tests/chamber.test.mjs: across different shapes the
+   light received depends on the shape as much as on the distance),
+   and brighter held up than at rest; a thing's shadow
+   lies away from the disc (where the table brightens when the thing
+   leaves its place, the centre of that change lies on the side of
+   the thing away from the disc); the table carries no drawn line (no
+   plate's ellipse); the being is whole in the frame and lit on its
+   side facing the disc; under reduced motion it is still; and the
+   ink is achromatic (G11: its inked pixels carry no more chroma than
+   the fog's own uninked pixels in the same disc).
    ============================================================ */
+
+/* The canvas's luma in a rectangle of the viewport (CSS pixels), row by row, at one sample a CSS pixel. */
+const ROWS = `window.__rows = (x0, y0, x1, y1) => {
+  const cv = document.getElementById('pod'), r = cv.getBoundingClientRect(), k = cv.width / r.width, out = [];
+  const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+  for (let y = Math.ceil(y0); y < y1; y++) { const row = []; for (let x = Math.ceil(x0); x < x1; x++) {
+    const X = Math.round((x - r.left) * k), Y = Math.round((y - r.top) * k);
+    if (X < 0 || Y < 0 || X >= cv.width || Y >= cv.height) { row.push(null); continue; }
+    const i = 4 * (Y * cv.width + X); row.push(0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]); } out.push(row); }
+  return out;
+};`;
+/* A straight-line fit of y on x: slope and R^2. */
+const fitLine = (X, Y) => {
+  const n = X.length, mx = X.reduce((a, b) => a + b, 0) / n, my = Y.reduce((a, b) => a + b, 0) / n;
+  let sxy = 0, sxx = 0, syy = 0;
+  for (let i = 0; i < n; i++) { sxy += (X[i] - mx) * (Y[i] - my); sxx += (X[i] - mx) ** 2; syy += (Y[i] - my) ** 2; }
+  return { slope: sxy / sxx, r2: (sxy * sxy) / (sxx * syy), n };
+};
+
+/* Luma statistics of the canvas's pixels in a rectangle of the viewport (CSS pixels), computed in the page. */
+const PIX = `window.__pix = (x0, y0, x1, y1, mask) => {
+  const cv = document.getElementById('pod'), r = cv.getBoundingClientRect(), k = cv.width / r.width;
+  const X0 = Math.max(0, Math.floor((x0 - r.left) * k)), Y0 = Math.max(0, Math.floor((y0 - r.top) * k));
+  const X1 = Math.min(cv.width, Math.ceil((x1 - r.left) * k)), Y1 = Math.min(cv.height, Math.ceil((y1 - r.top) * k));
+  if (X1 - X0 < 1 || Y1 - Y0 < 1) return { n: 0 };
+  const d = cv.getContext('2d').getImageData(X0, Y0, X1 - X0, Y1 - Y0).data, L = [], C = [];
+  let chroma = 0;
+  for (let i = 0; i < d.length; i += 4) {
+    const px = X0 + ((i / 4) % (X1 - X0)), py = Y0 + Math.floor(i / 4 / (X1 - X0));
+    if (mask && !mask(px / k + r.left, py / k + r.top)) continue;
+    const y = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2], c = Math.max(d[i], d[i + 1], d[i + 2]) - Math.min(d[i], d[i + 1], d[i + 2]);
+    L.push(y); C.push([y, c]);
+    chroma = Math.max(chroma, c);
+  }
+  L.sort((a, b) => a - b);
+  const q = (f) => L[Math.min(L.length - 1, Math.floor(f * L.length))];
+  // the chroma of the darkest fifth (in the disc, the ink)
+  const p20 = q(0.2);
+  const chromaDark = C.reduce((m, [y, c]) => (y <= p20 ? Math.max(m, c) : m), 0);
+  return { n: L.length, mean: L.reduce((a, b) => a + b, 0) / Math.max(1, L.length), p50: q(0.5), p75: q(0.75), p95: q(0.95), max: L[L.length - 1], chroma, chromaDark };
+};`;
 
 export default async function heptapod(p, { base }) {
   const probe = () => p.ev('document.getElementById("pod").probe()');
@@ -29,6 +86,24 @@ export default async function heptapod(p, { base }) {
     await p.sleep(250);
   };
   const first = (g, place) => Object.entries(g.things).find(([, t]) => t.place === place);
+  const pix = async (b, mask = null) => { await p.ev(PIX); return p.ev(`window.__pix(${b.x0}, ${b.y0}, ${b.x1}, ${b.y1}${mask ? ', ' + mask : ''})`); };
+  /* the disc where it is still whole: the 75th percentile of the luma on that circle (above any ink on it) */
+  const discEdge = async (g) => p.ev(`(() => { ${PIX}; const g = document.getElementById("pod").probe(), r = g.disc.R * g.whole, L = [];
+    for (let a = 0; a < 360; a += 2) { const x = g.disc.x + r * Math.sin(a * Math.PI / 180), y = g.disc.y - r * Math.cos(a * Math.PI / 180);
+      const s = window.__pix(x - 0.5, y - 0.5, x + 0.5, y + 0.5); if (s.n) L.push(s.p50); }
+    L.sort((a, b) => a - b); return L[Math.floor(0.75 * L.length)]; })()`);
+  /* the table's columns, top to bottom from just under the sill, away from every thing: the largest step up from a
+     row to the next and back down within two rows (a drawn hairline), in luma */
+  const ridge = async (g) => p.ev(`(() => { ${PIX}; const g = document.getElementById("pod").probe(), cv = document.getElementById("pod"), r = cv.getBoundingClientRect(), k = cv.width / r.width;
+    const boxes = Object.values(g.things).map((t) => t.box).filter(Boolean);
+    const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let worst = 0;
+    for (let x = r.left + 4; x < r.right - 4; x += 6) {
+      if (boxes.some((b) => x > b.x0 - 6 && x < b.x1 + 6)) continue;
+      const X = Math.round((x - r.left) * k); const col = [];
+      for (let Y = Math.ceil((g.sill - r.top) * k) + 4; Y < cv.height - 2; Y++) { const i = 4 * (Y * cv.width + X); col.push(0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]); }
+      for (let i = 2; i < col.length - 2; i++) worst = Math.max(worst, Math.min(col[i] - col[i - 2], col[i] - col[i + 2]));
+    }
+    return +worst.toFixed(2); })()`);
 
   await p.go(`${base}/labs/heptapod.html`);
   p.check('the page comes up', await ready());
@@ -47,14 +122,77 @@ export default async function heptapod(p, { base }) {
   p.check('its ink field has gathered', await p.until('(() => { const f = document.getElementById("pod").probe().field; return f.mass > 10 && f.fit > 0.8; })()', 6000), JSON.stringify((await probe()).field));
   p.check('no horizontal scroll', await p.ev('document.documentElement.scrollWidth <= innerWidth'), await p.ev('`${document.documentElement.scrollWidth} > ${innerWidth}`'));
   await p.shot('01-greeting');
+
+  // BAR_C on the pixels: the brightest thing is darker than the disc where it is still whole
+  g = await probe();
+  const edge = await discEdge(g);
+  const things = Object.entries(g.things).filter(([, t]) => t.box);
+  const stats = {};
+  for (const [o, t] of things) stats[o] = await pix(t.box);
+  const brightest = Math.max(...Object.values(stats).map((s) => s.max));
+  p.check('C1: no thing is brighter than the disc where it is whole', brightest < edge, `brightest thing ${brightest.toFixed(1)}, disc ${edge}`);
+  // the fog's light falls off with distance. On the pixels: the table, away from every thing and its shadow, against
+  // the distance from the point under the disc's centre on the sill
+  {
+    await p.ev(ROWS);
+    const cvr = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { x0: r.left, x1: r.right, y1: r.bottom }; })()');
+    const rows = await p.ev(`window.__rows(${cvr.x0}, ${g.sill + 3}, ${cvr.x1}, ${cvr.y1 - 2})`);
+    const X = [], Y = [];
+    const near = (x, y) => things.some(([, t]) => x > t.box.x0 - 0.6 * t.u && x < t.box.x1 + 0.6 * t.u && y > t.box.y0 - 0.2 * t.u && y < t.base.y + 2.6 * t.u);
+    rows.forEach((row, j) => row.forEach((v, i) => {
+      const x = Math.ceil(cvr.x0) + i, y = Math.ceil(g.sill + 3) + j;
+      if (v == null || v < 1 || i % 4 || j % 4 || near(x, y)) return;
+      X.push(Math.log(Math.hypot(x - g.disc.x, y - g.sill) + 10)); Y.push(Math.log(v));
+    }));
+    const f = fitLine(X, Y);
+    p.check('C1: the table\'s light falls with distance from under the disc (a fit over its pixels)', f.n > 50 && f.slope < -0.2 && f.r2 > 0.5, JSON.stringify({ slope: +f.slope.toFixed(2), r2: +f.r2.toFixed(2), n: f.n }));
+  }
+  // each thing is brighter where it faces the fog than where it faces away (its pixels as written, split by its surface)
+  const unlit = things.filter(([, t]) => !(t.light && t.light.lumNear > t.light.lumFar));
+  p.check('C3: each thing is lit where it faces the fog and dark where it faces away', unlit.length === 0, unlit.map(([o, t]) => `${o} ${JSON.stringify(t.light)}`).join('; '));
+  const line = await ridge(g);
+  p.check('C1: the table carries no drawn line (no plate)', line < 4, `largest one-row ridge ${line} luma`);
+  // G11: the ink in the disc is achromatic: its pixels (the darkest fifth of the whole disc, where the greeting's ink
+  // is) carry no more chroma than the fog's own colours
+  const fogChroma = 24;           // the largest max-min of light.js FOG_STOPS (#6E7786: 0x86 - 0x6E)
+  const inDisc = `(x, y) => Math.hypot(x - ${g.disc.x}, y - ${g.disc.y}) < ${g.disc.R * 0.7}`;
+  const box7 = { x0: g.disc.x - g.disc.R * 0.7, y0: g.disc.y - g.disc.R * 0.7, x1: g.disc.x + g.disc.R * 0.7, y1: g.disc.y + g.disc.R * 0.7 };
+  const inked = await pix(box7, `(x, y) => (${inDisc})(x, y) && document.getElementById('pod').inkAt(x, y) > 0.5`);
+  const bare = await pix(box7, `(x, y) => (${inDisc})(x, y) && document.getElementById('pod').inkAt(x, y) < 0.01`);
+  p.check('G11: the ink carries no colour beyond the fog\'s own', inked.n > 50 && bare.n > 50 && inked.chroma <= bare.chroma + 1,
+    `inked pixels ${inked.n}, chroma at most ${inked.chroma}; uninked fog ${bare.n}, at most ${bare.chroma} (its stops' ${fogChroma})`);
+  // C2: the being is whole in the frame, and lit on the side facing the disc
+  const bb = g.being.box, cvr = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }; })()');
+  p.check('C2: the being is whole in the frame', bb.x0 >= cvr.x0 - 1 && bb.x1 <= cvr.x1 + 1 && bb.y0 >= cvr.y0 - 1 && bb.y1 <= cvr.y1 + 1, `${JSON.stringify(bb)} in ${JSON.stringify(cvr)}`);
+  const third = (bb.x1 - bb.x0) / 3, toward = g.disc.x < (bb.x0 + bb.x1) / 2;
+  const sideA = await pix({ x0: toward ? bb.x0 : bb.x1 - third, x1: toward ? bb.x0 + third : bb.x1, y0: bb.y0, y1: bb.y1 });
+  const sideB = await pix({ x0: toward ? bb.x1 - third : bb.x0, x1: toward ? bb.x1 : bb.x0 + third, y0: bb.y0, y1: bb.y1 });
+  p.check('C2: the being is lit on its side facing the disc', sideA.max > sideB.max + 8 && g.being.light.near > 3 * g.being.light.far,
+    `brightest pixel facing ${sideA.max.toFixed(0)}, away ${sideB.max.toFixed(0)}; light ${JSON.stringify(g.being.light)}`);
   await cropSide(g, 180);
   p.check('a crop of the greeting lands in the notebook', (await entries()) === 1, `${await entries()} entries`);
 
-  // take a thing from the plate at the glass
-  let [name, t] = first(g, 'near');
+  // take a thing from the plate at the glass: first its light and the table round its foot at rest, so that its shadow
+  // and its light held up can be told from them (the thing farthest from the disc's centre line, so the shadow's side
+  // shows)
+  let [name, t] = Object.entries(g.things).filter(([, v]) => v.place === 'near').sort((a, b) => Math.abs(b[1].base.x - g.disc.x) - Math.abs(a[1].base.x - g.disc.x))[0];
+  const U = t.u;
+  const restStat = await pix(t.box);
+  // the table round its foot, row by row, to find where its shadow lay once it has left
+  const around = { x0: t.base.x - 2 * U, x1: t.base.x + 2 * U, y0: Math.max(g.sill + 3, t.base.y - 1.2 * U), y1: t.base.y + 2.2 * U };
+  await p.ev(ROWS);
+  const restRows = await p.ev(`window.__rows(${around.x0}, ${around.y0}, ${around.x1}, ${around.y1})`);
+  const tBox = t.box;
   await p.drag(t.x, t.y, t.x, t.y - 0.11 * g.height, { steps: 12 });      // up into the air, short of the glass
   await p.sleep(200);
   p.check('taking a thing writes ring 1', (await ringNo()).includes('ring 1 of 40'), await ringNo());
+  {
+    await p.sleep(600);
+    const h = await probe(), ht = h.things[name];
+    const heldStat = await pix(ht.box);
+    p.check('C3: a thing held up enters the disc\'s light (it is brighter than at rest)', heldStat.p95 > restStat.p95 && ht.light.all > t.light.all && ht.dist < t.dist,
+      `${name}: brightest 5% ${restStat.p95.toFixed(1)} at rest, ${heldStat.p95.toFixed(1)} held; light ${t.light.all.toFixed(4)}, ${ht.light.all.toFixed(4)}; ${t.dist} px from the fog, then ${ht.dist}`);
+  }
   p.check('the greeting gave way to the new ring', await p.until('document.getElementById("pod").probe().crop', 6000));
   // both sides are cut while the ring hangs, before any picture: a picture of this page took seconds in the headless
   // browser, and a ring lives 9.6 s (2026-11-17: the second crop came after the ring had gone)
@@ -78,6 +216,27 @@ export default async function heptapod(p, { base }) {
   p.check('setting it down far writes ring 2', (await ringNo()).includes('ring 2 of 40'), await ringNo());
   g = await probe();
   p.check('the thing is on the far plate', g.things[name].place === 'far', g.things[name].place);
+  await p.sleep(1200);
+  {
+    const f = (await probe()).things[name], farStat = await pix(f.box);
+    p.check('C1: the same thing set down far from the glass is darker than it was near it', farStat.p95 < restStat.p95 && f.dist > t.dist,
+      `${name}: brightest 5% ${restStat.p95.toFixed(1)} near, ${farStat.p95.toFixed(1)} far; ${t.dist} then ${f.dist} px from the fog`);
+    // its place at the glass is empty now: where the table brightened is where its shadow lay. The centre of that
+    // change, outside the thing's own picture, lies on the side of the thing away from the disc's foot on the sill
+    await p.ev(ROWS);
+    const goneRows = await p.ev(`window.__rows(${around.x0}, ${around.y0}, ${around.x1}, ${around.y1})`);
+    let sw = 0, sx = 0, sy = 0;
+    goneRows.forEach((row, j) => row.forEach((v, i) => {
+      const x = Math.ceil(around.x0) + i, y = Math.ceil(around.y0) + j, r0 = restRows[j][i];
+      if (v == null || r0 == null || (x > tBox.x0 - 2 && x < tBox.x1 + 2 && y > tBox.y0 - 2 && y < tBox.y1 + 2)) return;
+      const d = v - r0;
+      if (d > 0.5) { sw += d; sx += d * x; sy += d * y; }
+    }));
+    const cx = sx / sw, cy = sy / sw, ax = t.base.x - g.disc.x, ay = t.base.y - g.sill;
+    const along = ((cx - t.base.x) * ax + (cy - t.base.y) * ay) / Math.hypot(ax, ay);
+    p.check('C3: its shadow had lain on the table on its side away from the disc', sw > 50 && along > 0.1 * U,
+      `${name}: the table brightened by ${sw.toFixed(0)} luma in all; its centre ${along.toFixed(1)} px beyond the thing's foot, away from the disc`);
+  }
 
   // raise a mark
   await p.ev('(() => { const i = document.getElementById("slate"); i.value = "Down"; i.form.requestSubmit(); })()');
@@ -194,5 +353,26 @@ export default async function heptapod(p, { base }) {
     p.check(`${q} comes up`, await ready());
     await p.sleep(2600);
     await p.shot(shot);
+    if (q.includes('still')) {
+      // C2: with motion reduced the being does not breathe: its pixels are the same a second and a half apart
+      const b = (await probe()).being.box;
+      const read = () => p.ev(`(() => { const cv = document.getElementById('pod'), r = cv.getBoundingClientRect(), k = cv.width / r.width;
+        const d = cv.getContext('2d').getImageData(Math.round((${b.x0} - r.left) * k), Math.round((${b.y0} - r.top) * k), Math.round((${b.x1 - b.x0}) * k), Math.round((${b.y1 - b.y0}) * k)).data;
+        let s = 0; for (let i = 0; i < d.length; i += 4) s = (s * 31 + d[i] + 7 * d[i + 1] + 13 * d[i + 2]) % 1000000007; return s; })()`);
+      const a = await read();
+      await p.sleep(1500);
+      const b2 = await read();
+      p.check('C2: with motion reduced the being is still', a === b2, a === b2 ? 'the same pixels 1.5 s apart' : 'its pixels changed');
+    }
+  }
+  // C2: the three species, side by side (and each being whole in the frame)
+  for (const k of [0, 1, 2]) {
+    await p.go(`${base}/labs/heptapod.html?species=${k}`);
+    await ready();
+    await p.ev('document.getElementById("pod").scrollIntoView({ block: "center" })');
+    await p.sleep(1200);
+    const b = (await probe()).being.box, c = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }; })()');
+    p.check(`C2: species ${k}'s being is whole in the frame`, b.x0 >= c.x0 - 1 && b.x1 <= c.x1 + 1 && b.y0 >= c.y0 - 1 && b.y1 <= c.y1 + 1, JSON.stringify(b));
+    await p.shot(`15-species-${k}`);
   }
 }
