@@ -234,7 +234,7 @@ export default async function search(p, { base }) {
   const zoned = await ask('habitable planets');
   const hots = await ask('hot planets');
   p.check('the zone and hot each have a chip', zoned.chips.length === 1 && zoned.chips[0] === 'conservative or optimistic zone ×' && zoned.n > 0 && hots.chips.length === 1 && hots.chips[0] === 'hot: 1,000 K or more ×' && hots.n > cold.n, `${zoned.chips.join(', ')} ${zoned.count} | ${hots.chips.join(', ')} ${hots.count}`);
-  p.check('no world listed as hot is a directly imaged one drawn far from its star', hots.rows.length === 8 && hots.rows.every((r) => !/cold gas giant|warm gas giant|frozen/.test(r.fact)), facts(hots));
+  p.check('no world listed as hot is a directly imaged one drawn far from its star', hots.rows.length === 8 && hots.rows.every((r) => !/cold gas giant|warm gas giant|frozen|own heat/.test(r.fact)), facts(hots));
 
   // ---- a replay of discoveries stops when a question is asked ----
   await call(press, '#filters [data-act="replay"]');

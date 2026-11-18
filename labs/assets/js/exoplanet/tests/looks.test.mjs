@@ -266,7 +266,7 @@ const by = Object.fromEntries(SOLAR.map((p) => [p.pl_name, p]));
   yes('a giant imaged 100 AU out and listed at 1,500 K is named by its own heat, not as a hot Jupiter', name(100, 1500, { method: 'Imaging' }) === OWN_HEAT_LABEL && OWN_HEAT_LABEL === 'Gas giant seen by its own heat', name(100, 1500, { method: 'Imaging' }));
   yes('so is one imaged with no listed temperature, which the starlight alone would name cold', name(100, null, { method: 'Imaging' }) === OWN_HEAT_LABEL && name(100, null) === 'Cold gas giant', `${name(100, null, { method: 'Imaging' })}, ${name(100, null)}`);
   yes('and one found by radial velocity at 2.7 AU listed at 1,250 K, while at 0.02 AU the same 1,250 K is a hot Jupiter', name(2.7, 1250, { method: 'Radial Velocity' }) === OWN_HEAT_LABEL && name(0.02, 1250, { method: 'Radial Velocity' }) === 'Hot Jupiter');
-  yes('its colour still follows the temperature listed for it, the one its clouds form at', physics(giant(100, 1500, { method: 'Imaging' })).Teq === 1500);
+  yes('its colour still follows the temperature listed for it', physics(giant(100, 1500, { method: 'Imaging' })).Teq === 1500);
   yes('a sub-Neptune and an ice giant keep their names, which say no temperature', classify(giant(100, 1500, { method: 'Imaging', pl_rade: 3, R: 3, pl_masse: 10, M: 10 })).label === 'Sub-Neptune'
     && classify(giant(0.02, 1500, { pl_rade: 4.6, R: 4.6, pl_masse: 17, M: 17 })).label === 'Ice giant');
 }

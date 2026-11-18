@@ -345,12 +345,17 @@ const MUTANTS = [
   /* ---- a planet's own heat (moved here from find.js with the rule) ---- */
   ['an imaged planet\'s listed temperature taken for an equilibrium', `  if (p.method === 'Imaging') return true;\n`, ``],
   ['every planet not found by transit seen by its own heat', `if (p.method === 'Imaging') return true;`, `if (p.method !== 'Transit') return true;`],
-  ['a listed temperature never its own heat, past the method', `return isNum(p.Teq) && isNum(t) && p.Teq > OWN_HEAT * t;`, `return false;`],
+  ['a listed temperature never its own heat, past the method', `return byArchive === null || p.Teq > OWN_HEAT * byArchive;`, `return false;`],
   ['own heat from three times the starlight', `export const OWN_HEAT = 2;`, `export const OWN_HEAT = 3;`],
   ['own heat from one and a half times the starlight', `export const OWN_HEAT = 2;`, `export const OWN_HEAT = 1.5;`],
-  ['exactly twice the starlight counted as own heat', `p.Teq > OWN_HEAT * t;`, `p.Teq >= OWN_HEAT * t;`],
-  ['own heat said where the starlight is not known', `isNum(p.Teq) && isNum(t) && p.Teq > OWN_HEAT * t;`, `isNum(p.Teq) && p.Teq > OWN_HEAT * t;`],
-  ['own heat held against the starlight at albedo 0', `const t = equilibriumTemp(p, 0.3);\n  return isNum(p.Teq)`, `const t = equilibriumTemp(p, 0);\n  return isNum(p.Teq)`],
+  ['exactly twice the starlight counted as own heat', `!(p.Teq > OWN_HEAT * t)`, `!(p.Teq >= OWN_HEAT * t)`],
+  ['own heat said where the starlight is not known', `if (!isNum(t) || !(p.Teq > OWN_HEAT * t)) return false;`, `if (isNum(t) && !(p.Teq > OWN_HEAT * t)) return false;`],
+  ['own heat held against the starlight at albedo 0', `const t = equilibriumTemp(p, 0.3);\n  if (!isNum(t)`, `const t = equilibriumTemp(p, 0);\n  if (!isNum(t)`],
+  ['a listed value that is no finite number taken as one', `  if (!isNum(p.Teq)) return false;\n`, ``],
+  ['the archive\'s insolation ignored', `return byArchive === null || p.Teq > OWN_HEAT * byArchive;`, `return true;`],
+  ['own heat only where the archive has an insolation', `return byArchive === null || p.Teq`, `return byArchive !== null && p.Teq`],
+  ['exactly twice the archive\'s counted as own heat', `p.Teq > OWN_HEAT * byArchive;`, `p.Teq >= OWN_HEAT * byArchive;`],
+  ['the archive\'s insolation read at albedo 0', `T_ZERO * Math.pow(p.S * 0.7, 0.25)`, `T_ZERO * Math.pow(p.S, 0.25)`],
 
   /* ---- where view D draws an orbit ---- */
   ['an orbit drawn with no zone', "if (!hz || !pos(a)) return 'unknown';", "if (!hz && !pos(a)) return 'unknown';"],

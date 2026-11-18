@@ -198,6 +198,11 @@ block('a planet\'s own heat', () => {
   yes('the starlight is taken at albedo 0.3: 530 K is over twice 254.6 K, though under twice the 278.3 K of albedo 0', L.ownHeat(mk({ Teq: 530 })));
   yes('with no starlight to hold it against, a listed temperature is not its own heat', !L.ownHeat(mk({ Teq: 900, Teff: null, Rs: null })));
   yes('with no listed temperature, a planet not imaged is not', !L.ownHeat(mk({ Teq: null })) && !L.ownHeat(mk({})));
+  yes('nor with a listed value that is no finite number', !L.ownHeat(mk({ Teq: Infinity })) && !L.ownHeat(mk({ Teq: NaN })));
+  // the archive's own insolation at albedo 0.3: S 2 gives 302.8 K, twice is 605.6 K; S 1 gives 254.6 K, twice 509.2 K
+  yes('a listed value at its own paper\'s equilibrium is not its own heat, however far this page\'s starlight is from it', !L.ownHeat(mk({ Teq: 600, S: 2 })) && L.ownHeat(mk({ Teq: 600 })));
+  yes('over twice both, it is; exactly twice the archive\'s, it is not', L.ownHeat(mk({ Teq: 606, S: 2 })) && !L.ownHeat(mk({ Teq: 2 * L.T_ZERO * Math.pow(2 * 0.7, 0.25), S: 2 })));
+  yes('the archive\'s insolation is read at albedo 0.3 too: 530 K is over twice its 254.6 K at S 1', L.ownHeat(mk({ Teq: 530, S: 1 })));
 });
 
 /* ---------- how both are printed ---------- */

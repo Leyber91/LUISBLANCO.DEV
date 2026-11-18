@@ -7,7 +7,7 @@
    lookOf), so a world found as "airless" is drawn airless.
    ============================================================ */
 
-import { classify } from './data.js';
+import { classify, OWN_HEAT_LABEL } from './data.js';
 import { equilibriumTemp, insolation, earthLikeness, sizeClassOf, ownHeat, OWN_HEAT } from './science.js';
 import { PHYS } from './config.js';
 import { int } from '../kit/format.js';
@@ -34,10 +34,10 @@ export function kindOf(p) {
    the starlight at Bond albedo 0.3 (science.js equilibriumTemp), which needs the star's temperature and
    radius and the orbit, or the archive's insolation. Null when neither exists: a world with no published
    value whose star lacks a temperature or a radius is not given one.
-   Null too for a planet seen by its own heat (starlight.js ownHeat, the rule the picture's label uses too:
-   the method is imaging, or the published value is more than OWN_HEAT times what the starlight gives; on
-   2026-11-15 the archive had 64 such worlds). Neither number is an equilibrium with starlight, so such a
-   planet is not cold, not hot, and comes last in an order by temperature. */
+   Null too for a planet seen by its own heat (starlight.js ownHeat, the rule a gas giant's name uses too:
+   the method is imaging, or the published value is more than OWN_HEAT times the starlight's by both this
+   page's starlight and the archive's insolation). Such a planet is not cold, not hot, and comes last in an
+   order by temperature. */
 export function tempOf(p) {
   if (ownHeat(p)) return null;
   if (isNum(p.Teq)) return { T: p.Teq, published: true };
@@ -99,11 +99,12 @@ export function kindLine(p) {
 }
 /* The kind, and the value the list is ordered by, with its unit. */
 export function hitFact(p, key) {
-  const t = tempOf(p);
+  const t = tempOf(p), own = !t && ownHeat(p);
   const v = key === 'dist' ? (isNum(p.dist) ? `${fmtInt(p.dist * PHYS.PC_LY)} ly` : 'distance unknown')
     // the page's own temperature is printed as the sheets print it; the archive's is named as the archive's, and a world
-    // tempOf passes over for its own heat says that, not that it has no temperature (its sheet prints the starlight's)
-    : key === 'T' ? (t ? `${fmtInt(t.T)} K${t.published ? ' published' : ''}` : p.method === 'Imaging' || isNum(p.Teq) ? 'seen by its own heat' : 'no equilibrium temperature')
+    // tempOf passes over for its own heat says that, not that it has no temperature (its sheet prints the starlight's),
+    // once: a gas giant's name already says it
+    : key === 'T' ? (t ? `${fmtInt(t.T)} K${t.published ? ' published' : ''}` : own ? (kindOf(p).label === OWN_HEAT_LABEL ? '' : 'seen by its own heat') : 'no equilibrium temperature')
     : key === 'R' ? (isNum(p.R) ? `${fmt(p.R, 3)} R⊕` : 'no radius')
     : key === 'P' ? (isNum(p.P) ? `${fmt(p.P, 3)} d` : 'no period')
     : key === 'year' ? (p.year ? String(p.year) : '')

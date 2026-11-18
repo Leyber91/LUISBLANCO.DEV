@@ -249,10 +249,10 @@ export function classify(p, opts = {}) {
   let label;
   if (look === 'fluid') {
     label = ['Sub-Neptune', 'Ice giant', 'Gas giant'][ph.domClass - 2];
-    // a gas giant is named by its temperature, except one whose listed temperature is its own heat (starlight.js
-    // ownHeat, the rule the search uses): on the snapshot of 2026-11-11 that names 99 giants, which were named by a
-    // temperature before, 45 of them "Hot Jupiter" (bet Pic c at 2.7 AU, the rest imaged 9 to 7,493 AU from their
-    // stars). Its colour still follows the temperature listed for it, the one its clouds form at.
+    // a gas giant is named by its temperature, except one seen by its own heat (starlight.js ownHeat, the rule the
+    // search uses). On the snapshot of 2026-11-11 that renames 97 giants, 44 of them "Hot Jupiter" before: bet Pic c
+    // at 2.7 AU, and 43 imaged 9 to 7,493 AU from their stars.
+    // Its colour still follows the temperature listed for it.
     if (ph.domClass >= 4) label = ownHeat(p) ? OWN_HEAT_LABEL : ph.Teq > 1200 ? 'Hot Jupiter' : ph.Teq > 800 ? 'Warm gas giant' : ph.Teq < 150 ? 'Cold gas giant' : 'Gas giant';
   } else if (look === 'molten') {
     label = ph.state === 'lava' ? 'Lava world' : 'Molten-surface world';
