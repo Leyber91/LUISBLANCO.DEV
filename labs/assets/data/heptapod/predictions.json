@@ -64,6 +64,28 @@
       "filmValueKnown": true,
       "filmValueKnownNote": "The film's dominance and cluster distributions were measured on 2026-11-17 before this entry (6d87248's message gives dominance p10 and median); MASS_MAX and MASS_ARC were set from the film's cluster count and total cluster arc the same afternoon. Three showcase texts (1, 4 and 12 clauses, seeds 101, 104, 112) were rendered and read before this entry: dominance 1.0, 0.559, 0.546. The corpus of this prediction has not been drawn.",
       "ifConfirmed": "Dominance follows from coreference and unequal sentences with no dominance parameter; the figure gets the film's composition from the grammar."
+    },
+    {
+      "date": "2026-11-18",
+      "filmValueKnown": true,
+      "id": "F4-P7",
+      "feature": "how different the pod's rings are from one another",
+      "derivation": "inkfig 0.6 replaces seeded noise with meaning wherever the figure's large-scale shape was noise: (1) a node's thread turns by its concept's words (code.js, the radical partition): each cell of a radical's nine-cell word turns the thread by TURN_CELL times (cell - 1), so two different concepts never bend alike; (2) a thread's ink is its concept's (the words' digits summed over 9), and a thread keeps one slenderness, so its length and shaft grow with the cube root of its ink; (3) a pool holds its clause's ink, the sum of its nodes' (over C_REF, the stand-in corpus's mean node ink 1.511), so its arc grows with what the clause says, not with how many nodes it has; (4) a state's pool is gathered (the hand rests: no drag, E_STATE of the arc and the depth over E_STATE, area kept), any other event's dragged; (5) the pool's ink lies on each side as its threads' ink leaves it; (6) a referent that is the speaker (person 1) leaves inward, into the ring that is the speaker (figure.js F1). Nothing is tuned to the measure below: the constants are first values or the corpus mean, set before any 0.6 figure was drawn.",
+      "prediction": "On the 126 rings of the three gate species (pod/species.js GATE_SPECIES), drawn by inkfig 0.6 at 1100 px, identical rasters counted once: the median over rings of the nearest other ring's coarse marks similarity (research/ip_probe/simprobe.py: 360 x 96 polar, the base ring band removed, rotation and mirror invariant) is at most 0.78. Measured before this entry: inkfig 0.5, 0.852 (65 distinct rings); the film's 38 logograms among themselves, 0.712.",
+      "measure": "scratch self_sim.py over simprobe.py's marks layer, the gate's coarse measure; written to the ROAD entry of the run (the film side reads private images, ip.md rule 6, so only numbers leave).",
+      "filmValueKnownNote": "The film's nearest-other median (0.712) and inkfig 0.5's (0.852) were measured on 2026-11-18 before this entry; 0.78 is set short of the film's on purpose: what is claimed is that meaning moves the figures most of the way, not that it lands on the film.",
+      "ifConfirmed": "The pod's rings differ as their meanings do, with no noise added: Luis's 'ours look very similar' (2026-11-18) was the figure drawing its meaning at small scale only."
+    },
+    {
+      "date": "2026-11-18",
+      "filmValueKnown": true,
+      "id": "F4-P8",
+      "feature": "rule 6 after the figures move apart",
+      "derivation": "Figures that differ more from one another could come closer to some film logogram; the gate is rerun on every figure the pod can write.",
+      "prediction": "The same species' 170 figures (rings, greetings, every concept alone) drawn by inkfig 0.6 keep rule 6's two-scale gate: no figure at or above the fine floor 0.786, and the coarse median below the film's 0.712.",
+      "measure": "scratch g4_two.py (the measure of g4-pod-05.json), on inkfig 0.6 figures.",
+      "filmValueKnownNote": "inkfig 0.5 on the same 170: fine max 0.747, coarse median 0.638 (g4-pod-05.json).",
+      "ifConfirmed": "Rule 6 holds; the 0.65-and-above coarse figures still go to Luis."
     }
   ]
 }
