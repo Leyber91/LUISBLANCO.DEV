@@ -44,6 +44,35 @@ guard('keep: most recent first, one entry per hole, refused when full', () => {
   ok('unkeep of one not kept is refused', !R.unkeep(r, CUSTOM).ok);
 });
 
+guard('the kept frames carry a small picture, the 12 newest only (BAR_L1 C17; the 256 KB cap)', () => {
+  const jpg = (n) => 'data:image/jpeg;base64,' + 'A'.repeat(n);
+  ok('a small JPEG is a thumbnail, at the bound and not past it', R.isThumb(jpg(R.LIMITS.thumb - 23)) && !R.isThumb(jpg(R.LIMITS.thumb - 22)), `${jpg(R.LIMITS.thumb - 23).length}`);
+  ok('a PNG, a script or a number is not', !R.isThumb('data:image/png;base64,AAAA') && !R.isThumb('javascript:alert(1)') && !R.isThumb(12) && !R.isThumb('data:image/jpeg;base64,AA AA'));
+  let r = R.empty();
+  const w = R.keep(r, { q: M87, t: 1, img: jpg(100) });
+  ok('a hole kept with its picture keeps it', w.ok && w.record.kept[0].img === jpg(100));
+  ok('a picture that is not a small JPEG is refused, with the reason, and the record is as it was', !R.keep(r, { q: M87, t: 1, img: 'data:image/png;base64,AA' }).ok && R.keep(r, { q: M87, t: 1, img: 'x' }).record === r);
+  ok('a hole kept without a picture keeps none', !('img' in R.keep(r, { q: M87, t: 1 }).record.kept[0]));
+  for (let i = 0; i < 14; i++) r = R.keep(r, { q: `a=0.${i + 10}`, t: i + 1, img: jpg(50) }).record;
+  const withImg = r.kept.filter((e) => 'img' in e).length;
+  ok(`with 14 kept, the ${R.LIMITS.thumbs} newest keep their picture and the 2 oldest do not`, withImg === R.LIMITS.thumbs && 'img' in r.kept[R.LIMITS.thumbs - 1] && !('img' in r.kept[R.LIMITS.thumbs]), `${withImg}`);
+  const stored = R.normalise({ kept: Array.from({ length: 14 }, (_, i) => ({ q: `a=0.${i + 10}`, t: i + 1, img: jpg(50) })).concat([{ q: SGRA, t: 99, img: 'data:image/png;base64,AA' }]) });
+  ok('one door: a stored record keeps pictures on the 12 newest only, and a bad picture is dropped, its hole kept', stored.kept.filter((e) => 'img' in e).length === R.LIMITS.thumbs && stored.kept.some((e) => e.q === SGRA && !('img' in e)), JSON.stringify(stored.kept.map((e) => 'img' in e)));
+  const first = R.normalise({ kept: [{ q: SGRA, t: 99, img: 'data:image/png;base64,AA' }, { q: M87, t: 98, img: '<svg onload=x>' }] });
+  ok('a stored picture that is text and not a small JPEG is dropped where the bound would keep it (the newest)', first.kept.length === 2 && first.kept.every((e) => !('img' in e)), JSON.stringify(first.kept));
+  // 50 different holes (each its own spin, so its own identity) at the longest link, 100 rays on the image plane and 50
+  // falls, all at the longest link: the record the rules allow at its fullest (review_s4 11: the links once collapsed
+  // to one hole and the rays were dropped, so the bound was measured on 1 kept and 0 rays)
+  // whole pairs only, the last value padded so the link is exactly the bound (a cut pair is not a link)
+  const longLink = (head) => { let q = head; while (q.length + 5 <= R.LIMITS.link) q += '&ab=1'; return q + '1'.repeat(R.LIMITS.link - q.length); };
+  const worst = R.normalise({ kept: Array.from({ length: R.LIMITS.kept }, (_, i) => ({ q: longLink(`a=0.${100 + i}`), t: 1794943231695 + i, img: jpg(R.LIMITS.thumb - 23) })),
+    rays: Array.from({ length: R.LIMITS.rays }, (_, i) => ({ q: longLink(`a=0.${300 + i}`), t: 1794943231695 + i, s: [-0.12345678901234567, 0.12345678901234567], fate: 'captured', n: 0 })),
+    falls: Array.from({ length: R.LIMITS.falls }, (_, i) => ({ q: longLink(`a=0.${500 + i}`), t: 1794943231695 + i, tau: 123456.78901234567 })) });
+  ok('the fullest record is full: 50 holes, 12 of them with a picture, 100 rays, 50 falls, every link 400 characters', worst.kept.length === R.LIMITS.kept && worst.kept.filter((e) => 'img' in e).length === R.LIMITS.thumbs && worst.rays.length === R.LIMITS.rays && worst.falls.length === R.LIMITS.falls && worst.kept.every((e) => e.q.length === R.LIMITS.link), JSON.stringify([worst.kept.length, worst.rays.length, worst.falls.length]));
+  const bytes = new TextEncoder().encode(JSON.stringify(worst)).length;
+  ok(`the fullest record the rules allow stays under Labs OS's cap of 256 KB (${bytes} bytes)`, bytes < 256 * 1024, String(bytes));
+});
+
 guard('rays: bounded, the oldest go and are counted', () => {
   let r = R.empty();
   ok('a ray is kept with its place on the image plane and its fate', R.ray(r, { q: M87, t: 1, s: [0.05, -0.02], fate: 'disk', n: 1 }).ok);

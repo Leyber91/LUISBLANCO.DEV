@@ -42,7 +42,11 @@ import { OBJECTS, VIEWS, SCHEMA } from './config.js';
 import { sci, deg } from './physics.js';
 
 export const V = 1;
-export const LIMITS = Object.freeze({ kept: 50, rays: 100, falls: 50, link: 400, dropped: 1000000 });
+export const LIMITS = Object.freeze({ kept: 50, rays: 100, falls: 50, link: 400, dropped: 1000000, thumbs: 12, thumb: 12000 });
+/** A kept frame's picture: a small JPEG as a data address, at most LIMITS.thumb characters. Only the LIMITS.thumbs
+ *  newest kept holes carry one, so the record stays under Labs OS's cap of 256 KB (progress.js MAX_PROGRESS_BYTES):
+ *  12 x 12,000 characters, beside at most about 40 KB of links. */
+export const isThumb = (v) => typeof v === 'string' && v.length <= LIMITS.thumb && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(v);
 /* What a traced ray did, as the probe names it, and the words for each. */
 export const FATE_WORDS = Object.freeze({ captured: 'ends in the hole', disk: 'lands on the disk', ring: 'skims the photon orbits', sky: 'escapes to the sky' });
 export const FATES = Object.freeze(Object.keys(FATE_WORDS));
@@ -63,14 +67,14 @@ export const empty = () => ({ kept: [], rays: [], falls: [], dropped: 0 });
 /** The record in its shape and bounds, whatever came in. */
 export function normalise(data) {
   const d = obj(data);
-  const kept = list(d.kept).map(obj).filter((e) => isLink(e.q) && isTime(e.t)).map((e) => ({ q: e.q, t: e.t }));
+  const kept = list(d.kept).map(obj).filter((e) => isLink(e.q) && isTime(e.t)).map((e) => (isThumb(e.img) ? { q: e.q, t: e.t, img: e.img } : { q: e.q, t: e.t }));
   const rays = list(d.rays).map(obj).filter((e) => isLink(e.q) && isTime(e.t) && Array.isArray(e.s) && e.s.length === 2 && e.s.every(isPlane) && FATES.includes(e.fate) && Number.isInteger(e.n) && e.n >= 0 && e.n <= 9)
     .map((e) => ({ q: e.q, t: e.t, s: [e.s[0], e.s[1]], fate: e.fate, n: e.n }));
   const falls = list(d.falls).map(obj).filter((e) => isLink(e.q) && isTime(e.t) && isTime(e.tau)).map((e) => ({ q: e.q, t: e.t, tau: e.tau }));
   const unique = (xs, key) => { const seen = new Set(); return xs.filter((e) => { const k = key(e); if (seen.has(k)) return false; seen.add(k); return true; }); };
   const dropped = Number.isInteger(d.dropped) && d.dropped >= 0 ? Math.min(d.dropped, LIMITS.dropped) : 0;
   return {
-    kept: unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept),
+    kept: thumbsBounded(unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept)),
     rays: rays.slice(0, LIMITS.rays),
     falls: falls.slice(0, LIMITS.falls),
     dropped,
@@ -83,12 +87,16 @@ export const BAD_TIME = 'the time is not a positive number';
 export const FULL = `${LIMITS.kept} holes are kept, which is all it takes; take one out first`;
 
 /** Keep a hole (most recent first). Keeping one already kept moves it to the top with the new time. */
-export function keep(record, { q, t }) {
+/** Only the LIMITS.thumbs newest entries keep their picture. */
+function thumbsBounded(kept) { return kept.map((e, i) => (i < LIMITS.thumbs || !('img' in e) ? e : { q: e.q, t: e.t })); }
+
+export function keep(record, { q, t, img = null }) {
+  if (img !== null && !isThumb(img)) return refuse(record, 'the frame\'s picture is not a small JPEG');
   if (!isLink(q)) return refuse(record, BAD_LINK);
   if (!isTime(t)) return refuse(record, BAD_TIME);
   const rest = record.kept.filter((e) => holeKey(e.q) !== holeKey(q));
   if (rest.length === record.kept.length && record.kept.length >= LIMITS.kept) return refuse(record, FULL);
-  return { ok: true, why: '', record: { ...record, kept: [{ q, t }, ...rest] } };
+  return { ok: true, why: '', record: { ...record, kept: thumbsBounded([img ? { q, t, img } : { q, t }, ...rest]) } };
 }
 export function unkeep(record, q) {
   const kept = record.kept.filter((e) => holeKey(e.q) !== holeKey(q));

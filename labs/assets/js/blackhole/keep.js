@@ -65,7 +65,7 @@ const idle = () => new Promise((done) => {
 
 /* card: the card's element (its #bh-keep, #bh-recline, #bh-reclist, #bh-recsaid, #bh-recfoot). store: the page's
    state. fixture: the os-fixture value of the address. moving(): whether the view is still easing to its state. */
-export function createKeep({ card, store, fixture = null, now = () => Date.now(), start = idle, moving = () => false }) {
+export function createKeep({ card, store, fixture = null, now = () => Date.now(), start = idle, moving = () => false, thumb = async () => null, onDraw = () => {} }) {
   const $ = (s) => card.querySelector(s);
   const btn = $('#bh-keep'), line = $('#bh-recline'), list = $('#bh-reclist'), saidEl = $('#bh-recsaid'), foot = $('#bh-recfoot');
   let os = null, stored = R.empty(), newer = false, loaded = false, said = '', failedStart = false, busy = false, saidErr = false;
@@ -113,12 +113,15 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
     const c = R.counts(stored), q = store.toQuery(), kept = R.isKept(stored, q);
     const recording = os ? os.recording.on : true;   // no Labs OS: nothing is recorded, so nothing to say is off
     line.textContent = loaded ? R.lineWords(c) : 'reading';
-    btn.disabled = !loaded || !os || newer || busy;
+    // off while it cannot act at all (the record not read, no store, a newer version's record); while a press is
+    // written it says so and a press does nothing, but it keeps its focus, which a disabled button drops (review_s4 8)
+    btn.disabled = !loaded || !os || newer;
+    btn.setAttribute('aria-disabled', String(busy));
     btn.setAttribute('aria-pressed', String(kept));
     btn.setAttribute('aria-busy', String(busy));
     btn.textContent = kept ? 'Kept' : 'Keep this hole';
     const out = [
-      ...rows('kept', stored.kept, (e) => `<li><span>${esc(nameOf(e.q))}</span><a class="bh-btn" href="${esc(here(e.q))}">Open</a><button class="bh-btn" type="button" data-out="${esc(e.q)}"${busy ? ' disabled' : ''}>Take out</button></li>`),
+      ...rows('kept', stored.kept, (e) => `<li>${e.img ? `<img class="bh-th" alt="" src="${esc(e.img)}">` : ''}<span>${esc(nameOf(e.q))}</span><a class="bh-btn" href="${esc(here(e.q))}">Open</a><button class="bh-btn" type="button" data-out="${esc(e.q)}"${busy ? ' disabled' : ''}>Take out</button></li>`),
       ...rows('rays', stored.rays, (e) => `<li><span>A ray at ${esc(nameOf(e.q))}: it ${esc(R.rayWords(e))}</span><a class="bh-btn" href="${esc(here(e.q, `&ps=${e.s[0].toFixed(5)},${e.s[1].toFixed(5)}`))}">Open</a></li>`),
       ...rows('falls', stored.falls, (e) => `<li><span>A fall at ${esc(nameOf(e.q))}: ${esc(dur(e.tau))} of its own time from 40 M to the stop</span><a class="bh-btn" href="${esc(here(e.q))}">Open</a></li>`),
     ];
@@ -138,6 +141,8 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
     foot.textContent = !os ? '' : os.recording.on
       ? `${where} A keep, a ray and a fall are also usage events, as is opening and leaving this page; they are sent to the labs' backend only where you allowed it on another lab.`
       : `${where} With recording off, no usage event is recorded on this page.`;
+    // what else shows the record (the drawing's strip of kept frames) is drawn again with the card
+    onDraw();
   }
 
   /** One press on the card, written in its turn; another press meanwhile does nothing (review_s3b A). */
@@ -159,8 +164,11 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
    *  The hub's way back is written by the keep's own update, after the store took it (G). */
   const keep = () => press(async () => {
     const q = store.toQuery(), label = nameOf(q), wantKept = btn.getAttribute('aria-pressed') !== 'true';
+    // the frame's picture (BAR_L1 C17), made inside the press (a still takes a moment; the card is busy meanwhile)
+    let img = null;
+    if (wantKept) { try { img = await thumb(q); } catch { img = null; } if (img && !R.isThumb(img)) img = null; }
     const w = wantKept
-      ? await change((r) => R.keep(r, { q, t: now() }), { resume: { url: here(q), label: R.resumeLabel(q) } })
+      ? await change((r) => R.keep(r, { q, t: now(), img }), { resume: { url: here(q), label: R.resumeLabel(q) } })
       : await change((r) => R.unkeep(r, q));
     if (!w || !w.ok) return;
     if (wantKept && w.changed) track('black-hole.keep', { obj: store.get('obj') });
