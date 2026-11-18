@@ -541,24 +541,24 @@ export async function SPIN_STEP(p, { base, ready }) {
   await p.until(ready, READY_MS);
   await p.sleep(1500);
   await p.step('M87* as the page opens, its caption');
-  const CAPTION = `(() => { const e = document.getElementById('bh-viewnote'); if (!e) return { text: '', lines: 0 };
-    const lh = parseFloat(getComputedStyle(e).lineHeight) || 16; return { text: e.textContent, lines: Math.round(e.getBoundingClientRect().height / lh) }; })()`;
+  // the view's note (in the panels) and the caption card under the picture: their text, and whether the card shows all
+  // of its words (the card's height is capped on a phone)
+  const CAPTION = `(() => { const e = document.getElementById('bh-viewnote'), c = document.querySelector('#bh-caption .cap-b'), box = document.querySelector('#bh-caption .cap');
+    return { note: e ? e.textContent : null, card: c ? c.textContent : null, cut: box ? box.scrollHeight - box.clientHeight : null }; })()`;
   const c = await p.ev(CAPTION);
-  const card = await p.ev(`(document.querySelector('#bh-caption .cap-b') || {}).textContent || ''`);
-  p.check('the caption card under the picture, seen at every width, gives the clock in short', /Time here runs at 7\.5 M a second: an orbit at the ISCO takes 3\.2 s here and 8\.89 d at M87\*\./.test(card), card);
-  p.check('the view\'s caption states the page\'s clock for M87* as a distant clock counts it',
-    /Time here runs at 7\.5 M a second: a second here is 2\.78 d by a distant clock at M87\*, and an orbit at the ISCO takes 3\.2 s here and 8\.89 d there\./.test(c.text), `${c.lines} lines: ${c.text}`);
-  // where nothing turns, no sentence about a turning disk (review_spin 4): the telescope's thin emitter, a paused disk
-  await p.go(`${base}/labs/bh_animation_page.html?o=m87&v=telescope&n=0`);
-  await p.until(ready, READY_MS);
-  await p.sleep(1000);
-  const t = await p.ev(CAPTION);
-  p.check('the telescope view, whose thin emitter carries no texture, says nothing of a turning disk', !/Time here runs/.test(t.text), t.text);
-  await p.go(`${base}/labs/bh_animation_page.html?o=m87&n=0&an=0`);
-  await p.until(ready, READY_MS);
-  await p.sleep(1000);
-  const z = await p.ev(CAPTION);
-  p.check('a paused disk says nothing of a turning disk', !/Time here runs/.test(z.text), z.text);
+  p.check('the caption card under the picture gives the clock in short, by a distant clock, and shows every word of it',
+    /Time here runs at 7\.5 M a second: an orbit at the ISCO takes 3\.2 s here and 8\.89 d by a distant clock\./.test(c.card || '') && c.cut != null && c.cut <= 1, JSON.stringify({ card: c.card, cut: c.cut }));
+  p.check('the view\'s note states the clock for M87* as a distant clock counts it',
+    /Time here runs at 7\.5 M a second: a second here is 2\.78 d by a distant clock at M87\*, and an orbit at the ISCO takes 3\.2 s here and 8\.89 d by that clock\./.test(c.note || ''), c.note);
+  // where nothing turns, no sentence about a turning disk (review_spin 4), read from a note and a card that exist and say
+  // their view (a missing or emptied note passed the first version of these)
+  for (const [q, what, hint] of [['&v=telescope', 'the telescope view, whose thin emitter carries no texture,', /the object as the EHT sees it/], ['&an=0', 'a paused disk', /a camera 46 M away/]]) {
+    await p.go(`${base}/labs/bh_animation_page.html?o=m87&n=0${q}`);
+    await p.until(ready, READY_MS);
+    await p.sleep(1000);
+    const z = await p.ev(CAPTION);
+    p.check(`${what} says nothing of a turning disk, in its note or its card`, hint.test(z.note || '') && !!z.card && !/Time here runs/.test(z.note) && !/Time here runs/.test(z.card), JSON.stringify({ note: (z.note || '').slice(0, 80), card: z.card }));
+  }
 }
 
 /* The record (road 1.09): keep a hole, a reload, a ray the visitor presses and one a link opens, the privacy export,

@@ -262,13 +262,13 @@ float profileT(float r){
   float u = sqrt(clamp((r - uRin)/(uRout - uRin), 0.0, 1.0));
   return texture(uProfile, vec2(u*(511.0/512.0) + 0.5/512.0, 0.5)).r;
 }
-// one copy of the disk's pattern at an angle in the co-moving frame, from one of flow.js's seeds (illustrative structure)
-float diskPattern(float ang, float lr, float seed){
+// one copy of the disk pattern's random core at an angle in the co-moving frame, from one of flow.js's seeds
+// (illustrative structure)
+float diskCore(float ang, float lr, float seed){
   vec3 p = vec3(cos(ang)*5.5, sin(ang)*5.5, lr*16.0) + vec3(seed*13.7, seed*7.9, 0.0);   // seeds far apart: independent copies
   float body = fbm(p*vec3(1.0, 1.0, 0.5));
   float ridge = 1.0 - abs(2.0*fbm(p*vec3(1.7, 1.7, 1.3) + 4.0) - 1.0);   // filaments
-  float lanes = 0.5 + 0.5*sin(lr*42.0 + 3.0*body);                         // thin lanes along the orbits
-  return 0.30 + 1.05*body*body*2.0*(0.55 + 0.75*ridge*ridge) * (0.75 + 0.35*lanes);
+  return 1.05*body*body*2.0*(0.55 + 0.75*ridge*ridge);
 }
 float turbulence(float r, float phiW){
   // Each annulus turns at its own Kerr orbital frequency. One pattern carried along wound into rings finer than the
@@ -281,11 +281,14 @@ float turbulence(float r, float phiW){
   float c0 = floor(uTime/T), c1 = floor(uTime/T + 0.5);
   float t0 = uTime - c0*T, t1 = uTime + 0.5*T - c1*T;
   float w0 = 1.0 - abs(2.0*t0/T - 1.0), w1 = 1.0 - w0;
-  float v0 = diskPattern(phiW - Om*t0, lr, mod(c0*2.0, ${FLOW.seeds.toFixed(1)}));
-  float v1 = diskPattern(phiW - Om*t1, lr, mod(c1*2.0 + 1.0, ${FLOW.seeds.toFixed(1)}));
-  // two independent copies blended around the pattern's own mean, their spread kept (flow.js flowBlend)
-  float m = ${FLOW.patternMean.toFixed(4)};
-  return max(0.05, m + (w0*(v0 - m) + w1*(v1 - m))*inversesqrt(w0*w0 + w1*w1 + ${(2 * FLOW.copyCorrelation).toFixed(4)}*w0*w1));
+  float x0 = diskCore(phiW - Om*t0, lr, mod(c0*2.0, ${FLOW.seeds.toFixed(1)}));
+  float x1 = diskCore(phiW - Om*t1, lr, mod(c1*2.0 + 1.0, ${FLOW.seeds.toFixed(1)}));
+  // the two independent cores blended around the core's own mean, their spread kept (flow.js flowBlend)
+  float m = ${FLOW.coreMean.toFixed(4)};
+  float x = max(0.0, m + (w0*(x0 - m) + w1*(x1 - m))*inversesqrt(w0*w0 + w1*w1));
+  // thin lanes along the orbits: rings drawn once, the same for both copies and however far the disk turns
+  float lanes = 0.5 + 0.5*sin(lr*42.0);
+  return 0.30 + x*(0.75 + 0.35*lanes);
 }
 vec3 diskColor(vec4 g0, vec4 g2){
   float r = g0.x, phiW = g0.y + uAz, g = max(g0.z, 1e-3);
