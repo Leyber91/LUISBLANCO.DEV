@@ -7,8 +7,8 @@
    lookOf), so a world found as "airless" is drawn airless.
    ============================================================ */
 
-import { classify } from './data.js';
-import { equilibriumTemp, insolation, earthLikeness, sizeClassOf } from './science.js';
+import { classify, OWN_HEAT_LABEL } from './data.js';
+import { equilibriumTemp, insolation, earthLikeness, sizeClassOf, ownHeat, OWN_HEAT } from './science.js';
 import { PHYS } from './config.js';
 import { int } from '../kit/format.js';
 import { starNum } from './starlight.js';
@@ -17,8 +17,8 @@ const isNum = (v) => typeof v === 'number' && isFinite(v);
 
 /* "cold" is an equilibrium temperature under COLD_K and "hot" one of HOT_K or more. */
 export const COLD_K = 200, HOT_K = 1000;
-/* A published temperature more than this many times what the starlight gives is the planet's own heat. */
-export const OWN_HEAT = 2;
+/* The bound of a planet's own heat, kept with its rule in starlight.js (ownHeat). */
+export { OWN_HEAT };
 
 /* The kind of world the picture draws for a planet, kept once per planet: its look, whether it is drawn
    with one face to its star, the label the page prints, and whether the archive holds a radius for it
@@ -34,18 +34,14 @@ export function kindOf(p) {
    the starlight at Bond albedo 0.3 (science.js equilibriumTemp), which needs the star's temperature and
    radius and the orbit, or the archive's insolation. Null when neither exists: a world with no published
    value whose star lacks a temperature or a radius is not given one.
-   Null too for a planet seen by its own heat. Those are young giants, most of them found by direct imaging
-   far from their stars: the starlight would leave them at a few kelvin while they glow at a thousand, and
-   the temperature the archive lists for them is their own. Two tests find them: the method is imaging, or
-   the published value is more than OWN_HEAT times what the starlight gives (bet Pic c, found by radial
-   velocity, is listed at 1,250 K where the starlight gives 268 K; on 2026-11-15 the archive had 64 such
-   worlds). Neither number is an equilibrium with starlight, so such a planet is not cold, not hot, and comes
-   last in an order by temperature. */
+   Null too for a planet seen by its own heat (starlight.js ownHeat, the rule a gas giant's name uses too:
+   the method is imaging, or the published value is more than OWN_HEAT times the starlight's by this page's
+   starlight and, where the archive lists an insolation, by that too). Such a planet is not cold, not hot,
+   and comes last in an order by temperature. */
 export function tempOf(p) {
-  if (p.method === 'Imaging') return null;
-  const t = equilibriumTemp(p, 0.3);
-  if (isNum(p.Teq) && isNum(t) && p.Teq > OWN_HEAT * t) return null;
+  if (ownHeat(p)) return null;
   if (isNum(p.Teq)) return { T: p.Teq, published: true };
+  const t = equilibriumTemp(p, 0.3);
   return isNum(t) ? { T: t, published: false } : null;
 }
 
@@ -103,11 +99,12 @@ export function kindLine(p) {
 }
 /* The kind, and the value the list is ordered by, with its unit. */
 export function hitFact(p, key) {
-  const t = tempOf(p);
+  const t = tempOf(p), own = !t && ownHeat(p);
   const v = key === 'dist' ? (isNum(p.dist) ? `${fmtInt(p.dist * PHYS.PC_LY)} ly` : 'distance unknown')
     // the page's own temperature is printed as the sheets print it; the archive's is named as the archive's, and a world
-    // tempOf passes over for its own heat says that, not that it has no temperature (its sheet prints the starlight's)
-    : key === 'T' ? (t ? `${fmtInt(t.T)} K${t.published ? ' published' : ''}` : p.method === 'Imaging' || isNum(p.Teq) ? 'seen by its own heat' : 'no equilibrium temperature')
+    // tempOf passes over for its own heat says that, not that it has no temperature (its sheet prints the starlight's),
+    // once: a gas giant's name already says it
+    : key === 'T' ? (t ? `${fmtInt(t.T)} K${t.published ? ' published' : ''}` : own ? (kindOf(p).label === OWN_HEAT_LABEL ? '' : 'seen by its own heat') : 'no equilibrium temperature')
     : key === 'R' ? (isNum(p.R) ? `${fmt(p.R, 3)} R⊕` : 'no radius')
     : key === 'P' ? (isNum(p.P) ? `${fmt(p.P, 3)} d` : 'no period')
     : key === 'year' ? (p.year ? String(p.year) : '')

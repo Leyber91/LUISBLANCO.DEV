@@ -233,10 +233,10 @@ const MUTANTS = [
   ['the luminosity named as the radius', "L: 'the star\\'s luminosity',", "L: 'the star\\'s radius',"],
 
   /* ---- the equilibrium temperature ---- */
-  ['a temperature with no starlight', '  if (!pos(s.S)) return null;\n  const k = T_ZERO', '  const k = T_ZERO'],
-  ['the albedo taken to the half', 'const k = T_ZERO * Math.pow(1 - albedo, 0.25);', 'const k = T_ZERO * Math.pow(1 - albedo, 0.5);'],
-  ['the albedo left out', 'const k = T_ZERO * Math.pow(1 - albedo, 0.25);', 'const k = T_ZERO;'],
-  ['the temperature as the square root of the starlight', 'k * Math.pow(x, 0.25) : null);', 'k * Math.pow(x, 0.5) : null);'],
+  ['a temperature with no starlight', '  if (!pos(s.S)) return null;\n  const t = (x)', '  const t = (x)'],
+  ['the albedo taken to the half', 'T_ZERO * Math.pow(1 - albedo, 0.25) * Math.pow(S, 0.25)', 'T_ZERO * Math.pow(1 - albedo, 0.5) * Math.pow(S, 0.25)'],
+  ['the albedo left out', 'T_ZERO * Math.pow(1 - albedo, 0.25) * Math.pow(S, 0.25)', 'T_ZERO * Math.pow(S, 0.25)'],
+  ['the temperature as the square root of the starlight', 'Math.pow(1 - albedo, 0.25) * Math.pow(S, 0.25)', 'Math.pow(1 - albedo, 0.25) * Math.pow(S, 0.5)'],
   ['no range for the temperature', 'return { med: t(s.S), lo: t(s.lo), hi: t(s.hi), src: s.src, drawn: s.drawn };', 'return { med: t(s.S), lo: null, hi: null, src: s.src, drawn: s.drawn };'],
   ['the range of the temperature the wrong way round', 'return { med: t(s.S), lo: t(s.lo), hi: t(s.hi), src: s.src, drawn: s.drawn };', 'return { med: t(s.S), lo: t(s.hi), hi: t(s.lo), src: s.src, drawn: s.drawn };'],
   ['the temperature without the errors drawn', 'src: s.src, drawn: s.drawn };', 'src: s.src, drawn: [] };'],
@@ -341,6 +341,24 @@ const MUTANTS = [
   ['the sheet\'s word for the optimistic zone', "opt: 'optimistic', hot: 'too hot'", "opt: 'habitable', hot: 'too hot'"],
   ['the line under the name for hot', "hot: 'hotter than the habitable zone'", "hot: 'too hot'"],
   ['the line under the name for the optimistic zone', "opt: 'in the optimistic habitable zone', hot: 'hotter", "opt: 'in the habitable zone', hot: 'hotter"],
+
+  /* ---- a planet's own heat (moved here from find.js with the rule) ---- */
+  ['an imaged planet\'s listed temperature taken for an equilibrium', `  if (p.method === 'Imaging') return true;\n`, ``],
+  ['every planet not found by transit seen by its own heat', `if (p.method === 'Imaging') return true;`, `if (p.method !== 'Transit') return true;`],
+  ['a listed temperature never its own heat, past the method', `return byArchive === null || p.Teq > OWN_HEAT * byArchive;`, `return false;`],
+  ['own heat from three times the starlight', `export const OWN_HEAT = 2;`, `export const OWN_HEAT = 3;`],
+  ['own heat from one and a half times the starlight', `export const OWN_HEAT = 2;`, `export const OWN_HEAT = 1.5;`],
+  ['exactly twice the starlight counted as own heat', `!(p.Teq > OWN_HEAT * t)`, `!(p.Teq >= OWN_HEAT * t)`],
+  ['own heat said where the starlight is not known', `if (!isNum(t) || !(p.Teq > OWN_HEAT * t)) return false;`, `if (isNum(t) && !(p.Teq > OWN_HEAT * t)) return false;`],
+  ['own heat held against the starlight at albedo 0', `const t = equilibriumTemp(p, 0.3);\n  if (!isNum(t)`, `const t = equilibriumTemp(p, 0);\n  if (!isNum(t)`],
+  ['a listed value that is no finite number taken as one', `  if (!isNum(p.Teq)) return false;\n`, ``],
+  ['the archive\'s insolation ignored', `return byArchive === null || p.Teq > OWN_HEAT * byArchive;`, `return true;`],
+  ['own heat only where the archive has an insolation', `return byArchive === null || p.Teq`, `return byArchive !== null && p.Teq`],
+  ['exactly twice the archive\'s counted as own heat', `p.Teq > OWN_HEAT * byArchive;`, `p.Teq >= OWN_HEAT * byArchive;`],
+  ['the archive\'s insolation read at albedo 0', `pos(p.S) ? teqFromS(p.S, 0.3) : null`, `pos(p.S) ? teqFromS(p.S, 0) : null`],
+  ['a negative insolation held against it', `const byArchive = pos(p.S) ?`, `const byArchive = isNum(p.S) ?`],
+  ['an infinite insolation held against it', `const byArchive = pos(p.S) ?`, `const byArchive = p.S !== null && p.S !== undefined ?`],
+  ['own heat by the archive\'s insolation alone', `if (!isNum(t) || !(p.Teq > OWN_HEAT * t)) return false;`, `if (!isNum(t)) return false;`],
 
   /* ---- where view D draws an orbit ---- */
   ['an orbit drawn with no zone', "if (!hz || !pos(a)) return 'unknown';", "if (!hz && !pos(a)) return 'unknown';"],
