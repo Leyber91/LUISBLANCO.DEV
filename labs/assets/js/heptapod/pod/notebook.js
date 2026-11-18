@@ -48,7 +48,7 @@ export function mountNotebook({ list, key, count }, hooks) {
     key.textContent = '';
     const grid = el('div', 'nb-keygrid');
     grid.setAttribute('role', 'img');
-    grid.setAttribute('aria-label', 'The table every notebook entry uses. Rows are the six things on the tray. Columns are what you did: taken at the glass, taken far from it, held up at the glass, held up far from it, set down at the glass, set down far from it, passed through the glass. A number is how many times you have done it today.');
+    grid.setAttribute('aria-label', 'The table every notebook entry uses. Rows are the six things on the table. Columns are what you did: taken at the glass, taken far from it, held up at the glass, held up far from it, set down at the glass, set down far from it, passed through the glass. A number is how many times you have done it today.');
     grid.append(el('span', 'nb-corner'));
     COLS.forEach(([act, place]) => { const i = new Image(); i.src = actImage(act, place, 30, colors); i.alt = ''; i.className = 'nb-ch'; grid.append(i); });
     const seen = new Array(42).fill(0);
@@ -129,8 +129,8 @@ export function mountNotebook({ list, key, count }, hooks) {
     if (!entry.tokens.length) meta.textContent = 'too little ink to know it again';
     else if (truth) {
       const ext = entry.tokens.map((t) => new Set(sp.ext.get(t) || [])).reduce((a, b) => new Set([...a].filter((x) => b.has(x))));
-      meta.textContent = ext.size ? `used for ${ext.size} of the 42 scenes; you saw ${new Set(acts.map((i) => state.acts[i].scene)).size}` : 'used for no scene of the tray';
-    } else meta.textContent = acts.length ? `in ${acts.length} of ${state.acts.length} ring${state.acts.length === 1 ? '' : 's'}` : 'in no ring about the tray yet';
+      meta.textContent = ext.size ? `used for ${ext.size} of the 42 scenes; you saw ${new Set(acts.map((i) => state.acts[i].scene)).size}` : 'used for no scene of the table';
+    } else meta.textContent = acts.length ? `in ${acts.length} of ${state.acts.length} ring${state.acts.length === 1 ? '' : 's'}` : 'in no ring about the table yet';
     if (from) meta.append(el('span', 'nb-from', from));
     const guess = el('input', 'nb-guess');
     guess.type = 'text'; guess.maxLength = DAY.GUESS_MAX; guess.value = entry.guess || ''; guess.placeholder = 'your guess, in pencil'; guess.spellcheck = false; guess.autocomplete = 'off';
