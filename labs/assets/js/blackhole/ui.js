@@ -17,7 +17,7 @@ import { buildDrawing } from './drawing.js';
 import { mountAsk } from './ask.js';
 import { exportPlate, exportState, importState, exportData, PLATE_SS, thumbnail } from './plate.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
-import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, tangentToScreen, SUBRING } from './probe.js';
+import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, tangentToScreen, SUBRING, ticksOf } from './probe.js';
 
 /** The texels of the GPU's measuring row; the Measure card's note quotes it. */
 const STRIP_N = 4096;
@@ -304,8 +304,8 @@ export function buildUI(app) {
       anchorKey = key;
       try {
         // the first pass runs inline (about 50 ms) so the labels exist with the first frame, and leaves a traced edge
-        // (45 to 100 ms more in node on this machine, 2026-11-18) to the worker, which sends the whole set straight
-        // after; later passes go to the worker
+        // (45 to 130 ms more in node on this machine, 2026-11-18, the higher under load) to the worker, which sends
+        // the whole set straight after; later passes go to the worker
         const first = anchorsRuns++ === 0 && !!worker;
         const res = first || !worker ? anchorsInline(first ? { ...args, edge: false } : args) : await call('anchors', args);
         if (key !== anchorKey) return;
@@ -346,18 +346,12 @@ export function buildUI(app) {
     const ly = Math.max(pad + 14, Math.min(H - pad - 14, y + dy));
     return { lx, ly, end };
   }
-  /** The traced edge as short ticks across the theory curve, one a direction, fewer where they would stand closer than
-   *  9 px. A dashed line laid on the solid curve in the same ink read as the curve itself (review_edge 1). */
+  /** The traced edge as short ticks across the theory curve (probe.js ticksOf). A dashed line laid on the solid curve
+   *  in the same ink read as the curve itself (review_edge 1). */
   function edgeTicks(e, th) {
     const [ox, oy] = toScreen(e.cx, e.cy, th);
-    const pts = e.runs.flat().map(([sx, sy]) => toScreen(sx, sy, th));
-    if (!pts.length) return '';
-    const R = pts.reduce((m, [x, y]) => m + Math.hypot(x - ox, y - oy), 0) / pts.length;
-    const every = Math.max(1, Math.ceil(9 / (R * 2 * Math.PI / e.n)));
-    return pts.filter((_, i) => i % every === 0).map(([x, y]) => {
-      const d = Math.hypot(x - ox, y - oy) || 1, ux = (x - ox) / d, uy = (y - oy) / d;
-      return `M${(x - 4 * ux).toFixed(1)},${(y - 4 * uy).toFixed(1)}L${(x + 4 * ux).toFixed(1)},${(y + 4 * uy).toFixed(1)}`;
-    }).join('');
+    const pts = e.runs.map((run) => run.map(([sx, sy, k]) => [...toScreen(sx, sy, th), k]));
+    return ticksOf(pts, ox, oy, e.n, e.closed).map(([x0, y0, x1, y1]) => `M${x0.toFixed(1)},${y0.toFixed(1)}L${x1.toFixed(1)},${y1.toFixed(1)}`).join('');
   }
   function drawOverlay() {
     const W = window.innerWidth, H = window.innerHeight;

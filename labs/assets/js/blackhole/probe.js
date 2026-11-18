@@ -141,14 +141,14 @@ export function anchors({ view, aspect, nx = 72, ny = 44, tpeakK = 0, fcol = 1.7
   }
   const g = cells.filter((c) => c.fate === 'disk').map((c) => c.g);
   return {
-    key, shadow, edge, limb, ring, isco, spectrum, th, aspect,
+    key, shadow, edge, edgeTraced: withEdge, limb, ring, isco, spectrum, th, aspect,
     gmin: g.length ? Math.min(...g) : null, gmax: g.length ? Math.max(...g) : null,
     grid: { nx, ny, fates: cells.map((c) => (c.fate === 'captured' ? -1 : c.fate === 'disk' ? c.n : -2)) },
   };
 }
 
-/** How many directions the traced edge is found in: 3 deg apart, so on a shadow 600 px across a straight segment
- *  between two points strays at most 0.1 px from the curve. */
+/** How many directions the traced edge is found in: 3 deg apart, so on the telescope view's shadow at 1440 px the
+ *  ticks stand 11.3 to 11.6 px apart (edge.test.mjs holds them between 9 and 16 px). */
 export const OUTLINE_N = 120;
 
 /** The rays the traced edge is found with: the disk switched off, as kerr.js bisectEdge and the renderer's
@@ -166,8 +166,8 @@ export const inShadow = (res) => res.fate === 'captured' && !res.maxed;
  *  outside), widening the bracket until it holds, and bisects it 10 times (to a thousandth of the bracket). A
  *  direction gives no point where the edge lies beyond the screen (the shadow runs off the frame) or no bracket is
  *  found, and the line breaks there.
- *  Returns the runs of [sx, sy] in direction order (closed when every direction gave a point), the rays traced and
- *  the centre the directions start from. */
+ *  Returns the runs of [sx, sy, direction] in direction order (closed when every direction gave a point), the rays
+ *  traced and the centre the directions start from. */
 export function outline({ a, cam, opts, X, Y, cx, cy, r0, n = OUTLINE_N, iters = 10 }) {
   const trace = (x, y) => inShadow(K.traceRay(a, cam, x, y, 1, opts));
   if (!(r0 > 0) || !trace(cx, cy)) return null;
@@ -188,7 +188,7 @@ export function outline({ a, cam, opts, X, Y, cx, cy, r0, n = OUTLINE_N, iters =
         r = 0.5 * (lo + hi);
         // only a point on the screen: from a centre off it, a direction runs off the screen before it enters
         const x = cx + r * dx, y = cy + r * dy;
-        if (Math.abs(x) <= X && Math.abs(y) <= Y) pt = [x, y];
+        if (Math.abs(x) <= X && Math.abs(y) <= Y) pt = [x, y, k];
       }
     }
     pts.push(pt);
@@ -200,6 +200,31 @@ export function outline({ a, cam, opts, X, Y, cx, cy, r0, n = OUTLINE_N, iters =
   // a run that ends at the last direction continues into the one that starts at the first
   if (!closed && runs.length > 1 && pts[0] && pts[n - 1]) runs[0] = runs.pop().concat(runs[0]);
   return { runs, closed, n, rays, cx, cy };
+}
+
+/** The traced edge's ticks on the screen: from the runs of points [x, y, direction] in screen px, the centre (ox, oy)
+ *  in px and whether the line is closed, short marks across the line, 8 px long. A tick stands at every direction
+ *  that is a multiple of the spacing, the smallest that keeps every tick at least gap px from the next, measured on
+ *  the screen and on a closed line where its last tick meets its first (a spacing estimated from a mean radius
+ *  doubled a tick there, 1.2 px apart, review_edge N1).
+ *  Returns [[x0, y0, x1, y1, xc, yc], ...]. */
+export function ticksOf(runs, ox, oy, n, closed, gap = 9) {
+  if (!runs.flat().length) return [];
+  const keep = (every) => runs.flat().filter((p) => p[2] % every === 0);
+  const close = (kept) => {
+    for (let i = 1; i < kept.length; i++) if (Math.hypot(kept[i][0] - kept[i - 1][0], kept[i][1] - kept[i - 1][1]) < gap) return true;
+    const [f, l] = [kept[0], kept[kept.length - 1]];
+    return closed && kept.length > 2 && Math.hypot(f[0] - l[0], f[1] - l[1]) < gap;
+  };
+  let kept = keep(n);
+  for (let every = 1; every <= n; every++) {
+    const k = keep(every);
+    if (k.length && !close(k)) { kept = k; break; }
+  }
+  return kept.map(([x, y]) => {
+    const d = Math.hypot(x - ox, y - oy) || 1, ux = (x - ox) / d, uy = (y - oy) / d;
+    return [x - 4 * ux, y - 4 * uy, x + 4 * ux, y + 4 * uy, x, y];
+  });
 }
 
 /** Sub-ring widths traced with the charge; the Lyapunov comparison (Johnson et al. 2020)

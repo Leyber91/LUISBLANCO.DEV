@@ -10,16 +10,19 @@
    list was widened after review_edge (2026-11-18), when 11 of a
    reviewer's 20 loosened conditions passed the first checks.
 
-   Not listed, because no rule the visitor sees breaks:
+   Not listed, because no rule the visitor sees breaks (checked
+   2026-11-18, the second read's mutants among them):
    - the step factor 0.2: its points stay within 0.17 px of a
      converged trace at every view the test holds;
-   - starting the directions from the screen's centre: the line is
-     the same wherever the start lies inside the shadow;
-   - the three bounds that keep a bracket on the screen (tMax > 0,
-     the low end, the widening): since a point off the screen is
-     dropped (a listed rule), they only save rays, and tMax > 0
-     matters only from a centre off the screen, which the anchors
-     never give (2026-11-18).
+   - 7 or 8 bisections: 0.39 and 0.20 px, inside the 0.5 px the
+     ticks need; 10 keeps a margin;
+   - two bounds that keep a bracket on the screen (tMax > 0, the
+     low end): a point off the screen is dropped (a listed rule),
+     so they only save rays, and tMax > 0 matters only from a
+     centre off the screen, which the anchors never give.
+   The second list breaks the shader: a line re-added in the
+   notes block, in a spelling the first source check did not
+   know.
    ============================================================ */
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -38,11 +41,19 @@ const MUTANTS = [
   ['the bracket never shrinks', `!inLo && s < 8; s++)`, `!inLo && s < 0; s++)`],
   ['the bracket widens once', `hi < tMax && s < 12; s++)`, `hi < tMax && s < 1; s++)`],
   ['the radius not carried to the next direction', `        r = 0.5 * (lo + hi);`, `        const r = 0.5 * (lo + hi);`],
+  ['the widening not stopped at the screen', `inLo && inHi && hi < tMax && s < 12; s++)`, `inLo && inHi && s < 12; s++)`],
+  ['the directions started from the screen\'s centre', `X: th * aspect, Y: th, cx, cy, r0: right - cx });`, `X: th * aspect, Y: th, cx: 0, cy: 0, r0: right - cx });`],
   ['the Y bound read as X', `(Math.sign(dy) * Y - cy) / dy`, `(Math.sign(dy) * X - cy) / dy`],
-  ['a point off the screen kept', `if (Math.abs(x) <= X && Math.abs(y) <= Y) pt = [x, y];`, `pt = [x, y];`],
+  ['a point off the screen kept', `if (Math.abs(x) <= X && Math.abs(y) <= Y) pt = [x, y, k];`, `pt = [x, y, k];`],
+  ['the screen bound in x only', `if (Math.abs(x) <= X && Math.abs(y) <= Y) pt = [x, y, k];`, `if (Math.abs(x) <= X) pt = [x, y, k];`],
   ['three bisections', `n = OUTLINE_N, iters = 10 }) {`, `n = OUTLINE_N, iters = 3 }) {`],
   ['six bisections', `n = OUTLINE_N, iters = 10 }) {`, `n = OUTLINE_N, iters = 6 }) {`],
   ['24 directions', `export const OUTLINE_N = 120;`, `export const OUTLINE_N = 24;`],
+  ['60 directions', `export const OUTLINE_N = 120;`, `export const OUTLINE_N = 60;`],
+  // the ticks
+  ['the gap between the ticks not measured where the line closes', `    return closed && kept.length > 2 && Math.hypot(f[0] - l[0], f[1] - l[1]) < gap;`, `    return false;`],
+  ['ticks 4 px apart allowed', `export function ticksOf(runs, ox, oy, n, closed, gap = 9) {`, `export function ticksOf(runs, ox, oy, n, closed, gap = 4) {`],
+  ['a tick at every point whatever the spacing', `  const keep = (every) => runs.flat().filter((p) => p[2] % every === 0);`, `  const keep = (every) => runs.flat();`],
   // the runs
   ['never closed', `const closed = pts.every(Boolean);`, `const closed = false;`],
   ['closed although a direction gave no point', `const closed = pts.every(Boolean);`, `const closed = pts.some(Boolean);`],
@@ -55,4 +66,11 @@ const MUTANTS = [
   ['the edge never traced', `    if (withEdge) edge = outline(`, `    if (!withEdge) edge = outline(`],
 ];
 
-process.exit(await runMutants({ here, file: 'probe.js', test: '../edge.test.mjs', mutants: MUTANTS }));
+const SHADER = [
+  ['the ISCO line re-added in another spelling', `      if (uHL > 0.0 && abs(m.x - uHL) < dr*0.9 && dr < 0.6)`, `      if (abs(uRin - m.x) < dr*0.9 && dr < 0.6) col = mix(col, vec3(0.62, 0.70, 0.84), 0.85);\n      if (uHL > 0.0 && abs(m.x - uHL) < dr*0.9 && dr < 0.6)`],
+  ['an edge re-added from a neighbour\'s fate', `      if (uHL > 0.0 && abs(m.x - uHL) < dr*0.9 && dr < 0.6)`, `      if ((m.w > -1.5 && m.w < -0.5) != (nx.w > -1.5 && nx.w < -0.5)) col = mix(col, vec3(0.6), 0.4);\n      if (uHL > 0.0 && abs(m.x - uHL) < dr*0.9 && dr < 0.6)`],
+];
+
+const a = await runMutants({ here, file: 'probe.js', test: '../edge.test.mjs', mutants: MUTANTS });
+const b = await runMutants({ here, file: 'shaders.js', test: '../edge.test.mjs', mutants: SHADER });
+process.exit(a || b);

@@ -21,9 +21,10 @@
 
 import * as K from './kerr.js';
 import { Store } from './state.js';
-import { anchors, edgeOpts, inShadow, camFor, outline } from './probe.js';
+import { anchors, edgeOpts, inShadow, camFor, outline, ticksOf } from './probe.js';
 import { shadowFor } from './physics.js';
 import * as S from './shaders.js';
+import { glslMark } from './palette.js';
 
 let fails = 0, checks = 0;
 const ok = (name, cond, detail = '') => {
@@ -132,7 +133,8 @@ for (const { name, patch, want, W, H, whole, theory } of VIEWS) {
   }
   ok(`${name}: the edge is the outline, no ray of the shadow beyond any point toward the screen's edge`, beyond === 0, `${beyond} of ${pts.length}`);
 
-  // each segment between neighbouring points stays on the edge: its midpoint within 3 px of the change of fate
+  // neighbouring points of a run lie on one stretch of the edge: the midpoint between them is within 3 px of the change
+  // of fate, so a run never joins two stretches across a gap (the runs decide where the ticks may stand)
   let chord = 0, chordAt = '';
   const segs = [];
   for (const r of e.runs) for (let i = 0; i + 1 < r.length + (e.closed ? 1 : 0); i++) segs.push([r[i], r[(i + 1) % r.length]]);
@@ -140,7 +142,7 @@ for (const { name, patch, want, W, H, whole, theory } of VIEWS) {
     const mx = 0.5 * (x0 + x1), my = 0.5 * (y0 + y1), [ux, uy] = unit(mx, my);
     if (!cap(mx - 3 * px * ux, my - 3 * px * uy) || cap(mx + 3 * px * ux, my + 3 * px * uy)) { chord++; chordAt ||= `${mx.toFixed(4)},${my.toFixed(4)}`; }
   }
-  ok(`${name}: every segment between neighbouring points stays within 3 px of the edge`, chord === 0, `${chord} of ${segs.length}${chordAt ? ', first at ' + chordAt : ''}`);
+  ok(`${name}: neighbouring points of a run lie on one stretch of the edge, their midpoint within 3 px of it`, chord === 0, `${chord} of ${segs.length}${chordAt ? ', first at ' + chordAt : ''}`);
 
   // the cost: the radius found in one direction starts the next, so a direction costs a bracket and 10 bisections
   ok(`${name}: the edge costs at most 13 rays a direction`, e.rays <= 13 * e.n, `${(e.rays / e.n).toFixed(2)} a direction`);
@@ -166,6 +168,30 @@ for (const { name, patch, want, W, H, whole, theory } of VIEWS) {
   }
 }
 
+// the ticks (probe.js ticksOf, as ui.js edgeTicks calls it): on the screen, no two closer than 9 px, the one where a
+// closed line meets itself included (a doubled tick stood there when the spacing did not divide the directions,
+// review_edge N1), and at the telescope view at 1440 no two farther apart than 16 px
+const toScreen = (sx, sy, th, W, H) => { const asp = W / H; return [(sx / (th * asp) + 1) / 2 * W, (1 - (sy / th + 1) / 2) * H]; };
+for (const [name, extra, W, H, maxGap] of [
+  ['the telescope at 1440', {}, 1440, 900, 16], ['the telescope at 390', {}, 390, 844, null],
+  ['the telescope at 1280 x 800, fov 8', { fov: 8 }, 1280, 800, null], ['the telescope at 1440, fov 9', { fov: 9 }, 1440, 900, null],
+  ['the telescope at 1440, fov 10', { fov: 10 }, 1440, 900, null], ['the telescope at 390, fov 8', { fov: 8 }, 390, 844, null],
+]) {
+  const st = new Store();
+  st.set(tel(extra)(st), { instant: true });
+  const an = anchors({ view: st.view(), aspect: W / H, edge: true }), e = an.edge;
+  if (!e) { ok(`ticks, ${name}: the edge exists`, false, 'none'); continue; }
+  const [ox, oy] = toScreen(e.cx, e.cy, an.th, W, H);
+  const ticks = ticksOf(e.runs.map((r) => r.map(([sx, sy, k]) => [...toScreen(sx, sy, an.th, W, H), k])), ox, oy, e.n, e.closed);
+  const c = ticks.map((k) => [k[4], k[5]]);
+  const gaps = [];
+  for (let i = 1; i < c.length; i++) gaps.push(Math.hypot(c[i][0] - c[i - 1][0], c[i][1] - c[i - 1][1]));
+  if (e.closed && c.length > 2) gaps.push(Math.hypot(c[0][0] - c[c.length - 1][0], c[0][1] - c[c.length - 1][1]));
+  const lo = Math.min(...gaps), hi = Math.max(...gaps);
+  ok(`ticks, ${name}: ${c.length} ticks, none closer than 9 px to the next, where the line closes included`, c.length >= 8 && lo >= 9, `closest ${lo.toFixed(2)} px, farthest ${hi.toFixed(2)} px`);
+  if (maxGap) ok(`ticks, ${name}: none farther than ${maxGap} px from the next`, hi <= maxGap, `farthest ${hi.toFixed(2)} px`);
+}
+
 // outline() itself, where the anchors never take it: a centre outside the shadow gives no line; a first radius three
 // times too large or five times too small still gives the whole line (the bracket shrinks and widens); a centre off
 // the screen gives points on the screen only
@@ -187,6 +213,12 @@ for (const { name, patch, want, W, H, whole, theory } of VIEWS) {
   // it in the opposite direction)
   let wrongWay = 0;
   if (off) for (const run of off.runs) run.forEach((p, i) => { if (i && directionOf(off, p) !== (directionOf(off, run[i - 1]) + 1) % off.n) wrongWay++; });
+  // and above the screen: a centre halfway up the shadow, the screen's half height half of that, so the bound holds in
+  // y as well as x
+  const cyUp = an.shadow.cy + 0.5 * (an.shadow.top - an.shadow.cy), Ys = 0.5 * Math.abs(cyUp);
+  const offY = outline({ ...base, cy: cyUp, Y: Ys, r0: r });
+  const outsideY = offY ? offY.runs.flat().filter(([x, y]) => Math.abs(x) > base.X * (1 + 1e-9) || Math.abs(y) > Ys * (1 + 1e-9)).length : -1;
+  ok('outline: with the centre off the screen in y every point is on it', outsideY === 0 && !!offY && offY.runs.flat().length > 0, `${outsideY} off, centre y ${cyUp.toFixed(4)} against a half height ${Ys.toFixed(4)}, ${offY ? offY.runs.flat().length : 0} points`);
   ok('outline: with the centre off the screen every run is still consecutive directions in order', !!off && off.runs.length > 0 && wrongWay === 0, off ? `${wrongWay} out of order in ${off.runs.flat().length} points` : 'no line');
 }
 
@@ -195,7 +227,9 @@ for (const { name, patch, want, W, H, whole, theory } of VIEWS) {
 {
   const st = new Store();
   const an = anchors({ view: st.view(), aspect: 1.6 });
-  ok('the anchors trace no edge unless asked', an.edge === null, an.edge ? `${an.edge.rays} rays` : 'none');
+  ok('the anchors trace no edge unless asked, and say so', an.edge === null && an.edgeTraced === false, an.edge ? `${an.edge.rays} rays` : `edgeTraced ${an.edgeTraced}`);
+  const asked = anchors({ view: st.view(), aspect: 1.6, edge: true });
+  ok('anchors asked for the edge say they traced it', asked.edgeTraced === true && !!asked.edge, `edgeTraced ${asked.edgeTraced}`);
 }
 
 // a ray that ran out of steps is not inside the shadow: kerr.js traceRay calls it captured, and at the camera's
@@ -210,6 +244,16 @@ for (const { name, patch, want, W, H, whole, theory } of VIEWS) {
 // EDGE_STEP holds the frame: the same pixels with the notes on and off)
 const shade = S.shadeProgram();
 ok('the shading shader has no per-texel ISCO line', !/uRin\) < dr/.test(shade), 'searched for the old test');
+// the notes block read whole, so a line re-added in another spelling shows: it draws one mark, the annulus a visitor
+// points at, and reads neither the disk's inner radius nor a neighbour's fate (review_edge N4)
+{
+  const at = shade.indexOf('if (uNotes == 1) {');
+  let depth = 0, end = -1;
+  for (let i = shade.indexOf('{', at); i < shade.length; i++) { if (shade[i] === '{') depth++; else if (shade[i] === '}' && --depth === 0) { end = i; break; } }
+  const block = at >= 0 && end > at ? shade.slice(at, end + 1) : '';
+  const mixes = block.match(/col = mix\(col,[^;]*;/g) || [];
+  ok('the notes block draws one mark, the annulus, in its token and at the hover radius', !!block && mixes.length === 1 && mixes[0].includes(glslMark('annulus')) && /uHL/.test(block) && !/uRin|\.w > -1\.5/.test(block), `${mixes.length} marks: ${mixes.join(' | ').slice(0, 160)}`);
+}
 ok('the shading shader has no per-texel shadow edge', !/capx|LAB\.edge|atan\(rel\.y/.test(shade) && !/0\.6200, 0\.7000, 0\.8400/.test(shade), 'searched for the old test and its colour');
 
 console.log(`\n${checks - fails}/${checks} checks passed`);

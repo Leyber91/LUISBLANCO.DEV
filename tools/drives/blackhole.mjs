@@ -472,6 +472,8 @@ const STILL_NOTES = `(async () => {
   const on = await a.renderer.renderStill({ ...f, notes: 1 }, 480, { ss: 1 });
   const off = await a.renderer.renderStill({ ...f, notes: 0 }, 480, { ss: 1 });
   if (!on || !off) return { still: false };
+  // a canvas resized between the two (a tier change) would misalign them: said, not compared (review_edge N6)
+  if (on.width !== off.width || on.height !== off.height) return { still: false, sizes: [on.width, on.height, off.width, off.height] };
   let diff = 0;
   for (let i = 0; i < on.data.length; i += 4) if (on.data[i] !== off.data[i] || on.data[i + 1] !== off.data[i + 1] || on.data[i + 2] !== off.data[i + 2]) diff++;
   return { still: true, pixels: on.data.length / 4, diff };
@@ -505,23 +507,27 @@ export async function EDGE_STEP(p, { base, ready }) {
   p.check('the frame as the page opens is the same with the notes on and off: no line drawn on the shadow\'s rim', s.still && s.diff === 0, JSON.stringify(s));
   const c0 = await p.ev(TICKS);
   p.check('the cinematic view draws no ticks', c0.ticks === 0 && !c0.named, JSON.stringify(c0));
+  // the anchors say when they traced the edge (probe.js edgeTraced), so "no ticks" is read only after they did
+  const TRACED = `(() => { const an = window.__bh.ui.liveAnchors(); return !!(an && an.edgeTraced); })()`;
   await p.go(`${base}/labs/bh_animation_page.html?o=m87&v=telescope`);
   await p.until(ready, READY_MS);
+  const traced0 = await p.until(TRACED, 30000);
   const drawn = await p.until(`!!document.querySelector('#bh-overlay path.edge')`, 30000);
   await p.sleep(1000);
   await p.step('M87* in the telescope view, its traced edge drawn');
   const t1 = await p.ev(TICKS);
   p.check('the telescope view draws the traced edge as ticks across the theory curve, 40 or more, each centred within 1.5 px of it, and its legend names them',
-    !!drawn && t1.ticks >= 40 && t1.curve > 0 && t1.worst != null && t1.worst <= 1.5 && t1.named, JSON.stringify(t1));
+    !!traced0 && !!drawn && t1.ticks >= 40 && t1.curve > 0 && t1.worst != null && t1.worst <= 1.5 && t1.named, JSON.stringify(t1));
   // where there is no theory curve (spin and charge together) no ticks are drawn and none are named; where the grid
   // finds no shadow (fov 20) there are no ticks, and the legend of the curve does not name them
   for (const [q, what, curve] of [['?o=custom&a=0.5&qq=0.5&v=telescope', 'a 0.5 and Q/M 0.5, no theory curve', false], ['?o=m87&v=telescope&f=20', 'fov 20, the shadow smaller than the grid', true]]) {
     await p.go(`${base}/labs/bh_animation_page.html${q}`);
     await p.until(ready, READY_MS);
-    await p.sleep(4000);
+    const traced = await p.until(TRACED, 30000);
+    await p.sleep(500);
     await p.step(`the telescope view, ${what}`);
     const t2 = await p.ev(TICKS);
-    p.check(`the telescope view, ${what}: no ticks drawn without the curve and the shadow both, and none named`, t2.ticks === 0 && !t2.named && (t2.curve > 0) === curve, JSON.stringify(t2));
+    p.check(`the telescope view, ${what}: the anchors traced the edge, and no ticks are drawn without the curve and the shadow both, and none named`, !!traced && t2.ticks === 0 && !t2.named && (t2.curve > 0) === curve, JSON.stringify({ traced, ...t2 }));
   }
 }
 
