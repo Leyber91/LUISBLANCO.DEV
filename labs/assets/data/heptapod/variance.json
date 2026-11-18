@@ -1,0 +1,136 @@
+{
+  "about": "How different the pod's rings are from one another, against the film's logograms among themselves (Luis, 2026-11-18: 'ours look very similar, why is that? did we add enough variance?'). Measure: the gate's coarse marks similarity (research/ip_probe/simprobe.py: 360 x 96 polar, the base ring band removed, rotation and mirror invariant). Rings: the 126 of the three gate species at 1100 px; identical rasters (two scenes the species writes with the same words) counted once. Outcomes of F4-P7 and F4-P8 (predictions.json). Numbers only.",
+  "measuredOn": "2026-11-18",
+  "film": {
+    "nearestOtherOf38": {
+      "p10": 0.582,
+      "p50": 0.712,
+      "p90": 0.915,
+      "max": 0.933
+    },
+    "singleMassNearestOther": {
+      "n": 7,
+      "p50": 0.742,
+      "max": 0.77,
+      "note": "like for like with the pod, whose rings are one clause each"
+    },
+    "allPairs": {
+      "n": 703,
+      "p10": 0.323,
+      "p50": 0.458,
+      "p90": 0.589
+    }
+  },
+  "inkfig-0.5": {
+    "distinctRings": 65,
+    "nearestOther": {
+      "p10": 0.749,
+      "p50": 0.852,
+      "p90": 0.901
+    },
+    "pairsBySectorsDiffering": {
+      "1": {
+        "n": 750,
+        "p50": 0.532
+      },
+      "2": {
+        "n": 1204,
+        "p50": 0.453
+      },
+      "3": {
+        "n": 457,
+        "p50": 0.49
+      },
+      "4": {
+        "n": 57,
+        "p50": 0.575
+      }
+    },
+    "reading": "the look did not follow the meaning: rings sharing no word were as alike as rings one word apart",
+    "suiteMedians": {
+      "arcDeg": 8,
+      "peakR": 0.28,
+      "filaments": 5,
+      "w_cv": 0.519,
+      "gapDeg": 30.25
+    }
+  },
+  "inkfig-0.6": {
+    "distinctRings": 65,
+    "nearestOther": {
+      "p10": 0.803,
+      "p50": 0.873,
+      "p90": 0.906
+    },
+    "pairsBySectorsDiffering": {
+      "1": {
+        "n": 750,
+        "p50": 0.702
+      },
+      "2": {
+        "n": 1204,
+        "p50": 0.711
+      },
+      "3": {
+        "n": 457,
+        "p50": 0.632
+      },
+      "4": {
+        "n": 57,
+        "p50": 0.588
+      }
+    },
+    "reading": "the look follows the meaning (the more words two rings share, the more alike), but every ring of the pod has one grammar, so one skeleton, and the larger masses raised the level",
+    "suiteMedians": {
+      "arcDeg": 18,
+      "peakR": 0.345,
+      "filaments": 7,
+      "w_cv": 0.62,
+      "gapDeg": 30.25
+    },
+    "g4": {
+      "figures": 170,
+      "coarseMedian": 0.692,
+      "coarseMax": 0.853,
+      "fineMax": 0.687,
+      "failsAtFineFloor": 0,
+      "toReview": 117
+    }
+  },
+  "outcomes": {
+    "F4-P7": {
+      "predicted": "nearest-other median at most 0.78",
+      "measured": 0.873,
+      "confirmed": false
+    },
+    "F4-P8": {
+      "predicted": "no figure at or above the fine floor 0.786; coarse median below 0.712",
+      "fineMax": 0.687,
+      "coarseMedian": 0.692,
+      "confirmed": true
+    }
+  },
+  "postHocVariants": {
+    "note": "drawn after F4-P7 had missed, in scratch copies; none adopted",
+    "W_RING 0.06, LOAD_FLOOR 0.45": {
+      "nearestOtherP50": 0.866,
+      "bySectors": {
+        "1": 0.688,
+        "4": 0.578
+      }
+    },
+    "WOBBLE 0.04": {
+      "nearestOtherP50": 0.908
+    },
+    "NODE_DEG 10.5, FIL_LEN 0.22": {
+      "nearestOtherP50": 0.85
+    },
+    "FIL_LEN 0.3, TURN_CELL 0.3": {
+      "nearestOtherP50": 0.856,
+      "bySectors": {
+        "1": 0.685,
+        "4": 0.506
+      }
+    }
+  }
+}
