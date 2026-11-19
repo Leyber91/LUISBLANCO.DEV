@@ -29,7 +29,8 @@ merged. A run that changed nothing still writes its entry, with the reason.
   at 1280 px and 390 px in headless Chromium; the only console errors are the expected ones, the live roast request
   refused by CORS from localhost, the same before and after. Forbidden-name check: runs in the gates workflow on the
   pull request.
-- Gates and merge: recorded below once the pull request's checks finish.
+- Gates on pull request #82: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-18, Seed's five fields have names (roadmap item 1)
 
