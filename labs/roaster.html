@@ -34,7 +34,7 @@
   .inst{display:grid;grid-template-columns:312px 1fr;gap:30px;min-height:0}
   /* left rail */
   .rail{display:flex;flex-direction:column;min-height:0}
-  .rl{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:2px 0 8px}
+  .rl{display:block;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:2px 0 8px}
   .terms{display:flex;flex-direction:column;gap:1px;overflow:auto;min-height:0}
   .terms .t{pointer-events:auto;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;gap:10px;
     padding:9px 12px;border-left:2px solid transparent;color:#AEB8C0;background:transparent;transition:.16s;text-align:left;font:inherit}
@@ -122,7 +122,7 @@
       <div class="rl">his own systems — pick one to roast</div>
       <div class="terms" id="terms"></div>
       <div class="own">
-        <div class="rl">roast your own claim</div>
+        <label class="rl" for="claim">roast your own claim</label>
         <textarea id="claim" placeholder=""></textarea>
         <button id="go" type="button">Roast it &rarr;</button>
       </div>

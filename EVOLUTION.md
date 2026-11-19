@@ -3,6 +3,35 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-19, The Roaster's claim box has a name (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 29 pages and 0 findings on main
+  today, so this run took the next finding the 2026-11-17 sweep left open: the claim box on labs/roaster.html, which
+  comes before labs/md_animation_page.html (one range slider) in that list. This run did not repeat the full sweep.
+- Cause: the caption "roast your own claim" above the box was a div, not tied to the textarea, so a screen reader
+  announced a bare text box.
+- Changed (labs/roaster.html, two lines): the caption is a label for claim, and the .rl rule states display:block so
+  the label keeps the block layout the div had. Measured in headless Chromium over a local http server at 1280 and
+  390 px: the box had 0 labels and no textbox named "roast your own claim" before, and has 1 label and one such
+  textbox after. The caption and the box keep their position and size to the pixel at both widths, the caption keeps
+  its 10.5 px size, colour rgb(107, 118, 130), 2.52 px letter spacing and block display, and the document scroll
+  width equals the screen width.
+- Still open for later runs of item 1, from the 2026-11-17 sweep and not re-checked today: the unnamed range slider
+  on labs/md_animation_page.html; 404.html, hero_proto.html, labs/claude-prep/, labs/figure.html, labs/roaster.html,
+  labs/seed.html, leak_map_demo.html and triad_demos.html have no meta description; labs/claude-prep/ requests
+  seal.json, which returns 404 (Luis decides). Item 2 still has no link to remove: no tracked file outside _archive/
+  references labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 29 pages, 0 findings; levels 32 labs, 0
+  errors; lab tests 100 files, 0 failed; atlas, stories and evolution checks pass (stories prints NOT_CHECKED for the
+  private plans); anti-tells selftest 27 of 27 and no new tells; node tools/anti_tells.mjs scan labs/roaster.html
+  lists 33 tells before and after, none on a changed line. The mutate run was not repeated (no tool changed) and
+  runs in the gates workflow. No script file changed, so there was no syntax check to run. Render: labs/roaster.html
+  at 1280 px and 390 px in headless Chromium; the only console errors are the expected ones, the live roast request
+  refused by CORS from localhost, the same before and after. Forbidden-name check: runs in the gates workflow on the
+  pull request.
+- Gates on pull request #82: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
+
 ## 2026-11-18, Seed's five fields have names (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 29 pages and 0 findings on main
