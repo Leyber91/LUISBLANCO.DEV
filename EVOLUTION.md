@@ -27,7 +27,8 @@ merged. A run that changed nothing still writes its entry, with the reason.
   The mutate run was not repeated (no tool changed) and runs in the gates workflow. Render:
   labs/md_animation_page.html at 1280 px and 390 px in headless Chromium, 0 console errors before and after.
   Forbidden-name check: runs in the gates workflow on the pull request.
-- Merged: pending the gates on the pull request.
+- Gates on pull request #83: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-19, The Roaster's claim box has a name (roadmap item 1)
 
