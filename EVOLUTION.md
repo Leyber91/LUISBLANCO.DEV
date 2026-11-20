@@ -3,6 +3,32 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-20, The Dimensions dial's slider has a name (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 29 pages and 0 findings on main
+  today, so this run took the next finding the 2026-11-17 sweep left open: the unnamed range slider on
+  labs/md_animation_page.html (Dimensions), the last unnamed form field in that list. This run did not repeat the
+  full sweep.
+- Cause: labs/assets/js/dimensional_mania/Console.js builds the Plane Dial's scrub slider (-180 to 180 degrees)
+  with no label and no aria-label, so a screen reader announced a bare slider. The plane name and the degrees shown
+  beside it are separate divs, not tied to it.
+- Changed (Console.js, one added line): the slider carries aria-label "angle of the selected plane, in degrees".
+  Measured in headless Chromium over a local http server at 1280 and 390 px: the page had 1 form field with no name
+  and no slider by that name before, and 0 unnamed fields and one such slider after. The slider keeps its position
+  and size to the pixel at both widths, and the document scroll width equals the screen width.
+- Still open for later runs of item 1, from the 2026-11-17 sweep and not re-checked today: 404.html, hero_proto.html,
+  labs/claude-prep/, labs/figure.html, labs/roaster.html, labs/seed.html, leak_map_demo.html and triad_demos.html
+  have no meta description; labs/claude-prep/ requests seal.json, which returns 404 (Luis decides). Item 2 still has
+  no link to remove: no tracked file outside _archive/ references labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 29 pages, 0 findings; levels 32 labs, 0
+  errors; lab tests 100 files, 0 failed (dimensional_mania has no tests yet); atlas, stories and evolution checks
+  pass (stories prints NOT_CHECKED for the private plans); anti-tells selftest 27 of 27; node tools/anti_tells.mjs
+  scan of Console.js lists 2 tells before and after, none on the changed line. node --check on Console.js passes.
+  The mutate run was not repeated (no tool changed) and runs in the gates workflow. Render:
+  labs/md_animation_page.html at 1280 px and 390 px in headless Chromium, 0 console errors before and after.
+  Forbidden-name check: runs in the gates workflow on the pull request.
+- Merged: pending the gates on the pull request.
+
 ## 2026-11-19, The Roaster's claim box has a name (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 29 pages and 0 findings on main

@@ -102,6 +102,7 @@ export class Console {
     Object.assign(this.scrub, {
       type: 'range', min: DIAL.scrubMin, max: DIAL.scrubMax, step: DIAL.scrubStep, value: 0,
     });
+    this.scrub.setAttribute('aria-label', 'angle of the selected plane, in degrees');
     this.dialMeta.appendChild(this.scrub);
     dialWrap.append(this.dial, this.dialMeta);
     body.appendChild(dialWrap);

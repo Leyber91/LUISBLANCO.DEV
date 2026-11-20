@@ -16,6 +16,9 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-20: Item 1, one finding: on Dimensions the Plane Dial's range slider had no accessible name; it now
+  carries the name "angle of the selected plane, in degrees". Item 1 stays in "Next". Pull request
+  "evolve 2026-11-20: dimensions dial slider has a name".
 - 2026-11-19: Item 1, one finding: on The Roaster the claim box had no accessible name; its caption "roast your own
   claim" is now its label. Item 1 stays in "Next". Pull request "evolve 2026-11-19: roaster claim box has a name".
 - 2026-11-18: Item 1, one finding: on Seed the five fields (grammar, axiom, angle, generation, replay) had no
