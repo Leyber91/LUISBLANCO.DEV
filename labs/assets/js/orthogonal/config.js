@@ -36,6 +36,14 @@ export const SOURCES = Object.freeze({
   // (525 nm, Lingle, Porter and O'Kane 1992, Mycologia) is known here only through a secondary source, so no number
   // for this species is printed.
   kotlobay2018: 'Kotlobay et al., PNAS 115, 12728 (2018)',
+  // the engine's table (assets/data/orthogonal/tech/light.json), opened 2026-11-21 from the copies the road's wheel scout
+  // downloaded (research/wheel_graphs.md G1, G7, M1, M4): Nordhaus's chapter read in sections 1.2.4 to 1.2.7 and Table
+  // 1.1; the Historical Tech Tree's records (title, year, links, date notes) for each row that cites it; Hordijk's
+  // Algorithms 1 to 3; Arthur and Polak's working paper whole
+  nordhaus1996: 'Nordhaus, in Bresnahan and Gordon (eds.), The Economics of New Goods, University of Chicago Press (1996)',
+  htt2025: 'Fortier-Dubois, Historical Tech Tree, historicaltechtree.com (2025)',
+  hordijk2023: 'Hordijk, A Concise and Formal Definition of RAF Sets and the RAF Algorithm, arXiv 2303.01809 (2023)',
+  arthurpolak2006: 'Arthur and Polak, Complexity 11(5), 23 (2006), read as SFI Working Paper 2004-12-042',
 });
 
 /* The lineage's geometry, in CSS px. The lanes are placed as shares of the drawing's width (engine.js lanes): Earth's

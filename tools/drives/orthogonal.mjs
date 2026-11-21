@@ -48,7 +48,8 @@ import { standard } from '../invariants.mjs';
 
 const PAGE = '/labs/orthogonal.html';
 // every step of the world, in the order the footer's reading is measured
-const WORLD_IDS = ['lignin', 'fungi', 'buried', 'farmed', 'nocoal', 'seams', 'luminous', 'coalgas', 'lamp', 'gaslamp', 'trouble'];
+// (grown by the engine since 2026-11-21: worlds/fungi-early.js buildWorld; the ids are the ones it gives the rows it grew)
+const WORLD_IDS = ['ground', 'fungi', 'farmed', 'whaling', 'luminous', 'whaleoil', 'lamp', 'oillamp', 'trouble'];
 // the branch that fired, and the legend's swatch that says what that gold means (the corners are in the ink ladder
 // since pass 3, by the hub's ruling of 2026-11-21 10:49); an order checked right is a decision, so its numbers and
 // their rings are gold
@@ -157,15 +158,15 @@ export default async function orthogonal(p, { base, width, height }) {
     legend: document.querySelector('.legend').textContent.replace(/\\s+/g, ' ').trim() })`);
   p.check('the two branches are named over their lanes, and a legend says what gold, clear ink and fog mean', named.heads === 'Earth|This world' && /branch this world took/.test(named.legend) && /Earth's branch: history/.test(named.legend) && /Fog: invented, or not yet happened/.test(named.legend), JSON.stringify(named));
   // the fog at rest, from the canvas's pixels
-  const fogRest = await p.ev(`({ root: ${FOG_AT('lignin')}, buried: ${FOG_AT('buried')}, seams: ${FOG_AT('seams')}, gaslamp: ${FOG_AT('gaslamp')},
-    besideNocoal: ${FOG_AT('nocoal', 20, 16)}, onNocoal: ${FOG_AT('nocoal')}, trouble: ${FOG_AT('trouble')} })`);
-  p.check("no fog on Earth's branch or on the root both worlds share", fogRest.root === 0 && fogRest.buried === 0 && fogRest.seams === 0 && fogRest.gaslamp === 0, JSON.stringify(fogRest));
-  const trunkFog = await p.ev(FOG_LINE('fungi', 'nocoal'));
+  const fogRest = await p.ev(`({ root: ${FOG_AT('ground')}, whaling: ${FOG_AT('whaling')}, whaleoil: ${FOG_AT('whaleoil')}, oillamp: ${FOG_AT('oillamp')},
+    besideFarmed: ${FOG_AT('farmed', 20, 16)}, onFarmed: ${FOG_AT('farmed')}, trouble: ${FOG_AT('trouble')} })`);
+  p.check("no fog on Earth's branch or on the root both worlds share", fogRest.root === 0 && fogRest.whaling === 0 && fogRest.whaleoil === 0 && fogRest.oillamp === 0, JSON.stringify(fogRest));
+  const trunkFog = await p.ev(FOG_LINE('fungi', 'farmed'));
   p.check("fog beside this world's branch, thinner along its ink", trunkFog.off > 6 && trunkFog.on < 0.8 * trunkFog.off, JSON.stringify(trunkFog));
   // read as density, the texture divided out (FOG_SEEN): a window of alpha alone passed or failed by where the
   // texture's mottling fell once the caption strip moved the lineage (this pass, H4)
-  const seen = { trouble: await p.ev(FOG_SEEN(base, 'trouble')), besideNocoal: await p.ev(FOG_SEEN(base, 'nocoal', 20, 16)) };
-  p.check('more fog on what has not happened than beside what was invented, as the canvas paints it', seen.trouble > 1.5 * seen.besideNocoal && seen.trouble > 0.8, JSON.stringify({ seen, alpha: fogRest }));
+  const seen = { trouble: await p.ev(FOG_SEEN(base, 'trouble')), besideFarmed: await p.ev(FOG_SEEN(base, 'farmed', 20, 16)) };
+  p.check('more fog on what has not happened than beside what was invented, as the canvas paints it', seen.trouble > 1.5 * seen.besideFarmed && seen.trouble > 0.8, JSON.stringify({ seen, alpha: fogRest }));
   const peakRest = await p.ev(FOG_PEAK(base));
   p.check("at rest the fog's densest pixel is within the world brief's 0.16 alpha", fogWithin(peakRest), JSON.stringify(peakRest));
   p.check('every line of the branch is drawn in full on the finished frame', await p.ev(`[...document.querySelectorAll('.edge.fired, .edge.thread')].every((g) => g.getAttribute('data-p') === '1')`));
@@ -197,7 +198,7 @@ export default async function orthogonal(p, { base, width, height }) {
     const lg = getComputedStyle(document.getElementById('lg-earth'));
     return { want, w: C.INK.earth, lines, legend: lg.strokeDasharray }; })`);
   p.check("Earth's branch is drawn dotted: each of its four lines round dots of the rule's size and spacing, no brush stroke, and the legend's sample the same",
-    dots.lines.length === 4 && dots.lines.every((l) => l.dots && l.brush === 0 && l.dash === dots.want && l.cap === 'round' && l.width === dots.w && l.fill === 'none') && dots.legend === dots.want, JSON.stringify(dots));
+    dots.lines.length === 3 && dots.lines.every((l) => l.dots && l.brush === 0 && l.dash === dots.want && l.cap === 'round' && l.width === dots.w && l.fill === 'none') && dots.legend === dots.want, JSON.stringify(dots));
   const cl = await p.ev(CLAIMS);
   p.check('every text of the header, the captions and the legend is a claim or a label, and every claim carries its tag (the evidence line, the note, the provenance, Earth\'s tag)',
     cl.texts >= 12 && cl.claims >= 4 && cl.loose.length === 0 && cl.untagged.length === 0, JSON.stringify(cl));
@@ -209,7 +210,7 @@ export default async function orthogonal(p, { base, width, height }) {
   await press('fungi');
   s = await state();
   p.check('a press on the driver chooses it', s.chosen === 'fungi' && s.reading === 'fungi' && s.url === 'fungi', JSON.stringify({ c: s.chosen, r: s.reading, u: s.url }));
-  p.check("its Earth step is ringed beside it, joined by the row's rule", s.paired === 'buried' && s.rule);
+  p.check('the driver has no Earth step beside it, so nothing is ringed across its row', !s.paired && !s.rule, JSON.stringify({ p: s.paired, r: s.rule }));
   p.check('the reading tags each claim and names its sources', /\[REAL\]/.test(s.readingText) && /Nelsen, DiMichele, Peters and Boyce/.test(s.readingText) && /\[ILLUSTRATIVE\]/.test(s.readingText));
   // a wide plate keeps one footer height for every reading; on a phone the reading is the last block and takes the
   // height of what it says (item 8), so there it is held to its content: no band below its last line
@@ -229,20 +230,20 @@ export default async function orthogonal(p, { base, width, height }) {
   await p.key('ArrowDown'); await p.sleep(200);
   await p.key('ArrowLeft'); await p.sleep(200);
   s = await state();
-  p.check("ArrowLeft crosses to Earth's step for the same job", s.chosen === 'seams' && s.focus === 'seams' && /Earth/.test(s.readingText), s.chosen);
+  p.check("ArrowLeft crosses to Earth's step for the same job", s.chosen === 'whaleoil' && s.focus === 'whaleoil' && /Earth/.test(s.readingText), s.chosen);
   await p.key('ArrowDown'); await p.sleep(200);
   s = await state();
-  p.check("ArrowDown walks Earth's branch", s.chosen === 'coalgas', s.chosen);
+  p.check("ArrowDown walks Earth's branch", s.chosen === 'oillamp', s.chosen);
   await p.key('ArrowRight'); await p.sleep(200);
   s = await state();
-  p.check('ArrowRight crosses back', s.chosen === 'luminous' && s.paired === 'coalgas', s.chosen);
+  p.check("ArrowRight crosses back, its Earth step ringed beside it and joined by the row's rule", s.chosen === 'lamp' && s.paired === 'oillamp' && s.rule, JSON.stringify({ c: s.chosen, p: s.paired, r: s.rule }));
   p.check(width >= 1000 ? 'the footer still keeps its height' : 'the footer still takes the height of what it says', width >= 1000 ? s.readingH === h0 : await fits(), `${h0} then ${s.readingH}`);
   await p.shot('03-keys');
 
   // ---- links
-  await open('node=gaslamp&still');
+  await open('node=oillamp&still');
   s = await state();
-  p.check('a link opens the plate on its step', s.chosen === 'gaslamp' && /^Gas street lamp · Earth/.test(s.readingText), s.readingText.slice(0, 40));
+  p.check('a link opens the plate on its step', s.chosen === 'oillamp' && /^Whale-oil lamp · Earth/.test(s.readingText), s.readingText.slice(0, 40));
   await open('node=nowhere&still');
   s = await state();
   p.check('a step not in the world opens the artifact', s.chosen === 'lamp');
@@ -351,8 +352,8 @@ export default async function orthogonal(p, { base, width, height }) {
   p.check('a first visit counts nothing yet, and is kept in the browser', x.count === '0 answered, 0 right' && x.kept === true && x.store === 'indexeddb' && !x.offMsg, JSON.stringify({ c: x.count, k: x.kept, s: x.store }));
   const saltReal = await p.ev('window.__orthogonal.record().salt');
   p.check('the record has a salt of its own, 32 bits (review C2)', Number.isInteger(saltReal) && saltReal >= 0 && saltReal <= 0xFFFFFFFF, String(saltReal));
-  await press('nocoal');
-  p.check('a step chosen in the reading is kept as an action of the explore mode', await p.until(`window.__orthogonal.record().log.some((e) => e.mode === 'explore' && e.kind === 'choose' && e.node === 'nocoal' && typeof e.t === 'number')`, 4000));
+  await press('luminous');
+  p.check('a step chosen in the reading is kept as an action of the explore mode', await p.until(`window.__orthogonal.record().log.some((e) => e.mode === 'explore' && e.kind === 'choose' && e.node === 'luminous' && typeof e.t === 'number')`, 4000));
   await button('drill-start');
   await view();
   x = await dr();
@@ -456,7 +457,7 @@ export default async function orthogonal(p, { base, width, height }) {
   x = await dr();
   const back = await p.ev(`({ chosen: window.__orthogonal.chosen(), next: window.__orthogonal.record().next, log: window.__orthogonal.record().log.map((e) => e.mode + ':' + e.kind) })`);
   p.check('after a reload the count reads back', x.count === '2 answered, 1 right', x.count);
-  p.check('and the step last chosen, and the next item', back.chosen === 'nocoal' && back.next === 2, JSON.stringify(back));
+  p.check('and the step last chosen, and the next item', back.chosen === 'luminous' && back.next === 2, JSON.stringify(back));
   p.check('and the log of answers and actions, each with its mode: the orders started, the presses, the undo, the leave, the choice in the reading',
     back.log.filter((s) => s === 'practice:answer').length === 2 && back.log.includes('explore:choose') && back.log.filter((s) => s === 'practice:start').length === 3
     && back.log.filter((s) => s === 'practice:press').length === 9 && back.log.includes('practice:undo') && back.log.includes('practice:leave'), back.log.join(' '));
