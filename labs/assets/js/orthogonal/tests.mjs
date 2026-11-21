@@ -83,6 +83,11 @@
   20. Every Earth line, at every width, is drawn as round dots set
       apart (engine.js lineStyle), and the legend's sample with the
       same dots (review H2).
+  21. The fog's peak alpha (the densest texel times the densest cell)
+      in every state, the ignition every 17 ms, at rest and ordering
+      every item, is within the world brief's 0.16 (config.js
+      FOG_LIMIT), and so is every --horizon haze in the CSS (review
+      H3).
    ============================================================ */
 import { spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
@@ -91,9 +96,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { brushStroke } from '../kit/brush.js';
 import { seedOf } from '../kit/rng.js';
-import { EARTH_DOTS, EXERCISE, FOG, INK, LAYOUT, ROLES, SOURCES, STORAGE_OFF, TIMING } from './config.js';
+import { EARTH_DOTS, EXERCISE, FOG, FOG_LIMIT, INK, LAYOUT, ROLES, SOURCES, STORAGE_OFF, TIMING } from './config.js';
 import {
-  arrival, check, checkOrder, drillFog, drillPlaces, fogAt, fogDensity, fogField, ignitionEnd, item, itemSets, judge, layout, needLine, srcsOf,
+  arrival, check, checkOrder, drillFog, drillPlaces, fogAt, fogDensity, fogField, fogTexel, ignitionEnd, item, itemSets, judge, layout, needLine, srcsOf,
   lineStyle, needPath, needsOf, needVerb, pairOf, reading, reasons, stateOf, step, stepBox, stepsOf, strandAt, strandGold, trunk, wrap,
 } from './engine.js';
 import { countLine, fresh, isSalt, Keeper, KINDS, newSalt, RECORD_V, restore, withChoice, withLeave, withPress, withStart, withUndo } from './record.js';
@@ -1189,6 +1194,41 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   // dots a hair apart pass
   ok('the check fails Earth drawn as a solid stroke, as the review found it', !isDotted({ brush: INK.earth, width: INK.earth, dash: null, cap: null }));
   ok('and dots that touch, a gap of one dot, while a hair more passes', !isDotted({ width: 2, dash: [0, 2], cap: 'round' }) && isDotted({ width: 2, dash: [0, 2.01], cap: 'round' }) && !isDotted({ width: 2, dash: [0, 6], cap: 'butt' }));
+}
+
+// ---------------------------------------------------------------- 21. the fog stays within the world brief's budget
+{
+  /* The review of 2026-11-21 (H3) found the fog drawn at 0.28 alpha against the world brief's bound of 0.16: a value
+     raised after the brief was written, with the brief left as it was. The bound is config.js FOG_LIMIT. The canvas
+     paints a cell at fogTexel(v) (the texture's alpha, 0 to 255) times the cell's density (0 to 1), so its peak alpha is
+     the densest texel times the densest cell. Here both are read in every state the plate can be in: every 17 ms of the
+     ignition, at rest, and the exercise's fog around every item, at a wide plate's width and a phone's. A blend between
+     two states never leaves the larger of them. */
+  ok('the fog\'s alpha at density 1 is within the world brief\'s bound', FOG.alpha <= FOG_LIMIT && FOG_LIMIT === 0.16, `${FOG.alpha} against ${FOG_LIMIT}`);
+  let texel = 0;
+  for (let v = 0; v <= 255; v++) texel = Math.max(texel, fogTexel(v));
+  ok('the densest texel of the fog texture is within the bound', texel / 255 <= FOG_LIMIT && texel > 0, `${texel} of 255`);
+  let peak = 0, states = 0;
+  for (const [width, height] of [[640, 560], [390, 0]]) {
+    const lay = layout(WORLD, { width, height, leader: height > 0 });
+    const field = fogField(WORLD, lay);
+    const end = ignitionEnd(WORLD, lay);
+    for (let ms = 0; ms <= end + 17; ms += 17) { states++; for (const d of fogDensity(field, strandAt(WORLD, lay, ms).edges)) peak = Math.max(peak, d); }
+    for (let i = 0; i < 40; i++) {
+      states++;
+      for (const d of drillFog(WORLD, lay, drillPlaces(lay, item(WORLD, i, i, 7).steps), field)) peak = Math.max(peak, d);
+    }
+  }
+  ok(`the fog's peak alpha, over ${states} states (the ignition every 17 ms, at rest, ordering every item), is within the bound`,
+    peak <= 1 && peak > 0.9 && (texel / 255) * peak <= FOG_LIMIT, `${((texel / 255) * peak).toFixed(4)} against ${FOG_LIMIT}`);
+  // just inside and just outside: the alpha the review found, and one a hair over the bound, are refused
+  ok('the check bites: the 0.28 the review found, and 0.1601, are over the bound; 0.16 is within it', !(0.28 <= FOG_LIMIT) && !(0.1601 <= FOG_LIMIT) && 0.16 <= FOG_LIMIT
+    && Math.max(...Array.from({ length: 256 }, (_, v) => fogTexel(v, 0.28))) / 255 > FOG_LIMIT);
+  // every haze of --horizon the plate's CSS draws (the legend's swatch of the fog, the fog over the render, the sheet's
+  // grid and glow) is within the bound too
+  const css = fs.readFileSync(path.join(LABS, 'assets', 'css', 'orthogonal.css'), 'utf8');
+  const hazes = [...css.matchAll(/rgba\(\s*159\s*,\s*179\s*,\s*214\s*,\s*([\d.]+)\s*\)/g)].map((m) => Number(m[1]));
+  ok(`every --horizon haze in orthogonal.css is within the bound (${hazes.length})`, hazes.length >= 4 && hazes.every((a) => a <= FOG_LIMIT), hazes.join(', '));
 }
 
 console.log(`orthogonal: ${pass} passed, ${fail} failed`);

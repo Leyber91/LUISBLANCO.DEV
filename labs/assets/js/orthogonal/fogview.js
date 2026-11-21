@@ -20,7 +20,7 @@
    ============================================================ */
 import { fogNoise } from '../kit/fog.js';
 import { FOG } from './config.js';
-import { fogDensity } from './engine.js';
+import { fogDensity, fogTexel } from './engine.js';
 
 const HORIZON = [159, 179, 214];   // --horizon (tokens.css), the cold ink the fog is drawn in
 
@@ -32,8 +32,7 @@ function texture() {
   const img = ctx.createImageData(n, n);
   for (let i = 0; i < n * n; i++) {
     img.data[4 * i] = HORIZON[0]; img.data[4 * i + 1] = HORIZON[1]; img.data[4 * i + 2] = HORIZON[2];
-    // never empty, so a dense cell is always seen as fog; mottled, so it reads as fog and not as a tint
-    img.data[4 * i + 3] = Math.round(255 * FOG.alpha * (0.2 + 0.8 * (v[i] / 255)));
+    img.data[4 * i + 3] = fogTexel(v[i]);   // the one rule of the texture's alpha, within the world brief's budget
   }
   ctx.putImageData(img, 0, 0);
   return c;

@@ -462,6 +462,11 @@ export function fogDensity(field, progress, out = new Float32Array(field.cols * 
   return out;
 }
 
+/* The fog texture's alpha (0 to 255) for a noise value v (0 to 255): never empty, so a dense cell always reads as fog,
+   and mottled, so it reads as fog and not as a tint. At its densest it is FOG.alpha, rounded down, so the canvas
+   (this times a cell's density, 0 to 1) never passes config.js FOG_LIMIT. fogview.js paints it; tests.mjs reads it. */
+export const fogTexel = (v, alpha = FOG.alpha) => Math.floor(255 * alpha * (0.2 + 0.8 * (v / 255)));
+
 /* The density at a point of the drawing, read from a field computed by fogDensity. */
 export function fogAt(field, density, x, y) {
   const c = Math.min(field.cols - 1, Math.max(0, Math.floor(x / field.cell)));

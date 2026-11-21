@@ -82,6 +82,12 @@ export const INK = Object.freeze({
    dotted rule across a chosen row (orthogonal.css .pair-rule, 1 px every 4 px), so the two read apart. */
 export const EARTH_DOTS = Object.freeze({ gap: 6 });
 
+/* The most alpha the fog may have anywhere, in any state: the world brief's budget ("the fog a cold haze of --horizon
+   at no more than 0.16 alpha", _reference/labs/plans/alt-reality/world_brief.md, axis 3). FOG.alpha had been raised
+   to 0.28 after the brief was written (review H3); tests.mjs section 21 holds the fog's peak alpha to this in every
+   state, the ignition included, and every --horizon haze in orthogonal.css, and the drive reads the canvas. */
+export const FOG_LIMIT = 0.16;
+
 /* The fog (engine.js fogDensity, the world brief). Densities run 0 to 1; reaches are the scale, in px, of a gaussian
    about a line. The canvas draws density 1 at FOG.alpha of --horizon, through a seeded fog texture (kit/fog.js). */
 export const FOG = Object.freeze({
@@ -95,7 +101,7 @@ export const FOG = Object.freeze({
   channelReach: 20,    // four stroke widths, not a band (a band beside a light haze reads as a drop shadow)
   earthClear: 10,      // Earth's branch and the root hold no fog within this many px
   earthReach: 18,      // and push it back over this many more
-  alpha: 0.28,         // the fog's alpha at density 1 (labels over it keep their contrast by a halo of the ground, orthogonal.css)
+  alpha: 0.16,         // the fog's alpha at density 1, at FOG_LIMIT (labels over it keep their contrast by a halo of the ground)
   seed: 0x0F06,        // the fog texture's seed
   tile: 128,           // the texture's side, cells
   scale: 4,            // drawn at this many px a cell, so the wisps are large and slow

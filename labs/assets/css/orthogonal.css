@@ -177,9 +177,10 @@ svg.ord-right text.num { fill: var(--accretion); }
 .lg-branch { fill: var(--text-dim); }
 .lg-branch.gold { fill: var(--accretion); }
 .lg-dots { fill: none; stroke: var(--text-dim); }
-/* the fog's swatch: the fog's own colour and alpha (config.js FOG.alpha), a soft patch */
+/* the fog's swatch: the fog's own colour in a soft patch, within config.js FOG_LIMIT (tests.mjs section 21 holds every
+   --horizon haze in this file to it) */
 .lg-fog { display: inline-block; width: 26px; height: 12px; vertical-align: middle; margin: 0 6px 0 0;
-  background: radial-gradient(closest-side, rgba(159, 179, 214, .24), rgba(159, 179, 214, .12) 60%, transparent); }
+  background: radial-gradient(closest-side, rgba(159, 179, 214, .14), rgba(159, 179, 214, .07) 60%, transparent); }
 
 /* ---------- the render and Earth's ghost: one box height, one caption strip ---------- */
 .art, .earth { margin: 0; min-width: 0; display: grid; grid-template-rows: minmax(0, 1fr) var(--strip); }

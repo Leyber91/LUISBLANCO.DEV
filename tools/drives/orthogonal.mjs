@@ -56,6 +56,14 @@ const GOLD = ['.edge.fired', '.edge.thread', '.leader', '.node.fired .sq', '.lg-
   // Labs OS's own consent banner (shared code, os/ui.js), on a page opened on the browser's real store until it is answered
   '.los-bk'];
 const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your answers last until you close it. A link to a step still opens that step.';
+/* The fog's peak alpha on the canvas, 0 to 255, and the most the world brief allows (config.js FOG_LIMIT, review H3):
+   what the visitor sees, read from every pixel. */
+const FOG_PEAK = (base) => `import('${base}/labs/assets/js/orthogonal/config.js').then((C) => {
+  const c = document.getElementById('lineage-fog'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let m = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > m) m = d[i];
+  return { peak: m, limit: Math.floor(255 * C.FOG_LIMIT), px: d.length / 4 };
+})`;
+const fogWithin = (f) => f.px > 1000 && f.peak > 10 && f.peak <= f.limit;
 /* Every text of the header, the captions and the legend, as the live page has it: each inside a claim (data-claim) or
    a label (data-label), and every claim on the page carrying [REAL] or [ILLUSTRATIVE] (review H1). */
 const CLAIMS = `(() => {
@@ -140,6 +148,8 @@ export default async function orthogonal(p, { base, width, height }) {
   const trunkFog = await p.ev(FOG_LINE('fungi', 'nocoal'));
   p.check("fog beside this world's branch, thinner along its ink", trunkFog.off > 6 && trunkFog.on < 0.8 * trunkFog.off, JSON.stringify(trunkFog));
   p.check('more fog on what has not happened than beside what was invented', fogRest.trouble > 1.5 * fogRest.besideNocoal, JSON.stringify(fogRest));
+  const peakRest = await p.ev(FOG_PEAK(base));
+  p.check("at rest the fog's densest pixel is within the world brief's 0.16 alpha", fogWithin(peakRest), JSON.stringify(peakRest));
   p.check('every line of the branch is drawn in full on the finished frame', await p.ev(`[...document.querySelectorAll('.edge.fired, .edge.thread')].every((g) => g.getAttribute('data-p') === '1')`));
   if (width >= 1000) {
     const boxes = await p.ev(`(() => { const a = document.querySelector('.art-view').getBoundingClientRect(), e = document.querySelector('.earth-view').getBoundingClientRect();
@@ -245,6 +255,8 @@ export default async function orthogonal(p, { base, width, height }) {
   if (width >= 1000) {
     p.check('live, the gold strand is still drawing and the render waits in the fog', early.fog && early.drawing > 0, JSON.stringify(early));
     p.check('and the branch the strand has not reached stands in fog, its steps faint squares with no words', early.luminous > 8 && early.faint > 0, JSON.stringify(early));
+    const peakIgnite = await p.ev(FOG_PEAK(base));
+    p.check("during the ignition the fog's densest pixel is within the world brief's 0.16 alpha", fogWithin(peakIgnite), JSON.stringify(peakIgnite));
     await p.shot('05-ignition');
     p.check('and surfaces once the strand has reached it', await p.until('!document.getElementById("art").classList.contains("fog")', 8000));
     const lifted = await p.ev(`Number(document.getElementById('art').dataset.liftedAt) - window.__orthogonal.startedAt`);
@@ -267,6 +279,9 @@ export default async function orthogonal(p, { base, width, height }) {
     p.check('on a phone the render shows at once, out of its fog', !first.fog, JSON.stringify(first));
     p.check('and the strand below the first screen has not drawn while out of sight', first.below > 0 && first.drawn === 0, JSON.stringify(first));
     await p.ev(`document.getElementById('lineage').scrollIntoView({ block: 'start' })`);
+    await p.sleep(250);
+    const peakIgnite = await p.ev(FOG_PEAK(base));
+    p.check("during the ignition the fog's densest pixel is within the world brief's 0.16 alpha", fogWithin(peakIgnite), JSON.stringify(peakIgnite));
     await p.shot('05-ignition');
     p.check('brought into view, the strand draws itself', await p.until(`[...document.querySelectorAll('.edge.fired, .edge.thread')].every((g) => g.getAttribute('data-p') === '1')`, 8000));
     await p.sleep(400);
@@ -337,6 +352,8 @@ export default async function orthogonal(p, { base, width, height }) {
   p.check('the footer says what to do', /Order these steps by what each needs/.test(x.footer) && /0 of 4 pressed/.test(x.footer), x.footer.slice(0, 120));
   p.check('while an order is given nothing on the steps is gold, and no role line gives the order away', (await goldNow()) === 0
     && (await p.ev(`[...document.querySelectorAll('#lineage-svg .node.step .role')].every((t) => getComputedStyle(t).visibility === 'hidden')`)), String(await goldNow()));
+  const peakOrder = await p.ev(FOG_PEAK(base));
+  p.check("while an order is given the fog's densest pixel is within the world brief's 0.16 alpha", fogWithin(peakOrder), JSON.stringify(peakOrder));
   await p.shot('07-order');
   const want0 = await rightOrder(x.item.steps);
   await press(want0[0]);
