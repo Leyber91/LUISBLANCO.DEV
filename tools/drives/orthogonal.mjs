@@ -56,6 +56,7 @@ const GOLD = ['.edge.fired', '.edge.thread', '.leader', '.node.fired .sq', '.lg-
   // Labs OS's own consent banner (shared code, os/ui.js), on a page opened on the browser's real store until it is answered
   '.los-bk'];
 const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your answers last until you close it. A link to a step still opens that step.';
+const STORAGE_ON = 'Your answers are kept in this browser. The privacy page shows what is kept, and exports or erases it.';
 /* The fog's peak alpha on the canvas, 0 to 255, and the most the world brief allows (config.js FOG_LIMIT, review H3):
    what the visitor sees, read from every pixel. */
 const FOG_PEAK = (base) => `import('${base}/labs/assets/js/orthogonal/config.js').then((C) => {
@@ -64,6 +65,20 @@ const FOG_PEAK = (base) => `import('${base}/labs/assets/js/orthogonal/config.js'
   return { peak: m, limit: Math.floor(255 * C.FOG_LIMIT), px: d.length / 4 };
 })`;
 const fogWithin = (f) => f.px > 1000 && f.peak > 10 && f.peak <= f.limit;
+/* The fog's density as the canvas paints it, about a step's square moved by (dx, dy): the alpha of a 9 x 9 px window
+   over the alpha the texture alone gives those pixels (kit/fog.js and engine.js fogTexel, drawn FOG.scale px a texel
+   from the canvas's origin when the fog has not drifted, as under ?still). The texture is mottled five to one, more
+   than the densities differ, so a window of alpha alone says where its mottling fell; this says what the canvas
+   painted the density as. */
+const FOG_SEEN = (base, id, dx = 0, dy = 0) => `Promise.all([import('${base}/labs/assets/js/kit/fog.js'), import('${base}/labs/assets/js/orthogonal/config.js'), import('${base}/labs/assets/js/orthogonal/engine.js')]).then(([K, C, E]) => {
+  const v = K.fogNoise(C.FOG.seed, C.FOG.tile), T = C.FOG.tile, S = C.FOG.scale;
+  const n = window.__orthogonal.layout().nodes.find((x) => x.id === '${id}');
+  const x0 = Math.round(n.x + ${dx}) - 4, y0 = Math.round(n.y + ${dy}) - 4;
+  const d = document.getElementById('lineage-fog').getContext('2d').getImageData(x0, y0, 9, 9).data;
+  let a = 0, t = 0;
+  for (let j = 0; j < 9; j++) for (let i = 0; i < 9; i++) { a += d[4 * (j * 9 + i) + 3]; t += E.fogTexel(v[(Math.floor((y0 + j) / S) % T) * T + (Math.floor((x0 + i) / S) % T)]); }
+  return a / t;
+})`;
 /* Every text of the header, the captions and the legend, as the live page has it: each inside a claim (data-claim) or
    a label (data-label), and every claim on the page carrying [REAL] or [ILLUSTRATIVE] (review H1). */
 const CLAIMS = `(() => {
@@ -147,7 +162,10 @@ export default async function orthogonal(p, { base, width, height }) {
   p.check("no fog on Earth's branch or on the root both worlds share", fogRest.root === 0 && fogRest.buried === 0 && fogRest.seams === 0 && fogRest.gaslamp === 0, JSON.stringify(fogRest));
   const trunkFog = await p.ev(FOG_LINE('fungi', 'nocoal'));
   p.check("fog beside this world's branch, thinner along its ink", trunkFog.off > 6 && trunkFog.on < 0.8 * trunkFog.off, JSON.stringify(trunkFog));
-  p.check('more fog on what has not happened than beside what was invented', fogRest.trouble > 1.5 * fogRest.besideNocoal, JSON.stringify(fogRest));
+  // read as density, the texture divided out (FOG_SEEN): a window of alpha alone passed or failed by where the
+  // texture's mottling fell once the caption strip moved the lineage (this pass, H4)
+  const seen = { trouble: await p.ev(FOG_SEEN(base, 'trouble')), besideNocoal: await p.ev(FOG_SEEN(base, 'nocoal', 20, 16)) };
+  p.check('more fog on what has not happened than beside what was invented, as the canvas paints it', seen.trouble > 1.5 * seen.besideNocoal && seen.trouble > 0.8, JSON.stringify({ seen, alpha: fogRest }));
   const peakRest = await p.ev(FOG_PEAK(base));
   p.check("at rest the fog's densest pixel is within the world brief's 0.16 alpha", fogWithin(peakRest), JSON.stringify(peakRest));
   p.check('every line of the branch is drawn in full on the finished frame', await p.ev(`[...document.querySelectorAll('.edge.fired, .edge.thread')].every((g) => g.getAttribute('data-p') === '1')`));
@@ -157,7 +175,7 @@ export default async function orthogonal(p, { base, width, height }) {
     p.check("the render and Earth's ghost share one box, so the two lamps stand on one ground line", boxes.a[0] === boxes.e[0] && boxes.a[1] === boxes.e[1], JSON.stringify(boxes));
     // the render's note names its three departures (review H4) and so takes more lines: every caption still ends inside
     // its figure, the strip they share
-    const capFit = await p.ev(`(() => { const out = {}; for (const sel of ['.art', '.earth']) { const f = document.querySelector(sel), cap = f.querySelector('figcaption');
+    const capFit = await p.ev(`(() => { const out = {}; for (const sel of ['figure.art', 'figure.earth']) { const f = document.querySelector(sel), cap = f.querySelector('figcaption');
       const kids = [...cap.querySelectorAll('*')].filter((c) => c.getClientRects().length);
       out[sel] = { n: kids.length, content: Math.round(Math.max(...kids.map((c) => c.getBoundingClientRect().bottom))), box: Math.round(f.getBoundingClientRect().bottom), img: Math.round(f.querySelector('.art-view, .earth-view').getBoundingClientRect().width) }; } return out; })()`);
     p.check("every line of the render's caption and of Earth's ends inside the strip they share", Object.values(capFit).every((c) => c.n >= 3 && c.content <= c.box), JSON.stringify(capFit));
@@ -193,7 +211,10 @@ export default async function orthogonal(p, { base, width, height }) {
   p.check('a press on the driver chooses it', s.chosen === 'fungi' && s.reading === 'fungi' && s.url === 'fungi', JSON.stringify({ c: s.chosen, r: s.reading, u: s.url }));
   p.check("its Earth step is ringed beside it, joined by the row's rule", s.paired === 'buried' && s.rule);
   p.check('the reading tags each claim and names its sources', /\[REAL\]/.test(s.readingText) && /Nelsen, DiMichele, Peters and Boyce/.test(s.readingText) && /\[ILLUSTRATIVE\]/.test(s.readingText));
-  p.check('the footer keeps its height', s.readingH === h0, `${h0} then ${s.readingH}`);
+  // a wide plate keeps one footer height for every reading; on a phone the reading is the last block and takes the
+  // height of what it says (item 8), so there it is held to its content: no band below its last line
+  const fits = async () => (await p.ev(`(() => { const r = document.getElementById('reading'); const b = Math.max(...[...r.children].map((k) => k.getBoundingClientRect().bottom)); return Math.round(r.getBoundingClientRect().bottom - b); })()`)) <= 1;
+  p.check(width >= 1000 ? 'the footer keeps its height' : 'the footer takes the height of what it says', width >= 1000 ? s.readingH === h0 : await fits(), `${h0} then ${s.readingH}`);
   const rtop = await p.ev(`Math.round(document.getElementById('reading').getBoundingClientRect().top - innerHeight)`);
   // a narrow plate scrolls the reading up to its first claims; a wide one has the reading beside the evidence, its head
   // and first lines in the window
@@ -215,7 +236,7 @@ export default async function orthogonal(p, { base, width, height }) {
   await p.key('ArrowRight'); await p.sleep(200);
   s = await state();
   p.check('ArrowRight crosses back', s.chosen === 'luminous' && s.paired === 'coalgas', s.chosen);
-  p.check('the footer still keeps its height', s.readingH === h0, `${h0} then ${s.readingH}`);
+  p.check(width >= 1000 ? 'the footer still keeps its height' : 'the footer still takes the height of what it says', width >= 1000 ? s.readingH === h0 : await fits(), `${h0} then ${s.readingH}`);
   await p.shot('03-keys');
 
   // ---- links
@@ -295,7 +316,7 @@ export default async function orthogonal(p, { base, width, height }) {
       footer: document.getElementById('reading').textContent, verdict: document.getElementById('reading').dataset.drill || null,
       shown: [...document.querySelectorAll('.node')].filter((g) => getComputedStyle(g).visibility !== 'hidden' && getComputedStyle(g).opacity !== '0').map((g) => g.getAttribute('data-id')),
       edges: getComputedStyle(document.querySelector('.edges')).opacity, nums: [...document.querySelectorAll('.node .num')].map((t) => t.closest('.node').getAttribute('data-id') + '=' + t.textContent),
-      offMsg: document.getElementById('drill-kept').hidden ? '' : document.getElementById('drill-kept').textContent }; })()`);
+      offMsg: document.getElementById('drill-kept').hasAttribute('data-off') ? document.getElementById('drill-kept').textContent : '', keptMsg: document.getElementById('drill-kept').textContent }; })()`);
   /* A right order of the item's steps, from the engine's own links, and whether an order is right. */
   const rightOrder = (steps) => p.ev(`import('${ENGINE}').then((E) => { const w = window.__orthogonal.world, s = ${JSON.stringify(steps)}, out = [];
     // each time, the first step whose needs among the four are all placed
@@ -320,7 +341,7 @@ export default async function orthogonal(p, { base, width, height }) {
   const noteBand = async (state) => { bands.push([state, await band()]); };
   /* Where the drawing, a step of it, the bar and the footer are on the page (document coordinates). */
   const place = () => p.ev(`(() => { const R = (el) => { const r = el.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top + scrollY), Math.round(r.width), Math.round(r.height)]; };
-    return { lin: R(document.getElementById('lineage')), lamp: R(document.querySelector('.node[data-id="lamp"] .sq')), bar: R(document.getElementById('drill-bar')), reading: R(document.getElementById('reading')) }; })()`);
+    return { lin: R(document.getElementById('lineage')), lamp: R(document.querySelector('.node[data-id="lamp"] .sq')), bar: R(document.getElementById('drill-bar')), reading: R(document.getElementById('reading')), kept: document.getElementById('drill-kept').textContent }; })()`);
   await p.go(`${base}${PAGE}?still`);
   p.check('the plate opens on the real store', await p.until('document.body.classList.contains("ready")', 30000));
   // Labs OS asks about sharing on a page with the real store; the question is answered no, so it covers nothing
@@ -446,6 +467,16 @@ export default async function orthogonal(p, { base, width, height }) {
   await p.shot('11a-normal');
   // the band of the footer in each reading, a step pressed at a time
   for (const id of WORLD_IDS) { await press(id); await noteBand(`reading ${id}`); }
+  if (width < 1000) {
+    // the road's call before the review (item 8): on a phone the reading is the last block and sizes to what it says
+    const readBands = bands.filter(([st]) => st.startsWith('reading'));
+    p.check('on a phone each of the 11 readings takes the height of what it says: no empty band below its last line', readBands.length === 11 && readBands.every(([, b]) => b <= 1), JSON.stringify(readBands));
+    const below = await p.ev(`(() => { const r = document.getElementById('reading').getBoundingClientRect(), sheet = document.querySelector('.sheet');
+      const els = [...sheet.querySelectorAll('*')].filter((e) => !e.closest('#reading') && !e.classList.contains('corner') && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden' && getComputedStyle(e).position !== 'fixed');
+      const low = els.filter((e) => e.getBoundingClientRect().bottom > r.bottom + 0.5).map((e) => e.id || (typeof e.className === 'string' ? e.className : e.tagName));
+      return { n: els.length, low: low.slice(0, 6), reading: Math.round(r.bottom), sheet: Math.round(sheet.getBoundingClientRect().bottom) }; })()`);
+    p.check('and the reading is the last block: nothing the visitor sees sits below it', below.n > 50 && below.low.length === 0, JSON.stringify(below));
+  }
   await button('drill-start');
   x = await dr();
   p.check('the exercise goes on at the next item', x.mode === 'order' && x.item.index === 2, JSON.stringify(x.item));
@@ -453,7 +484,8 @@ export default async function orthogonal(p, { base, width, height }) {
   await p.sleep(150);
 
   // ---- storage refused: the bindings' words, and the exercise still works for the visit
-  await open('still&os-fixture=storage-unavailable');
+  // the same step read as in the normal state, so the two states are held to each other on the same footer
+  await open(`still&node=${back.chosen}&os-fixture=storage-unavailable`);
   p.check('with storage refused the record is still read (for the visit)', await p.until(`!document.getElementById('drill-start').disabled`, 10000));
   x = await dr();
   p.check("the bar says so in the bindings' storage-off words", x.offMsg === STORAGE_OFF && x.kept === false, x.offMsg);
@@ -463,12 +495,13 @@ export default async function orthogonal(p, { base, width, height }) {
   await p.sleep(150);
   const off = await place();
   p.check('the drawing does not move between the normal and the storage-off states', JSON.stringify(off.lin) === JSON.stringify(normal.lin) && JSON.stringify(off.lamp) === JSON.stringify(normal.lamp), JSON.stringify({ normal: [normal.lin, normal.lamp], off: [off.lin, off.lamp] }));
-  if (width >= 1000) {
-    p.check('on a wide plate the storage-off line takes the count\'s line: the bar and the footer stay where they were, at their heights', JSON.stringify(off.bar) === JSON.stringify(normal.bar) && JSON.stringify(off.reading) === JSON.stringify(normal.reading), JSON.stringify({ normal: [normal.bar, normal.reading], off: [off.bar, off.reading] }));
-    p.check('and the diagnosis sits on one line beside the count', await p.ev(`(() => { const k = document.getElementById('drill-kept').getBoundingClientRect(), c = document.getElementById('drill-count').getBoundingClientRect(); return k.height < 20 && Math.abs(k.top - c.top) < 4; })()`));
-  } else {
-    p.check('on a phone the bar is where it was; it grows by the diagnosis\'s lines below the drawing', off.bar[1] === normal.bar[1], JSON.stringify({ normal: normal.bar, off: off.bar }));
-  }
+  // both states put a line beside the count (where the answers are kept, or the storage-off diagnosis): the bar and the
+  // footer stay where they were, at their heights, at both widths (item 9; the review's M3 found 55 px at 390)
+  p.check('the storage-off line takes the place of the line about what is kept: the bar and the footer stay where they were, at their heights',
+    JSON.stringify(off.bar) === JSON.stringify(normal.bar) && JSON.stringify(off.reading) === JSON.stringify(normal.reading) && normal.kept === STORAGE_ON && off.kept === STORAGE_OFF,
+    JSON.stringify({ normal: [normal.bar, normal.reading, normal.kept.slice(0, 20)], off: [off.bar, off.reading, off.kept.slice(0, 20)] }));
+  if (width >= 1000) p.check('and the diagnosis sits on one line beside the count', await p.ev(`(() => { const k = document.getElementById('drill-kept').getBoundingClientRect(), c = document.getElementById('drill-count').getBoundingClientRect(); return k.height < 20 && Math.abs(k.top - c.top) < 4; })()`));
+  else p.check('and on a phone the line holds the height of the longer of its two states, so neither moves what is below it', await p.ev(`(() => { const k = document.getElementById('drill-kept'); return k.offsetHeight >= 30 && Math.abs(parseFloat(k.style.minHeight) - k.offsetHeight) <= 1; })()`));
   await p.shot('11b-storage-off');
   await button('drill-start');
   const it2 = (await dr()).item;

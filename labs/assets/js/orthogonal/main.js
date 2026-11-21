@@ -26,7 +26,7 @@
    with its presses.
    ============================================================ */
 import { mountScene } from '../os/scene.js';
-import { EVENTS, EXERCISE, FOG, STORAGE_OFF, TIMING } from './config.js';
+import { EVENTS, EXERCISE, FOG, STORAGE_OFF, STORAGE_ON, TIMING } from './config.js';
 import {
   arrival, check, checkOrder, drillFog, drillPlaces, fogField, ignitionEnd, item, judge, needLine, reasons, step, stepsOf,
   strandAt, strandGold,
@@ -171,8 +171,9 @@ function writeFooter() {
   else writeDrill($('reading'), WORLD, { steps: drill.item.steps, picks: drill.picks, result: drill.result, size: EXERCISE.size });
 }
 
-/* The bar under the drawing: its buttons for the mode, the count, and the storage-off diagnosis beside the count when
-   nothing is kept (on a wide plate the bar runs the sheet's width, so the diagnosis takes the same one line). */
+/* The bar under the drawing: its buttons for the mode, the count, and beside the count what is kept: the storage-off
+   diagnosis when nothing is, else where the answers are (on a wide plate the bar runs the sheet's width, so either
+   takes the count's one line; on a narrow one fixKeptHeight holds its height). */
 function controls() {
   const show = (id, on) => { $(id).hidden = !on; };
   show('drill-start', mode === 'read');
@@ -185,8 +186,9 @@ function controls() {
   $('drill-undo').disabled = !(drill && drill.picks.length);
   $('drill-count').textContent = recordRead ? countLine(rec) : '';
   const off = recordRead && !(keeper && keeper.kept);
-  $('drill-kept').hidden = !off;
-  $('drill-kept').textContent = off ? STORAGE_OFF : '';
+  $('drill-kept').hidden = false;
+  $('drill-kept').textContent = !recordRead ? '' : off ? STORAGE_OFF : STORAGE_ON;
+  $('drill-kept').toggleAttribute('data-off', off);
   $('drill-bar').dataset.mode = mode;
 }
 
@@ -367,14 +369,30 @@ function choose(id, { focus = false, track = true, reveal = false } = {}) {
   if (track && !focus && os) { try { os.track(EVENTS.node, { node: id }); } catch { /* usage is never in the way */ } }
 }
 
-/* The footer's reserved height: on a wide plate the tallest of everything it can hold, so nothing below it jumps; on a
-   narrow one the tallest of the mode it is in (a change of mode is the visitor's own act, and the footer may change
-   height with it). Every state of the exercise is one height on its own: its pressed list always has its four places
-   (view.js writeDrill), so a state with fewer presses has no empty band. */
+/* The footer's reserved height. On a wide plate, where the plate fits one frame, the tallest of everything it can hold,
+   so nothing jumps. On a narrow one the reading is the last block (orthogonal.css), so nothing the visitor looks at
+   sits below it: a reading takes the height of what it says, with no empty band (the road's call, item 8), and an
+   order being given or checked takes the tallest of the exercise, so the fourth press does not shorten the page under
+   the visitor's finger. Every state of the exercise is one height on its own: its pressed list always has its four
+   places (view.js writeDrill), so a state with fewer presses has no empty band. */
 let heights = { read: 0, drill: 0 };
 function applyReadingHeight() {
-  const h = wide.matches ? Math.max(heights.read, heights.drill) : mode === 'read' ? heights.read : heights.drill;
+  const h = wide.matches ? Math.max(heights.read, heights.drill) : mode === 'read' ? 0 : heights.drill;
   $('reading').style.minHeight = h ? `${h}px` : '';
+}
+
+/* On a narrow plate the bar's line about what is kept wraps to its own lines: it is held at the height of the longer of
+   its two states (STORAGE_ON, STORAGE_OFF) from the start, so the answer Labs OS gives after load moves nothing below
+   it, in either state (item 9). On a wide plate it shares the count's one line and needs no height. */
+function fixKeptHeight() {
+  const k = $('drill-kept');
+  k.style.minHeight = '';
+  if (wide.matches) return;
+  const was = k.textContent;
+  let h = 0;
+  for (const text of [STORAGE_ON, STORAGE_OFF]) { k.textContent = text; h = Math.max(h, k.offsetHeight); }
+  k.textContent = was;
+  k.style.minHeight = `${h}px`;
 }
 
 /* Measure the tallest reading and the exercise at its fullest, for applyReadingHeight. */
@@ -394,6 +412,7 @@ function fixReadingHeight() {
   heights = { read: max, drill: drillH };
   applyReadingHeight();
   writeFooter();
+  fixKeptHeight();
 }
 
 async function readParams() {
@@ -540,6 +559,8 @@ function boot() {
   drawEarthLamp($('earth-svg'), WORLD.earthArtifact.supply, WORLD.artifact.frame);
   draw();
   fixReadingHeight();
+  // the plate's mono face arrives after the first layout: the reserved heights are measured again in it
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fixReadingHeight(), () => {});
   writeReading($('reading'), WORLD, chosen);
   const startedAt = performance.now();
   const revealAt = still || !drawn ? 0 : arrival(WORLD, drawn.lay);

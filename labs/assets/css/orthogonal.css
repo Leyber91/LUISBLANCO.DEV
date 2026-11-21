@@ -162,7 +162,8 @@ svg.ord-right text.num { fill: var(--accretion); }
 .drill-btn:disabled { color: var(--text-dim); cursor: default; }
 .drill-btn[hidden] { display: none; }
 .drill-count { font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
-/* the storage-off diagnosis, on the count's line: one line beside it on a wide plate */
+/* what is kept: the storage-off diagnosis, or where the answers are kept, on the count's line: one line beside it on a
+   wide plate */
 .drill-kept { flex: 0 1 auto; font-size: 11px; color: var(--text-dim); }
 .drill-kept[hidden] { display: none; }
 
@@ -249,14 +250,16 @@ svg.ord-right text.num { fill: var(--accretion); }
 .rd-evidence cite { font-style: normal; color: var(--text-dim); }
 .rd-gap { color: var(--text-dim); }
 
-/* ---------- narrow: one column; the render, then the lineage that grew it and its reading, then Earth ---------- */
+/* ---------- narrow: one column; the render with Earth's lamp under it, then the lineage that grew it and its
+   reading. The reading is the last block, so nothing the visitor looks at sits below it and it takes the height of
+   what it says (main.js applyReadingHeight; the road's call before the review, item 8) ---------- */
 @media (max-width: 999px) {
   .sheet {
     --strip: auto;
     margin: 8px; padding: 4px 12px 14px;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: none;
-    grid-template-areas: "head" "art" "lin" "bar" "read" "earth";
+    grid-template-areas: "head" "art" "earth" "lin" "bar" "read";
   }
   .head { flex-direction: column-reverse; gap: 8px; }
   .head-side { flex-direction: row; justify-content: space-between; align-items: center; align-self: stretch; }
@@ -271,9 +274,13 @@ svg.ord-right text.num { fill: var(--accretion); }
   .reading { grid-column: auto; display: block; margin-top: 12px; }
   .reading p { padding-right: 0; }
   .rd-evidence { margin-top: 6px; padding-left: 0; }
-  .earth { margin-top: 16px; border-top: 1px solid var(--line); grid-template-columns: minmax(0, 1fr) 120px; grid-template-rows: auto; }
+  /* Earth's lamp for the same job, under the render in the same frame, so the two answers are read together */
+  .earth { margin-top: 0; border: 1px solid var(--line); border-top: 0; grid-template-columns: minmax(0, 1fr) 120px; grid-template-rows: auto; }
   .earth-view { grid-column: 2; grid-row: 1; height: 200px; }
-  .earth-cap { grid-column: 1; grid-row: 1; border-top: 0; padding: 12px 0 0; }
+  .earth-cap { grid-column: 1; grid-row: 1; border-top: 0; padding: 10px 0 10px 14px; }
+  /* the bar's line about what is kept takes its own line, at the height of the longer of its two states (main.js
+     fixKeptHeight), so the storage-off state moves nothing below it (item 9) */
+  .drill-kept { flex: 1 1 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

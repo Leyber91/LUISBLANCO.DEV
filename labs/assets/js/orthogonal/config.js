@@ -127,4 +127,9 @@ export const EXERCISE = Object.freeze({
    (bindings.known_setup_failures, id storage-off). */
 export const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your answers last until you close it. A link to a step still opens that step.';
 
-export const EVENTS = Object.freeze({ node: 'alt-reality.node', order: 'alt-reality.order' });
+/* What the plate says beside the count when the browser keeps the record: where it is and what the privacy page does
+   with it (Labs OS keeps it in this browser; labs/privacy.html shows, exports and erases it). It takes the storage-off
+   diagnosis's place, so both states put a line there and on a phone the bar is one height in both (item 9). */
+export const STORAGE_ON = 'Your answers are kept in this browser. The privacy page shows what is kept, and exports or erases it.';
+
+export const EVENTS =Object.freeze({ node: 'alt-reality.node', order: 'alt-reality.order' });
