@@ -6,7 +6,7 @@
 
 import { forward, template, argmax } from './mlp.js';
 import { mosaic, certify } from './split.js';
-import { netFromFile, digitFrom, candidates, verdict, softmax, smallestFlip } from './call.js';
+import { netFromFile, digitFrom, candidates, verdict, softmax, smallestFlip, reasonOf } from './call.js';
 import { fnv1a } from '../kit/rng.js';
 import { frameAlong, run } from './plate.js';
 import { reduce } from './pad.js';
@@ -234,7 +234,7 @@ function call(i) {
   $('verdict').textContent = !S.v.counted
     ? (S.hardened ? `None of these three corners changes it now: after hardening, each of these steps of ${S.eps} of full ink keeps the answer at ${S.cands.answer}. This call is not counted.`
       : 'None of the three changes the answer here, so this call is not counted.')
-    : S.v.right ? `Right. This corner changes the answer to ${c.read}.` : `Not this one. It leaves the answer at ${S.cands.answer}.`;
+    : S.v.right ? `Right. This corner changes the answer to ${c.read}. ${reasonOf(S.cands, i, (v) => fixed(v, 1))}` : `Not this one. It leaves the answer at ${S.cands.answer}. ${reasonOf(S.cands, i, (v) => fixed(v, 1))}`;
   drawCands(); drawPlate(true); showTemplate(true);
   nextAction(S.hardened ? 'Next: draw your own digit, or pick another, and call again.' : 'Next: harden the network, then call the same drawing again.');
 }
@@ -303,7 +303,9 @@ async function start() {
   try {
     const get = (f, tag) => fetch(`assets/data/dimensions/${f}`).then((r) => { if (!r.ok) throw new Error(tag); return r.json(); }).catch((err) => { throw new Error(err && err.message === tag ? tag : tag); });
     const [nj, dj] = await Promise.all([get('net.json', 'network'), get('digits.json', 'digits')]);
-    S.net = netFromFile(nj); S.eps = nj.source.eps_by_rule; S.digits = dj.items; S.xs = dj.items.map(digitFrom);
+    S.net = netFromFile(nj); S.eps = nj.source.eps_by_rule;
+    // The network's provenance and version, read from its own file (the lab's ladder, network-provenance rung 2).
+    $('prov').textContent = `The network: ${nj.sizes.join(', ')} neurons, ReLU, trained on MNIST (Yann LeCun, Corinna Cortes and Christopher J.C. Burges; yann.lecun.com/exdb/mnist). Test accuracy ${fixed(100 * nj.source.test_accuracy, 2)}% on MNIST's 10,000 test digits, as recorded in its file. File version ${String(nj.source.kill_test_code).slice(0, 12)}. [REAL]`; S.digits = dj.items; S.xs = dj.items.map(digitFrom);
   } catch (e) {
     $('readout').textContent = `${e && e.message === 'digits' ? 'The example digits' : 'The network\'s file'} did not load. Reload the page to try again.`;
     document.body.dataset.state = 'error';

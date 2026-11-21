@@ -46,6 +46,9 @@ export default async function folded(p, { base }) {
   const lab = await p.ev(`(() => { const a = document.getElementById('pl-from'), b = document.getElementById('pl-to'); return { a: parseFloat(getComputedStyle(a).fontSize), b: parseFloat(getComputedStyle(b).fontSize), text: b.textContent }; })()`);
   p.check('the plate’s labels are 12 px or more at this width', lab.a >= 12 && lab.b >= 12 && /read \d/.test(lab.text), `${lab.a} px and ${lab.b} px, "${lab.text}"`);
   p.check('after the call the corners carry their names and the template is shown with its sentence', await p.ev(`[...document.querySelectorAll('#cands .cl')].some((x) => /template/.test(x.textContent)) && !document.getElementById('tplbox').hidden && /score for [0-9] against [0-9] is this picture/.test(document.getElementById('tplnote').textContent)`));
+  const why = await p.ev(`({ v: document.getElementById('verdict').textContent, prov: document.getElementById('prov').textContent })`);
+  p.check('the verdict says why, from computed values', /^Right[.] This corner changes the answer to [0-9][.] It raised [0-9]'s score over [0-9]'s by -?[0-9]+[.][0-9] [(]the cell.s map predicted -?[0-9]+[.][0-9][)], the most of the three[.]$/.test(why.v), why.v);
+  p.check('the network names its source, its test accuracy and its file version', /^The network: 784, 64, 64, 10 neurons, ReLU, trained on MNIST [(]Yann LeCun, Corinna Cortes and Christopher J[.]C[.] Burges; yann[.]lecun[.]com.exdb.mnist[)][.] Test accuracy 96[.]71% on MNIST.s 10,000 test digits, as recorded in its file[.] File version [0-9a-f]{12}[.] .REAL.$/.test(why.prov), why.prov);
   await p.shot('02-called-right');
 
   const nx = await centre('#next');

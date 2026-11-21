@@ -2,8 +2,8 @@
 // cells whose answer is known. Run: node labs/assets/js/dimensions/tests/call.test.mjs (exit 1 on any failure).
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { forward, argmax } from '../mlp.js';
-import { netFromFile, digitFrom, candidates, verdict, tally, softmax, answerAndRival, stepTo, KINDS, smallestFlip, signsFor } from '../call.js';
+import { forward, argmax, template } from '../mlp.js';
+import { netFromFile, digitFrom, candidates, verdict, tally, softmax, answerAndRival, stepTo, KINDS, smallestFlip, signsFor, reasonOf } from '../call.js';
 import { frameAlong, clipRun, run } from '../plate.js';
 import { mosaic, certify } from '../split.js';
 
@@ -56,6 +56,25 @@ const four = dj.items.findIndex((d) => d.label === 4);
 const c4 = candidates(net, xs[four], eps, dj.items[four].index);
 ok(c4.list.find((q) => q.kind === 'template').read === 9, 'the first 4 is read as 9 at its sharpest corner, as on the bar sheet');
 ok(c4.list.filter((q) => q.kind !== 'template').every((q) => q.read === 4), 'and as 4 at the two other corners');
+
+// 3b. The reason: each corner's lift of the rival's score over the answer's is what the network computes, and its
+//     prediction is the template's dot product with the step; on the first 4 the template's corner lifts the most.
+{
+  const { rival, answer } = c4;
+  const z0 = Array.from(forward(net, xs[four]));
+  for (const q of c4.list) {
+    const zc = Array.from(forward(net, q.xc));
+    ok(Math.abs(q.lift - ((zc[rival] - zc[answer]) - (z0[rival] - z0[answer]))) < 1e-9, `${q.kind}: the lift is the network's own change`);
+    const t = template(net, xs[four], rival, answer);
+    let d = 0; for (let p = 0; p < 784; p++) d += t[p] * (q.xc[p] - xs[four][p]);
+    ok(Math.abs(q.predicted - d) < 1e-9, `${q.kind}: the prediction is the template's dot product with the step`);
+  }
+  const best = c4.list.reduce((a, b) => (b.lift > a.lift ? b : a));
+  ok(best.kind === 'template', `on the first 4 the template's corner lifts the most (${c4.list.map((q) => q.kind + ' ' + q.lift.toFixed(2)).join(', ')})`);
+  const ti = c4.list.findIndex((q) => q.kind === 'template'), ri = c4.list.findIndex((q) => q.kind === 'random');
+  ok(/^It raised 9's score over 4's by -?\d+\.\d \(the cell’s map predicted -?\d+\.\d\), the most of the three\.$/.test(reasonOf(c4, ti)), reasonOf(c4, ti));
+  ok(/^It raised 9's score over 4's by -?\d+\.\d \(the cell’s map predicted -?\d+\.\d\); the template’s corner raised it by -?\d+\.\d\.$/.test(reasonOf(c4, ri)), reasonOf(c4, ri));
+}
 
 // 4. The verdict and the tally, on hand-made candidates.
 const mk = (changes) => ({ answer: 4, list: changes.map((ch) => ({ changes: ch, read: ch ? 9 : 4 })) });

@@ -62,13 +62,20 @@ export function stepTo(x, signs, eps) {
 
 /** The three candidates for a drawing, in a seeded order. `key` names the drawing (its index) for the seed. */
 export function candidates(net, x, eps, key) {
-  const { answer, rival } = answerAndRival(net, x);
+  const { answer, rival, z } = answerAndRival(net, x);
+  const lead0 = z[rival] - z[answer];
+  const t = template(net, x, rival, answer);
   const seed = fnv1a('folded|call|' + key);
   const list = KINDS.map((kind, i) => {
     const signs = signsFor(kind, net, x, rival, answer, (seed + i * 2654435761) >>> 0);
     const xc = stepTo(x, signs, eps);
-    const read = argmax(forward(net, xc));
-    return { kind, label: LABELS[kind], signs, xc, read, changes: read !== answer };
+    const zc = Array.from(forward(net, xc));
+    const read = argmax(zc);
+    // Why a corner wins or loses (atlas tutoring.2.2): how far it moved the rival's score against the answer's,
+    // measured by the network (lift), and what the drawing's cell's map predicts for the same step (predicted).
+    let predicted = 0;
+    for (let p = 0; p < t.length; p++) predicted += t[p] * (xc[p] - x[p]);
+    return { kind, label: LABELS[kind], signs, xc, read, changes: read !== answer, lift: zc[rival] - zc[answer] - lead0, predicted };
   });
   const rng = mulberry32(seed);
   for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
@@ -93,6 +100,16 @@ export function smallestFlip(net, x, hi = 0.5, iters = 12) {
   let lo = 0, top = hi;
   for (let r = 0; r < iters; r++) { const mid = (lo + top) / 2; if (off(mid)) top = mid; else lo = mid; }
   return top;
+}
+
+/** The verdict's reason, from computed values only: the picked corner's lift of the rival's score over the answer's,
+ *  against the largest of the three. `fmt` writes a number. */
+export function reasonOf(cands, picked, fmt = (v) => v.toFixed(1)) {
+  const c = cands.list[picked];
+  const best = cands.list.reduce((a, b) => (b.lift > a.lift ? b : a));
+  const lift = (q) => `${fmt(q.lift)} (the cell’s map predicted ${fmt(q.predicted)})`;
+  if (c === best) return `It raised ${cands.rival}'s score over ${cands.answer}'s by ${lift(c)}, the most of the three.`;
+  return `It raised ${cands.rival}'s score over ${cands.answer}'s by ${lift(c)}; the ${best.kind === 'template' ? 'template’s corner' : best.label.toLowerCase()} raised it by ${fmt(best.lift)}.`;
 }
 
 /** The tally after one more verdict. A call that is not counted leaves it as it was. */
