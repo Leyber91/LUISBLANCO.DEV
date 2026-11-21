@@ -30,11 +30,13 @@ One family so far, shelf-culture-lamp. Its methods, not code:
 - the glow is a stylised blue-white, not the species' green (about 525 nm), because the plate allows no third hue.
 
 The scene is honest about that light (pass 3, 2026-11-21). The lamp stands at night in fog on a wet cobbled street,
-and nothing else lights it: no studio light (air.rim_energy_w is 0, and at 0 none is made), a black sky that lights
-nothing, and fog that scatters only the culture's glow. The emission is low, and the image is exposed up by
-exposure.stops, as a long exposure records a dim source: the glowing edges near the top of the range, the street lit
-only in a small pool around the plinth, the fog averaged into a smooth halo. To the eye it would be dimmer; the page
-says so beside the image, tagged [ILLUSTRATIVE].
+and no studio light lights it (air.rim_energy_w is 0, and at 0 none is made). The emission is low, and the image is
+exposed up by exposure.stops, as a long exposure records a dim source: the glowing edges near the top of the range, the
+street lit only in a small pool around the plinth, the fog averaged into a smooth halo. An exposure that long also
+records the night sky (slice 2): a faint, cold sky ambient (air.sky_ambient in air.sky_rgb, a dome inside the fog)
+lights the fog behind the instrument and rims its hood and plinth, so the instrument reads while the culture stays the
+brightest thing in the frame. The record measures both from the render's own pixels (measure.light). To the eye it
+would be dimmer; the page says so beside the image, tagged [ILLUSTRATIVE].
 
 The camera puts the instrument's foot at camera.ground_y of the frame's height from the top and its top camera.fill
 above that, so the street and its pool show below the plinth. The record measures where the two lines fell
@@ -53,6 +55,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCHEMA_PATH = os.path.join(HERE, "artifact_schema.json")
+SKY_DOME_M = 11.0        # the sky dome's radius: inside the 24 m street, 3.3 of the fog's mean free paths out at 0.3
 
 
 # ------------------------------------------------------------------------------------------------ parameters (no bpy)
@@ -649,12 +652,42 @@ def build_shelf_culture_lamp(P: dict, seed: int):
         rim.data.color = (0.62, 0.72, 0.95)
         rim.rotation_euler = (math.radians(-55), math.radians(-30), math.radians(-150))
 
-    # fog: the world scatters the gills' light into a halo. The night sky is black, so it lights nothing.
+    # the night sky (slice 2, 2026-11-21): any exposure long enough to record the culture records the sky's faint light
+    # too, so the sky is a dome of light air.sky_ambient strong, in air.sky_rgb, SKY_DOME_M out over the street and
+    # inside the fog. Its light crosses that much fog before it reaches the lamp, so it lights the fog behind the
+    # instrument and rims it, and stays far below the culture (artifact_schema.json bounds it, and keeps it under the
+    # culture's own dimmest glow). The world's background stays black: it is infinitely far, behind infinite fog.
+    if A["sky_ambient"] > 0:
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=SKY_DOME_M, location=(0, 0, 0), segments=64, ring_count=32)
+        dome = bpy.context.active_object
+        dome.name = "sky"
+        bm = bmesh.new()
+        bm.from_mesh(dome.data)
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z < -1e-6], context="VERTS")   # the half below the street
+        bmesh.ops.reverse_faces(bm, faces=bm.faces[:])                                           # facing in
+        bm.to_mesh(dome.data)
+        bm.free()
+        sky = bpy.data.materials.new("night_sky")
+        sky.use_nodes = True
+        snt = sky.node_tree
+        for n in list(snt.nodes):
+            snt.nodes.remove(n)
+        em = snt.nodes.new("ShaderNodeEmission")
+        em.inputs["Color"].default_value = (*A["sky_rgb"], 1)
+        em.inputs["Strength"].default_value = A["sky_ambient"]
+        so = snt.nodes.new("ShaderNodeOutputMaterial")
+        snt.links.new(em.outputs["Emission"], so.inputs["Surface"])
+        dome.data.materials.append(sky)
+        for c in list(dome.users_collection):
+            c.objects.unlink(dome)
+        noink.objects.link(dome)
+
+    # fog: the world scatters the gills' light, and the sky's, into a halo
     world = bpy.data.worlds.new("void")
     scene.world = world
     world.use_nodes = True
     wn = world.node_tree
-    wn.nodes.get("Background").inputs["Color"].default_value = (*A["sky_rgb"], 1)
+    wn.nodes.get("Background").inputs["Color"].default_value = (0.0, 0.0, 0.0, 1)
     vol = wn.nodes.new("ShaderNodeVolumePrincipled")
     vol.inputs["Density"].default_value = A["fog_density"]
     vol.inputs["Anisotropy"].default_value = A["fog_anisotropy"]
@@ -733,13 +766,64 @@ def build_shelf_culture_lamp(P: dict, seed: int):
         # Earth's lamp on these two lines
         vy = [world_to_camera_view(scene, cam, p).y for p in pts]
         frame = {"top": round(1.0 - max(vy), 4), "ground": round(1.0 - min(vy), 4)}
+
+        # the instrument's parts as boxes on the frame, [left, top, right, bottom] as shares of its width and height
+        # from the top left: the hood (brim and louvers, above the column), the plinth, the glass column. light()
+        # reads the render's pixels in them.
+        def box(points):
+            v = [world_to_camera_view(scene, cam, p) for p in points]
+            return [round(min(p.x for p in v), 4), round(1 - max(p.y for p in v), 4),
+                    round(max(p.x for p in v), 4), round(1 - min(p.y for p in v), 4)]
+        regions = {
+            "hood": box([p for p in pts if p.z >= top - 1e-6]),
+            "plinth": box([p for p in pts if p.z <= plinth_h + 1e-6]),
+            "column": box([p for o in instrument if o.name == "glass" for p in world_points(o)]),
+        }
         return {"caps": rows, "overlaps": overlaps, "farthest_m": round(far, 3), "glass_radius_m": col_r,
-                "lens_mm": round(cam.data.lens, 2), "shift_y": round(cam.data.shift_y, 4), "frame": frame}
+                "lens_mm": round(cam.data.lens, 2), "shift_y": round(cam.data.shift_y, 4), "frame": frame,
+                "regions": regions}
 
     return scene, cam, noink, measure
 
 
 FAMILIES = {"shelf-culture-lamp": build_shelf_culture_lamp}
+
+
+def light(out: str, m: dict, plate_w: int, aspect: float) -> dict:
+    """The render's own pixels, read back from the file it wrote: luma (Rec. 709 weights on the stored, display-encoded
+    values, 0 to 1) in the regions the measure named. The culture is the union of the caps' boxes; the sky is the band
+    above the hood, clear of the column. Percentiles, so one hot pixel decides nothing."""
+    import bpy
+    import numpy as np
+    img = bpy.data.images.load(out)
+    img.colorspace_settings.name = "Non-Color"           # the stored values as they are, not linearised
+    W, H = img.size
+    a = np.empty(W * H * 4, dtype=np.float32)
+    img.pixels.foreach_get(a)
+    a = a.reshape(H, W, 4)[::-1]                         # Blender's rows run from the foot of the image
+    luma = 0.2126 * a[..., 0] + 0.7152 * a[..., 1] + 0.0722 * a[..., 2]
+
+    def mask(b):
+        x0, y0, x1, y1 = b
+        k = np.zeros((H, W), dtype=bool)
+        k[max(0, int(y0 * H)):min(H, int(math.ceil(y1 * H))), max(0, int(x0 * W)):min(W, int(math.ceil(x1 * W)))] = True
+        return k
+    culture = np.zeros((H, W), dtype=bool)
+    for c in m["caps"]:
+        x0, y0, x1, y1 = c["box_px"]
+        culture |= mask([x0 / plate_w, y0 / (plate_w * aspect), x1 / plate_w, y1 / (plate_w * aspect)])
+    reg = m["regions"]
+    column = mask(reg["column"])
+    hood, plinth = mask(reg["hood"]), mask(reg["plinth"])
+    sky = mask([0, 0, 1, max(0.02, reg["hood"][1] - 0.01)]) & ~mask([reg["column"][0], 0, reg["column"][2], 1])
+    q = lambda k, p: round(float(np.percentile(luma[k], p)), 4) if k.any() else None
+    bpy.data.images.remove(img)
+    return {
+        "culture_p99": q(culture, 99), "beyond_column_p995": q(~column, 99.5),
+        "sky_p50": q(sky, 50), "hood_p10": q(hood, 10), "hood_p50": q(hood, 50), "hood_p90": q(hood, 90),
+        "plinth_p10": q(plinth, 10), "plinth_p50": q(plinth, 50), "plinth_p90": q(plinth, 90),
+        "frame_p50": q(np.ones((H, W), dtype=bool), 50),
+    }
 
 
 def render(scene, noink, P: dict, out: str, samples: int, percent: int, threads: int | None = None) -> float:
@@ -820,6 +904,8 @@ def main() -> None:
     import bpy
     out = opts["out"]
     seconds = render(scene, noink, P, out, samples, percent, opts["threads"])
+    m["light"] = light(out, m, P["render"]["plate_width_px"], P["render"]["height"] / P["render"]["width"])
+    print(f"[artifact] light: {m['light']}")
     stem = os.path.splitext(out)[0]
     record = {
         "artifact": P["artifact"], "family": P["family"], "title": P["title"], "tag": P["tag"],

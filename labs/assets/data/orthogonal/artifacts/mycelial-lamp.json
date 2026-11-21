@@ -38,7 +38,7 @@
     "gill_steps": 24
   },
   "glow": { "rgb": [0.7, 0.84, 1.0], "gill": 1.2, "flesh": 0.08 },
-  "air": { "fog_density": 0.3, "fog_anisotropy": 0.2, "rim_energy_w": 0, "sky_rgb": [0.0, 0.0, 0.0] },
+  "air": { "fog_density": 0.3, "fog_anisotropy": 0.2, "rim_energy_w": 0, "sky_rgb": [0.45, 0.55, 0.8], "sky_ambient": 0.0045 },
   "ground": { "joint_m": 0.11, "wet_cover": 0.6, "rough_dry": 0.42, "rough_wet": 0.04 },
   "exposure": { "stops": 4.8 },
   "camera": {

@@ -42,6 +42,19 @@
    same step, joins the two with a dotted rule across the row, and
    writes the node's reading into the evidence footer, each claim
    tagged [REAL] with its source or [ILLUSTRATIVE].
+
+   The exercise acts on the same drawing. Asked to order four steps
+   by what each needs, the lineage's lines go into fog, since they
+   would give the answer, and its other steps leave; the four steps
+   lift out of their rows to four places down the drawing, in the
+   item's shuffled order, each on its own lane with its own words,
+   in clearings of the fog. Each press numbers a step in a ring.
+   When the fourth is pressed the engine checks the order against
+   the links, the steps settle back into their rows and the lines
+   come back, so the visitor's numbers stand on the true order. A
+   right answer is a decision, and its numbers are gold; a wrong one
+   is drawn in ink: the pair out of order is ringed, and the links
+   that order them are traced in bright ink over the lineage.
    ============================================================ */
 import { brushStroke } from '../kit/brush.js';
 import { seedOf } from '../kit/rng.js';
@@ -178,15 +191,101 @@ export function markChosen(svg, world, groups, id) {
   } else rule.classList.remove('on');
 }
 
+/* ---------------------------------------------------------------- the exercise on the drawing */
+
+/* Lift an item's steps out of their rows to the places drillPlaces gave (a Map id -> { dy, slot }), or, with null,
+   settle every step back into its row. The other steps leave and the lines go into fog (orthogonal.css .drill). */
+export function placeDrill(svg, groups, places) {
+  svg.classList.toggle('drill', !!places);
+  for (const [id, g] of groups) {
+    const p = places ? places.get(id) : null;
+    const off = !!places && !p;
+    g.classList.toggle('step', !!p);
+    g.classList.toggle('off', off);
+    g.style.transform = p ? `translate(0px, ${Math.round(p.dy * 10) / 10}px)` : '';
+    if (places) g.setAttribute('tabindex', '-1');
+    // a step that leaves is no longer a control from the moment it starts to fade
+    if (off) { g.removeAttribute('role'); g.setAttribute('aria-hidden', 'true'); } else { g.setAttribute('role', 'button'); g.removeAttribute('aria-hidden'); }
+  }
+}
+
+/* Number the steps pressed so far (`picks`, in order) in rings on their squares. `verdict` is null while the order is
+   being given, 'right' or 'wrong' once it is checked. */
+export function markPicks(svg, groups, picks, verdict = null) {
+  svg.classList.toggle('ord-right', verdict === 'right');
+  svg.classList.toggle('ord-wrong', verdict === 'wrong');
+  for (const [id, g] of groups) {
+    const k = picks.indexOf(id);
+    g.classList.toggle('picked', k >= 0);
+    if (g.classList.contains('step')) g.setAttribute('aria-pressed', k >= 0 ? 'true' : 'false');
+    let num = g.querySelector('.num');
+    if (k < 0) { if (num) num.remove(); continue; }
+    if (!num) {
+      const sq = g.querySelector('.sq');
+      const x = Number(sq.getAttribute('x')) + LAYOUT.node / 2, y = Number(sq.getAttribute('y')) + LAYOUT.node / 2;
+      num = svgEl('text', { class: 'num', x: r1(x), y: r1(y + 3.6), 'text-anchor': 'middle', 'aria-hidden': 'true' }, g);
+    }
+    num.textContent = String(k + 1);
+  }
+}
+
+/* A wrong answer's reason on the drawing: the pair out of order ringed, and the links between them (path, from the
+   step up to what it needs) traced over their lines. Null clears it. */
+export function markWhy(svg, groups, path) {
+  for (const g of groups.values()) g.classList.remove('why');
+  svg.querySelectorAll('.why-line').forEach((e) => e.remove());
+  if (!path) return;
+  groups.get(path[0]).classList.add('why');
+  groups.get(path[path.length - 1]).classList.add('why');
+  const lay = svg.__lay;
+  for (let k = 0; k + 1 < path.length; k++) {
+    const e = lay.edges.find((x) => x.from === path[k + 1] && x.to === path[k]);
+    const g = e && svg.querySelector(`.edge[data-from="${e.from}"][data-to="${e.to}"]`);
+    if (!g) continue;
+    svgEl('path', { class: 'why-line', d: `M${e.pts.map((q) => `${r1(q[0])} ${r1(q[1])}`).join(' L')}` }, g.parentNode);
+  }
+}
+
+const make = (tag, cls, text) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+};
+
+/* The exercise in the footer, as text: what to do, how far the visitor has come, and once checked, the verdict and the
+   links that decide it. `d` is { steps, picks, result: null | { right, line } , size }. */
+export function writeDrill(root, world, d) {
+  const label = (id) => world.nodes.find((n) => n.id === id).label;
+  const head = make('p', 'rd-head');
+  head.append(make('b', 'rd-label', 'Order these steps by what each needs'), make('span', 'rd-sep', ' · '), make('span', 'rd-role', 'Practice'));
+  let note, beside;
+  if (!d.result) {
+    note = make('p', 'rd-note', 'Press first the step that needs none of the others, then each one after the steps it needs.');
+    beside = make('p', 'rd-beside', `${d.picks.length} of ${d.size} pressed. With keys: the arrows move, Enter picks, Backspace undoes, Escape leaves.`);
+  } else if (d.result.right) {
+    note = make('p', 'rd-note', 'Right: each step comes after every step it needs.');
+    beside = make('p', 'rd-beside', "Checked against the links of this world's data, the lines of the lineage.");
+  } else {
+    note = make('p', 'rd-note', `Not in order: ${d.result.line}.`);
+    beside = make('p', 'rd-beside', 'Those links are traced on the lineage, and the two steps ringed.');
+  }
+  note.classList.add('dr-verdict');
+  const list = make('ol', 'rd-evidence rd-order');
+  d.picks.forEach((id, k) => {
+    const li = make('li');
+    li.append(make('b', 't', String(k + 1)), document.createTextNode(` ${label(id)}`));
+    list.append(li);
+  });
+  root.replaceChildren(head, note, beside, list);
+  root.dataset.node = '';
+  root.dataset.drill = d.result ? (d.result.right ? 'right' : 'wrong') : 'order';
+}
+
 /* The reading of node `id`, written into `root` as text (never as markup). */
 export function writeReading(root, world, id) {
   const r = reading(world, id);
-  const make = (tag, cls, text) => {
-    const e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text !== undefined) e.textContent = text;
-    return e;
-  };
+  delete root.dataset.drill;
   const head = make('p', 'rd-head');
   head.append(make('b', 'rd-label', r.label), make('span', 'rd-sep', ' · '), make('span', 'rd-role', r.role));
   const note = make('p', 'rd-note', r.note);

@@ -1,5 +1,5 @@
 {
-  "about": "The parameters each artifact family takes, with their bounds. render_artifact.py refuses a parameter file outside them before it builds anything; labs/assets/js/orthogonal/tests.mjs holds the committed files to the same bounds. A 'number' or 'int' is one value in [min, max]; a 'range' is a pair [lo, hi] with min <= lo <= hi <= max; 'rgb' is three numbers in [0, 1]; 'steps' is a list of [radius, height] pairs, each in its bounds. 'at_most' lists pairs [a, b] of one family where a may not exceed b: the instrument's height share may not exceed the line its foot stands on, or its top would leave the frame.",
+  "about": "The parameters each artifact family takes, with their bounds. render_artifact.py refuses a parameter file outside them before it builds anything; labs/assets/js/orthogonal/tests.mjs holds the committed files to the same bounds. A 'number' or 'int' is one value in [min, max]; a 'range' is a pair [lo, hi] with min <= lo <= hi <= max; 'rgb' is three numbers in [0, 1]; 'steps' is a list of [radius, height] pairs, each in its bounds. 'at_most' lists pairs [a, b] of one family where a may not exceed b: the instrument's height share may not exceed the line its foot stands on, or its top would leave the frame; the night sky's strength may not exceed the culture's dimmest glow (its flesh), so the culture stays the brightest thing in the frame. air.sky_ambient is bounded to 0.02, a faint sky: the committed lamp's is measured in its render's record (measure.light).",
   "families": {
     "shelf-culture-lamp": {
       "seed": { "type": "int", "min": 1, "max": 2147483647 },
@@ -36,6 +36,7 @@
       "air.fog_anisotropy": { "type": "number", "min": -0.9, "max": 0.9 },
       "air.rim_energy_w": { "type": "number", "min": 0, "max": 1000 },
       "air.sky_rgb": { "type": "rgb" },
+      "air.sky_ambient": { "type": "number", "min": 0.0, "max": 0.02 },
       "ground.joint_m": { "type": "number", "min": 0.04, "max": 0.5 },
       "ground.wet_cover": { "type": "number", "min": 0.0, "max": 1.0 },
       "ground.rough_dry": { "type": "number", "min": 0.0, "max": 1.0 },
@@ -61,6 +62,6 @@
     }
   },
   "at_most": {
-    "shelf-culture-lamp": [["camera.fill", "camera.ground_y"]]
+    "shelf-culture-lamp": [["camera.fill", "camera.ground_y"], ["air.sky_ambient", "glow.flesh"]]
   }
 }

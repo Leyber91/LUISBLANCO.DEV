@@ -15,8 +15,14 @@
    - arrival(world, lay)       when the strand reaches the artifact
    - fogField(world, lay)      each cell's distance to each line, once per layout
    - fogDensity(field, prog)   the fog's density in every cell, for the strand's progress
+   - needsOf, needPath         what a step needs, and the links from a step up to one it needs
+   - itemSets, item            the exercise's sets of steps, and item n: its steps, shuffled
+   - checkOrder(world, order)  the check: right, or the first pair out of order and the links that order them
+   - needLine(world, path)     those links in words
+   - drillPlaces, drillFog     where an item's steps stand while they are ordered, and the fog around them
    ============================================================ */
-import { FOG, LAYOUT, ROLES, SOURCES, TIMING } from './config.js';
+import { mulberry32, seedOf, shuffle } from '../kit/rng.js';
+import { EXERCISE, FOG, LAYOUT, ROLES, SOURCES, TIMING } from './config.js';
 
 const byId = (world) => new Map(world.nodes.map((n) => [n.id, n]));
 
@@ -340,7 +346,8 @@ export function strandAt(world, lay, ms) {
      with a clear channel along the drawn ink (FOG.channel): the ink came out of the fog, and the branch is invented,
      so its fog never clears;
    - around what has not happened, FOG.pending, always;
-   - Earth's branch and the root both worlds share push every fog back to 0 within FOG.earthReach: history is clear.
+   - Earth's branch and the root both worlds share push every fog back to 0 within FOG.earthReach: history is clear;
+   - every fog thins to 0 over FOG.edge px at the drawing's edges, so the box never cuts a cloud off square.
    fogField builds, once per layout, each cell's distance to each line and how far along the line its nearest point
    is; fogDensity combines them with the strand's progress, so a frame costs one pass over the cells. */
 const gauss = (d, r) => Math.exp(-(d * d) / (r * r));
@@ -367,7 +374,12 @@ const lengthOf = (pts) => { let s = 0; for (let i = 1; i < pts.length; i++) s +=
 export function fogField(world, lay, cell = FOG.cell) {
   const cols = Math.max(1, Math.ceil(lay.width / cell)), rows = Math.max(1, Math.ceil(lay.height / cell)), N = cols * rows;
   const centre = (i) => [((i % cols) + 0.5) * cell, (Math.floor(i / cols) + 0.5) * cell];
-  const lines = [], pending = new Float32Array(N), clear = new Float32Array(N);
+  const lines = [], pending = new Float32Array(N), clear = new Float32Array(N), edge = new Float32Array(N);
+  // how far each cell lies inside the drawing: the outermost cells hold no fog, and it comes in over FOG.edge px
+  for (let i = 0; i < N; i++) {
+    const [x, y] = centre(i);
+    edge[i] = ramp(0, FOG.edge, Math.min(x, lay.width - x, y, lay.height - y) - cell / 2);
+  }
   // each cell's distance to a line, within `reach` of the line's box (farther cells stay Infinity)
   const measure = (pts, reach, fn) => {
     const len = lengthOf(pts);
@@ -403,7 +415,7 @@ export function fogField(world, lay, cell = FOG.cell) {
     }
     if (n.state === 'earth' || n.state === 'root') measure(dot, 3 * FOG.earthReach, (i, d) => { clear[i] = Math.max(clear[i], clearing(d)); });
   }
-  return { cols, rows, cell, lines, pending, clear };
+  return { cols, rows, cell, lines, pending, clear, edge };
 }
 
 /* The fog's density, 0 to 1, in every cell, for the strand's progress (strandAt's edges). `out` is reused. */
@@ -419,7 +431,7 @@ export function fogDensity(field, progress, out = new Float32Array(field.cols * 
       base = Math.max(base, (FOG.rest + (FOG.full - FOG.rest) * undrawn) * gauss(d, FOG.reach));
       chan = Math.max(chan, FOG.channel * (1 - undrawn) * gauss(d, FOG.channelReach));
     }
-    out[i] = Math.max(base - chan, field.pending[i], 0) * (1 - field.clear[i]);
+    out[i] = Math.max(base - chan, field.pending[i], 0) * (1 - field.clear[i]) * field.edge[i];
   }
   return out;
 }
@@ -475,4 +487,161 @@ export function step(world, id, key) {
   const j = earth.indexOf(id) + dir;
   if (j < 0) return order[0];
   return j < earth.length ? earth[j] : null;
+}
+
+/* ---------------------------------------------------------------- the exercise: order these steps by what each needs
+
+   The necessity unit, on the lineage itself. An item is EXERCISE.size steps of the world's lineage, and the visitor
+   presses them in the order they must come. The check reads the parent links of the world's data and nothing else:
+   a step must come after every step it needs (its parents, theirs, up to the root). Where the links leave two steps
+   unordered, either order is right, so the check accepts every order the links allow and never one answer key. */
+
+/* Every step `id` needs: the nodes it grows from, and theirs, up to the root. */
+export function needsOf(world, id) {
+  const ids = byId(world);
+  const out = new Set();
+  const todo = [...((ids.get(id) || {}).after || [])];
+  while (todo.length) {
+    const a = todo.shift();
+    if (out.has(a) || !ids.has(a)) continue;
+    out.add(a);
+    todo.push(...ids.get(a).after);
+  }
+  return out;
+}
+
+/* The links from step `a` up to a step it needs, `b`: [a, ..., b], each one a node the one before it grows from. The
+   shortest such chain, a first parent before a second on a tie. Null when `a` does not need `b`. */
+export function needPath(world, a, b) {
+  const ids = byId(world);
+  if (!ids.has(a) || !ids.has(b) || a === b) return null;
+  const prev = new Map([[a, null]]);
+  const queue = [a];
+  while (queue.length) {
+    const id = queue.shift();
+    for (const p of ids.get(id).after) {
+      if (prev.has(p)) continue;
+      prev.set(p, id);
+      if (p === b) {
+        const path = [b];
+        for (let at = id; at !== null; at = prev.get(at)) path.unshift(at);
+        return path;
+      }
+      queue.push(p);
+    }
+  }
+  return null;
+}
+
+/* The sets the exercise draws from, in the data's order: every EXERCISE.size nodes of the lineage among which at most
+   EXERCISE.free pairs are left unordered by the links. A set of steps with no order to find is never an item. */
+export function itemSets(world, size = EXERCISE.size, free = EXERCISE.free) {
+  const ids = world.nodes.map((n) => n.id);
+  const need = new Map(ids.map((id) => [id, needsOf(world, id)]));
+  const ordered = (a, b) => need.get(a).has(b) || need.get(b).has(a);
+  const out = [];
+  const pick = [];
+  const walk = (from) => {
+    if (pick.length === size) {
+      let loose = 0;
+      for (let i = 0; i < size; i++) for (let j = i + 1; j < size; j++) if (!ordered(pick[i], pick[j])) loose++;
+      if (loose <= free) out.push(pick.slice());
+      return;
+    }
+    for (let k = from; k <= ids.length - (size - pick.length); k++) { pick.push(ids[k]); walk(k + 1); pick.pop(); }
+  };
+  walk(0);
+  return out;
+}
+
+/* Item `index` (a whole number from 0): its steps, in the order they are first shown. The sets are dealt in an order
+   seeded by the world, so no set comes back before every set has come once; the steps are shuffled by a generator
+   seeded by the item's index, and a shuffle the check would already call right is shuffled again. */
+export function item(world, index) {
+  const sets = itemSets(world);
+  if (!sets.length || !Number.isInteger(index) || index < 0) return null;
+  const deal = shuffle(sets.map((_, i) => i), mulberry32(seedOf('orthogonal', world.id, 'deal')));
+  const rng = mulberry32(seedOf('orthogonal', world.id, 'item', index));
+  let steps = shuffle(sets[deal[index % sets.length]], rng);
+  for (let k = 0; k < 64 && checkOrder(world, steps).right; k++) steps = shuffle(steps, rng);
+  return { index, steps };
+}
+
+/* The check, against the parent links. Right when no step comes before a step it needs. When wrong: the first step,
+   in the visitor's order, that comes before something it needs, and of what it needs that comes after it, the one
+   fewest links away, with those links ([step, ..., needed]). An order that is not a list of distinct steps of the
+   world is refused, never marked. */
+export function checkOrder(world, order) {
+  const ids = byId(world);
+  if (!Array.isArray(order) || !order.length || new Set(order).size !== order.length || order.some((id) => !ids.has(id))) {
+    return { right: false, pair: null, refused: 'an order is a list of distinct steps of this world' };
+  }
+  for (let i = 0; i < order.length; i++) {
+    let best = null;
+    for (let j = i + 1; j < order.length; j++) {
+      const path = needPath(world, order[i], order[j]);
+      if (path && (!best || path.length < best.length)) best = path;
+    }
+    if (best) return { right: false, pair: { step: order[i], needs: best[best.length - 1], path: best } };
+  }
+  return { right: true, pair: null };
+}
+
+/* The links that order a pair, in words: "Fungi farmed needs Fungi eat lignin", then ", which needs ..." for each step
+   between them. A seed of trouble does not need the success that plants it; it grows from it, and is said so. */
+export function needLine(world, path) {
+  const ids = byId(world);
+  const label = (id) => ids.get(id).label;
+  const verb = (id) => (ids.get(id).role === 'trouble' ? 'grows from' : 'needs');
+  let s = `${label(path[0])} ${verb(path[0])} ${label(path[1])}`;
+  for (let k = 2; k < path.length; k++) s += `, which ${verb(path[k - 1])} ${label(path[k])}`;
+  return s;
+}
+
+/* Where the steps of an item stand while they are ordered: out of their rows, one to a slot down the drawing in the
+   order the item shows them, each on its own lane with its words as the lineage set them, so the rows give nothing
+   away. Each step's shift down the drawing (dy) and its slot. */
+export function drillPlaces(lay, steps) {
+  const top0 = LAYOUT.topPad + LAYOUT.headH;
+  const pitch = (lay.height - top0 - 4) / steps.length;
+  const out = new Map();
+  steps.forEach((id, k) => {
+    const n = lay.nodes.find((x) => x.id === id);
+    const blockH = (n.label.lines.length + (n.label.role ? 1 : 0)) * LAYOUT.lineH;
+    const was = n.y - LAYOUT.node / 2;
+    const top = top0 + k * pitch + Math.max(8, (pitch - blockH) / 2);
+    out.set(id, { dy: top - was, slot: k });
+  });
+  return out;
+}
+
+/* A step's square and words as one box, moved down by dy. */
+export function stepBox(n, dy = 0) {
+  const w = Math.max(...n.label.lines.map((s) => s.length), n.label.role.length) * LAYOUT.charW;
+  const h = (n.label.lines.length + (n.label.role ? 1 : 0)) * LAYOUT.lineH;
+  const lx0 = n.label.anchor === 'start' ? n.label.x : n.label.x - w;
+  return {
+    x0: Math.min(n.x - LAYOUT.node / 2, lx0), x1: Math.max(n.x + LAYOUT.node / 2, lx0 + w),
+    y0: Math.min(n.y - LAYOUT.node / 2, n.label.y - 10) + dy, y1: Math.max(n.y + LAYOUT.node / 2, n.label.y - 10 + h) + dy,
+  };
+}
+
+/* The fog while an order is being given: the fog of the lineage before the strand drew it (fogDensity at the clock's
+   0, the branch in full fog), because while the visitor orders the steps the links are not known again; and clear
+   about each step being ordered, where it stands (drillPlaces). */
+export function drillFog(world, lay, places, field) {
+  const N = field.cols * field.rows;
+  const out = fogDensity(field, strandAt(world, lay, 0).edges);
+  const boxes = [...places].map(([id, p]) => stepBox(lay.nodes.find((x) => x.id === id), p.dy));
+  for (let i = 0; i < N; i++) {
+    if (!out[i]) continue;
+    const x = ((i % field.cols) + 0.5) * field.cell, y = (Math.floor(i / field.cols) + 0.5) * field.cell;
+    let c = 0;
+    for (const b of boxes) {
+      const d = Math.hypot(Math.max(b.x0 - x, 0, x - b.x1), Math.max(b.y0 - y, 0, y - b.y1));
+      c = Math.max(c, d <= FOG.drillClear ? 1 : gauss(d - FOG.drillClear, FOG.drillReach));
+    }
+    out[i] *= 1 - c;
+  }
+  return out;
 }

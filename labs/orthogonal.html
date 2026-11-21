@@ -39,6 +39,17 @@
       <svg id="lineage-svg" role="group" aria-label="Choose a step to read it; the arrow keys move along the rows and across to Earth's step"></svg>
     </div>
     <p class="legend"><span><svg class="lg" viewBox="0 0 26 8" aria-hidden="true"><path class="lg-gold" d="M1 2.2 C9 2 17 3 25 3.8 L25 4.2 C17 4.9 9 6 1 5.8 Z" /></svg>The branch this world took</span> <span><svg class="lg" viewBox="0 0 26 8" aria-hidden="true"><path class="lg-ink" d="M1 2.9 C9 2.8 17 3.4 25 3.9 L25 4.1 C17 4.6 9 5.2 1 5.1 Z" /></svg>Earth's branch: history</span> <span><span class="lg-fog" aria-hidden="true"></span>Fog: invented, or not yet happened</span></p>
+    <div class="drill-bar" id="drill-bar" data-mode="read">
+      <span class="drill-acts">
+        <button type="button" class="drill-btn" id="drill-start" disabled>Order four steps by what each needs</button>
+        <button type="button" class="drill-btn" id="drill-undo" hidden>Undo</button>
+        <button type="button" class="drill-btn" id="drill-leave" hidden>Leave</button>
+        <button type="button" class="drill-btn" id="drill-next" hidden>Next four steps</button>
+        <button type="button" class="drill-btn" id="drill-back" hidden>Back to the reading</button>
+      </span>
+      <span class="drill-count" id="drill-count" aria-live="polite"></span>
+      <span class="drill-kept" id="drill-kept" hidden></span>
+    </div>
   </section>
 
   <figure class="art" id="art">
@@ -50,7 +61,7 @@
     <figcaption class="art-cap">
       <span class="art-name">The mycelial street lamp</span>
       <span class="art-line">This world's answer to light at night</span>
-      <span class="art-exposure"><b class="t ill">[ILLUSTRATIVE]</b> <span class="art-exposure-text">Drawn as a long exposure records it; to the eye it is dimmer.</span></span>
+      <span class="art-exposure"><b class="t ill">[ILLUSTRATIVE]</b> <span class="art-exposure-text">Drawn as a long exposure records it, sky included; to the eye it is dimmer.</span></span>
       <span class="art-status" id="art-status" role="status"></span>
       <span class="provenance" id="provenance" data-state="loading">Reading the render's record.</span>
     </figcaption>

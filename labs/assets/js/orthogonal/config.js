@@ -82,6 +82,26 @@ export const FOG = Object.freeze({
   seed: 0x0F06,        // the fog texture's seed
   tile: 128,           // the texture's side, cells
   scale: 4,            // drawn at this many px a cell, so the wisps are large and slow
+  edge: 28,            // the fog thins to none over this many px at the drawing's edges, so the box never cuts it
+  drillClear: 10,      // while an order is given, a step holds no fog within this many px of its square and its words
+  drillReach: 22,      // and pushes it back over this many more
+  fadeMs: 520,         // the fog's change between the reading and an order
 });
 
-export const EVENTS = Object.freeze({ node: 'alt-reality.node' });
+/* The exercise: order these steps by what each needs (the necessity unit; the challenge blueprint's second format in
+   the lab's plan). The engine picks `size` steps of the shown world's lineage for each item: a set in which at most
+   `free` pairs are not ordered by the links, so every item has an order to find, and any order the links allow is
+   right. */
+export const EXERCISE = Object.freeze({
+  size: 4,
+  free: 1,
+  logCap: 400,         // the record keeps the last 400 answers and actions; its counts are kept apart and never trimmed
+  walkMs: 1500,        // arrow-key choices this close together are one walk, logged as the step it ended on
+  moveMs: 560,         // the steps leave their rows, and come back, over this long
+});
+
+/* What the plate says when the browser keeps nothing: the bindings' storage-off diagnosis, verbatim from the lab's plan
+   (bindings.known_setup_failures, id storage-off). */
+export const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your world lasts until you close it. A link still shares it.';
+
+export const EVENTS = Object.freeze({ node: 'alt-reality.node', order: 'alt-reality.order' });

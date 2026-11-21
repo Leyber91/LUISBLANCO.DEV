@@ -32,8 +32,9 @@ export const WORLD = Object.freeze({
     record: 'assets/data/orthogonal/renders/mycelial-lamp.render.json',
     title: 'The mycelial street lamp',
     line: "This world's answer to light at night",
-    // [ILLUSTRATIVE] said beside the render: the scene is exposed up, as a long exposure records a dim source
-    exposure: 'Drawn as a long exposure records it; to the eye it is dimmer.',
+    // [ILLUSTRATIVE] said beside the render: the scene is exposed up, as a long exposure records a dim source, and an
+    // exposure that long records the night sky's faint light too (air.sky_ambient in the parameter file)
+    exposure: 'Drawn as a long exposure records it, sky included; to the eye it is dimmer.',
     alt: 'At night in fog, a glass column on a ceramic plinth under a louvered hood, drawn in fine ink lines: shelves of gilled bracket fungus on a wooden spindle inside glow blue-white at their gill edges, and light only a small pool of the wet cobbled street around the plinth.',
     // where the render put the instrument's top and foot, as shares of the frame's height from its top (the render's
     // record, measure.frame); Earth's lamp stands on the same two lines. tests.mjs holds the three to each other.

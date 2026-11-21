@@ -13,7 +13,10 @@
    absolutely inside the box CSS sizes. The effects budget (world
    brief): during the ignition one density pass and two full-canvas
    draws a frame; at rest the density is cached and only the
-   texture's offset moves.
+   texture's offset moves. Between the reading and an order of the
+   exercise the density blends to the other mode's (engine.js
+   drillFog) over FOG.fadeMs, one mask a frame; under reduced
+   motion it changes at once.
    ============================================================ */
 import { fogNoise } from '../kit/fog.js';
 import { FOG } from './config.js';
@@ -59,12 +62,43 @@ export class FogPainter {
     this.density = new Float32Array(field.cols * field.rows);
     this.img = this.mctx.createImageData(field.cols, field.rows);
     this.size = [width, height];
+    this.blend = null;
   }
 
   /* The density for the strand's progress, written into the mask's alpha. */
   setProgress(progress) {
     if (!this.field) return;
+    this.blend = null;
     fogDensity(this.field, progress, this.density);
+    this.writeMask();
+  }
+
+  /* The density at the strand's progress, as a new array, for a change to blend to. */
+  densityFor(progress) {
+    return this.field ? fogDensity(this.field, progress) : null;
+  }
+
+  /* Move to another density (engine.js fogDensity or drillFog, on this field) over `ms`, or at once with 0. */
+  blendTo(target, ms, now) {
+    if (!this.field || !target || target.length !== this.density.length) return;
+    if (!(ms > 0)) { this.blend = null; this.density.set(target); this.writeMask(); return; }
+    this.blend = { from: this.density.slice(), to: target, t0: now, ms };
+  }
+
+  get blending() { return !!this.blend; }
+
+  /* One step of a blend at `now`, eased; true while it runs. */
+  advance(now) {
+    const b = this.blend;
+    if (!b) return false;
+    const x = Math.min(1, Math.max(0, (now - b.t0) / b.ms)), e = x * x * (3 - 2 * x);
+    for (let i = 0; i < this.density.length; i++) this.density[i] = b.from[i] + (b.to[i] - b.from[i]) * e;
+    this.writeMask();
+    if (x >= 1) this.blend = null;
+    return true;
+  }
+
+  writeMask() {
     const d = this.img.data;
     for (let i = 0; i < this.density.length; i++) { d[4 * i] = 255; d[4 * i + 1] = 255; d[4 * i + 2] = 255; d[4 * i + 3] = Math.round(255 * this.density[i]); }
     this.mctx.putImageData(this.img, 0, 0);
