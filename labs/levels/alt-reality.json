@@ -1,311 +1,429 @@
 {
   "id": "alt-reality",
   "title": "Alternate Reality Scenarios",
-  "page": "altverse.html",
-  "thesis": "The visitor dials or types any change to physics or history, watches a validated stage graph of rules and models weave a world with every rejection shown, then forks it into a navigable tree of worlds whose maps, chronologies and causal graphs trace each claim back to the divergence and travel as a shareable artifact.",
+  "page": "orthogonal.html",
+  "thesis": "The visitor changes one driver of a world (a resource, a constraint, an accident of history) and the lab grows the technologies that branch from it, each with what it needs, the pressure that forced it at its moment and its cost, checked by Luis's own worldbuilding method (the Necessity Principle: every step needs what came before it; the Orthogonal Path: no step may sit unchanged in Earth's history) against a sourced ledger of Earth's technology. Each branch ends in an artifact Earth never built, its form computed from its lineage and rendered, standing beside Earth's device for the same job, with one line saying which branch the evidence favours. At level 10 the visitor grows a world era by era, each success planting the next era's trouble, keeps it and shares it, and the lab's chains are shown by a committed test to need their driver where Earth-mimicry and grafted reasons do not.",
   "axes": [
     {
-      "id": "divergence-propagation",
-      "name": "Divergence propagation",
+      "id": "branch-growth",
+      "name": "Branch growth from a driver",
       "frame": "model",
-      "metric": "How a world's facts are produced from the divergence: count of world values computed by code from typed divergence parameters or evaluated rules versus read from a table keyed by divergence id, counted by tracing generateEcho and the pipeline in the source, plus whether rater-chosen parameter values yield worlds with no placeholder strings.",
+      "units": [
+        "driver",
+        "function",
+        "combination",
+        "consequence",
+        "trouble"
+      ],
+      "fiction_inventory": [
+        "change-driver",
+        "branch-graph",
+        "combination",
+        "seed-of-trouble",
+        "eras"
+      ],
+      "metric": "How a world's lineage comes to exist: the count of steps typed by hand in a world file against steps the lab derives from a typed driver; the number of shipped drivers and of the six domains they cover (energy, materials, communication, transport, food, environment); whether a driver the visitor states, absent from every shipped world, grows a complete lineage; whether the same engine regrows Earth's history when no driver is changed; and the number of eras a world grows. A step is a technology node after the driver; the root, the driver and the artifact are not steps, so step 1 is the first technology after the driver.",
+      "how_checked": "Read the engine and every world file, and count the steps each world file types. State 5 drivers of your own, one in each of 5 domains, none present in the data, and read each lineage the page grows. Run the lab's tests and read the Earth regrowth test. Rungs are cumulative: a rung holds only when every rung below it holds.",
       "ladder": [
-        "No world is produced; nothing runs after a divergence is chosen.",
-        "At least one complete world (premise, effects, regions, eras, events, peoples, contrasts) appears after a divergence is chosen, whether read from a hand-authored table keyed by divergence id or computed, and its parts cross-reference by ids (fx-, rg-, ev-).",
-        "Code reads at least one numeric divergence parameter (e.g. g in m/s2, c in km/s) and computes at least 3 world values from it by formulas visible in the source.",
-        "A rule base of at least 20 typed propagation rules (condition evaluated on the divergence record, cause, effect, mechanism, certainty tag) emits the first-order effects of every preset; no table keyed by divergence id (as echo-world.js CONTENT is today) supplies any first-order effect.",
-        "Second-order effects come from chaining rules at least 2 hops from the divergence; each effect stores its parent ids and a domain from schemas.js DOMAINS, and one world's chained effects span at least 3 of those domains.",
-        "For 5 values of one parameter chosen by the rater across its legal range, each woven world fills all 7 slots (premise, first-order, geography, chronology, civilizations, contrast, arrival) and contains no string matching the genericPhysics placeholders (/^(Region|Era|People|Turning point|Direct consequence) \\d/ or 'situation N').",
-        "Derived quantities carry units and come from named scaling laws (e.g. atmospheric scale height H = kT/(mg)), with the formula shown beside each number on the page.",
-        "A non-physics domain (history or biology) propagates through the same rule engine: at least 10 typed rules for that domain, taking dated baseline events as inputs.",
-        "A repository test checks at least 10 derived quantities: the no-divergence baseline reproduces Earth's values (scale height about 8.5 km, g 9.81 m/s2) within 5%.",
-        "The visitor sweeps a parameter and sees which downstream facts flip at which threshold, computed from at least 20 engine re-runs across the range.",
-        "Every generated fact traces to an executed rule or simulation step with its formula, and history is simulated step by step over at least 500 years, producing at least 300 events and 10 peoples, each event with a recorded cause chain and browsable by year (reference: Dwarf Fortress legends mode), driven by a changed constant or event."
+        "No lineage exists on the page.",
+        "One world's lineage (a driver, at least 5 technologies with their parent links, an artifact at the tip) is read from a hand-written data file and drawn, and every parent link resolves to a node of that file.",
+        "At least 3 shipped worlds with different drivers, in at least 2 of the six domains; each lineage runs at least 5 steps between the driver and the artifact, and each step lists what it needs.",
+        "The lab grows at least one lineage from a typed driver record (a resource or condition, removed or multiplied, with its domain), either by an engine over a table of technologies (each with its function, its needs and what it provides) under a stated rule such as \"a technology enters when every need is met by the world or by an earlier step\", or by a model whose reply passes a check in code that every need of every step resolves to the driver, the world's starting state or an earlier step; no step of that lineage is typed in a world file.",
+        "Grown lineages carry combination and consequence: at least one step of each has two parents (two threads that meet), each branch is followed at least 3 steps past its first technology, and each lineage names its function (the job) and ends at an artifact node for that function.",
+        "Level 5, the fiction made real: a driver the visitor states or composes, absent from every shipped world, grows a lineage at the central scene's detail (at least 5 steps between the driver and the artifact, each with its needs, its why-now pressure and its cost; at least one combination; no step marked as Earth-mimicry by the Orthogonal Path test of method-checks rung 5; a seed of trouble at the tip), and then one more era from that seed of trouble, which becomes the new era's pressure, with at least one step that needs a technology of the era before it. For 5 drivers the rater chooses, in 5 of the six domains, every lineage is complete and no two of them share more than 2 steps.",
+        "Eras in sequence: a rater's own driver grows at least 3 eras, each era's pressure taken from the last era's seed of trouble, and each era after the first has at least 2 steps that need technologies of earlier eras.",
+        "Earth regrown: with no driver changed (Earth's starting state), the same engine grows, for at least 6 functions, one in each domain, a lineage whose steps match the entries Earth's ledger records for that function, by function and needs and in the ledger's order, in at least 70% of its steps, checked by a repository test whose result is linked from the page.",
+        "A sweep: the visitor varies a driver's magnitude (removed, halved, doubled, multiplied tenfold, or a stated continuous range) and the page shows at which value each branch fires or dies, computed from at least 10 runs across the range.",
+        "Breadth: lineages are grown for at least 42 drivers, 7 in each of the six domains, with a median of at least 8 steps and no two lineages sharing more than half their steps, and the results file is in the repository and linked from the page.",
+        "Reference: one world grows at least 5 eras and at least 60 technologies across at least 4 functions, every step derived by the lab with its rule trace and browsable by era, where a strategy game's technology tree is written by hand and fixed; and at least 5 independent entries in the lab's reference ledger (labs/levels/ledger/alt-reality.json, atlas.json ledger_schema), each opened by the rater at its URL, cite it as a tool for technology worldbuilding."
       ],
       "levels": {
         "G0": {
-          "level": 1,
-          "evidence": "echo-world.js generateEcho copies one of three hand-authored worlds from CONTENT keyed by preset id (ice-sinks VETHLEND, slow-light LENTUA, strong-gravity BARUND) into createWorld's shape; parts cross-reference by typed ids (rung 1). No value is computed from the divergence and no divergence parameter is read as a number anywhere. genericPhysics is unreachable from the three presets and emits 'Region 1' / 'Direct consequence 1'. Rung 2 fails."
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
         }
       }
     },
     {
-      "id": "consistency-enforcement",
-      "name": "Consistency enforcement",
+      "id": "method-checks",
+      "name": "The method's checks",
       "frame": "model",
-      "metric": "Number of decidable consistency rules computed over the world graph on the path the public page runs, the validator's depth (structural, full schema, semantic), and whether violations are shown, repaired or blocked; counted in worldstate.js computeConsistency, schemas.js and the consistency ledger on altverse.html?still&tab=dossier (add &demo=slow-light or &demo=strong-gravity for the other worlds).",
+      "units": [
+        "necessity",
+        "pressure",
+        "combination",
+        "orthogonality"
+      ],
+      "fiction_inventory": [
+        "why-now",
+        "combination"
+      ],
+      "metric": "Count of the method's rules computed by code on every lineage the page shows (the Necessity Principle: every need of a step is met by the driver, the world's starting state or an earlier step; why now: every step names a pressure that resolves to a world state; a physics check on every combination; the Orthogonal Path test against Earth's ledger; the driver ablation), whether each violation is shown, refused or repaired, and how the checks score against labelled chains and real outcomes.",
+      "how_checked": "Read the check code and its tests. Plant each fault through a documented URL flag or a test fixture (a need met by nothing, a step that uses what the driver removed, a pressure that names nothing in the world, a combination whose physics quantity breaks its bound, an Earth ledger entry entered as a step under a new name) and read what the page says. Open the labelled set and the result files named in rungs 7 to 9. Rungs are cumulative.",
       "ladder": [
-        "No check runs on world content.",
-        "At least 1 decidable rule (e.g. id uniqueness) runs over every shown world, whatever produced it, and its result is shown on the page.",
-        "At least 5 structural rules over the world graph (id uniqueness, era order, cause resolution, bbox validity, path resolution) are computed in code and listed as pass or flag on the page.",
-        "At least 8 rules, including certainty non-inflation along every parent link (event to its cause, contrast to each path id, first-order effect and region to the premise and the preset ceiling), with passed and flagged counts shown on the page.",
-        "Every slot is validated against a full JSON Schema (required keys, types, enums, numeric ranges, array lengths), and each failure names its field path.",
-        "Rejections are visible to the visitor: the failing stage, the rule, the offending value, and whether a repair pass fixed it; a documented URL flag (e.g. ?fault=<rule>) plants a bad value so a rater can force one.",
-        "Each first-order effect is checked against every binding axiom (by rule or classifier), and contradictions are listed with the axiom they break.",
-        "At least 15 rules including cross-view invariants (every region named in chronology, peoples and threads exists on the map; every event year lies inside its era; no two region bboxes overlap unless marked contested), with a planted-fault test proving each rule fires.",
-        "The semantic causal audit (strong, weak or none per edge) is scored against human labels on at least 50 labeled cause-to-effect pairs kept in the repo, and the agreement percentage is shown on the page.",
-        "The visitor edits any fact and the ledger re-runs live, flagging every downstream fact the edit invalidates through stored parent ids.",
-        "Justification-based truth maintenance in the sense of Doyle (1979, Artificial Intelligence): every fact stores its justification set, retracting a fact cascades to its dependants, and every shipped preset world passes all of at least 25 rules with zero flags."
+        "No rule is checked on any lineage.",
+        "At least one structural rule runs on every lineage shown (one root, one driver, no cycle, every parent a node), and a world that breaks it is refused with the rule's sentence.",
+        "At least 6 structural rules run on every lineage (among them: every Earth step pairs with the world step doing the same job, and the artifact is reached from the driver by parent links), each with a repository test that plants its fault and sees the world refused.",
+        "The Necessity Principle runs in code: each step lists its needs, every need resolves to the driver, the world's starting state or an earlier step on the same branch, and a step with an unmet need is flagged on the page with the need named.",
+        "Why now, cost and physics: every step names its pressure (a scarcity, a bottleneck or a demand) and its cost, a pressure that resolves to no state the driver or an earlier step created is flagged, and every combination carries a physics check computed in code (a named quantity with its unit, from a stated law, compared with a stated bound), with a combination whose quantity breaks its bound shown as killed, with the value and the bound.",
+        "Level 5, the fiction made real: every lineage the page shows, the visitor's own included, passes these checks with the result shown per step (needs met, pressure resolved, combination checked), and the Orthogonal Path test marks as Earth-mimicry any step whose function and needs match an entry of Earth's ledger, compared by ids whatever the step is called, so an Earth device under a new name is marked; a step that uses what the driver removed is refused; a documented URL flag plants each fault so a rater can watch it fire.",
+        "The ablation runs on the page: reverting the driver to Earth's value marks which steps stop working (an unmet need) or stop being worth building (no pressure), and steps 3 to 5 of every shown lineage are among them.",
+        "Each branch carries an orthogonality measure computed against Earth's ledger (the share of its steps with no Earth technology of the same function and needs, or another stated distance), shown with its formula; and on at least 50 labelled chains in the repository (labelled, by readers who did not write the rules, as needing the driver, Earth-mimicry or reasons grafted on), the checks agree with the labels on at least 80%, with the agreement and the misses on the page.",
+        "The lab's chains beat both foils: on at least 24 drivers, chains grown by the code the page runs (a test of the method's text in a model's hands alone does not count) beat chains that copy Earth's history and chains whose reasons were grafted on afterwards, on whether their later steps need the driver, by a test whose design, drivers and readers were committed before it ran once; the page states the result in words.",
+        "The rules are calibrated on real societies: the rules the page's checks run (the same functions), written blind to the outcomes, run once on a coded sample of at least 500 real societies, name each society's recorded choice among their top two picks more often than the 95th percentile of 10,000 permutations of the environment rows and with a lift of at least 0.10 over the permutation mean, by a gate committed before the run; the page states the result with its source and licence.",
+        "Reference: every step on every lineage carries its justification set (the needs, pressure and physics check it stands on), editing or retracting any step re-runs the checks live and marks every downstream step it invalidates, and the checks agree with labels on at least 90% of a held-out set committed only as a hash before the rules it tests were written, and opened after."
       ],
       "levels": {
         "G0": {
-          "level": 2,
-          "evidence": "On every shown world (altverse.html?still&tab=dossier, &demo=slow-light, &demo=strong-gravity) generateEcho calls worldstate.js computeConsistency, which runs 8 structural rules, and render/dossier.js lists each PASS/FLAG under '8/8 structural checks passed' (rungs 1 and 2); shared (#w=) and saved worlds show the ledger stored at weave time. Rung 3 fails: the inflation rule covers only event to cause, so LENTUA fx-003 and rg-004 (THEORETICAL under a SPECULATIVE premise and ceiling) pass unflagged; generateEcho run in Node on 2026-11-11 reports 8/8, 0 flagged for all three worlds. VETHLEND rg-003 and rg-005 overlap and no rule catches it. schemas.js guardKeys/guardItems run only in pipeline.js runLive, which the public page never reaches."
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
         }
       }
     },
     {
-      "id": "model-contribution",
-      "name": "Model contribution",
-      "frame": "intelligence",
-      "metric": "Share of the 7 world slots (premise, first-order, geography, chronology, civilizations, contrast, arrival) filled by a model call in the visitor's session, with the answering route named, plus the count of validated facts the model added that the deterministic engine does not produce for the same divergence; measured by weaving a divergence on the public site, reading pipeline.js, and reading the route and provenance shown on the page.",
+      "id": "artifact-necessity",
+      "name": "Artifact from its lineage",
+      "frame": "model",
+      "units": [
+        "artifact"
+      ],
+      "fiction_inventory": [
+        "artifact-render"
+      ],
+      "metric": "How an artifact's form follows from its lineage: the share of its form parameters (shape, material, size, parts; seed, camera and render settings excepted) that a stated mapping derives from lineage steps, needs or the driver, against parameters set by hand; whether its parameter file is validated against its family's schema before anything is built; whether changing one step changes the form; and the quantities computed from the form.",
+      "how_checked": "Read the artifact grammar, the family schema and the mapping from lineage to parameters. Change one step of a shipped lineage (or the driver's magnitude), regenerate, and diff the parameter file and the drawing. Count traced and hand-set form parameters. Rungs are cumulative.",
       "ladder": [
-        "No model-call code exists in the lab.",
-        "A model client exists in the lab's code, and any world produced without a model is badged on the page as an offline sample.",
-        "A model fills at least one world slot on a route the visitor can enable (local Ollama or a key they bring), and that slot is marked as model-written.",
-        "On the keyless public route, one batched call per divergence (inside the 1 reply per 45 s limit) fills at least 3 slots; the page names the route that answered and shows the 45 s countdown and a cancel control while waiting.",
-        "All 7 slots can be model-filled in one weave (one call per stage on fast routes, one batched call on the public route), and the page shows how many of the 7 slots a model filled.",
-        "Every model output passes the schema and consistency validators before it enters the world; a failing slot gets one repair call, then falls back to the deterministic engine, and the world records per slot which of the three happened with the validator's failing field path; a documented fault flag corrupts one real reply so a rater can watch it.",
-        "Each slot shows a provenance chip (model and route, deterministic rule, or authored).",
-        "The visitor re-runs any one stage on a model route without regenerating the others, and stages downstream of it are marked stale until re-run.",
-        "Per-stage outcome rates (valid on first try, repaired, fell back, in %) are shown for the session and for a benchmark of at least 30 divergences whose results file is in the repo and linked from the page; the file also counts, per divergence, the validated facts the model added that the engine-only weave of the same divergence lacks.",
-        "The model proposes at least 3 typed fork points per world that pass the validator and open as branches in the world tree.",
-        "On that benchmark of at least 30 divergences, model-filled worlds of at least 50 id-bearing items each pass every consistency rule (at least 15) with zero flags after repair, and a blind rating recorded in the repo (at least 5 raters) scores them above the engine-only worlds for the same divergences on novelty."
+        "No artifact is attached to any lineage.",
+        "Each shown lineage ends in a named artifact with its function and a written description of its form.",
+        "Each artifact is built by a script from a parameter file and a seed; the same file and seed rebuild the same object, and every build writes a record carrying the parameter file's hash.",
+        "Each parameter file is validated against its family's schema (every parameter typed and bounded) before anything is built; a file outside the bounds is refused with the parameter named, and a test holds every committed file to the bounds.",
+        "At least 5 form parameters of each artifact are traced in the data to the step, need or driver that sets them, and the trace is listed on the page beside the artifact.",
+        "Level 5, the fiction made real: the form is computed from the lineage. A stated mapping derives at least half of an artifact's form parameters from its lineage, each from a property the step provides or needs (a material, a process, a scale, a constraint) and never from a hash or seed of the step's text, so a visitor's own branch yields its own parameter file, validated and drawn at its tip by the same grammar; changing one step of a shipped lineage changes at least 3 form parameters and the drawing.",
+        "Each artifact states at least 3 quantities computed from its parameters, with units and the law used (for example light output from glowing area and a published luminance, fuel or water consumed, mass), each tagged REAL or ILLUSTRATIVE, and an artifact whose quantity breaks a stated bound (it could not stand, or could not do its job) is refused.",
+        "Families: at least 3 artifact families exist, a schema each; one world's artifacts for different functions share a design grammar derived from its driver (shared materials, joins and motifs named in the data), and a rater shown the uncaptioned drawings of 2 worlds' artifacts sorts at least 9 of 10 into the right world.",
+        "Earth's counterpart is built by the same pipeline from a sourced parameter file (its dimensions from a cited museum record or technical drawing of the real device), so the two stand at one measured scale, printed on the page.",
+        "An exploded or annotated view labels every part with the step it came from, and removing a step removes or changes the part it set, in a test.",
+        "Reference: for at least 20 drivers the artifacts at their tips are generated from their lineages alone (no form parameter set by hand), each passes its schema and its quantity bounds, and the parameter files, records and drawings download as one archive."
       ],
       "levels": {
         "G0": {
-          "level": 1,
-          "evidence": "nemotron-client.js and prompts.js exist (rung 1, first half), but pipeline.js runWorld goes live only when provider.detect() returns 'worker' and AI_CONFIG.worker.base is set; labs/assets/js/ai/config.js has worker.base '' so every route, local Ollama included, falls to runEcho. The lab does not import labs/assets/js/ai/llm.js. render/world-view.js badges tier 'echo' as OFFLINE SAMPLE in the world header (rung 1, second half). Rung 2 fails."
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
         }
       }
     },
     {
-      "id": "cartography",
-      "name": "Generated cartography",
-      "frame": "graphics",
-      "metric": "What the Mapamundi draws from world data: geometry type (rectangles, polygons, heightfield, globe), plate overlaps, number of toggleable layers, whether the divergence changes the map by a stated rule, and links to other views; checked on altverse.html?still&tab=map (add &demo=slow-light or &demo=strong-gravity) at 1440 px and 390 px, and in render/map-canvas.js.",
-      "ladder": [
-        "No map exists.",
-        "Regions are listed by name.",
-        "Regions are drawn from stored coordinates on an equirectangular graticule, labeled at their centroid, tinted cold to warm from each region's climate field, and the canvas carries a projection label marking the map as stylized.",
-        "Hovering a legend entry highlights its region, and no two region plates overlap unless the overlap is drawn and labeled as contested.",
-        "Regions are generated polygons with irregular coastlines from seeded noise; the same seed redraws the same coastline.",
-        "Land and ocean come from a generated heightfield, and at least 3 layers toggle (elevation, climate bands, peoples).",
-        "The map responds to the divergence by a stated rule (e.g. ice extent from the freezing rule, relief scaled by 1/g), with the rule printed in the map caption.",
-        "Pan and zoom (drag, wheel or pinch, and +/- buttons) work, and at every zoom step no two drawn labels overlap (colliding labels are culled).",
-        "Climate bands are computed from latitude insolation and a stated lapse rate, and the no-divergence baseline puts its band edges within 10 degrees of reference latitudes printed on the page (tropics 23.4, subtropical arid belt 15 to 35, polar circles 66.6).",
-        "An era slider redraws the map for each era of the chronology, and regions, ice extent or peoples differ between at least 2 eras.",
-        "Heightmap, rivers, biomes, states and routes draw as separate toggleable layers, also on a globe the visitor rotates (the feature set of Azgaar's Fantasy Map Generator), and clicking any feature names the divergence rule that placed it."
-      ],
-      "levels": {
-        "G0": {
-          "level": 2,
-          "evidence": "render/map-canvas.js AltMap draws each region.bbox as a rounded-rect plate on an equirectangular graticule, tinted by a tempOf() regex on climate and biome, labeled at the centroid, and stamps 'PROJECTION: EQUIRECTANGULAR · STYLIZED / PLAUSIBLE' (rung 2); render/world-view.js legend mouseenter calls map.setHover. Rung 3 fails: on altverse.html?still&tab=map (VETHLEND) The Sere Equator (rg-003, lon -65..95, lat -16..16) and The Drowned Shelves (rg-005, lon 80..165, lat -42..8) are drawn over each other and their labels collide at 1440 px and at 390 px."
-        }
-      }
-    },
-    {
-      "id": "causal-graph",
-      "name": "Causal graph and timeline",
-      "frame": "graphics",
-      "metric": "How the causal record and chronology are drawn: ids as text, a scaled time axis, a node-link graph, and the number of views (graph, chronology, map) that highlight the same ids together; checked on altverse.html?still&tab=chrono and ?still&tab=dossier (add &demo=slow-light or &demo=strong-gravity) and in render/chronology.js and render/dossier.js.",
-      "ladder": [
-        "No causal record appears anywhere on the page.",
-        "Causes are stated in prose inside descriptions.",
-        "Events and contrasts print their cause ids (e.g. an event tagged with fx-003, a contrast path fx-001 then fx-003), and eras are listed top to bottom with their year spans.",
-        "The chronology is drawn on a time axis with a log or piecewise scale and era bands sized by duration, and at 1440 px every era band is at least 16 px tall, both the 3.5 Gyr Cold Genesis and the 350-year Thaw Engines included.",
-        "The causal record is drawn as a node-link graph from the divergence to effects, events, peoples and contrasts, every edge taken from stored ids.",
-        "Hovering or focusing a graph node highlights its ancestors and descendants; the same ids highlight in the chronology, and on the map for every id tied to a region (regions, peoples, events with a regionId).",
-        "Edge style encodes the certainty tag and the audit verdict (strong, weak, none), with a legend.",
-        "During weaving the graph grows in stage order as stages complete; under reduced motion it appears complete.",
-        "A layered layout with crossing minimization (Sugiyama-style) draws a world of at least 40 nodes at 1440 px with zero overlapping node labels; at 390 px branches collapse into an expandable list.",
-        "Clicking any edge shows the rule or model output that created it and its validator result.",
-        "The graph filters by era and by region and exports as SVG or PNG (reference standard: DAGitty, the browser causal-DAG editor at dagitty.net, extended here with time and space)."
-      ],
-      "levels": {
-        "G0": {
-          "level": 2,
-          "evidence": "On altverse.html?still&tab=chrono render/chronology.js lists eras top to bottom with year spans and each event with year, title, tag and '← fx-00N'; on ?still&tab=dossier render/dossier.js prints contrast paths as code ids joined by arrows (rung 2). Rung 3 fails: eras are equal-height blocks with no time axis; measured in headless Chrome at 1440 px on 2026-11-11, the 3.46 Gyr Cold Genesis and the 350-year Thaw Engines are both 85 px tall. No graph drawing exists. At 390 px the cause ids are hidden (see reach-and-speed)."
-        }
-      }
-    },
-    {
-      "id": "divergence-authoring",
-      "name": "Divergence authoring",
-      "frame": "interaction",
-      "metric": "What the visitor can change before weaving: count of preset divergences and domains, typed parameters with unit and range, free-text entry, compound divergences, dated historical events; counted on the compose screen (altverse.html) and in divergence-presets.js.",
-      "ladder": [
-        "No way to choose a divergence exists.",
-        "At least one divergence can be woven from the page.",
-        "At least 3 preset divergence cards, each one click to weave.",
-        "At least 8 presets across at least 3 of the schemas.js DOMAINS (physics, history, biology, geography, technology).",
-        "Every preset with a numeric parameter (c, g, ...) exposes it as a slider or number field with unit and legal range, and worlds woven at the two ends of the range differ in at least 3 facts.",
-        "A typed divergence builder (domain, then parameter or event, then magnitude, then plausibility ceiling) shows the composed record before weaving.",
-        "Free-text entry is parsed into that typed record (by rules or a model) and is editable before weaving; text that cannot be parsed gets a stated reason.",
-        "Compound divergences: 2 or more combine in one world; two divergences that set the same parameter, or whose axioms contradict under a stated rule, are refused before weaving with the reason shown.",
-        "Historical-event divergences pin to a date on a baseline timeline, and baseline events after that date are marked at risk.",
-        "Any generated fact opens in the divergence builder as a pre-filled typed record (domain, parameter or event, magnitude) that the visitor negates or edits before weaving.",
-        "At least 30 typed parameters across all 5 schemas.js DOMAINS, each with unit, range and our-reality default; any 3 rater-chosen parameters combine and weave with no placeholder string (reference: Universe Sandbox's per-object property editor, extended from planets to history)."
-      ],
-      "levels": {
-        "G0": {
-          "level": 2,
-          "evidence": "altverse.html (compose, also the audit screenshot altverse.png) shows three PHYSICS cards (ice sinks, slow light, 30% stronger gravity), each a button that starts the Loom (main.js screenCompose). divergence-presets.js holds exactly 3 presets, all domain 'physics'; its header defers free-text to Phase 4. Rung 3 fails."
-        }
-      }
-    },
-    {
-      "id": "world-tree",
-      "name": "World tree",
-      "frame": "interaction",
-      "metric": "Whether worlds persist, travel and fork: saved-world shelf, share link fidelity, parent links, a drawn tree, diffs and fork depth; checked by weaving, saving, sharing and forking on the page and reading store.js.",
-      "ladder": [
-        "Each world vanishes when the page closes.",
-        "Woven worlds are saved in the browser and listed on the compose screen for reopening.",
-        "A share link carries the whole world and replays it exactly, with no regeneration.",
-        "From an open world the visitor forks a child by adding a divergence; the saved child stores its parent world id and the forking divergence.",
-        "The saved-worlds shelf shows lineage: each child names its parent and its fork divergence, and opens the parent in one click.",
-        "The tree is drawn (nodes are worlds, edges are labeled with divergences) and navigable by click at least 3 levels deep.",
-        "Two worlds open side by side with a computed diff of their facts (added, removed, changed), keyed by fact ids inherited from their common ancestor.",
-        "Forking works from any event or effect node, and the child inherits every fact upstream of the fork point.",
-        "The tree is navigable by keyboard (arrows to parent, child, sibling), and the selected node is held in the URL.",
-        "The whole tree exports and imports as one JSON file, and one share link opens the tree, not a single world.",
-        "Convergence marks appear where two branches reach the same fact (same canonical key: domain, subject, claim) by different paths, and a tree of at least 100 worlds supports collapse, bookmarks and search by fact text (reference: the open-source loom interface for branching language-model text, not this lab's Loom screen)."
-      ],
-      "levels": {
-        "G0": {
-          "level": 2,
-          "evidence": "store.js saveWorld/listWorlds keep up to 60 worlds in localStorage and main.js renders a 'Saved worlds' shelf on compose (rung 1); Share copies shareURL, which encodes the full world as #w= base64, and boot() replays it through decodeShareHash with no regeneration (rung 2). No fork action exists and createWorld (worldstate.js) stores no parent id, so rung 3 fails."
-        }
-      }
-    },
-    {
-      "id": "baseline-grounding",
-      "name": "Baseline grounding",
+      "id": "earth-ledger",
+      "name": "Earth's technology ledger",
       "frame": "data",
-      "metric": "Where the facts come from: share of baseline constants and claims shown on the page with unit, certainty tag and a named source, gating of the ESTABLISHED tag, and export formats; counted on altverse.html?still&tab=dossier and ?still&tab=chrono for each preset at 1440 px and 390 px, and in divergence-presets.js and echo-world.js.",
+      "units": [
+        "function",
+        "orthogonality",
+        "evidence"
+      ],
+      "fiction_inventory": [
+        "earth-beside",
+        "evidence-line"
+      ],
+      "metric": "Where Earth's branch and the drivers' facts come from: the count of Earth technologies in one sourced ledger (each with its function, its date, its needs and a source its writer opened), the share of Earth steps on the page read from that ledger rather than typed per world, the count of REAL claims with an opened source against declared gaps, and what is downloadable with its licence.",
+      "how_checked": "Open the ledger file. Pick 10 entries at random and open each cited source to confirm the date and the dependency. Check that every Earth step on the page resolves to a ledger entry. Count the declared gaps on the page. Rungs are cumulative.",
       "ladder": [
-        "No baseline facts are stated.",
-        "On the page, each world states our reality's baseline for what it changes (a baseline line, or an Our reality line per contrast).",
-        "On the page, baseline numbers carry units (c about 299,792 km/s, g about 9.81 m/s2), and at 1440 px every first-order effect, event and contrast shows a certainty tag (ESTABLISHED, THEORETICAL, SPECULATIVE, SF).",
-        "A per-world fact index lists at least 10 named facts, each with a tag, and a magnitude with unit wherever the fact is numeric.",
-        "Every claim type carries a displayed tag, regions, peoples and axioms included; no untagged claim on any tab at 1440 px or at 390 px.",
-        "Every baseline constant names its source of record and year on the page (e.g. the SI definition of c, standard gravity 9.80665 m/s2, water's density maximum near 3.98 C).",
-        "The ESTABLISHED tag is gated: a validator rule refuses ESTABLISHED on any claim without a linked source.",
-        "A page action saves the world as schema-versioned JSON, beside the World Card PNG.",
-        "Historical-domain divergences draw baseline events from a bundled dated dataset of at least 200 events, each with a source.",
-        "Export to a graph file (GraphML or JSON-LD) that opens in a named external tool (Gephi or yEd), each node carrying its tag and source.",
-        "Every quantitative claim in every world resolves to a dated source or a derivation from sourced constants, enforced by a repository test that fails on any unsourced number, and a corpus of at least 30 woven worlds with their ledgers ships dated and versioned (reference standard: Our World in Data, where every chart names its sources and offers its data for download)."
+        "Earth's branch is absent, or its steps carry no date and no source.",
+        "Earth's branch for the shown function is drawn beside the world's, its steps typed in the world's file.",
+        "Every Earth step carries a date (a year or a range) and either a source its writer opened or a gap declared on the page.",
+        "Earth's steps are read from one ledger file shared by every world: each entry has an id, a technology, its function, a date, its needs (as ledger ids) and a source, and no world file types an Earth step.",
+        "The ledger holds at least 60 entries covering every function a shipped world names, each with a source opened (author, year, venue or URL, and the date it was read), and no Earth step on the page carries a declared gap.",
+        "Level 5, the fiction made real: for any function a visitor's world serves, Earth's branch for the same job is found in the ledger by function and drawn beside it with Earth's real technologies and dates; the ledger holds at least 150 entries across all six domains; a test checks that every needs link resolves and that no technology is dated before what it needs.",
+        "Every real driver a shipped world uses carries its evidence for and against, each source opened and the claim it supports quoted or paraphrased with its page, and the ledger and the driver evidence download as JSON or CSV with their licence stated.",
+        "Dates carry their uncertainty and their source's kind (primary, scholarly secondary, encyclopedia), and at least 80% of entries cite a book or a journal article rather than an encyclopedia.",
+        "The ledger is audited: where an open dataset of technology dates or prerequisites covers its period, at least 100 shared entries and at least 90% of all shared entries match it within each entry's stated date uncertainty, and the mismatches are listed; where none does, a reader who did not write it checks 50 random entries against their sources and finds at most 5 in error; either way the result is on the page.",
+        "At least 500 entries across all six domains from the earliest tools to 1900, and every needs link cites a source that states the dependency, not only the date.",
+        "Reference: the ledger is released as a citable open dataset of technology prerequisites (versioned, with a DOI or a stable URL and a licence), and at least 5 independent entries in the lab's reference ledger, each opened by the rater at its URL, use or cite it."
       ],
       "levels": {
         "G0": {
-          "level": 1,
-          "evidence": "On altverse.html?still&tab=dossier every world's contrasts print 'Our reality' lines (rung 1). Rung 2 fails: the baseline strings in divergence-presets.js carry units (c ≈ 299,792 km/s, g ≈ 9.81 m/s²) but no renderer reads divergence.baseline (only the unreachable live prompt in prompts.js does), so no baseline number appears on any screen; the fact index shows the divergent values (≈ 30,000 km/s, ≈ 12.7 m/s²), not ours. Toward rung 3: factIndex holds 3/2/2 facts (VETHLEND/LENTUA/BARUND, generateEcho run in Node 2026-11-11), and BARUND's 'tallest mountains: far lower than ours' has no magnitude."
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
         }
       }
     },
     {
-      "id": "causal-explanation",
-      "name": "Causal explanation",
-      "frame": "explanation",
-      "metric": "Count of ladder features present on the page, plus the count of copy-versus-code mismatches (claims on any screen that pipeline.js, echo-world.js or main.js contradict), checked by reading every screen at 1440 px against the code.",
+      "id": "lineage-plate",
+      "name": "The lineage plate",
+      "frame": "graphics",
+      "units": [
+        "necessity",
+        "combination",
+        "orthogonality"
+      ],
+      "fiction_inventory": [
+        "branch-graph",
+        "earth-beside",
+        "animation"
+      ],
+      "metric": "What the lineage graph draws and links: nodes and edges from data, Earth's branch beside the world's on matched rows, gold only on the branch that fired, the ignition (the branch drawing itself in order and the artifact revealed at its tip), the views a selection lights together, and overlapping labels at 1440 x 900 and 390 x 844.",
+      "how_checked": "Shoot the page at 1440 x 900 and 390 x 844 at rest, with a step chosen and under reduced motion (node tools/labs-wt.mjs shoot, or tools/drive.mjs). Count overlapping labels on the shots. Choose steps by mouse, touch and keyboard and record what lights. Read the layout code. Rungs are cumulative.",
       "ladder": [
-        "No text explains the lab.",
-        "A headline and a subtitle state what the lab does.",
-        "The page states truthfully what produced the world (authored table, rule engine, or model and route); no copy claims a propagation engine or live reasoning where content is replayed from a table.",
-        "Each world shows its premise, the first mechanism, and a list of contrasts between our reality and the world.",
-        "A key on the page defines, one line each, the four certainty tags (ESTABLISHED, THEORETICAL, SPECULATIVE, SF) and every id prefix the visitor meets (fx-, rg-, er-, ev-, civ-, con-).",
-        "A guided first run of at most 5 steps walks from the divergence through one causal chain to a contrast; it is skippable and replayable.",
-        "Causal paths read as sentences with the mechanism and tag at each hop (ice is denser, so lakes freeze from the bed, so no fish overwinter), not bare ids.",
-        "The Loom explains its own stage graph while it runs: each stage shows its inputs, its validator and its output counts.",
-        "A weakest-links view lists the 3 lowest-certainty or weakest-audited hops in the world, with the reason for each.",
-        "The visitor saves a one-page causal dossier as Markdown carrying the chain, tags and sources.",
-        "Every number in the dossier is an inline control: editing or dragging it re-runs the engine and updates every dependent fact in place, for every preset (Bret Victor, Explorable Explanations, 2011)."
+        "No lineage is drawn.",
+        "The lineage is shown as a list or a static picture.",
+        "The lineage is drawn as a node-link graph from data (each edge from a stored parent link), with the branch that fired in gold and Earth's branch dotted in its own lane.",
+        "Each Earth step sits on the row of the world step that does the same job; choosing a step by mouse, touch or keyboard shows its reading (its role, note, needs and evidence); no two labels overlap at 1440 or at 390 px.",
+        "The ignition: the fired branch draws itself from the driver down in step order and the artifact surfaces at its tip when the line reaches it; under reduced motion or a still flag the finished frame appears at once.",
+        "Level 5, the fiction made real: the central scene stands in one plate inside 1440 x 900 without scrolling (the driver at the root, the branching graph with this world's branch in gold and Earth's dotted beside it, the artifact at the tip with Earth's ghosted beside it on one ground line, and the evidence line), drawn with its ignition for any lineage the lab grows, the visitor's own included, up to 25 nodes with no overlapping label, and read in a stated order at 390 px.",
+        "Linked views: choosing a step lights its ancestors and descendants, the artifact part it set and its Earth pair; a combination shows both threads meeting; branches that did not fire (killed by physics, or with an unmet need) are drawn ghosted, with the reason on hover and on focus.",
+        "Eras on the plate: each era is a band, the seed of trouble is drawn as the hook into the next, an era control redraws the graph era by era, and a world of 60 nodes in 4 eras keeps every label clear at 1440 px and collapses into an expandable outline at 390 px.",
+        "A layered layout with crossing minimization (Sugiyama-style) lays out any grown world, and two worlds serving the same function stand side by side, linked step to step by function.",
+        "A scenario plays: the world's eras run as a sequence (branches growing, artifacts revealed, each trouble planting the next era) with pause, step and scrub, and the sequence exports as a video or an image sequence.",
+        "Reference: the plate exports as SVG and as PNG at print resolution with every mark bound to data, a reader rebuilds the full lineage (every node, edge, need and date) from the exported SVG alone, and at least 5 independent entries in the lab's reference ledger, each opened by the rater at its URL, reuse its plates."
       ],
       "levels": {
         "G0": {
-          "level": 1,
-          "evidence": "The compose screen (altverse.html) has a headline ('Change one thing. Watch a world diverge.') and a subtitle (rung 1). Rung 2 fails: the subtitle in main.js screenCompose and the meta description in altverse.html say 'A deterministic engine propagates the consequences', while echo-world.js copies authored worlds from CONTENT and the Loom's COGITATION stream replays authored reasoning strings on 240 ms timers (pipeline.js runEcho). Premise, mechanism and contrasts do show on ?still&tab=dossier, but they sit above the failed rung."
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
         }
       }
     },
     {
-      "id": "world-identity-style",
-      "name": "Loom and world identity",
+      "id": "artifact-render",
+      "name": "Artifact render",
+      "frame": "graphics",
+      "units": [
+        "artifact",
+        "function"
+      ],
+      "fiction_inventory": [
+        "artifact-render"
+      ],
+      "metric": "How the artifacts look, judged against references each artifact states: the share of branch tips with a rendered still, the references each still is judged against (photographs or drawings of the organism, material or mechanism it is drawn from, and of Earth's device for the same job), whether the light and scale are honest to their tags, and what a tip the visitor grew is given.",
+      "how_checked": "Open each still at full resolution beside the references its record lists and check each listed feature at plate size. Read each render record (seed, parameter hash, engine, samples, time). Block the image request and look at the fallback. Grow a branch of your own and look at its tip. For rungs 7 and up, run the blind comparisons as written and read their recorded answers. Rungs are cumulative.",
+      "ladder": [
+        "No artifact is drawn.",
+        "The artifact is shown as a placeholder, an icon or a stock image.",
+        "The artifact at each shipped tip is drawn from its own geometry (an ink drawing or a render) with its title and function, and Earth's artifact for the same job is drawn beside it.",
+        "Each shipped tip has a still rendered offline from its parameter file and seed, at most 60 KB at its plate width, with alt text that describes the form; when the image fails to load the same artifact is drawn in ink from its parameter file in the same box, and the page says the picture did not load.",
+        "Each still's record names at least 2 references (photographs or drawings of the real organism, material or mechanism it is drawn from, each with its source) and the features taken from them (for a shelf fungus: side-attached caps that overlap, real gills with short gills between, glow on the gill edges and margins), and a rater finds each listed feature visible at plate size.",
+        "Level 5, the fiction made real: every tip of every shipped world is a still at prime quality. A rater who did not build it, judging at full resolution against its references and the labs-design skill, finds every listed feature legible at plate size, no look on the skill's list of tells, and light within its tag (a brightness tagged REAL comes from a cited measurement; any brighter light is tagged ILLUSTRATIVE); Earth's artifact stands ghosted beside it on one ground line at a stated scale; Luis's yes on the stills is recorded with its date in the lab's plan or log; and a tip the visitor grew is drawn within 1 s by the same grammar in the plate's ink line and then rendered from its own parameter file with the stills' materials and light (lit and shaded, at runtime or by a render that returns to the visitor's world), with every feature its family's record lists legible at plate size, because the binding says each branch ends in a rendered artifact.",
+        "Each still has a detail view (a crop or a second camera on the part its lineage names, such as a gill edge) and a turntable or a set of 3 views, all from the same seed and record.",
+        "A blind check: each still is shown, unlabelled and shuffled, beside photographs of real objects of its kind, and at least 3 raters who did not build it judge its material and construction plausible as a made object in at least 80% of their judgements, with the answers recorded in the repository.",
+        "A tip the visitor grew cannot be told from the offline stills: in blind pairs at plate size, at least 3 raters who did not build it pick the offline still in no more than 60% of pairs, with their answers recorded in the repository.",
+        "Scenes: each shipped world has at least 1 scene of its artifacts in use (a street at night, a workshop), rendered from the same parameter files, with the world's other artifacts placed by the same grammar.",
+        "Reference: at least 30 stills across at least 6 worlds, each with its lineage and render record, are published under a stated licence, and at least 5 independent entries in the lab's reference ledger, each opened by the rater at its URL, use or cite them as references for invented technology."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
+        }
+      }
+    },
+    {
+      "id": "plate-language",
+      "name": "Plate language, ink in fog",
       "frame": "style",
-      "metric": "Design craft across the 4 screens (compose, Loom, map, dossiers): token use, per-world identity derivation and contrast, gold reserved for active state, Loom choreography, type system; checked on altverse.html, altverse.html?loom=ice-sinks, ?still&tab=map and ?still&tab=dossier at 1440 px, and in altverse.css and identity.js.",
+      "units": [],
+      "fiction_inventory": [
+        "animation"
+      ],
+      "metric": "The craft of the plate in the Contact world's material (ink in fog): the count of style gates above 0 (tools/anti_tells.mjs and the style gates of labs/levels/atlas.json), gold's share of the screen's pixels at rest measured on the screenshots, the number of label grammars on the page, ornament that marks nothing, and the number of the labs-design skill's five design axes on which the plate differs from the other worlds.",
+      "how_checked": "Run node tools/anti_tells.mjs on the page and count each atlas style gate. Count gold pixels on the 1440 x 900 and 390 x 844 shots at rest. List every label style on the page. Judge the shots with the labs-design skill. Rungs are cumulative.",
       "ladder": [
-        "The page is unstyled HTML.",
-        "A lab stylesheet sets colors, fonts and spacing on all 4 screens.",
-        "Site tokens (tokens.css: void ground, amber accent, display, body and mono families, bordered cards) apply on all 4 screens.",
-        "Each world derives its own accent and void tint from its data, scoped to the world root, and the code's contrast clamp holds the accent at no less than 4.5:1 on the void (WCAG 2.2 SC 1.4.3, since the accent colors small text).",
-        "Gold (the --accretion, --accretion-soft and --accretion-dim tokens, and any per-world accent within 15 degrees of the hue of #F2A93B) appears only on interactive or active state: every such use in altverse.css sits on a button, :hover, :focus-visible or [aria-selected] selector, and the 4 screens at 1440 px show it only on controls.",
-        "Every Loom stage transition fires from the completion callback of that stage's own computation or model call, with no setTimeout-paced replay of a precomputed world (runEcho does that replay today), and reduced motion shows the end state.",
-        "Header, map and World Card share one identity (accent, graticule density, plate radius), and any two preset worlds differ by at least 30 degrees of accent hue or 8 degrees of graticule step.",
-        "At most 3 type families, at most 6 sizes on a modular scale, and prose blocks measured at 45 to 75 characters per line.",
-        "Cartographic styling: a biome palette with legend, hillshading, and a 3-tier label hierarchy (region, people, feature).",
-        "The World Card (2400 px wide) lays out on a column grid stated in card.js and carries the map, a causal excerpt of at least one 2-hop path with tags, and the world's accent and void.",
-        "A blind test recorded in the repo (5 viewers, 5 World Cards) shows each viewer matched at least 4 of 5 cards to their divergence from the card alone."
+        "No page exists, or the page carries no style of its own.",
+        "The page reads the site's tokens file (labs/assets/css/tokens.css) and loads its fonts only from the site's approved hosts.",
+        "node tools/anti_tells.mjs reports 0 for the page, and gold falls only on the branch that fired and the chosen step.",
+        "One label grammar runs through the nodes, the captions and the reading (one order of name and role, one case, one size ladder), and gold covers under 3% of the screen's pixels at rest at 1440 x 900 and at 390 x 844, counted on the screenshots.",
+        "Every atlas style gate counts 0 on the page, and no ornament marks nothing: each corner, rule, frame or bracket marks a state or a measure, as listed in the stylesheet's header or the lab's notes.",
+        "Level 5, the fiction made real: the plate is drawn in the Contact material, ink in fog, bound to state (the lineage as ink that draws itself, the artifact surfacing from fog, gold only on what fired), and differs from every other lab world on at least 4 of the 5 design axes of the labs-design skill (geometry, texture, ornament, motion, ink tint), judged at both widths by a rater who did not build it, who names the 4.",
+        "Motion follows one stated rule per element (for example the fog clears outward from where the gold strand meets the artifact; ink draws and settles and never blinks in or out), each rule written in the code beside the motion, and reduced motion gives the finished frame.",
+        "Each world's plate carries a variation of the material bound to its driver (an ink tint, a line texture or a fog density set by a stated world quantity), so any 2 shipped worlds differ visibly on at least 2 design axes, with each binding listed.",
+        "Every state of the product is shot at both widths and holds rungs 2 to 5: an empty world, a world of 60 nodes, a failed render, an era change and two worlds compared.",
+        "A designer or illustrator who did not build the lab reviews the plate in a review recorded in the repository, finds no look from the labs-design skill's list of tells, and every finding is fixed or answered.",
+        "Reference: the plate language is a documented system (tokens, label grammar, line weights, fog rules) that a second lab uses without editing it, and at least 5 independent entries in the lab's reference ledger, each opened by the rater at its URL, reference the plate, at least one of them a design publication or gallery that features it."
       ],
       "levels": {
         "G0": {
-          "level": 2,
-          "evidence": "altverse.css styles all 4 screens with tokens.css variables (void, --accretion, Orbitron / Space Grotesk / IBM Plex Mono, bordered cards) (rung 2). identity.js deriveIdentity computes accent and void tint per world and applyIdentity scopes them to .av-world; measured on their voids: VETHLEND #5c9ad5 6.60:1, LENTUA #5797da 6.38:1, BARUND #f1b53c 10.57:1. Rung 3 fails: deriveIdentity calls ensureContrast(accent, voidTint, 3.0), so the clamp admits a 3:1 accent on small text (.av-id, .av-legend-head, the motto) for any world whose derived accent starts dark. Rung 4 also fails: the ALTVERSE wordmark, the chronology spine and era dots, the WORLD LEDGER heading and SPECULATIVE/SF tags are gold on static elements, and BARUND's accent (hue 40, within 15 degrees of #F2A93B) colors its static name and headings."
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
         }
       }
     },
     {
-      "id": "reach-and-speed",
-      "name": "Reach and speed",
+      "id": "world-making",
+      "name": "World making",
+      "frame": "interaction",
+      "units": [
+        "driver",
+        "trouble"
+      ],
+      "fiction_inventory": [
+        "change-driver",
+        "eras",
+        "keep-share"
+      ],
+      "metric": "The protagonist's verbs from the bindings (change a driver, follow a branch, compare with Earth, grow an era, keep, share), each performed by mouse, touch and keyboard; the kinds of driver the visitor can state; and whether a kept world reopens identically from Labs OS and from a link in a fresh profile.",
+      "how_checked": "Perform each verb at 1440 px by mouse and by keyboard and at 390 px with touch emulation. State 5 drivers of your own. Keep a world, reload, and open its link in a fresh browser profile; compare the two. Refuse storage and repeat. Rungs are cumulative.",
+      "ladder": [
+        "The visitor can do nothing but scroll.",
+        "The visitor chooses a step of a shipped lineage and reads it, by press or by the arrow keys.",
+        "The visitor switches between at least 3 shipped worlds, and the world and the chosen step are in the URL, so a link opens the same world on the same step.",
+        "The visitor composes a driver from typed fields (domain, the resource or condition, removed or multiplied, magnitude) and sees the composed record before growing it; a driver the lab cannot read is refused with the reason.",
+        "A driver stated in one sentence is parsed into that typed record (by rules or by a model), shown and editable before growing; a sentence that cannot be parsed gets the reason.",
+        "Level 5, the fiction made real: every verb of the protagonist works from the visitor's own input by mouse, touch and keyboard. The visitor changes a driver, follows a branch step by step, compares it with Earth's for the same job, grows one more era from the last trouble, keeps the world in Labs OS (it reopens after a reload with its driver, branches, eras and artifacts) and shares it as a link that opens identically in a fresh profile; with storage refused, the page says the world lasts until it is closed and the link still shares it.",
+        "Editing the output: the visitor edits a step (its need, its pressure or its technology), the lineage regrows from that step, the checks re-run and the artifact's parameters update; undo restores the world before the edit.",
+        "Forks: from any step the visitor forks a second world with another driver; the shelf draws the tree of worlds, each child naming its parent and its fork, and any two worlds compare side by side by function.",
+        "Of 10 questions of shapes absent from the code's examples (for example \"what would this world use for refrigeration\", \"which step fails if copper is scarce too\"), the lab answers at least 7 from its engine and its ledger, each answer with a trace the rater follows to the steps, needs and ledger entries it used, and none contradicting the world's own lineage or its checks.",
+        "A world exports as a file (its driver, lineages, eras, parameter files and evidence) and imports identically in another browser, and a second visitor continues a world from its link as a fork of their own.",
+        "Reference: a writer builds a world of at least 5 eras and 4 functions in the lab and exports it as a world document (lineages, artifacts, account and evidence), and at least 5 independent entries in the lab's reference ledger, each opened by the rater at its URL, show writers using it."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
+        }
+      }
+    },
+    {
+      "id": "method-writer",
+      "name": "The lab writing on its own",
+      "frame": "intelligence",
+      "units": [
+        "necessity",
+        "pressure"
+      ],
+      "fiction_inventory": [
+        "narrative",
+        "why-now"
+      ],
+      "metric": "What the lab writes on its own for a visitor's driver (each step's why-now and cost, and an account of how the world came to be), by rule from the engine's trace or by a model route; whether every generated text passes the method's checks before it is shown; what each sentence names as its writer; rejection, repair and fallback rates; and the measured gain of the lab's chains over stated baselines.",
+      "how_checked": "Read the writer and, if a model is called, the call site of labs/assets/js/ai/llm.js. Grow a driver of your own with a model route and again with the network off, and compare the texts and their writer marks. Plant a reply or a rule output with an unmet need, a removed resource used and an Earth-mimicry step, and check each is refused with its reason. Read the benchmark files and their sealed parts. Rungs are cumulative.",
+      "ladder": [
+        "No part of any world is written by the lab on its own.",
+        "Each shown world carries an account of how it came to be, written by hand and tagged as authored.",
+        "The account is generated from the lineage: each sentence is tied to a node id, and a test shows that changing a node's data changes its sentence.",
+        "For a visitor's own driver the lab writes each step's why-now and cost sentence on its own (by rule from the engine's trace, or by a model route through labs/assets/js/ai/llm.js), and each sentence names what wrote it (the rule id, or the model and the route).",
+        "Whatever writes is checked before it is shown: every generated chain and account passes the lab's checks, a failing model reply gets at most one repair call and then falls back to the engine, and the world records per step which of the three happened.",
+        "Level 5, the fiction made real: for a visitor's own driver the lab tells how the world came to be, on its own, in an account of at least 150 words written from the chain, every sentence tied to a node and every number to an engine value, naming the pressure behind each step, the two threads of each combination and the trouble the success planted; the account regrows when a step changes, and with the network off it is still written.",
+        "Across 20 drivers the rater chooses, every generated chain and account passes the checks, and the counts of rejections, repairs and fallbacks by trigger (an unmet need, a removed resource used, Earth-mimicry, a schema failure) are shown on the page from the log.",
+        "The writer's gain is measured: on at least 24 drivers with a sealed test part committed before the run, the chains of the page's own writer (its prompt, checks and route as the page runs them; a test of the method's text in other calls does not count) are compared with chains written from the same instruction without the method, on whether their later steps need the driver, by a stated test, and the page states the result, pass or fail.",
+        "The lab proposes at least 3 combinations per world it was not asked for (two threads that should meet, with the physics check that let each survive or killed it), each passing the checks and opening as a new branch.",
+        "At least 5 readers who did not build the lab, their answers recorded in the repository, prefer the lab's chains to those of a general model told only \"make it plausible\", on novelty and on necessity, in at least 70% of blind pairs.",
+        "Reference: from one driver the lab writes a world of at least 5 eras on its own, each era's pressure taken from the last era's trouble, with zero check flags, and in a blind comparison recorded in the repository at least 5 readers of hard science fiction rate its account at or above a published human-written worldbuilding excerpt of the same length."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
+        }
+      }
+    },
+    {
+      "id": "method-explained",
+      "name": "Method and evidence",
+      "frame": "explanation",
+      "units": [
+        "driver",
+        "function",
+        "necessity",
+        "pressure",
+        "combination",
+        "consequence",
+        "trouble",
+        "orthogonality",
+        "artifact",
+        "evidence"
+      ],
+      "fiction_inventory": [
+        "evidence-line"
+      ],
+      "metric": "What a visitor can state after five minutes about how a changed driver branches technology, measured by the lab's insight check; the count of on-page claims tagged REAL (with author, year and venue) or ILLUSTRATIVE; whether every real driver carries the line saying which branch the evidence favours; and the count of statements false about the code or the subject, which must be 0.",
+      "how_checked": "Read every claim on the page and its tag, and open 5 REAL citations. Check each real driver's evidence line against its sources. Follow the walk and take the insight check. Look for any statement false about the code or the subject. Rungs are cumulative.",
+      "ladder": [
+        "The page explains nothing of how the world was made.",
+        "Each step carries a note in plain sentences saying what it is and why it follows from its parent.",
+        "Every claim on the page is tagged REAL or ILLUSTRATIVE, every REAL claim cites a source its writer opened (author, year, venue) or declares its gap, and no statement is false about the code or the subject.",
+        "The plate says which branch the evidence favours for its driver in one line, citing the sources for and against, each opened.",
+        "The method's rules are stated on the page in neutral terms where they act: each step shows which rule it met (needs met, why now, combination checked, not Earth-mimicry), with a one-sentence definition of the rule on focus.",
+        "Level 5, the fiction made real: a staged walk through one world, run on the lab's engine, teaches each of the 10 declared units (driver, function, necessity, pressure, combination, consequence, trouble, orthogonality, artifact, evidence) with a worked example the reader predicts before it is revealed; an insight check of at least 5 questions, computed on the instrument, explains every answer; and every real driver on the page carries its evidence line.",
+        "A traps catalogue of at least 5 cases where intuition misleads (an Earth device relabelled as invention, a reason grafted on after the fact, a combination physics kills), each shown on a lineage the lab computes.",
+        "Each world is set among real histories: at least 3 real cases in which a resource's absence or plenty changed a society's technology, each with its source, shown beside the world's branch with what they share and where the world departs.",
+        "The page shows its own misses: the results of the checks' validations (method-checks rungs 7 to 9, pass or fail, with their numbers) stand beside every claim about the rules' realism, and a claim about the rules' realism is tagged REAL only after a calibration passed.",
+        "At least 5 readers who did not build the lab take the insight check before and after the walk, their answers recorded in the repository, and the mean gain is at least 2 of 5 questions.",
+        "Reference: at least 5 independent entries in the lab's reference ledger (worldbuilding courses, writing forums, articles), each opened by the rater at its URL, cite the lab's explanation of technology grown from necessity."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
+        }
+      }
+    },
+    {
+      "id": "reach",
+      "name": "Reach",
       "frame": "performance",
-      "metric": "Time from click to a rendered world (ms), horizontal overflow and hidden or clipped content at a 390 px viewport (documentElement.scrollWidth vs clientWidth, computed display of tags and ids), reduced-motion handling, keyboard and screen-reader reach, Lighthouse mobile scores; measured in headless Chrome with device-metrics emulation, by tabbing, and in altverse.css and main.js.",
+      "units": [],
+      "fiction_inventory": [
+        "keep-share"
+      ],
+      "metric": "Load and frame time, transfer bytes, phone width, reduced motion, keyboard and screen-reader reach of the plate, and the three known setup failures of the bindings (render-missing, data-missing, storage-off), measured with tools/drive.mjs and the browser's performance panel at 1440 x 900 and 390 x 844.",
+      "how_checked": "Drive the page at both widths with tools/drive.mjs and the lab's scenario under tools/drives/. Record the first complete frame, transfer bytes and long tasks with 4x CPU slowdown and the network throttled to at most 1.44 Mbps down with at least 562 ms latency (a custom DevTools profile, so the rung does not hang on a preset's name). Run with reduced motion. Walk every control by keyboard only and with a screen reader. Block the render, then the world data, then storage. Rungs are cumulative.",
       "ladder": [
-        "The page does not load.",
-        "The page loads at 1440 px without console errors and renders a world.",
-        "A rendered world is reachable within 2 s of a click on Skip to world or of loading a ?still URL, and prefers-reduced-motion removes CSS animation and Loom timers.",
-        "At a 390 px viewport, compose, Loom, map, chronology and dossiers have no horizontal scroll (scrollWidth equals clientWidth), and no tag, id or label shown at 1440 px is hidden or clipped.",
-        "Every control is a native button operable by Tab and Enter with a visible focus ring, map legend entries included, which highlight their region on focus as on hover.",
-        "Tabs follow the ARIA tablist pattern (tablist, tab, tabpanel, arrow keys), the map has a text alternative, and the Loom stream is an aria-live region.",
-        "Lighthouse mobile scores reach at least 95 accessibility and 90 performance on compose and explore.",
-        "Generation runs in a Web Worker, and Interaction to Next Paint stays under 100 ms while weaving (DevTools Performance panel, 4x CPU slowdown).",
-        "Map rendering steps down a tier (fewer layers) when frame time exceeds 20 ms, and the page states the tier.",
-        "After first load the engine and presets work offline (service worker), and a share link opens a world in under 1 s.",
-        "A manual WCAG 2.2 AA audit and an NVDA walk through compose, weave, map, chronology and dossiers are recorded in the repo with zero open failures, and map interaction holds 60 fps at 390 px under DevTools 4x CPU slowdown."
+        "The page does not load, or throws on load.",
+        "The page loads at 1440 px with a clean console.",
+        "The page works at 390 px with no horizontal scroll and no overlap, and under reduced motion shows the finished frame.",
+        "Every control is reachable and operable by keyboard with a visible focus, each step has an accessible name with its role and label, and the lab's drive passes at both widths with a clean console.",
+        "Each known setup failure shows its diagnosis, each forced in the drive: the render missing (the ink drawing and its line), the world data missing (nothing drawn and the reload line), storage refused (the world lasts until the page is closed, and a link still shares it).",
+        "Level 5, the fiction made real: every target is at least 44 px at 390 px, and at 320 px wide (WCAG 2.2 reflow, 1.4.10) the whole plate (lineage, artifact, Earth's ghost, evidence line) reads with no horizontal scroll; the first complete frame lands within 2.5 s with 4x CPU slowdown and the network profile named in how_checked; the lab's own files (HTML, CSS, JS, data and the stills shown at rest; shared site files excepted) transfer under 300 KB; a lineage the visitor grows computes and draws within 1 s; a screen reader reads the lineage as an ordered list of steps with their needs.",
+        "A world of 60 nodes in 4 eras keeps every animation frame under 16 ms on the 4x CPU preset, with no long task over 50 ms after load.",
+        "Performance tiers: the page detects a slow device and drops fog and motion first while keeping the plate, and names the tier on the page.",
+        "Offline: once loaded, the page and its shipped worlds work with the network off, and a kept world reopens offline.",
+        "Every still is served in AVIF and WebP by width (srcset), and Lighthouse scores the page at least 95 for performance and 100 for accessibility at both widths.",
+        "Reference: a WCAG 2.2 AA audit by tool and by hand, recorded in the repository, finds 0 failures, and a world of 300 nodes keeps input delay under 100 ms with 6x CPU slowdown at 390 x 844."
       ],
       "levels": {
         "G0": {
-          "level": 2,
-          "evidence": "Headless Chrome on 2026-11-11 (local static server): no script errors at 1440 px and a world renders (rung 1). runEcho hands the whole world to onWorld before the replay, so Skip to world is live at once; ?still renders the world directly; reduced motion sets wait() to 0 and skips the tick interval, and the CSS media query kills animation and transitions (rung 2). At 390 px with device-metrics emulation, scrollWidth 390 = clientWidth on altverse.html, ?loom=ice-sinks and ?still&tab=map|chrono|dossier for ice-sinks, slow-light and strong-gravity. Rung 3 fails: the 880 px media query in altverse.css sets .av-event-cause and .av-event .av-tag to display:none (0 of 6 VETHLEND event tags and 0 of 6 cause ids visible at 390 px), and on ?still&tab=map at 390 px the canvas cuts 'volcanic warm springs', 'The Drowned Shelves' and 'tidal flats over sunken ice' at its edges."
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
         }
       }
     },
     {
-      "id": "stage-graph-architecture",
-      "name": "Stage graph architecture",
+      "id": "engine-shape",
+      "name": "Engine and render pipeline",
       "frame": "architecture",
-      "metric": "Code shape of labs/assets/js/altverse: module separation, who mints ids, whether the stage graph is one data definition read by Loom, pipeline and prompts, use of the shared model route, data-only extension, tests; checked by reading the modules.",
+      "units": [
+        "necessity",
+        "orthogonality",
+        "artifact"
+      ],
+      "fiction_inventory": [
+        "artifact-render"
+      ],
+      "metric": "Code shape: worlds as data, an engine with no DOM, a render pipeline that is seeded and validated, and what can be added (a world, a driver, a technology, a rule, an artifact family) without touching the engine or the view, counted by adding one of each in a scratch worktree and listing the files each needed.",
+      "how_checked": "Read the module headers and imports. In a scratch worktree add a test world, a ledger entry, a rule and an artifact family, and list the files each needed. Run the lab's tests and its mutation run. Rungs are cumulative.",
       "ladder": [
-        "No code exists.",
-        "Data, logic and rendering exist as code (a single script qualifies).",
-        "ES modules separate presets, world state, generator, pipeline, prompts, schemas and renderers (at least 10 modules), and renderers read one world shape whatever produced it.",
-        "The orchestrator mints every id (no id typed into authored data or taken from model output), and one module defines the world shape that every producer (authored, rule engine, model) imports.",
-        "The stage graph is data (records of id, inputs, output schema, prompt, validator) defined once; the Loom, the pipeline and the prompts read it, and adding a stage is one record.",
-        "Model calls go through the site's shared route chain (labs/assets/js/ai/llm.js: local Ollama, own key, worker, public route, deterministic), not a lab-private client pinned to one provider.",
-        "Presets and domain rule sets are data files loaded by the engine; adding a divergence touches no .js module.",
-        "Node unit tests cover engine, validator and store with at least 30 assertions, run by one command (node --test) that exits non-zero on any failure.",
-        "Worlds store a schema version, and an older saved or shared world migrates on load, tested with a version-1 fixture.",
-        "The engine runs headless in Node with no DOM; a CLI weaves a world from a JSON divergence and matches the browser byte for byte for the same seed.",
-        "A new domain (rules, presets, map layer, prompts) ships as one folder against a documented plug-in contract, verified by a contract test, with no edits to the core."
+        "No code of this page (orthogonal.html) exists; the earlier page's code (altverse.html) does not count.",
+        "The page runs from one script with data and drawing mixed.",
+        "Data (worlds), computation (an engine with no DOM) and drawing (a view) are separate modules, and each of the engine's rules lives in one function that the view and the tests both call.",
+        "A new world is added as one data file and one line in a list, with no change to the engine or the view, and a test shows the engine refusing a malformed world.",
+        "The render pipeline is a script apart from the page (the page loads only committed images, records and parameter files and never runs the renderer), each record names the file's hash, the renderer's version and the render time, and a test recomputes every hash from the committed file and fails when a parameter file changed without a new render.",
+        "Level 5, the fiction made real: the lab grows lineages for any driver record from shared tables held as data with schemas and tests (the technology table, Earth's ledger, the rule base); a new technology or rule is one data entry; a new artifact family is one schema entry and one grammar module; every rule has a planted-fault test; the lab's tests run in the gates workflow on every pull request.",
+        "The world format is versioned: a kept world written by an older version opens in the current one through a migration, with a test fixture per version.",
+        "Mutation testing: for each rule of the checks a mutant that silences it and a mutant that loosens its bound are run against the lab's tests and caught, by tools/mutate.mjs or a script committed with the lab.",
+        "The engine and its tables run in Node with no browser, as a command that grows a world from a driver and writes its lineage and parameter files, so the benchmark files come from the same code the page runs.",
+        "The artifact grammar is one module shared by the offline renderer and the runtime ink drawing, with a test that the two place every part within a stated tolerance of each other.",
+        "Reference: the engine, its tables and the grammar are documented as a toolkit that a second project uses without editing the core (a second lab or an outside repository grows worlds with it), recorded with its commit."
       ],
       "levels": {
         "G0": {
-          "level": 2,
-          "evidence": "17 ES modules under labs/assets/js/altverse (12 top-level: divergence-presets, worldstate, echo-world, pipeline, prompts, schemas, store, identity, rng, json-extract, nemotron-client, main; 5 in render/: card, chronology, dossier, map-canvas, world-view), importing ../ai/config.js and ../ai/provider.js; renderers take one world shape from worldstate.js createWorld (rung 2). Rung 3 fails: worldstate.js makeMinter is never called, ids are typed into echo-world.js CONTENT and required from model output by schemas.js. Stage lists are duplicated in main.js STAGES, pipeline.js SPINE_ORDER and runLive's hand-written gen() calls."
+          "level": 0,
+          "evidence": "Not a grade of the Orthogonal slice. origin/main at ee4366f holds no labs/orthogonal.html (git show ee4366f:labs/orthogonal.html fails), so nothing this axis measures runs on main. The slice on branch labs/orthogonal (0b0d3f0, ab68065) gets its first grade from an independent rater after this ladder has had its second pass."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
+    { "gen": "G0", "date": "2026-11-18", "by": "ladder rewritten for a changed concept, before its first grade, by an independent writer who built none of the lab; a second pass tries to break it before it merges with the page", "commit": "ee4366f", "note": "The concept changed in the session of 2026-11-18 to 19, on Luis's direction: Altverse (the visitor dials or types any change to physics or history and a stage graph weaves a world) became Orthogonal (a changed driver grows the technologies Earth never built, drawn as a lineage beside Earth's and ending in a rendered artifact). LABS_LEVELS.md rule 3 lets a ladder change between generations with the reason recorded; this is the reason. The page is now orthogonal.html; the hub title is unchanged. Every axis, metric and rung replaces the ladder of 2026-11-11, whose axes and G0 grades of altverse.html stay in git history (cd1e9f7). The G0 here records origin/main at ee4366f, which has no labs/orthogonal.html, at 0 on every axis, and grades nothing of the slice. Rungs are cumulative. Each axis lists, under units and fiction_inventory, the ids of the bindings declared in the lab's plan on 2026-11-21 (10 units, 12 inventory entries). Written 2026-11-21." },
+    { "gen": "G0", "date": "2026-11-21", "by": "second pass (LABS_LEVELS.md rule 1) by a reviewer who wrote none of the ladder and built none of the lab, before any grade", "commit": "947ecdd", "note": "Rungs tightened or made checkable, none loosened, the G0 grades unchanged. A step is defined (a technology after the driver), so 5 steps and steps 3 to 5 read one way. branch-growth: a model-grown lineage must pass the needs check in code (r3); r5 adds one more era and no Earth-mimicry step, as the bound eras entry and the thesis's Orthogonal Path require, and r6 asks 3 eras with 2 cross-era needs each; r7 was the ablation already counted by method-checks r6 and became Earth regrown with no driver changed, the model's check against reality; r9 bars lineages sharing over half their steps. method-checks: the REAL-or-gap rule left r2, counted by method-explained r2; the physics check is computed against a bound (r4), not a carried label; mimicry matches by function and needs whatever the name (r5), or method-explained r6's relabelled device escapes it; r8 and r9 count only the page's own code and rules, since CORE_TEST tests the method's text in a model's hands and KILL_TEST a separate rule set; r10's held-out set is sealed by a hash. artifact-necessity r5: a derived parameter comes from what a step provides or needs, never a hash of its text. artifact-render r5: a visitor's tip is rendered, not only inked, since the binding says each branch ends in a rendered artifact; r8 is the blind test alone. earth-ledger r8 has a bar (90% match within stated uncertainty, or at most 5 of 50 in error). world-making r8 defines a correct answer as traced and consistent. Every rung 10 asks 5 independent entries in the reference ledger, as atlas.json ledger_schema and stage 10 do. reach: a throttling profile by numbers, not a preset name; r5's 1440 x 900 and 390 px clauses, counted by lineage-plate r5, became a 320 px reflow check; r10 names its CPU slowdown. engine-shape: r0 does not read the old page's code as this page's; r4 no longer repeats artifact-necessity r3's schema check and adds a stale-render test." }
   ]
 }
