@@ -772,7 +772,7 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   await writeFails.load(ids, drawOf);
   const wf = (await writeFails.apply((r) => withStart(r, { t: 1, item: 6 }))).state;
   ok('a store that refuses a write is said to keep nothing, and the change still holds for the visit', !writeFails.kept && wf.open.item === 6 && (await writeFails.apply((r) => r)).state.open.item === 6);
-  ok('the words for that are the bindings\' storage-off diagnosis', STORAGE_OFF === 'Your browser is not letting this page keep anything, so your answers last only until this page is reloaded or closed. A link to a step still opens that step.');
+  ok('the words for that are the bindings\' storage-off diagnosis', STORAGE_OFF === 'Your browser keeps nothing for this page, so your answers last until it reloads or closes. A link to a step still opens that step.');
 
   // a record that does not hold together is never trusted
   ok('a record of another page reads as fresh', restore({ page: 'loom', answered: 3, right: 1, next: 1 }, ids).answered === 0);
