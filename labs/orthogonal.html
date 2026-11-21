@@ -27,7 +27,7 @@
       <a class="back" href="index.html">&larr; labs</a>
       <div class="titleblock" aria-label="Title block">
         <span>Sheet</span><span>A / 1</span>
-        <span>Rev</span><span>1</span>
+        <span>Rev</span><span>3</span>
         <span>Date</span><span>2026-11-21</span>
       </div>
     </div>
@@ -35,20 +35,22 @@
 
   <section class="lineage" aria-label="The lineage of the lamp: this world's branch and Earth's">
     <div class="lin-box" id="lineage">
+      <canvas id="lineage-fog" class="lin-fog" aria-hidden="true"></canvas>
       <svg id="lineage-svg" role="group" aria-label="Choose a step to read it; the arrow keys move along the rows and across to Earth's step"></svg>
     </div>
-    <p class="legend"><span><span class="lg gold" aria-hidden="true"></span>the branch this world took</span> <span><span class="lg dot" aria-hidden="true"></span>Earth's branch for the same jobs</span> <span><span class="lg dash" aria-hidden="true"></span>not yet happened</span></p>
+    <p class="legend"><span><svg class="lg" viewBox="0 0 26 8" aria-hidden="true"><path class="lg-gold" d="M1 2.2 C9 2 17 3 25 3.8 L25 4.2 C17 4.9 9 6 1 5.8 Z" /></svg>The branch this world took</span> <span><svg class="lg" viewBox="0 0 26 8" aria-hidden="true"><path class="lg-ink" d="M1 2.9 C9 2.8 17 3.4 25 3.9 L25 4.1 C17 4.6 9 5.2 1 5.1 Z" /></svg>Earth's branch: history</span> <span><span class="lg-fog" aria-hidden="true"></span>Fog: invented, or not yet happened</span></p>
   </section>
 
   <figure class="art" id="art">
     <div class="art-view">
-      <img id="art-img" src="assets/data/orthogonal/renders/mycelial-lamp.webp" width="940" height="1316" decoding="async"
-        alt="A wide glass column on a ceramic plinth under a louvered hood, seen from low down: shelves of gilled bracket fungus climb a wooden spindle inside, their gill edges and rolled margins glowing blue-white in fog." />
+      <img id="art-img" src="assets/data/orthogonal/renders/mycelial-lamp.webp" width="900" height="1200" decoding="async"
+        alt="At night in fog, a glass column on a ceramic plinth under a louvered hood, drawn in fine ink lines: shelves of gilled bracket fungus on a wooden spindle inside glow blue-white at their gill edges, and light only a small pool of the wet cobbled street around the plinth." />
       <svg id="art-ink" class="art-ink" hidden aria-hidden="true"></svg>
     </div>
     <figcaption class="art-cap">
       <span class="art-name">The mycelial street lamp</span>
       <span class="art-line">This world's answer to light at night</span>
+      <span class="art-exposure"><b class="t ill">[ILLUSTRATIVE]</b> <span class="art-exposure-text">Drawn as a long exposure records it; to the eye it is dimmer.</span></span>
       <span class="art-status" id="art-status" role="status"></span>
       <span class="provenance" id="provenance" data-state="loading">Reading the render's record.</span>
     </figcaption>

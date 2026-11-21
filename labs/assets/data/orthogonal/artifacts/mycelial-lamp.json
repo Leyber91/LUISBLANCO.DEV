@@ -3,17 +3,17 @@
   "family": "shelf-culture-lamp",
   "title": "The mycelial street lamp",
   "tag": "ILLUSTRATIVE",
-  "about": "An invented lamp: a glass column on a ceramic plinth under a louvered hood, a culture of gilled shelf fungus on a wooden spindle inside, the glow on the gill edges and the rolled margins. Lengths in metres, angles in degrees.",
+  "about": "An invented lamp: a glass column on a ceramic plinth under a louvered hood, a culture of gilled shelf fungus on a wooden spindle inside, the glow on the gill edges and the rolled margins. It stands at night in fog on a wet cobbled street, lit by nothing but the culture, and is exposed as a long exposure records a dim source. Lengths in metres, angles in degrees, exposure in stops.",
   "seed": 20261121,
   "instrument": {
     "column_radius_m": 0.48,
     "column_height_m": 1.35,
     "plinth_height_m": 0.36,
-    "plinth_overhang_m": 0.08,
+    "plinth_overhang_m": 0.03,
     "spindle_radius_m": 0.045,
     "brim_overhang_m": 0.12,
-    "louvers": [[0.40, 0.07], [0.34, 0.15], [0.27, 0.23], [0.19, 0.31]],
-    "flask_radius_m": 0.10
+    "louvers": [[0.4, 0.07], [0.34, 0.15], [0.27, 0.23], [0.19, 0.31]],
+    "flask_radius_m": 0.1
   },
   "culture": {
     "front_caps": 4,
@@ -28,7 +28,7 @@
     "ceiling_m": 0.36
   },
   "bracket": {
-    "rise": [0.20, 0.28],
+    "rise": [0.2, 0.28],
     "thick": [0.14, 0.18],
     "full_gills": [18, 25],
     "gill_depth": [0.07, 0.09],
@@ -37,17 +37,27 @@
     "sweep_steps": 96,
     "gill_steps": 24
   },
-  "glow": { "rgb": [0.70, 0.84, 1.0], "gill": 5.0, "flesh": 1.8 },
-  "air": { "fog_density": 0.075, "fog_anisotropy": 0.35, "rim_energy_w": 140 },
-  "camera": { "distance_m": 3.6, "height_m": 0.55, "look_at_m": 1.05, "azimuth_deg": -53.88, "fill": 0.93, "fill_x": 0.95 },
-  "ink": { "thickness_px": 0.7, "rgb": [0.62, 0.70, 0.84], "alpha": 0.55 },
+  "glow": { "rgb": [0.7, 0.84, 1.0], "gill": 1.2, "flesh": 0.08 },
+  "air": { "fog_density": 0.3, "fog_anisotropy": 0.2, "rim_energy_w": 0, "sky_rgb": [0.0, 0.0, 0.0] },
+  "ground": { "joint_m": 0.11, "wet_cover": 0.6, "rough_dry": 0.42, "rough_wet": 0.04 },
+  "exposure": { "stops": 4.8 },
+  "camera": {
+    "distance_m": 3.6,
+    "height_m": 1.15,
+    "look_at_m": 1.0,
+    "azimuth_deg": -53.88,
+    "fill": 0.7,
+    "fill_x": 0.95,
+    "ground_y": 0.79
+  },
+  "ink": { "thickness_px": 0.0, "rgb": [0.62, 0.7, 0.84], "alpha": 0.3 },
   "render": {
-    "width": 1000,
-    "height": 1400,
-    "percent": 94,
-    "samples": 32,
-    "time_limit_s": 330,
+    "width": 900,
+    "height": 1200,
+    "percent": 100,
+    "samples": 24,
+    "time_limit_s": 400,
     "webp_quality": 82,
-    "plate_width_px": 470
+    "plate_width_px": 360
   }
 }

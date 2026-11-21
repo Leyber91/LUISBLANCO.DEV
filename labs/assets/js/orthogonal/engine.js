@@ -11,8 +11,12 @@
    - reading(world, id) what the plate says of a node: its role, label, note, Earth's step beside it, its evidence
    - pairOf(world, id)  the node on the other branch that does the same job at the same step
    - step(world, id, k) the next node a key moves to
+   - strandAt(world, lay, ms)  the ignition at a moment: each line's progress, each step's opacity
+   - arrival(world, lay)       when the strand reaches the artifact
+   - fogField(world, lay)      each cell's distance to each line, once per layout
+   - fogDensity(field, prog)   the fog's density in every cell, for the strand's progress
    ============================================================ */
-import { LAYOUT, ROLES, SOURCES } from './config.js';
+import { FOG, LAYOUT, ROLES, SOURCES, TIMING } from './config.js';
 
 const byId = (world) => new Map(world.nodes.map((n) => [n.id, n]));
 
@@ -225,7 +229,10 @@ export function layout(world, { width, height = 0, leader = false } = {}) {
     n.after.forEach((a, k) => {
       const p = pos.get(a), c = pos.get(n.id);
       const kind = n.branch === 'earth' ? 'earth' : stateOf(world, n.id) === 'pending' ? 'pending' : k === 0 && t.has(n.id) ? 'fired' : 'thread';
-      edges.push({ from: a, to: n.id, kind, d: edgePath(p, c) });
+      // a line that turns toward its cause's label runs down past the label before it turns, so it never crosses it
+      const toward = (c.x > p.x && p.label.anchor === 'start') || (c.x < p.x && p.label.anchor === 'end');
+      const under = toward ? p.label.y - 10 + (p.label.lines.length + (p.label.role ? 1 : 0)) * L.lineH + 6 : 0;
+      edges.push({ from: a, to: n.id, kind, d: edgePath(p, c, under), pts: edgePoints(p, c, under) });
     });
   }
   const lastY = rowY[rowCount - 1] + Math.max(blockH[rowCount - 1], L.lineH);
@@ -242,13 +249,186 @@ export function layout(world, { width, height = 0, leader = false } = {}) {
 
 /* A branch line from a parent's square to a child's: straight down a lane, and where the lanes differ, an S-curve over
    the last LAYOUT.curve px before the child. */
-function edgePath(p, c) {
+function edgePath(p, c, under = 0) {
   const h = LAYOUT.node / 2;
   const y0 = p.y + h, y1 = c.y - h;
   if (p.x === c.x) return `M${p.x} ${y0} L${c.x} ${y1}`;
-  const ya = Math.max(y0, y1 - LAYOUT.curve);
+  const ya = turnAt(y0, y1, under);
   const ym = (ya + y1) / 2;
   return `M${p.x} ${y0} L${p.x} ${ya} C${p.x} ${ym} ${c.x} ${ym} ${c.x} ${y1}`;
+}
+
+/* Where a line between lanes starts to turn: LAYOUT.curve px above the child, and never above `under` (the foot of its
+   cause's label, when it turns toward it), while leaving at least 14 px to turn in. */
+function turnAt(y0, y1, under) {
+  return Math.max(y0, Math.min(Math.max(y1 - LAYOUT.curve, under), y1 - 14));
+}
+
+/* The same line as points, from the parent down to the child: the brush is laid along these, and the fog's distance
+   fields are measured from them. */
+export function edgePoints(p, c, under = 0) {
+  const h = LAYOUT.node / 2;
+  const y0 = p.y + h, y1 = c.y - h;
+  if (p.x === c.x) return [[p.x, y0], [c.x, y1]];
+  const ya = turnAt(y0, y1, under);
+  const ym = (ya + y1) / 2;
+  const out = [[p.x, y0]];
+  if (ya > y0) out.push([p.x, ya]);
+  const n = 16;
+  for (let i = 1; i <= n; i++) {   // the cubic from (p.x, ya) through (p.x, ym) and (c.x, ym) to (c.x, y1)
+    const t = i / n, u = 1 - t;
+    const x = u * u * u * p.x + 3 * u * u * t * p.x + 3 * u * t * t * c.x + t * t * t * c.x;
+    const y = u * u * u * ya + 3 * u * u * t * ym + 3 * u * t * t * ym + t * t * t * y1;
+    out.push([x, y]);
+  }
+  return out;
+}
+
+/* ---------------------------------------------------------------- the ignition, as a function of time
+
+   The strand draws itself from the driver down: each line of this world's branch starts when the row of its parent
+   comes (TIMING.perRow a row) and takes TIMING.edge to draw, eased out (a quintic, close to the cubic-bezier
+   .16, 1, .3, 1 the plate used before). A step appears as its line reaches it. What has not happened fades in after
+   the line above it. Earth's branch and the root were always there. Every frame of the drawing and of the fog is read
+   from strandAt, so the tests read the same clock the visitor sees. */
+const easeOut = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 5);
+
+/* The ms at which the strand reaches the artifact; the render surfaces from its fog then. */
+export function arrival(world, lay) {
+  const artRow = lay.nodes.find((n) => n.id === world.artifact.node).row;
+  return (artRow - 1) * TIMING.perRow + TIMING.edge;
+}
+
+/* When the whole ignition is over, in ms. */
+export function ignitionEnd(world, lay) {
+  let end = 0;
+  for (const e of lay.edges) {
+    const row = lay.nodes.find((n) => n.id === e.from).row;
+    if (e.kind === 'fired' || e.kind === 'thread') end = Math.max(end, row * TIMING.perRow + TIMING.edge);
+    if (e.kind === 'pending') end = Math.max(end, row * TIMING.perRow + 2 * TIMING.edge);
+  }
+  for (const n of lay.nodes) if (n.state === 'fired' || n.state === 'pending') end = Math.max(end, Math.max(0, n.row - 1) * TIMING.perRow + TIMING.edge * 0.6 + TIMING.appear);
+  if (lay.leader) end = Math.max(end, arrival(world, lay) + TIMING.edge);
+  return end;
+}
+
+/* The drawing at `ms` after the ignition began: each edge's progress (0 undrawn to 1 drawn; for a line that has not
+   happened, its opacity), each node's opacity, and the leader's progress. */
+export function strandAt(world, lay, ms) {
+  const rowOf = new Map(lay.nodes.map((n) => [n.id, n.row]));
+  const edges = lay.edges.map((e) => {
+    const row = rowOf.get(e.from);
+    if (e.kind === 'fired' || e.kind === 'thread') return easeOut((ms - row * TIMING.perRow) / TIMING.edge);
+    if (e.kind === 'pending') return Math.min(1, Math.max(0, (ms - row * TIMING.perRow - TIMING.edge) / TIMING.edge));
+    return 1;
+  });
+  const nodes = new Map(lay.nodes.map((n) => {
+    if (n.state !== 'fired' && n.state !== 'pending') return [n.id, 1];
+    const delay = Math.max(0, n.row - 1) * TIMING.perRow + TIMING.edge * 0.6;
+    return [n.id, easeOut((ms - delay) / TIMING.appear)];
+  }));
+  const leader = lay.leader ? easeOut((ms - arrival(world, lay)) / TIMING.edge) : 0;
+  return { edges, nodes, leader, done: ms >= ignitionEnd(world, lay) };
+}
+
+/* ---------------------------------------------------------------- the fog, as a function of state
+
+   The fog encodes what has not happened or is not real (the world brief, _reference/labs/plans/alt-reality/
+   world_brief.md). One function, fogDensity, gives its density in every cell of the drawing, for the canvas and for
+   the tests:
+   - around each line of this world's branch, FOG.full before the strand reaches a point of it and FOG.rest after,
+     with a clear channel along the drawn ink (FOG.channel): the ink came out of the fog, and the branch is invented,
+     so its fog never clears;
+   - around what has not happened, FOG.pending, always;
+   - Earth's branch and the root both worlds share push every fog back to 0 within FOG.earthReach: history is clear.
+   fogField builds, once per layout, each cell's distance to each line and how far along the line its nearest point
+   is; fogDensity combines them with the strand's progress, so a frame costs one pass over the cells. */
+const gauss = (d, r) => Math.exp(-(d * d) / (r * r));
+/* How much of the fog history pushes back at a distance d from Earth's ink: all of it within FOG.earthClear, so a cell
+   on Earth's branch holds none, then a gaussian falloff over FOG.earthReach. */
+const clearing = (d) => (d <= FOG.earthClear ? 1 : gauss(d - FOG.earthClear, FOG.earthReach));
+const ramp = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+/* The nearest point of a polyline to (x, y): its distance, and its share of the line's length from the start. */
+function nearest(pts, len, x, y) {
+  let best = Infinity, at = 0, acc = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const ax = pts[i - 1][0], ay = pts[i - 1][1], bx = pts[i][0], by = pts[i][1];
+    const dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy, L = Math.sqrt(L2);
+    const t = L2 > 0 ? Math.min(1, Math.max(0, ((x - ax) * dx + (y - ay) * dy) / L2)) : 0;
+    const d = Math.hypot(x - (ax + t * dx), y - (ay + t * dy));
+    if (d < best) { best = d; at = acc + t * L; }
+    acc += L;
+  }
+  return [best, len > 0 ? at / len : 0];
+}
+const lengthOf = (pts) => { let s = 0; for (let i = 1; i < pts.length; i++) s += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); return s; };
+
+export function fogField(world, lay, cell = FOG.cell) {
+  const cols = Math.max(1, Math.ceil(lay.width / cell)), rows = Math.max(1, Math.ceil(lay.height / cell)), N = cols * rows;
+  const centre = (i) => [((i % cols) + 0.5) * cell, (Math.floor(i / cols) + 0.5) * cell];
+  const lines = [], pending = new Float32Array(N), clear = new Float32Array(N);
+  // each cell's distance to a line, within `reach` of the line's box (farther cells stay Infinity)
+  const measure = (pts, reach, fn) => {
+    const len = lengthOf(pts);
+    const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+    const c0 = Math.max(0, Math.floor((Math.min(...xs) - reach) / cell)), c1 = Math.min(cols - 1, Math.ceil((Math.max(...xs) + reach) / cell));
+    const r0 = Math.max(0, Math.floor((Math.min(...ys) - reach) / cell)), r1 = Math.min(rows - 1, Math.ceil((Math.max(...ys) + reach) / cell));
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+      const i = r * cols + c, [x, y] = centre(i);
+      const [d, s] = nearest(pts, len, x, y);
+      fn(i, d, s);
+    }
+  };
+  lay.edges.forEach((e, k) => {
+    if (e.kind === 'fired' || e.kind === 'thread') {
+      const dist = new Float32Array(N).fill(Infinity), along = new Float32Array(N);
+      measure(e.pts, 3 * FOG.reach, (i, d, s) => { dist[i] = d; along[i] = s; });
+      lines.push({ edge: k, dist, along });
+    } else if (e.kind === 'pending') {
+      // the line leaves a step that happened, so its fog thickens along it, from none at its start
+      measure(e.pts, 3 * FOG.pendingReach, (i, d, s) => { pending[i] = Math.max(pending[i], FOG.pending * gauss(d, FOG.pendingReach) * ramp(0, 0.7, s)); });
+    } else if (e.kind === 'earth') {
+      measure(e.pts, 3 * FOG.earthReach, (i, d) => { clear[i] = Math.max(clear[i], clearing(d)); });
+    }
+  });
+  for (const n of lay.nodes) {
+    const dot = [[n.x, n.y], [n.x, n.y + 0.01]];
+    if (n.state === 'pending') {
+      // what has not happened is in fog with its words: the fog runs from its square across its label
+      const w = Math.max(...n.label.lines.map((s) => s.length), n.label.role.length) * LAYOUT.charW;
+      const x1 = n.label.anchor === 'start' ? n.label.x + w : n.label.x - w;
+      const y1 = n.label.y - 10 + (n.label.lines.length + (n.label.role ? 1 : 0)) * LAYOUT.lineH / 2;
+      measure([[n.x, n.y], [x1, y1]], 3 * FOG.pendingReach, (i, d) => { pending[i] = Math.max(pending[i], FOG.pending * gauss(d, FOG.pendingReach * 0.8)); });
+    }
+    if (n.state === 'earth' || n.state === 'root') measure(dot, 3 * FOG.earthReach, (i, d) => { clear[i] = Math.max(clear[i], clearing(d)); });
+  }
+  return { cols, rows, cell, lines, pending, clear };
+}
+
+/* The fog's density, 0 to 1, in every cell, for the strand's progress (strandAt's edges). `out` is reused. */
+export function fogDensity(field, progress, out = new Float32Array(field.cols * field.rows)) {
+  const N = field.cols * field.rows;
+  const P = field.lines.map((l) => (progress[l.edge] > 0 ? progress[l.edge] : -0.08));   // a line not begun is all fog
+  for (let i = 0; i < N; i++) {
+    let base = 0, chan = 0;
+    for (let k = 0; k < field.lines.length; k++) {
+      const d = field.lines[k].dist[i];
+      if (d === Infinity) continue;
+      const undrawn = ramp(P[k], P[k] + 0.06, field.lines[k].along[i]);
+      base = Math.max(base, (FOG.rest + (FOG.full - FOG.rest) * undrawn) * gauss(d, FOG.reach));
+      chan = Math.max(chan, FOG.channel * (1 - undrawn) * gauss(d, FOG.channelReach));
+    }
+    out[i] = Math.max(base - chan, field.pending[i], 0) * (1 - field.clear[i]);
+  }
+  return out;
+}
+
+/* The density at a point of the drawing, read from a field computed by fogDensity. */
+export function fogAt(field, density, x, y) {
+  const c = Math.min(field.cols - 1, Math.max(0, Math.floor(x / field.cell)));
+  const r = Math.min(field.rows - 1, Math.max(0, Math.floor(y / field.cell)));
+  return density[r * field.cols + c];
 }
 
 /* The node on the other branch at the same step: an Earth node's pair, or the Earth node that pairs with a world node. */

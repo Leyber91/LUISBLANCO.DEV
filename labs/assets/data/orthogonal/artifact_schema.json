@@ -1,5 +1,5 @@
 {
-  "about": "The parameters each artifact family takes, with their bounds. render_artifact.py refuses a parameter file outside them before it builds anything; labs/assets/js/orthogonal/tests.mjs holds the committed files to the same bounds. A 'number' or 'int' is one value in [min, max]; a 'range' is a pair [lo, hi] with min <= lo <= hi <= max; 'rgb' is three numbers in [0, 1]; 'steps' is a list of [radius, height] pairs, each in its bounds.",
+  "about": "The parameters each artifact family takes, with their bounds. render_artifact.py refuses a parameter file outside them before it builds anything; labs/assets/js/orthogonal/tests.mjs holds the committed files to the same bounds. A 'number' or 'int' is one value in [min, max]; a 'range' is a pair [lo, hi] with min <= lo <= hi <= max; 'rgb' is three numbers in [0, 1]; 'steps' is a list of [radius, height] pairs, each in its bounds. 'at_most' lists pairs [a, b] of one family where a may not exceed b: the instrument's height share may not exceed the line its foot stands on, or its top would leave the frame.",
   "families": {
     "shelf-culture-lamp": {
       "seed": { "type": "int", "min": 1, "max": 2147483647 },
@@ -32,15 +32,22 @@
       "glow.rgb": { "type": "rgb" },
       "glow.gill": { "type": "number", "min": 0.0, "max": 20.0 },
       "glow.flesh": { "type": "number", "min": 0.0, "max": 10.0 },
-      "air.fog_density": { "type": "number", "min": 0.0, "max": 0.3 },
+      "air.fog_density": { "type": "number", "min": 0.0, "max": 0.6 },
       "air.fog_anisotropy": { "type": "number", "min": -0.9, "max": 0.9 },
       "air.rim_energy_w": { "type": "number", "min": 0, "max": 1000 },
+      "air.sky_rgb": { "type": "rgb" },
+      "ground.joint_m": { "type": "number", "min": 0.04, "max": 0.5 },
+      "ground.wet_cover": { "type": "number", "min": 0.0, "max": 1.0 },
+      "ground.rough_dry": { "type": "number", "min": 0.0, "max": 1.0 },
+      "ground.rough_wet": { "type": "number", "min": 0.0, "max": 1.0 },
+      "exposure.stops": { "type": "number", "min": -4.0, "max": 10.0 },
       "camera.distance_m": { "type": "number", "min": 1.0, "max": 10.0 },
       "camera.height_m": { "type": "number", "min": 0.0, "max": 4.0 },
       "camera.look_at_m": { "type": "number", "min": 0.0, "max": 4.0 },
       "camera.azimuth_deg": { "type": "number", "min": -180, "max": 180 },
       "camera.fill": { "type": "number", "min": 0.5, "max": 1.0 },
       "camera.fill_x": { "type": "number", "min": 0.5, "max": 1.0 },
+      "camera.ground_y": { "type": "number", "min": 0.5, "max": 1.0 },
       "ink.thickness_px": { "type": "number", "min": 0.0, "max": 3.0 },
       "ink.rgb": { "type": "rgb" },
       "ink.alpha": { "type": "number", "min": 0.0, "max": 1.0 },
@@ -52,5 +59,8 @@
       "render.webp_quality": { "type": "int", "min": 1, "max": 100 },
       "render.plate_width_px": { "type": "int", "min": 100, "max": 2000 }
     }
+  },
+  "at_most": {
+    "shelf-culture-lamp": [["camera.fill", "camera.ground_y"]]
   }
 }

@@ -5,7 +5,9 @@ the same geometry, and only the render's sampling noise can differ between two r
 
 Usage (Blender 5.1; the paths must be absolute):
   blender --background --factory-startup --python render_artifact.py -- <params.json> <out.webp|out.png>
-          [--seed N] [--samples N] [--percent N] [--measure]
+          [--seed N] [--samples N] [--percent N] [--threads N] [--measure]
+
+--threads caps the CPU threads Cycles takes (this machine is shared); it changes the time, not the image.
 
 It writes the image and, beside it, <out stem>.render.json: the artifact, its family, the seed, the parameter file's
 SHA-256 (its text with CRLF read as LF), Blender's version, the render settings and time, and the measure of the
@@ -24,8 +26,19 @@ One family so far, shelf-culture-lamp. Its methods, not code:
 - the glow sits on the gill edges and cross-veins, the gill-stem junction and the rolled margin, where O'Kane, Lingle,
   Porter and Wampler (Mycologia 82, 595, 1990) report it for Panellus stipticus, as a secondary source states it (the
   primary was not opened). Real fungal light is dim: a culture of P. stipticus was photographed with an 8-minute
-  exposure (Rabara and Xie, J. Fungi 11, 774, 2025). A lamp this bright is the invention.
+  exposure (Rabara and Xie, J. Fungi 11, 774, 2025).
 - the glow is a stylised blue-white, not the species' green (about 525 nm), because the plate allows no third hue.
+
+The scene is honest about that light (pass 3, 2026-11-21). The lamp stands at night in fog on a wet cobbled street,
+and nothing else lights it: no studio light (air.rim_energy_w is 0, and at 0 none is made), a black sky that lights
+nothing, and fog that scatters only the culture's glow. The emission is low, and the image is exposed up by
+exposure.stops, as a long exposure records a dim source: the glowing edges near the top of the range, the street lit
+only in a small pool around the plinth, the fog averaged into a smooth halo. To the eye it would be dimmer; the page
+says so beside the image, tagged [ILLUSTRATIVE].
+
+The camera puts the instrument's foot at camera.ground_y of the frame's height from the top and its top camera.fill
+above that, so the street and its pool show below the plinth. The record measures where the two lines fell
+(measure.frame), and the page stands Earth's lamp on the same two lines.
 """
 from __future__ import annotations
 
@@ -99,6 +112,14 @@ def validate(params: dict, schema: dict) -> list[str]:
                     out.append(f"{key} step {s!r} is outside radius {rule['radius']} or height {rule['height']}")
         else:
             out.append(f"{key} has an unknown rule type {t!r}")
+    # rules between two parameters: [a, b] means a <= b
+    for a, b in schema.get("at_most", {}).get(params.get("family"), []):
+        try:
+            va, vb = lookup(params, a), lookup(params, b)
+        except KeyError:
+            continue                     # reported above as missing
+        if _num(va) and _num(vb) and va > vb:
+            out.append(f"{a} = {va} is more than {b} = {vb}")
     return out
 
 
@@ -115,11 +136,11 @@ def read_params(path: str) -> dict:
 
 def parse_argv(argv: list[str]) -> dict:
     args = argv[argv.index("--") + 1:] if "--" in argv else []
-    opts = {"measure": "--measure" in args, "seed": None, "samples": None, "percent": None}
+    opts = {"measure": "--measure" in args, "seed": None, "samples": None, "percent": None, "threads": None}
     pos, i = [], 0
     while i < len(args):
         a = args[i]
-        if a in ("--seed", "--samples", "--percent"):
+        if a in ("--seed", "--samples", "--percent", "--threads"):
             if i + 1 >= len(args):
                 sys.exit(f"render_artifact.py: {a} needs a value")
             opts[a[2:]] = int(args[i + 1])
@@ -480,8 +501,78 @@ def build_shelf_culture_lamp(P: dict, seed: int):
         bpy.ops.object.shade_smooth()
         return o
 
-    stone = principled("stone", (0.012, 0.013, 0.016), rough=0.32)
-    ceramic = principled("ceramic", (0.035, 0.037, 0.042), rough=0.75)
+    def street_mat():
+        """A wet cobbled street: setts of joint_m a side (Voronoi cells), darker and rougher in the joints, each sett a
+        little lighter or darker than the next, and puddles (a noise over wet_cover of the ground) that are near
+        mirrors, so the culture's glow is doubled in the water near the plinth. The puddles' place comes from the seed,
+        through a stream of its own, so the culture's placement is the same as before the street existed."""
+        W = P["ground"]
+        grng = random.Random(seed ^ 0x5EED5)
+        m = bpy.data.materials.new("wet_street")
+        m.use_nodes = True
+        nt = m.node_tree
+        p = nt.nodes.get("Principled BSDF")
+        tc = nt.nodes.new("ShaderNodeTexCoord")
+        vor = nt.nodes.new("ShaderNodeTexVoronoi")       # the setts
+        vor.feature = "DISTANCE_TO_EDGE"
+        vor.inputs["Scale"].default_value = 1.0 / W["joint_m"]
+        nt.links.new(tc.outputs["Object"], vor.inputs["Vector"])
+        cell = nt.nodes.new("ShaderNodeTexVoronoi")      # each sett's own shade
+        cell.inputs["Scale"].default_value = 1.0 / W["joint_m"]
+        nt.links.new(tc.outputs["Object"], cell.inputs["Vector"])
+        joint = nt.nodes.new("ShaderNodeMapRange")      # 0 in a joint, 1 on a sett's face
+        joint.inputs["From Min"].default_value = 0.0
+        joint.inputs["From Max"].default_value = 0.07
+        nt.links.new(vor.outputs["Distance"], joint.inputs["Value"])
+        mapping = nt.nodes.new("ShaderNodeMapping")      # the puddles, moved by the seed
+        mapping.inputs["Location"].default_value = (grng.uniform(-50, 50), grng.uniform(-50, 50), 0.0)
+        nt.links.new(tc.outputs["Object"], mapping.inputs["Vector"])
+        pud = nt.nodes.new("ShaderNodeTexNoise")
+        pud.inputs["Scale"].default_value = 0.9
+        pud.inputs["Detail"].default_value = 3.0
+        nt.links.new(mapping.outputs["Vector"], pud.inputs["Vector"])
+        wet = nt.nodes.new("ShaderNodeMapRange")        # 1 under water, 0 dry, a short shore between
+        wet.inputs["From Min"].default_value = 1.0 - W["wet_cover"] - 0.03
+        wet.inputs["From Max"].default_value = 1.0 - W["wet_cover"] + 0.03
+        nt.links.new(pud.outputs["Fac"], wet.inputs["Value"])
+        rough = nt.nodes.new("ShaderNodeMapRange")      # dry roughness to wet roughness
+        rough.inputs["To Min"].default_value = W["rough_dry"]
+        rough.inputs["To Max"].default_value = W["rough_wet"]
+        nt.links.new(wet.outputs["Result"], rough.inputs["Value"])
+        nt.links.new(rough.outputs["Result"], p.inputs["Roughness"])
+        shade = nt.nodes.new("ShaderNodeMapRange")      # a sett's shade, times the joint's darkening
+        shade.inputs["To Min"].default_value = 0.12    # granite setts, about 0.12 to 0.26 of the light back when dry
+        shade.inputs["To Max"].default_value = 0.26
+        nt.links.new(cell.outputs["Distance"], shade.inputs["Value"])
+        dark = nt.nodes.new("ShaderNodeMath")
+        dark.operation = "MULTIPLY"
+        nt.links.new(shade.outputs["Result"], dark.inputs[0])
+        nt.links.new(joint.outputs["Result"], dark.inputs[1])
+        soak = nt.nodes.new("ShaderNodeMapRange")       # wet stone is darker: half its dry shade under water
+        soak.inputs["To Min"].default_value = 1.0
+        soak.inputs["To Max"].default_value = 0.5
+        nt.links.new(wet.outputs["Result"], soak.inputs["Value"])
+        soaked = nt.nodes.new("ShaderNodeMath")
+        soaked.operation = "MULTIPLY"
+        nt.links.new(dark.outputs["Value"], soaked.inputs[0])
+        nt.links.new(soak.outputs["Result"], soaked.inputs[1])
+        rgb = nt.nodes.new("ShaderNodeCombineColor")
+        for k in ("Red", "Green", "Blue"):
+            nt.links.new(soaked.outputs["Value"], rgb.inputs[k])
+        nt.links.new(rgb.outputs["Color"], p.inputs["Base Color"])
+        flat = nt.nodes.new("ShaderNodeMath")           # water lies flat: no bump under a puddle
+        flat.operation = "SUBTRACT"
+        flat.inputs[0].default_value = 1.0
+        nt.links.new(wet.outputs["Result"], flat.inputs[1])
+        bump = nt.nodes.new("ShaderNodeBump")
+        bump.inputs["Distance"].default_value = 0.01
+        nt.links.new(flat.outputs["Value"], bump.inputs["Strength"])
+        nt.links.new(joint.outputs["Result"], bump.inputs["Height"])
+        nt.links.new(bump.outputs["Normal"], p.inputs["Normal"])
+        return m
+
+    street = street_mat()
+    ceramic = principled("ceramic", (0.09, 0.095, 0.105), rough=0.6)   # a dark glazed ceramic
     metal = principled("metal", (0.16, 0.17, 0.19), rough=0.35, metal=1.0)
     wood = principled("wood", (0.05, 0.045, 0.04), rough=0.8)
     glass = glass_mat()
@@ -489,7 +580,7 @@ def build_shelf_culture_lamp(P: dict, seed: int):
 
     bpy.ops.mesh.primitive_plane_add(size=24, location=(0, 0, 0))
     ground = bpy.context.active_object
-    ground.data.materials.append(stone)
+    ground.data.materials.append(street)
 
     instrument = []
     instrument.append(cyl("plinth", plinth_r, plinth_h, plinth_h / 2, ceramic, bevel=0.03))
@@ -549,20 +640,21 @@ def build_shelf_culture_lamp(P: dict, seed: int):
         c.objects.unlink(ground)
     noink.objects.link(ground)
 
-    # a cold rim light behind, so the column's silhouette reads; the gills light the rest
-    bpy.ops.object.light_add(type="AREA", location=(-2.2, 3.0, 3.2))
-    rim = bpy.context.active_object
-    rim.data.energy = A["rim_energy_w"]
-    rim.data.size = 2.5
-    rim.data.color = (0.62, 0.72, 0.95)
-    rim.rotation_euler = (math.radians(-55), math.radians(-30), math.radians(-150))
+    # a cold rim light behind, only when the file asks for one: at 0 W there is none, and the culture is the only light
+    if A["rim_energy_w"] > 0:
+        bpy.ops.object.light_add(type="AREA", location=(-2.2, 3.0, 3.2))
+        rim = bpy.context.active_object
+        rim.data.energy = A["rim_energy_w"]
+        rim.data.size = 2.5
+        rim.data.color = (0.62, 0.72, 0.95)
+        rim.rotation_euler = (math.radians(-55), math.radians(-30), math.radians(-150))
 
-    # fog: the world scatters the gills' light into a halo
+    # fog: the world scatters the gills' light into a halo. The night sky is black, so it lights nothing.
     world = bpy.data.worlds.new("void")
     scene.world = world
     world.use_nodes = True
     wn = world.node_tree
-    wn.nodes.get("Background").inputs["Color"].default_value = (0.0019, 0.0024, 0.0040, 1)
+    wn.nodes.get("Background").inputs["Color"].default_value = (*A["sky_rgb"], 1)
     vol = wn.nodes.new("ShaderNodeVolumePrincipled")
     vol.inputs["Density"].default_value = A["fog_density"]
     vol.inputs["Anisotropy"].default_value = A["fog_anisotropy"]
@@ -587,7 +679,8 @@ def build_shelf_culture_lamp(P: dict, seed: int):
         return [o.matrix_world @ v.co for v in o.data.vertices]
 
     # set the lens so the instrument fills `fill` of the frame's height, or `fill_x` of its width about the axis if
-    # that binds first, then shift the frame to centre it vertically; the column stays centred left to right
+    # that binds first, then shift the frame so the instrument's foot sits at `ground_y` of the height from the top;
+    # the column stays centred left to right
     bpy.context.view_layer.update()
     pts = [p for o in instrument for p in world_points(o)]
     cam.data.shift_y = 0.0
@@ -598,7 +691,9 @@ def build_shelf_culture_lamp(P: dict, seed: int):
         cam.data.lens *= min(K["fill"] / (max(ys) - min(ys)), K["fill_x"] / 2 / max(abs(x - 0.5) for x in xs))
     bpy.context.view_layer.update()
     ys = [world_to_camera_view(scene, cam, p).y for p in pts]
-    cam.data.shift_y = (max(ys) + min(ys)) / 2 - 0.5
+    # shift_y is in units of the frame's larger side; camera-view y runs 0 at the foot of the frame to 1 at its top
+    tall = R["height"] / max(R["width"], R["height"])
+    cam.data.shift_y = (min(ys) - (1.0 - K["ground_y"])) * tall
     bpy.context.view_layer.update()
 
     def measure() -> dict:
@@ -634,8 +729,12 @@ def build_shelf_culture_lamp(P: dict, seed: int):
                 hits = trees[i][1].overlap(trees[j][1])
                 if hits:
                     overlaps.append({"a": trees[i][0], "b": trees[j][0], "face_pairs": len(hits)})
+        # where the instrument's top and foot fell, as shares of the frame's height from its top: the page stands
+        # Earth's lamp on these two lines
+        vy = [world_to_camera_view(scene, cam, p).y for p in pts]
+        frame = {"top": round(1.0 - max(vy), 4), "ground": round(1.0 - min(vy), 4)}
         return {"caps": rows, "overlaps": overlaps, "farthest_m": round(far, 3), "glass_radius_m": col_r,
-                "lens_mm": round(cam.data.lens, 2), "shift_y": round(cam.data.shift_y, 4)}
+                "lens_mm": round(cam.data.lens, 2), "shift_y": round(cam.data.shift_y, 4), "frame": frame}
 
     return scene, cam, noink, measure
 
@@ -643,7 +742,7 @@ def build_shelf_culture_lamp(P: dict, seed: int):
 FAMILIES = {"shelf-culture-lamp": build_shelf_culture_lamp}
 
 
-def render(scene, noink, P: dict, out: str, samples: int, percent: int) -> float:
+def render(scene, noink, P: dict, out: str, samples: int, percent: int, threads: int | None = None) -> float:
     import bpy
     R, ink = P["render"], P["ink"]
     scene.render.resolution_percentage = percent
@@ -670,6 +769,11 @@ def render(scene, noink, P: dict, out: str, samples: int, percent: int) -> float
     scene.cycles.use_adaptive_sampling = True
     scene.cycles.time_limit = R["time_limit_s"]
     scene.cycles.use_denoising = True
+    scene.cycles.denoiser = "OPENIMAGEDENOISE"
+    scene.cycles.denoising_input_passes = "RGB_ALBEDO_NORMAL"
+    if threads:
+        scene.render.threads_mode = "FIXED"
+        scene.render.threads = threads
     scene.cycles.caustics_reflective = False
     scene.cycles.caustics_refractive = False
     scene.cycles.max_bounces = 6
@@ -680,6 +784,7 @@ def render(scene, noink, P: dict, out: str, samples: int, percent: int) -> float
     scene.render.film_transparent = False
     scene.view_settings.view_transform = "AgX"
     scene.view_settings.look = "AgX - Base Contrast"
+    scene.view_settings.exposure = P["exposure"]["stops"]   # the long exposure: a dim source recorded over minutes
     scene.render.filepath = out
     fmt = scene.render.image_settings
     if out.lower().endswith(".webp"):
@@ -714,7 +819,7 @@ def main() -> None:
         return
     import bpy
     out = opts["out"]
-    seconds = render(scene, noink, P, out, samples, percent)
+    seconds = render(scene, noink, P, out, samples, percent, opts["threads"])
     stem = os.path.splitext(out)[0]
     record = {
         "artifact": P["artifact"], "family": P["family"], "title": P["title"], "tag": P["tag"],
@@ -722,6 +827,7 @@ def main() -> None:
         "image": os.path.basename(out), "image_bytes": os.path.getsize(out),
         "width": round(P["render"]["width"] * percent / 100), "height": round(P["render"]["height"] * percent / 100),
         "blender": bpy.app.version_string, "engine": "Cycles, CPU", "samples": samples,
+        "denoiser": "OpenImageDenoise", "exposure_stops": P["exposure"]["stops"],
         "time_limit_s": P["render"]["time_limit_s"], "render_s": round(seconds, 1),
         "rendered_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "measure": m,

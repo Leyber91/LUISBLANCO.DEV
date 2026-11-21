@@ -18,14 +18,28 @@
       byte (SHA-256, CRLF read as LF), so an image never outlives
       the parameters it was drawn from.
    7. The page's markup says what the data says.
+   8. The ignition clock (strandAt): nothing of this world's branch
+      at 0, Earth's branch always; each line drawn in row order; the
+      artifact reached at arrival and not before; done at its end.
+   9. The fog (fogDensity), bound to state: none on Earth's branch
+      or the root at any moment; full on this world's branch before
+      the strand, thinner after it with a clear channel along the
+      ink; the seed of trouble in full fog always; and no cell's fog
+      grows as the strand advances.
+  10. The brush: every line is seeded by the two steps it joins, so
+      no two lines share a stroke and a redraw is the same drawing.
+  11. The frame: the lines Earth's lamp stands on are the ones the
+      render measured, and the ones its parameters asked for.
    ============================================================ */
 import { spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LAYOUT, ROLES, SOURCES } from './config.js';
-import { check, layout, pairOf, reading, stateOf, step, trunk, wrap } from './engine.js';
+import { brushStroke } from '../kit/brush.js';
+import { seedOf } from '../kit/rng.js';
+import { FOG, INK, LAYOUT, ROLES, SOURCES, TIMING } from './config.js';
+import { arrival, check, fogAt, fogDensity, fogField, ignitionEnd, layout, pairOf, reading, stateOf, step, strandAt, trunk, wrap } from './engine.js';
 import { WORLD } from './worlds/fungi-early.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -121,6 +135,13 @@ for (let width = 300; width <= 640; width += 4) {   // the phone's 300 to 420, a
     const pos = new Map(lay.nodes.map((n) => [n.id, n]));
     for (const e of lay.edges) ok(`${where}: ${e.from} to ${e.to} runs downward`, pos.get(e.from).y < pos.get(e.to).y);
     for (const n of WORLD.nodes.filter((x) => x.branch === 'earth')) ok(`${where}: ${n.id} sits on its pair's row`, pos.get(n.id).row === pos.get(n.pair).row);
+    for (const e of lay.edges) {
+      const bad = lay.nodes.find((n) => { const b = textBox(n); return e.pts.some(([x, y]) => x > b.x0 + 1 && x < b.x1 - 1 && y > b.y0 + 1 && y < b.y1 - 1); });
+      ok(`${where}: ${e.from} to ${e.to} crosses no label`, !bad, bad && bad.id);
+      for (let k = 1; k < e.pts.length; k++) if (e.pts[k][1] < e.pts[k - 1][1] - 1e-9) { ok(`${where}: ${e.from} to ${e.to} never turns upward`, false); break; }
+      const a = e.pts[0], b = e.pts[e.pts.length - 1], P = pos.get(e.from), C = pos.get(e.to), h = LAYOUT.node / 2;
+      ok(`${where}: ${e.from} to ${e.to} is laid from the foot of its cause's square to the head of its effect's`, Math.hypot(a[0] - P.x, a[1] - (P.y + h)) < 0.01 && Math.hypot(b[0] - C.x, b[1] - (C.y - h)) < 0.01);
+    }
     if (height) ok(`${where}: the rows fill the height given`, lay.height === height, String(lay.height));
     if (lay.leader) ok(`${where}: the leader runs right from the artifact's label`, lay.leader.x1 < lay.leader.x2 && lay.leader.x1 > pos.get('lamp').x);
   }
@@ -186,6 +207,10 @@ if (py) {
     ['a missing parameter', { ...params, air: { fog_density: 0.075, fog_anisotropy: 0.35 } }, false],
     ['an unknown family', { ...params, family: 'teapot' }, false],
     ['a time limit at the bound', { ...params, render: { ...params.render, time_limit_s: 540 } }, true],
+    ['an instrument as tall as the line its foot stands on', { ...params, camera: { ...params.camera, fill: params.camera.ground_y } }, true],
+    ['an instrument taller than the line its foot stands on', { ...params, camera: { ...params.camera, fill: params.camera.ground_y + 0.0001 } }, false],
+    ['a street with no ground block', (() => { const c = { ...params }; delete c.ground; return c; })(), false],
+    ['an exposure past its bound', { ...params, exposure: { stops: 10.01 } }, false],
     ['a time limit past the bound', { ...params, render: { ...params.render, time_limit_s: 541 } }, false],
   ];
   const code = [
@@ -212,8 +237,99 @@ const html = fs.readFileSync(path.join(LABS, 'orthogonal.html'), 'utf8').replace
 for (const [what, text] of [['title', WORLD.title], ['driver', WORLD.driver], ['evidence line', WORLD.favours.line],
   ['artifact', WORLD.artifact.title], ['artifact line', WORLD.artifact.line], ["Earth's artifact", WORLD.earthArtifact.title],
   ["Earth's line", WORLD.earthArtifact.line],
-  ['image', WORLD.artifact.image], ['alt text', WORLD.artifact.alt]]) {
+  ['image', WORLD.artifact.image], ['alt text', WORLD.artifact.alt], ['exposure note', WORLD.artifact.exposure]]) {
   ok(`the markup's ${what} is the data's`, html.includes(text), text);
+}
+
+// ---------------------------------------------------------------- 8. the ignition clock
+{
+  const lay = layout(WORLD, { width: 640, height: 560, leader: true });
+  const at = (ms) => strandAt(WORLD, lay, ms);
+  const idx = (from, to) => lay.edges.findIndex((e) => e.from === from && e.to === to);
+  const s0 = at(0);
+  ok('at 0 no line of this world is drawn', lay.edges.every((e, i) => (e.kind === 'fired' || e.kind === 'thread' || e.kind === 'pending' ? s0.edges[i] === 0 : true)));
+  ok("at 0 Earth's branch is all there", lay.edges.every((e, i) => (e.kind === 'earth' ? s0.edges[i] === 1 : true)));
+  ok('at 0 no step of this world shows, and Earth and the root do', lay.nodes.every((n) => s0.nodes.get(n.id) === (n.state === 'fired' || n.state === 'pending' ? 0 : 1)));
+  const art = arrival(WORLD, lay), into = idx('luminous', 'lamp');
+  ok('the line into the artifact is drawn at arrival', at(art).edges[into] === 1);
+  ok('and not 1 ms before', at(art - 1).edges[into] < 1);
+  ok('arrival is the artifact row less one, times a row, plus a line', art === (lay.nodes.find((n) => n.id === 'lamp').row - 1) * TIMING.perRow + TIMING.edge);
+  ok('the driver is drawn before the step under it', at(TIMING.edge).edges[idx('lignin', 'fungi')] === 1 && at(TIMING.edge).edges[idx('fungi', 'nocoal')] < 1);
+  let mono = true;
+  for (let t = 0; t < ignitionEnd(WORLD, lay); t += 17) {
+    const a = at(t), b = at(t + 17);
+    if (a.edges.some((v, i) => b.edges[i] < v) || [...a.nodes].some(([id, v]) => b.nodes.get(id) < v)) mono = false;
+  }
+  ok('nothing undraws as the clock runs', mono);
+  ok('the ignition is done at its end and not before', at(ignitionEnd(WORLD, lay)).done && !at(ignitionEnd(WORLD, lay) - 1).done);
+  const end = at(ignitionEnd(WORLD, lay));
+  ok('at its end every line and step is drawn', end.edges.every((v) => v === 1) && [...end.nodes.values()].every((v) => v === 1) && end.leader === 1);
+  ok('the strand reaches the artifact inside the ignition', art > 0 && art < ignitionEnd(WORLD, lay));
+}
+
+// ---------------------------------------------------------------- 9. the fog
+for (const [width, height] of [[640, 560], [360, 0]]) {
+  const lay = layout(WORLD, { width, height, leader: height > 0 });
+  const field = fogField(WORLD, lay);
+  const at = (ms) => fogDensity(field, strandAt(WORLD, lay, ms).edges);
+  const end = ignitionEnd(WORLD, lay);
+  const d0 = at(0), d1 = at(end);
+  const where = `${width} x ${height}`;
+  const n = (id) => lay.nodes.find((x) => x.id === id);
+  const fogOf = (d, x, y) => fogAt(field, d, x, y);
+  for (const node of lay.nodes.filter((x) => x.state === 'earth' || x.state === 'root')) {
+    ok(`${where}: no fog on ${node.id} (history) at 0 or at rest`, fogOf(d0, node.x, node.y) === 0 && fogOf(d1, node.x, node.y) === 0);
+  }
+  for (const e of lay.edges.filter((x) => x.kind === 'earth')) {
+    const clear = e.pts.every(([x, y]) => [0, end / 2, end].every((t) => fogOf(at(t), x, y) === 0));
+    ok(`${where}: no fog along Earth's line ${e.from} to ${e.to}, at any moment`, clear);
+  }
+  for (const id of ['fungi', 'farmed', 'nocoal', 'luminous']) {
+    const p = n(id);
+    ok(`${where}: before the strand, ${id} stands in nearly full fog`, fogOf(d0, p.x, p.y) >= 0.9 * FOG.full, fogOf(d0, p.x, p.y).toFixed(2));
+    const side = p.x + (p.x > lay.lanes.side ? 20 : -20);
+    const v = fogOf(d1, side, p.y + 16);
+    ok(`${where}: at rest ${id}'s ink sits in a clearing, its fog under 0.65 of the fog 20 px off`, fogOf(d1, p.x, p.y) <= 0.65 * v, `${fogOf(d1, p.x, p.y).toFixed(2)} against ${v.toFixed(2)}`);
+    ok(`${where}: and 20 px from it the invented branch keeps its fog`, v >= 0.3 && v <= FOG.rest, v.toFixed(2));
+  }
+  const t = n('trouble');
+  ok(`${where}: the seed of trouble stands in full fog, at 0 and at rest`, fogOf(d0, t.x, t.y) >= 0.95 && fogOf(d1, t.x, t.y) >= 0.95);
+  {
+    const w = Math.max(...t.label.lines.map((s) => s.length)) * LAYOUT.charW;
+    const v = fogOf(d1, t.label.x + w / 2, t.label.y);
+    ok(`${where}: and its fog runs over its words`, v >= 0.6, v.toFixed(2));
+  }
+  ok(`${where}: more fog on what has not happened than beside what was invented`, fogOf(d1, t.x + 20, t.y) > fogOf(d1, n('nocoal').x + 20, n('nocoal').y + 16));
+  let grew = 0;
+  let prev = d0;
+  for (let ms = 60; ms <= end; ms += 60) {
+    const d = at(ms);
+    for (let i = 0; i < d.length; i++) if (d[i] > prev[i] + 1e-6) grew++;
+    prev = d;
+  }
+  ok(`${where}: no cell's fog grows as the strand advances`, grew === 0, `${grew} cells`);
+  ok(`${where}: the fog never leaves 0 to 1`, d0.every((v) => v >= 0 && v <= 1) && d1.every((v) => v >= 0 && v <= 1));
+}
+
+// ---------------------------------------------------------------- 10. the brush
+{
+  const lay = layout(WORLD, { width: 640, height: 560, leader: true });
+  const seeds = lay.edges.map((e) => seedOf('orthogonal', e.from, e.to));
+  ok('every line has its own seed', new Set(seeds).size === seeds.length);
+  const draw = () => lay.edges.map((e, i) => brushStroke(e.pts, { width: INK[e.kind], seed: seeds[i] }).paths.join('|'));
+  const a = draw(), b = draw();
+  ok('a redraw is the same drawing', a.every((x, i) => x === b[i]));
+  ok('every kind of line has a brush width', lay.edges.every((e) => INK[e.kind] > 0));
+  ok("this world's branch is drawn wider than Earth's, and Earth's wider than what has not happened", INK.fired > INK.thread && INK.thread > INK.earth && INK.earth > INK.pending);
+}
+
+// ---------------------------------------------------------------- 11. the frame
+{
+  const f = WORLD.artifact.frame, m = record.measure.frame, cam = params.camera;
+  ok("the frame Earth's lamp stands on is the one the render measured", !!m && Math.abs(f.top - m.top) <= 0.002 && Math.abs(f.ground - m.ground) <= 0.002, JSON.stringify({ f, m }));
+  ok('and the one its parameters asked for', Math.abs(f.ground - cam.ground_y) <= 0.005 && Math.abs(f.top - (cam.ground_y - cam.fill)) <= 0.005, JSON.stringify(cam));
+  ok("the record's exposure is the parameter file's, and it is a long exposure", record.exposure_stops === params.exposure.stops && params.exposure.stops > 0);
+  ok('no light but the culture lit it: no studio light, a black sky', params.air.rim_energy_w === 0 && params.air.sky_rgb.every((v) => v === 0));
 }
 
 console.log(`orthogonal: ${pass} passed, ${fail} failed`);

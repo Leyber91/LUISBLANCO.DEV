@@ -3,12 +3,20 @@
 
    ?node=<id>  opens the plate with that node chosen (an unknown id
                opens the artifact)
-   ?still      the finished frame, no ignition (as under
-               prefers-reduced-motion)
+   ?still      the finished frame, no ignition and no drift (as
+               under prefers-reduced-motion)
+
+   One clock runs the ignition (engine.js strandAt): the strokes,
+   the steps and the fog behind them are read from it each frame.
+   It is a Labs OS scene, so it advances only while the drawing is
+   on screen in a visible tab: on a phone, where the lineage is
+   below the render, the strand draws when the visitor reaches it.
    ============================================================ */
+import { mountScene } from '../os/scene.js';
 import { EVENTS, TIMING } from './config.js';
-import { check, step } from './engine.js';
-import { drawArtifactInk, drawEarthLamp, drawLineage, ignite, markChosen, settle, writeReading } from './view.js';
+import { arrival, check, fogField, ignitionEnd, step, strandAt } from './engine.js';
+import { FogPainter } from './fogview.js';
+import { applyStrand, drawArtifactInk, drawEarthLamp, drawLineage, markChosen, writeReading } from './view.js';
 import { WORLD } from './worlds/fungi-early.js';
 
 const $ = (id) => document.getElementById(id);
@@ -30,8 +38,14 @@ let artParams = null;   // the artifact's parameter file, once read: the ink dra
 
 const holder = $('lineage');
 const svg = $('lineage-svg');
+const fog = new FogPainter($('lineage-fog'));
 
 let size = '';   // the box the lineage was last drawn for: a resize that keeps it redraws nothing
+let clock = still ? Infinity : 0;   // ms of the ignition, advanced only while the scene runs
+let driftS = 0;                     // seconds the fog has drifted at rest
+let fogSettled = false;             // the density at rest is computed once and kept
+let reached = still;                // the strand has reached the artifact (on the clock below)
+let onReach = null;                 // what the render does then (art)
 
 function draw() {
   const isWide = wide.matches;
@@ -42,8 +56,57 @@ function draw() {
   size = `${width}x${height}`;
   drawn = drawLineage(svg, WORLD, { width, height, leader: isWide });
   if (!isWide) holder.style.height = `${drawn.lay.height}px`;
+  fog.setField(fogField(WORLD, drawn.lay), drawn.lay.width, drawn.lay.height);
+  fogSettled = false;
   markChosen(svg, WORLD, drawn.groups, chosen);
   aimReveal();
+  frame();
+}
+
+/* Draw the strand, the steps and the fog at the clock's moment; at rest, only move the fog. */
+function frame() {
+  if (!drawn) return null;
+  const f = strandAt(WORLD, drawn.lay, Math.min(clock, ignitionEnd(WORLD, drawn.lay)));
+  if (!reached && clock >= arrival(WORLD, drawn.lay)) { reached = true; if (onReach) onReach(); }
+  if (!f.done || !fogSettled) {
+    applyStrand(svg, f, drawn.groups);
+    fog.setProgress(f.edges);
+    fogSettled = f.done;
+  }
+  fog.paint(TIMING.drift[0] * driftS, TIMING.drift[1] * driftS);
+  return f;
+}
+
+/* The ignition, then the fog's drift, as one Labs OS scene on the fog's canvas. Under reduced motion or ?still the
+   clock starts at its end and nothing loops. */
+function inkScene() {
+  mountScene($('lineage-fog'), ({ reducedMotion }) => {
+    let raf = 0, prev = null, lastDrift = 0;
+    if (reducedMotion) clock = Infinity;
+    const canvas = $('lineage-fog');
+    // the scene's observer reports a drawing off screen a frame or two late, and counts a sliver at the window's edge as
+    // seen; the clock runs only while at least 60 px of the drawing is in the window
+    const seen = () => { const r = canvas.getBoundingClientRect(); return r.bottom > 60 && r.top < innerHeight - 60 && r.right > 0 && r.left < innerWidth; };
+    const tick = () => {
+      raf = requestAnimationFrame(tick);
+      // the page's own clock, not the frame's timestamp, which can begin before the plate booted: the ignition never
+      // runs ahead of the time since it started
+      const now = performance.now();
+      const dt = prev === null || !seen() ? 0 : Math.min(100, now - prev);
+      prev = now;
+      if (!dt && drawn && clock < ignitionEnd(WORLD, drawn.lay)) return;
+      if (drawn && clock < ignitionEnd(WORLD, drawn.lay)) { clock += dt; frame(); return; }
+      if (reducedMotion) { cancelAnimationFrame(raf); raf = 0; frame(); return; }
+      if (now - lastDrift < 1000 / TIMING.driftFps) return;
+      driftS += (lastDrift ? Math.min(200, now - lastDrift) : 0) / 1000;
+      lastDrift = now;
+      frame();
+    };
+    const start = () => { if (!raf) { prev = null; lastDrift = 0; raf = requestAnimationFrame(tick); } };
+    const stop = () => { if (raf) cancelAnimationFrame(raf); raf = 0; };
+    if (reducedMotion) frame(); else start();
+    return { destroy: stop, pause: stop, resume: () => { if (!reducedMotion) start(); } };
+  }, { reducedMotion: still });
 }
 
 /* The fog clears outward from where the gold strand meets the render: the leader's row on a wide plate, the render's
@@ -95,9 +158,12 @@ async function readParams() {
   return artParams;
 }
 
-/* The render: it surfaces from the fog once it has loaded and the gold strand has reached it. When it does not load, the
-   lamp is drawn in ink from its parameter file in the same box, and the strand that pointed at it goes to ink. */
-function art(revealAt) {
+/* The render: on a wide plate it surfaces from the fog once it has loaded and the gold strand has reached it, read on
+   the strand's own clock (frame above), so a paused or hidden drawing holds the render back too. On a narrow plate the
+   render comes first and its lineage below it, so it shows at once and the strand draws when the visitor reaches it.
+   When it does not load, the lamp is drawn in ink from its parameter file in the same box, and the strand that pointed
+   at it goes to ink. */
+function art() {
   const fig = $('art');
   const img = $('art-img');
   const ink = $('art-ink');
@@ -108,7 +174,11 @@ function art(revealAt) {
     fig.classList.remove('fog');
     fig.dataset.liftedAt = String(Math.round(performance.now()));   // read by the drive: never before the strand arrives
   };
-  if (!still) { fig.classList.add('fog'); setTimeout(() => { timeUp = true; show(); }, revealAt); }
+  if (!still && wide.matches) {
+    fig.classList.add('fog');
+    onReach = () => { timeUp = true; show(); };
+    if (reached) onReach();
+  } else timeUp = true;
   const ok = () => {
     loaded = true;
     fig.classList.remove('failed');
@@ -123,7 +193,7 @@ function art(revealAt) {
     $('lineage').classList.add('no-art');
     const file = WORLD.artifact.params.split('/').pop();
     try {
-      drawArtifactInk(ink, JSON.parse(await readParams()));
+      drawArtifactInk(ink, JSON.parse(await readParams()), WORLD.artifact.frame);
       ink.hidden = false;
       status.textContent = `The render did not load; this outline is drawn from ${file} [ILLUSTRATIVE].`;
     } catch {
@@ -189,6 +259,7 @@ function words() {
   q('.thesis').replaceChildren('Changed driver: ', b, `. ${WORLD.favours.line}`);
   q('.art-name').textContent = WORLD.artifact.title;
   q('.art-line').textContent = WORLD.artifact.line;
+  q('.art-exposure-text').textContent = WORLD.artifact.exposure;
   $('art-img').alt = WORLD.artifact.alt;
   q('.earth-name').textContent = WORLD.earthArtifact.title;
   q('.dim-line').textContent = WORLD.earthArtifact.line;
@@ -196,13 +267,14 @@ function words() {
 
 function boot() {
   words();
-  drawEarthLamp($('earth-svg'), WORLD.earthArtifact.supply);
+  drawEarthLamp($('earth-svg'), WORLD.earthArtifact.supply, WORLD.artifact.frame);
   draw();
   fixReadingHeight();
   writeReading($('reading'), WORLD, chosen);
   const startedAt = performance.now();
-  const revealAt = still ? 0 : ignite(svg, WORLD);
-  art(revealAt);
+  const revealAt = still || !drawn ? 0 : arrival(WORLD, drawn.lay);
+  inkScene();
+  art();
   provenance();
   labsOS();
   document.body.classList.add('ready');
@@ -222,12 +294,11 @@ function boot() {
   const ro = new ResizeObserver(() => {
     const now = `${Math.floor(holder.clientWidth)}x${wide.matches ? Math.floor(holder.clientHeight) : 0}`;
     if (now === size) return;   // the observer's first call, and the height a narrow plate sets itself
-    settle(svg);
-    draw();
+    draw();   // the clock carries on: a resize mid-ignition (a web font arriving) redraws the same moment
     fixReadingHeight();
   });
   ro.observe(holder);
-  wide.addEventListener('change', () => { settle(svg); draw(); fixReadingHeight(); });
+  wide.addEventListener('change', () => { draw(); fixReadingHeight(); });
   window.__orthogonal = { world: WORLD, chosen: () => chosen, layout: () => drawn && drawn.lay, timing: TIMING, startedAt, revealAt };
 }
 

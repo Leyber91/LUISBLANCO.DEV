@@ -5,17 +5,19 @@
   "tag": "ILLUSTRATIVE",
   "seed": 20261121,
   "params": "mycelial-lamp.json",
-  "params_sha256": "e1bc53ee95ba58c58f7793b3eb3d52267463551f3629ce34beee6c7e09d52ca8",
+  "params_sha256": "8df3643ff7bff1cd994dc492adef01ee5526801746c9da2c3343e48f986e383d",
   "image": "mycelial-lamp.webp",
-  "image_bytes": 35118,
-  "width": 940,
-  "height": 1316,
+  "image_bytes": 16526,
+  "width": 900,
+  "height": 1200,
   "blender": "5.1.0",
   "engine": "Cycles, CPU",
-  "samples": 32,
-  "time_limit_s": 330,
-  "render_s": 297.1,
-  "rendered_utc": "2026-11-21T09:05:56+00:00",
+  "samples": 24,
+  "denoiser": "OpenImageDenoise",
+  "exposure_stops": 4.8,
+  "time_limit_s": 400,
+  "render_s": 182.7,
+  "rendered_utc": "2026-11-21T10:55:16+00:00",
   "measure": {
     "caps": [
       {
@@ -23,14 +25,14 @@
         "radius_m": 0.354,
         "height_m": 0.552,
         "faces_deg": -33.2,
-        "plate_px": 130.6,
+        "plate_px": 67.3,
         "box_px": [
-          137,
-          407,
-          268,
-          464
+          129,
+          262,
+          197,
+          287
         ],
-        "underside_seen_deg": 16.7,
+        "underside_seen_deg": 7.2,
         "verts": 19912
       },
       {
@@ -38,14 +40,14 @@
         "radius_m": 0.347,
         "height_m": 0.795,
         "faces_deg": 28.1,
-        "plate_px": 134.8,
+        "plate_px": 70.3,
         "box_px": [
-          192,
-          337,
-          327,
-          396
+          158,
+          227,
+          228,
+          251
         ],
-        "underside_seen_deg": 21.5,
+        "underside_seen_deg": 11.7,
         "verts": 16712
       },
       {
@@ -53,14 +55,14 @@
         "radius_m": 0.356,
         "height_m": 1.06,
         "faces_deg": -45.9,
-        "plate_px": 131.1,
+        "plate_px": 69.3,
         "box_px": [
-          134,
-          268,
-          265,
-          325
+          127,
+          189,
+          196,
+          211
         ],
-        "underside_seen_deg": 20.0,
+        "underside_seen_deg": 10.6,
         "verts": 16968
       },
       {
@@ -68,14 +70,14 @@
         "radius_m": 0.377,
         "height_m": 1.37,
         "faces_deg": 35.3,
-        "plate_px": 143.1,
+        "plate_px": 76.9,
         "box_px": [
-          192,
-          168,
-          335,
-          246
+          157,
+          136,
+          234,
+          169
         ],
-        "underside_seen_deg": 27.7,
+        "underside_seen_deg": 18.5,
         "verts": 20104
       },
       {
@@ -83,14 +85,14 @@
         "radius_m": 0.247,
         "height_m": 0.66,
         "faces_deg": 151.4,
-        "plate_px": 92.0,
+        "plate_px": 47.5,
         "box_px": [
-          206,
-          404,
-          298,
-          426
+          165,
+          250,
+          212,
+          264
         ],
-        "underside_seen_deg": -5.0,
+        "underside_seen_deg": -14.2,
         "verts": 17992
       },
       {
@@ -98,21 +100,25 @@
         "radius_m": 0.254,
         "height_m": 1.23,
         "faces_deg": -178.5,
-        "plate_px": 92.0,
+        "plate_px": 48.8,
         "box_px": [
-          186,
-          258,
-          278,
-          278
+          154,
+          173,
+          203,
+          185
         ],
-        "underside_seen_deg": 3.3,
+        "underside_seen_deg": -5.8,
         "verts": 18184
       }
     ],
     "overlaps": [],
     "farthest_m": 0.431,
     "glass_radius_m": 0.48,
-    "lens_mm": 53.27,
-    "shift_y": -0.0204
+    "lens_mm": 38.06,
+    "shift_y": -0.0541,
+    "frame": {
+      "top": 0.09,
+      "ground": 0.79
+    }
   }
 }
