@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'" />
 <link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/controls.css" />
 <link rel="stylesheet" href="assets/css/honesty-decoder.css" />
 <link rel="modulepreload" href="assets/js/honesty-decoder/main.js" />
 <link rel="modulepreload" href="assets/js/honesty-decoder/config.js" />
@@ -55,6 +56,8 @@
     </div>
   </section>
 
+  <section class="hl" id="half-life" aria-labelledby="hl-h"><p class="hl-kick">a sealed test of ten sentences about AI, loading its counts</p></section>
+
   <main class="deck" id="deck">
     <aside class="panel ledger" id="ledger" aria-label="Every system, ranked by its figure"></aside>
     <section class="panel receipt" id="receipt" aria-label="The selected system's receipt"></section>
@@ -74,5 +77,6 @@
 </div>
 <noscript><p style="padding:24px">The decoder computes every figure in the browser and needs JavaScript.</p></noscript>
 <script type="module" src="assets/js/honesty-decoder/main.js"></script>
+<script type="module" src="assets/js/honesty-decoder/view/halflife.js"></script>
 </body>
 </html>

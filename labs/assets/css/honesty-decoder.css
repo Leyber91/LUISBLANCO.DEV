@@ -351,3 +351,46 @@ a:hover { text-decoration-color: var(--text); }
   .ev a, .rc-meta a, .prev a, .foot a { display: inline-block; min-height: 44px; padding: 12px 0; }
   .lbr-pill { min-height: 44px; }
 }
+
+/* ---------------------------------------------------------- the Half-Life plate
+   Ten sentences about what AI cannot do, against seven open models by release date (view/halflife.js). Cells are
+   inked by pass rate in the cool register; a cell that clears the bar gains a brighter edge; gold marks only the
+   pencil stroke through a sentence that died and the tick on the cell where it died. Labels are lower case, untracked. */
+.hl { position: relative; margin: 6px 0 18px; padding: 16px 20px 12px; border: 1px solid var(--hd-hair); background: var(--hd-panel); min-height: 620px; }
+.hl-kick { margin: 0; font-size: var(--fs-0); color: var(--hd-dim); }
+.hl-h { margin: 4px 0 0; font-size: var(--fs-2); line-height: 1.3; font-weight: 600; color: var(--text-bright); max-width: 80ch; }
+.hl-lede { margin: 6px 0 0; color: var(--text); max-width: 118ch; }
+.hl-ctl { display: flex; flex-wrap: wrap; gap: 6px 40px; margin: 10px 0 6px; }
+.hl-ctl .scale { min-width: min(100%, 460px); }
+.hl-ctl .scale:last-child { min-width: min(100%, 200px); }
+.hl-grid { display: grid; }
+.hl-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) 250px; gap: 16px; align-items: center; padding: 4px 0; border-top: 1px solid var(--hd-hair); }
+.hl-cols { border-top: 0; padding-bottom: 2px; }
+.hl-say { color: var(--text-bright); text-decoration: line-through; text-decoration-color: transparent; text-decoration-thickness: 2px;
+  transition: text-decoration-color var(--hd-t2) var(--hd-ease), color var(--hd-t2) var(--hd-ease); }
+.hl-say.struck { text-decoration-color: var(--accretion); color: var(--text); }
+.hl-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.hl-col { display: grid; justify-items: center; align-content: end; text-align: center; font-size: var(--fs-0); line-height: 1.25; color: var(--hd-dim); overflow-wrap: anywhere; min-width: 0; }
+.hl-col b { font-weight: 500; color: var(--text); }
+.hl-cell { position: relative; height: 26px; padding: 0; cursor: pointer; border: 1px solid var(--hd-hair);
+  background: rgba(159, 179, 214, calc(0.03 + var(--rate, 0) * 0.40)); color: var(--text-bright); font-size: var(--fs-0);
+  font-variant-numeric: tabular-nums; transition: background-color var(--hd-t2) var(--hd-ease), border-color var(--hd-t2) var(--hd-ease); }
+.hl-cell.clears { border-color: var(--horizon); }
+.hl-cell.death::after { content: ''; position: absolute; left: 3px; right: 3px; bottom: -1px; height: 3px; background: var(--accretion); }
+.hl-cell:hover { border-color: var(--text-bright); }
+.hl-note { font-size: var(--fs-0); color: var(--hd-dim); }
+.hl-note.dead { color: var(--text-bright); }
+.hl-readout { margin: 10px 0 0; color: var(--text); min-height: 3em; max-width: 130ch; }
+.hl-ask { margin: 2px 0 0; font-size: var(--fs-0); color: var(--hd-dim); min-height: 3em; max-width: 130ch; overflow-wrap: anywhere; }
+.hl-foot { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--hd-hair); }
+.hl-foot p { margin: 4px 0; font-size: var(--fs-0); color: var(--hd-dim); max-width: 150ch; }
+.hl-foot .t-real { color: var(--horizon); }
+.hl-error { color: var(--text); }
+@media (prefers-reduced-motion: reduce) { .hl-say, .hl-cell { transition: none; } }
+@media (max-width: 860px) {
+  .hl { padding: 14px 12px 10px; }
+  .hl-row { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 6px 0; }
+  .hl-cols .hl-say, .hl-cols .hl-note { display: none; }
+  .hl-cell { height: 32px; }
+  .hl-col { font-size: 10px; letter-spacing: -0.02em; }
+}
