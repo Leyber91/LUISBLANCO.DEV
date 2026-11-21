@@ -51,9 +51,9 @@ export const STILL = {
    The world each hub id belongs to, from the table in .claude/skills/labs-design/SKILL.md.
    A lab missing here falls back to its hub category. */
 export const WORLDS = {
-  cosmos:   { name: 'Cosmos',             labs: ['black-hole', 'exomania', 'dimensional'] },
+  cosmos:   { name: 'Cosmos',             labs: ['black-hole', 'exomania'] },
   contact:  { name: 'Contact',            labs: ['heptapod', 'timeline', 'alt-reality', 'last-witness'] },
-  machine:  { name: 'Inside the Machine', labs: ['token-ekg', 'dataspace', 'the-figure', 'ai-health', 'primordial-seed'] },
+  machine:  { name: 'Inside the Machine', labs: ['token-ekg', 'dataspace', 'the-figure', 'ai-health', 'primordial-seed', 'dimensional'] },
   claims:   { name: 'Claims',             labs: ['honesty-decoder', 'roaster', 'mentorship', 'content-gen'] },
   self:     { name: 'Self',               labs: ['claude-prep', 'workout-plans', 'habits', 'mindful', 'vr-fitness', 'pathways', 'learn-platform'] },
   signals:  { name: 'Signals',            labs: ['trends', 'memes', 'sports-predict', 'social-tool', 'ugc', 'challenges'] },

@@ -11,6 +11,6 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "rootDir": ".."
   },
-  "include": ["../labs/assets/js/exoplanet/record.js"],
+  "include": ["../labs/assets/js/exoplanet/record.js", "../labs/assets/js/dimensions/record.js", "../labs/assets/js/dimensions/keep.js"],
   "exclude": []
 }

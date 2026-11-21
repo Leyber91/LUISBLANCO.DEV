@@ -35,5 +35,8 @@ export default async function harden(p, { base }) {
   const r = await p.ev(`(() => { const b = document.querySelector('#cands button[data-kind="template"] .cr'); return { res: b.textContent, any: [...document.querySelectorAll('#cands .cr')].some((c) => c.classList.contains('fired')), verdict: document.getElementById('verdict').textContent, tally: document.getElementById('tally').textContent }; })()`);
   const expect = !r.any ? /not counted/ : !/still read as/.test(r.res) ? /^Right\./ : /^Not this one\./;
   p.check('the second call is marked by what the hardened corner was read as', expect.test(r.verdict), `sharpest corner now: ${r.res}; verdict "${r.verdict}"; ${r.tally}`);
+  const gold = await p.ev(`(() => { const run = document.querySelector('#plate line.run'); const lab = document.getElementById('pl-to'); return { run: run && run.getAttribute('class'), lab: lab.className, text: lab.textContent }; })()`);
+  const changed = !/still read as/.test(r.res);
+  p.check('gold only for what fired: the run is gold exactly when its corner changed the answer', changed ? gold.run === 'run' && !/quiet/.test(gold.lab) : gold.run === 'run quiet' && /quiet/.test(gold.lab), `${gold.run}; ${gold.lab}; ${gold.text}`);
   await p.shot('03-second-call');
 }

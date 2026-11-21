@@ -18,14 +18,14 @@
   <header class="bar"><a href="index.html">Labs</a><span class="mark">THE LAB · L212</span></header>
   <div class="head">
     <h1>Folded Space</h1>
-    <p class="lede">A network trained on handwritten digits cuts the space of all drawings into flat-walled cells. Inside each cell it applies one picture. Draw a digit, then call which corner of the cube around it changes the answer.</p>
-    <p class="nextline" id="nextline" aria-live="polite">Next: call which corner changes the 4.</p>
+    <p class="lede">A network trained on handwritten digits cuts the space of all drawings into flat-walled cells, and inside each cell it is one fixed linear map <span class="tag">[REAL: Montufar et al. 2014; Hanin and Rolnick 2019]</span>. Draw a digit, then call which corner of the cube of small changes around it changes the answer.</p>
+    <p class="nextwrap"><a class="nextline" id="nextline" href="#call" aria-live="polite">Next: call which corner changes the 4.</a></p>
   </div>
   <main class="grid">
     <section class="col-a" aria-labelledby="h-a">
       <h2 id="h-a"><span class="idx">A</span>Your drawing</h2>
       <div class="pad"><canvas id="pad" width="280" height="280" aria-label="The drawing pad: draw a digit here"></canvas></div>
-      <div class="padrow"><span class="hint" id="hint">Draw a digit on the pad, or pick one below.</span><button class="clear" id="clear" type="button">Clear</button></div>
+      <div class="padrow"><span class="hint" id="hint">Draw a digit on the pad, or pick one below.</span><button class="kact" id="clear" type="button"><kbd class="key" aria-hidden="true">C</kbd>Clear</button></div>
       <div class="strip" id="strip" role="list" aria-label="Drawings"></div>
       <svg id="simplex" class="simplex" viewBox="0 0 260 260" role="img" aria-label="The answer as a point among the ten digits"></svg>
       <p class="readout" id="readout">Loading the network.</p>
@@ -51,11 +51,12 @@
       <p class="tally" id="tally">Calls right: <b>0</b> of 0</p>
       <p class="health" id="health">Reading the record.</p>
       <p class="keepnote" id="keepnote" aria-live="polite"></p>
-      <div class="tpl"><canvas id="tpl" width="28" height="28" aria-label="The template of the cell the drawing is in"></canvas><p>Inside this cell the network applies this one picture. Its sign is the sharpest corner of the cube.</p></div>
+      <div class="tpl" id="tplbox" hidden><canvas id="tpl" width="28" height="28" aria-label="The template of the cell the drawing is in"></canvas><p id="tplnote"></p></div>
       <button class="fill" id="harden" type="button">Harden the network</button>
       <p class="actnote" id="hardnote" aria-live="polite">300 steps on 2,000 digits and your drawings, in this tab.</p>
-      <table class="ledger"><thead><tr><th>Smallest step that changes it</th><th class="n">before</th><th class="n">after</th></tr></thead><tbody id="ledger"></tbody></table>
-      <button class="next" id="next" type="button">Next drawing</button>
+      <table class="ledger"><thead><tr><th>Smallest step that changes it, in full ink</th><th class="n">before</th><th class="n">after</th></tr></thead><tbody id="ledger"></tbody></table>
+      <p class="ledgernote" id="ledgernote">Harden the network to fill this table: for the drawing on the pad, the smallest step that changes its answer, before and after.</p>
+      <button class="kact" id="next" type="button"><kbd class="key" aria-hidden="true">N</kbd>Next drawing</button>
     </section>
   </main>
   <footer class="foot">[REAL] Every number and mark is computed in this page by a network of 784, 64, 64 and 10 neurons trained on MNIST (LeCun, Cortes and Burges). The cells are exact, never sampled. The examples in the strip are MNIST test digits; your own drawing is reduced to 28 by 28 the way MNIST’s were (a 20 pixel box, centred by its centre of mass).</footer>

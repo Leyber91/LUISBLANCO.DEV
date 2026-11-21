@@ -16,7 +16,9 @@ h2 { font: 400 19px/1.2 Fraunces, serif; color: var(--text-bright); margin: 0 0 
 .padrow { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-top: 8px; }
 .padrow .hint { flex: 1; }
 .hint { color: var(--text-dim); font-size: 12px; }
-.clear { min-height: 44px; padding: 0 12px; background: none; border: 1px solid var(--line); color: var(--text); font: inherit; cursor: pointer; }
+/* The kit's keycap action (controls.css .kact), at the page's 44 px target. */
+.kact { min-height: 44px; }
+#next { width: 100%; justify-content: center; border: 1px solid var(--horizon); color: var(--text-bright); font-size: 14px; }
 .strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .strip button { width: 48px; height: 48px; padding: 0; border: 1px solid var(--line); background: var(--void); cursor: pointer; }
 .strip button canvas { width: 100%; height: 100%; display: block; }
@@ -65,7 +67,14 @@ h2 { font: 400 19px/1.2 Fraunces, serif; color: var(--text-bright); margin: 0 0 
 .ledger .n { text-align: right; padding-left: 18px; white-space: nowrap; width: 1%; }
 .next { min-height: 48px; width: 100%; background: none; border: 1px solid var(--horizon); color: var(--text-bright); font: 500 14px 'IBM Plex Mono', monospace; cursor: pointer; }
 button:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
-.nextline { margin: 10px 0 0; color: var(--text-bright); }
+.nextwrap { margin: 10px 0 0; }
+.nextline { color: var(--text-bright); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--horizon); }
+.tag { color: var(--text-dim); font: 11px 'IBM Plex Mono', monospace; }
+.ledgernote { color: var(--text-dim); font-size: 12px; margin: -10px 0 18px; }
+.run.quiet, .tick.quiet { stroke: var(--horizon); }
+.to.quiet { fill: var(--horizon); }
+.pl.quiet { color: var(--horizon); }
+.tally b.none { color: var(--text); }
 .health, .keepnote { color: var(--text-dim); font-size: 12px; margin: 0 0 6px; }
 .tally .tally-marks { vertical-align: middle; margin-left: 10px; }
 /* One global rule (atlas reach.2.2): under reduced motion every animation and transition collapses. */

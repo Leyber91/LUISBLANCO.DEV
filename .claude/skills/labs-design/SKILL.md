@@ -59,9 +59,9 @@ Each world's look is derived from its subject, so two worlds never look alike wh
 
 | World | Labs | Material | Marks | Motion | What goes gold |
 |---|---|---|---|---|---|
-| Cosmos | Black Hole, Exomania, Dimensions | measured light | ray-traced optics, photometric curves, star fields from real catalogues | slow orbital time, lensing | a measured value, a confirmed planet |
+| Cosmos | Black Hole, Exomania | measured light | ray-traced optics, photometric curves, star fields from real catalogues | slow orbital time, lensing | a measured value, a confirmed planet |
 | Contact | Heptapod, Timeline, Alternate Reality, Last Witness | ink in fog | brushed ink with no first stroke, fog fields, logograms built from rules | ink blooming and settling | a decoded meaning, a translation that held |
-| Inside the Machine | Token EKG, DATASPACE, The Figure, AI in Healthcare, Primordial Seed | oscilloscope traces | phosphor traces, sweep lines, graticules, token ticks | sweeps and persistence decay | a measured run, a matched token |
+| Inside the Machine | Token EKG, DATASPACE, The Figure, AI in Healthcare, Primordial Seed, Dimensions (Folded Space) | oscilloscope traces | phosphor traces, sweep lines, graticules, token ticks | sweeps and persistence decay | a measured run, a matched token |
 | Claims | Honesty Decoder, Roaster, Virtual Mentorship, AI Content Studio | the editor's pencil | strike-throughs, margin marks, proof-correction symbols over set type | the pencil moving across a line | the mark that caught a claim |
 | Self | Claude Prep, Personalized Plans, Habits, Mindfulness, VR Fitness, Learning Pathways, Personalized Learning | breath and slow curves | long easing curves, rings of days, growth lines | breathing rhythms, never jitter | a session done, a streak kept |
 | Signals | Trending, Meme Lab, Predictive Analytics, Social Manager, User-Generated Content, Community Challenges | seismograph fields | stacked traces, change-point ticks, fields of small multiples | tremor and its record | a detected burst, a resolved prediction |

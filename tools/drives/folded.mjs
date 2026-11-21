@@ -20,6 +20,14 @@ export default async function folded(p, { base }) {
   const s0 = await at();
   p.check('at rest the plate shows its exact cells, certified, with no run yet', s0.cells > 0 && s0.polys === s0.cells && s0.cert === 0 && s0.runs === 0, `${s0.cells} cells, ${s0.polys} drawn, certificate failures ${s0.cert}, runs ${s0.runs}`);
   p.check('three candidates wait for a call, and the tally is empty', s0.cands === 3 && /^Calls right: 0 of 0$/.test(s0.tally), `${s0.cands} candidates, "${s0.tally}"`);
+  const rest = await p.ev(`(() => ({ labels: [...document.querySelectorAll('#cands .cl')].map((x) => x.textContent), tpl: document.getElementById('tplbox').hidden,
+    next: document.getElementById('nextline').tagName + ' ' + document.getElementById('nextline').getAttribute('href'),
+    kact: ['next', 'clear'].map((id) => document.getElementById(id).className + ':' + !!document.querySelector('#' + id + ' kbd.key')).join(' '),
+    ledgernote: !document.getElementById('ledgernote').hidden && document.getElementById('ledgernote').textContent }))()`);
+  p.check('before the call the corners are named by place only, and the template is not shown', rest.labels.join('|') === 'Corner 1|Corner 2|Corner 3' && rest.tpl === true, rest.labels.join(', '));
+  p.check('the next action is a link to the call', rest.next === 'A #call', rest.next);
+  p.check('Next and Clear are the kit\u2019s keycap actions', rest.kact === 'kact:true kact:true', rest.kact);
+  p.check('the empty ledger says what fills it', /^Harden the network to fill this table/.test(rest.ledgernote || ''), rest.ledgernote);
   await p.shot('01-at-rest');
 
   const centre = (sel) => p.ev(`(() => { const b = document.querySelector(${JSON.stringify(sel)}); if (!b) return null; b.scrollIntoView({ block: 'center' }); const r = b.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, h: r.height }; })()`);
@@ -34,6 +42,7 @@ export default async function folded(p, { base }) {
   p.check('after the call every candidate shows what it was read as, and none can be pressed again', res.every((r) => r.off && /read as \d/.test(r.text)), res.map((r) => `${r.kind}: ${r.text}`).join('; '));
   const lab = await p.ev(`(() => { const a = document.getElementById('pl-from'), b = document.getElementById('pl-to'); return { a: parseFloat(getComputedStyle(a).fontSize), b: parseFloat(getComputedStyle(b).fontSize), text: b.textContent }; })()`);
   p.check('the plate’s labels are 12 px or more at this width', lab.a >= 12 && lab.b >= 12 && /read \d/.test(lab.text), `${lab.a} px and ${lab.b} px, "${lab.text}"`);
+  p.check('after the call the corners carry their names and the template is shown with its sentence', await p.ev(`[...document.querySelectorAll('#cands .cl')].some((x) => /template/.test(x.textContent)) && !document.getElementById('tplbox').hidden && /score for [0-9] against [0-9] is this picture/.test(document.getElementById('tplnote').textContent)`));
   await p.shot('02-called-right');
 
   const nx = await centre('#next');
@@ -61,7 +70,7 @@ export default async function folded(p, { base }) {
   p.check('the fonts load without blocking first paint', rungs.fontMedia === 'print' || rungs.fontMedia === 'all', `media ${rungs.fontMedia}`);
   p.check('a skip link jumps to the call', rungs.skip === '#call', rungs.skip);
   p.check('the page names one next action', /^Next: [^.]+\.$/.test(rungs.next), rungs.next);
-  p.check('the health line names the record version, what is kept and where', /^Record version 1: 2 calls, \d+ drawings?, \d+ ledger rows?, (kept in this browser|kept only until this tab closes)/.test(rungs.health), rungs.health);
+  p.check('the health line names the record version, what is kept and where', /^Record version 2: 2 calls, 1 action, \d+ drawings?, \d+ ledger rows?, (kept in this browser|kept only until this tab closes)/.test(rungs.health), rungs.health);
 
   await p.go(`${base}/labs/folded.html`);
   p.check('after a reload the calls are read back from the store', await p.until('document.body.dataset.state === "ready" && document.body.dataset.kept === "2"', 20000), await p.ev('document.getElementById("health").textContent'));
