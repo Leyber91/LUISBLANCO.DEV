@@ -50,6 +50,8 @@ const PAGE = '/labs/orthogonal.html';
 // every step of the world, in the order the footer's reading is measured
 // (grown by the engine since 2026-11-21: worlds/fungi-early.js buildWorld; the ids are the ones it gives the rows it grew)
 const WORLD_IDS = ['ground', 'fungi', 'farmed', 'whaling', 'luminous', 'whaleoil', 'lamp', 'oillamp', 'trouble'];
+// the steps gold marks: the driver and this world's own steps up to the artifact (engine.js stateOf)
+const FIRED = ['fungi', 'farmed', 'luminous', 'lamp'];
 // the branch that fired, and the legend's swatch that says what that gold means (the corners are in the ink ladder
 // since pass 3, by the hub's ruling of 2026-11-21 10:49); an order checked right is a decision, so its numbers and
 // their rings are gold
@@ -188,7 +190,7 @@ export default async function orthogonal(p, { base, width, height }) {
   const counts = await p.ev(`({ nodes: document.querySelectorAll('.node').length, gold: document.querySelectorAll('.node.fired').length,
     filled: [...document.querySelectorAll('.node.fired .sq')].filter((r) => getComputedStyle(r).fill !== 'rgb(6, 8, 13)').length,
     earth: document.querySelectorAll('.edge.earth').length, leader: !!document.querySelector('.leader') })`);
-  p.check('the lineage draws every step of the data, five of them gold', counts.nodes === 11 && counts.gold === 5, JSON.stringify(counts));
+  p.check(`the lineage draws every step of the data, ${FIRED.length} of them gold`, counts.nodes === WORLD_IDS.length && counts.gold === FIRED.length, JSON.stringify(counts));
   p.check('the driver and the artifact are the filled stamps', counts.filled === 2, String(counts.filled));
   // Earth's branch is dotted as the bindings ask (review H2): the drawn dash read back against the one rule's numbers
   const dots = await p.ev(`Promise.all([import('${base}/labs/assets/js/orthogonal/config.js')]).then(([C]) => {
@@ -421,7 +423,7 @@ export default async function orthogonal(p, { base, width, height }) {
   }
   x = await dr();
   const gold = await p.ev(`getComputedStyle(document.querySelector('svg.ord-right text.num') || document.body).fill`);
-  p.check('the fourth press is checked: right, the steps back in their rows, the lines back', x.mode === 'checked' && x.result && x.result.right && x.shown.length === 11 && x.edges === '1', JSON.stringify({ m: x.mode, r: x.result, s: x.shown.length, e: x.edges }));
+  p.check('the fourth press is checked: right, the steps back in their rows, the lines back', x.mode === 'checked' && x.result && x.result.right && x.shown.length === WORLD_IDS.length && x.edges === '1', JSON.stringify({ m: x.mode, r: x.result, s: x.shown.length, e: x.edges }));
   p.check("a right answer is a decision: its numbers are gold", /212, 162, 76|rgb\(212/.test(gold), gold);
   p.check('the footer says it is right and the count moves', x.verdict === 'right' && /^Order these steps.*Right: each step comes after every step it needs/.test(x.footer) && x.count === '1 answered, 1 right', `${x.count} | ${x.footer.slice(0, 90)}`);
   p.check('the answer is kept with its time and its mode', await p.until(`window.__orthogonal.record().log.some((e) => e.kind === 'answer' && e.mode === 'practice' && e.item === 0 && e.right === true && typeof e.t === 'number')`, 4000));
@@ -449,7 +451,7 @@ export default async function orthogonal(p, { base, width, height }) {
   await p.key('Escape');
   await p.sleep(200);
   x = await dr();
-  p.check('Escape leaves an order for the reading', x.mode === 'read' && x.shown.length === 11, x.mode);
+  p.check('Escape leaves an order for the reading', x.mode === 'read' && x.shown.length === WORLD_IDS.length, x.mode);
   await goldAgrees('back in the reading');
   p.check('the writes reach the store', await p.until(`import('${base}/labs/assets/js/os/index.js').then((m) => m.LabsOS.instance.progress.get()).then((r) => !!r && r.data.answered === 2)`, 6000));
   await p.go(`${base}${PAGE}?still`);
@@ -471,7 +473,7 @@ export default async function orthogonal(p, { base, width, height }) {
   if (width < 1000) {
     // the road's call before the review (item 8): on a phone the reading is the last block and sizes to what it says
     const readBands = bands.filter(([st]) => st.startsWith('reading'));
-    p.check('on a phone each of the 11 readings takes the height of what it says: no empty band below its last line', readBands.length === 11 && readBands.every(([, b]) => b <= 1), JSON.stringify(readBands));
+    p.check(`on a phone each of the ${WORLD_IDS.length} readings takes the height of what it says: no empty band below its last line`, readBands.length === WORLD_IDS.length && readBands.every(([, b]) => b <= 1), JSON.stringify(readBands));
     const below = await p.ev(`(() => { const r = document.getElementById('reading').getBoundingClientRect(), sheet = document.querySelector('.sheet');
       const els = [...sheet.querySelectorAll('*')].filter((e) => !e.closest('#reading') && !e.classList.contains('corner') && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden' && getComputedStyle(e).position !== 'fixed');
       const low = els.filter((e) => e.getBoundingClientRect().bottom > r.bottom + 0.5).map((e) => e.id || (typeof e.className === 'string' ? e.className : e.tagName));

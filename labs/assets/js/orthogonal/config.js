@@ -42,8 +42,10 @@ export const SOURCES = Object.freeze({
   // Algorithms 1 to 3; Arthur and Polak's working paper whole
   nordhaus1996: 'Nordhaus, in Bresnahan and Gordon (eds.), The Economics of New Goods, University of Chicago Press (1996)',
   htt2025: 'Fortier-Dubois, Historical Tech Tree, historicaltechtree.com (2025)',
-  hordijk2023: 'Hordijk, A Concise and Formal Definition of RAF Sets and the RAF Algorithm, arXiv 2303.01809 (2023)',
-  arthurpolak2006: 'Arthur and Polak, Complexity 11(5), 23 (2006), read as SFI Working Paper 2004-12-042',
+  // Hordijk's note is 'A Concise and Formal Definition of RAF Sets and the RAF Algorithm'; Arthur and Polak were read as
+  // SFI Working Paper 2004-12-042, the paper's version before Complexity
+  hordijk2023: 'Hordijk, arXiv 2303.01809 (2023)',
+  arthurpolak2006: 'Arthur and Polak, Complexity 11, 23 (2006)',
 });
 
 /* The lineage's geometry, in CSS px. The lanes are placed as shares of the drawing's width (engine.js lanes): Earth's

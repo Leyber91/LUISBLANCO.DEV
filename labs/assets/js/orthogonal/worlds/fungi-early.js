@@ -65,7 +65,7 @@ const ROOT = {
 const DRIVER_NODE = {
   id: 'fungi', label: 'Fungi eat lignin', role: 'driver', branch: 'world',
   needs: 'wood stiffened with lignin',
-  note: 'The one change: white-rot fungi learn to digest lignin before the Carboniferous, so dead plants rot where on Earth they piled up. The engine takes coal out of the endowment and puts these fungi in.',
+  note: 'The one change: white-rot fungi learn to digest lignin before the Carboniferous, so dead plants rot where on Earth they piled up.',
   evidence: [
     { tag: 'REAL', text: 'A molecular clock puts the origin of lignin decay near the end of the Carboniferous and supports this lag in part.', src: 'floudas2012' },
     { tag: 'REAL', text: 'Rejected on four kinds of evidence: coal formed where everwet tropics met sinking basins, much of it from bark without lignin, and still forms wherever those conditions hold.', src: 'nelsen2016' },
@@ -100,7 +100,7 @@ const WORDS = {
       { tag: 'ILLUSTRATIVE', text: 'The lamp, its brightness and its world are invented. Each cap of its culture is a profile swept round an axis, built from the seed in its parameter file.', src: ['desbenoit2004', 'raistrick2023'] },
       // the lab's core claim is untested (Luis closed box 1 without the core test, 2026-11-21; CORE_TEST.md); since the
       // engine (2026-11-21) the lineage is grown by its rules, which is all this line now adds
-      { tag: 'ILLUSTRATIVE', text: "Lineage grown by the engine's rules (CAF and the keep rule) from its table, not typed; the core claim of the method is not yet tested.", src: ['hordijk2023', 'arthurpolak2006'] },
+      { tag: 'ILLUSTRATIVE', text: "Lineage grown by the engine's rules from its table; the core claim of the method is not yet tested.", src: ['hordijk2023', 'arthurpolak2006'] },
     ],
   },
   whaling: {
