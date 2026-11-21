@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Folded Space | Labs</title>
+  <meta name="description" content="A network trained on handwritten digits cuts the space of all drawings into flat-walled cells. Call which corner of the cube around a drawing changes its answer." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/folded.css" />
+</head>
+<body data-state="loading">
+  <a class="skip" href="#call">Skip to the call</a>
+  <header class="bar"><a href="index.html">Labs</a><span class="mark">THE LAB · L212</span></header>
+  <div class="head">
+    <h1>Folded Space</h1>
+    <p class="lede">A network trained on handwritten digits cuts the space of all drawings into flat-walled cells. Inside each cell it applies one picture. Pick a drawing, then call which corner of the cube around it changes the answer.</p>
+  </div>
+  <main class="grid">
+    <section class="col-a" aria-labelledby="h-a">
+      <h2 id="h-a"><span class="idx">A</span>Your drawing</h2>
+      <div class="pad"><canvas id="pad" width="28" height="28" aria-label="The drawing"></canvas></div>
+      <div class="strip" id="strip" role="list" aria-label="Drawings"></div>
+      <svg id="simplex" class="simplex" viewBox="0 0 260 260" role="img" aria-label="The answer as a point among the ten digits"></svg>
+      <p class="readout" id="readout">Loading the network.</p>
+    </section>
+    <section class="col-b" aria-labelledby="h-b">
+      <h2 id="h-b"><span class="idx">B</span>The cells around it</h2>
+      <div class="platewrap" id="platewrap">
+        <svg id="plate" class="plate-svg" viewBox="0 0 640 640" role="img" aria-label="The exact cells on the plane through the drawing, its sharpest corner and another digit"></svg>
+        <span class="pl" id="pl-from"></span><span class="pl gold" id="pl-to"></span>
+      </div>
+      <div class="tblock" id="tblock">
+        <div>Cells<b id="t-cells">&nbsp;</b></div>
+        <div>Walls crossed<b id="t-walls">&nbsp;</b></div>
+        <div>Each pixel moved<b id="t-eps">&nbsp;</b></div>
+        <div>Computed in<b id="t-ms">&nbsp;</b></div>
+      </div>
+    </section>
+    <section class="col-c" id="call" aria-labelledby="h-c">
+      <h2 id="h-c"><span class="idx">C</span>Your call</h2>
+      <p class="q" id="question">&nbsp;</p>
+      <div id="cands" class="cands"></div>
+      <p class="verdict" id="verdict" aria-live="polite">&nbsp;</p>
+      <p class="tally" id="tally">Calls right: <b>0</b> of 0</p>
+      <div class="tpl"><canvas id="tpl" width="28" height="28" aria-label="The template of the cell the drawing is in"></canvas><p>Inside this cell the network applies this one picture. Its sign is the sharpest corner of the cube.</p></div>
+      <button class="next" id="next" type="button">Next drawing</button>
+    </section>
+  </main>
+  <footer class="foot">[REAL] Every number and mark is computed in this page by a network of 784, 64, 64 and 10 neurons trained on MNIST (LeCun, Cortes and Burges). The cells are exact, never sampled. [ILLUSTRATIVE] The drawings are MNIST test digits standing in for your hand until the pad arrives.</footer>
+  <script type="module" src="assets/js/dimensions/folded.js"></script>
+</body>
+</html>

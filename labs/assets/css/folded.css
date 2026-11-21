@@ -1,0 +1,67 @@
+/* folded.css: Folded Space (Dimensions), Inside the Machine's material, by BAR_L1.md. Tokens from tokens.css. */
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--void); color: var(--text); font: 14px/1.5 'IBM Plex Mono', ui-monospace, monospace; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--text-bright); color: var(--void); padding: 8px 12px; }
+.skip:focus { left: 16px; }
+.bar { display: flex; justify-content: space-between; align-items: baseline; padding: 18px 32px; border-bottom: 1px solid var(--line); }
+.bar a, .bar .mark { color: var(--text-dim); text-decoration: none; }
+.head { padding: 26px 32px 10px; }
+h1 { font: 400 30px/1.15 Fraunces, serif; color: var(--text-bright); margin: 0; }
+.lede { font: 16px/1.5 Fraunces, serif; color: var(--text); max-width: 60ch; margin: 8px 0 0; }
+.grid { display: grid; grid-template-columns: 300px minmax(0, 1fr) 340px; gap: 28px; padding: 12px 32px 32px; }
+h2 { font: 400 19px/1.2 Fraunces, serif; color: var(--text-bright); margin: 0 0 10px; }
+.idx { color: var(--text-dim); font: 12px 'IBM Plex Mono', monospace; margin-right: 8px; }
+.pad { position: relative; width: 100%; aspect-ratio: 1; border: 1px solid var(--line); }
+.pad canvas { position: absolute; inset: 12%; width: 76%; height: 76%; filter: blur(.4px); }
+.strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.strip button { width: 48px; height: 48px; padding: 0; border: 1px solid var(--line); background: var(--void); cursor: pointer; }
+.strip button canvas { width: 100%; height: 100%; display: block; }
+.strip button[aria-current="true"] { border-color: var(--horizon); }
+.simplex { width: 100%; max-width: 260px; display: block; margin: 6px auto 0; }
+.simplex .edge { stroke: var(--horizon); stroke-opacity: .12; stroke-width: .7; }
+.simplex .vlabel { fill: var(--text-dim); font: 12px 'IBM Plex Mono', monospace; text-anchor: middle; }
+.simplex .vlabel.on { fill: var(--text-bright); }
+.simplex .answer { fill: var(--accretion); }
+.readout { font-variant-numeric: tabular-nums; }
+.readout b { color: var(--text-bright); font-weight: 500; }
+.platewrap { position: relative; }
+.plate-svg { width: 100%; display: block; border: 1px solid var(--line); }
+.grat { stroke: var(--line); stroke-width: .8; }
+.grat.axis, .minor { stroke: #283142; stroke-width: .8; }
+.wall { fill: none; stroke: var(--horizon); stroke-opacity: .5; stroke-width: .7; }
+.persist { fill: var(--horizon); fill-opacity: .13; }
+.run { stroke: var(--accretion); stroke-width: 2; }
+.tick { stroke: var(--accretion); stroke-width: 1.2; }
+.from { fill: var(--void); stroke: var(--text-bright); stroke-width: 1.5; }
+.to { fill: var(--accretion); }
+.pl { position: absolute; transform: translate(-50%, 0); font-size: 12px; color: var(--text-bright); white-space: nowrap; pointer-events: none; }
+.pl.gold { color: var(--accretion); }
+.tblock { display: grid; grid-template-columns: repeat(4, auto); gap: 4px 22px; margin-top: 10px; color: var(--text-dim); font-size: 12px; font-variant-numeric: tabular-nums; }
+.tblock b { display: block; color: var(--text); font-weight: 400; font-size: 13px; }
+.q { margin: 0 0 12px; }
+.cands button { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; width: 100%; padding: 8px; min-height: 80px; margin: 0 0 4px; text-align: left; border: 1px solid transparent; background: none; color: var(--text); font: inherit; cursor: pointer; }
+.cands button:hover:not([disabled]) { border-color: var(--line); }
+.cands button[aria-pressed="true"] { border-color: var(--horizon); }
+.cands button[disabled] { cursor: default; }
+.cands canvas { width: 64px; height: 64px; image-rendering: pixelated; }
+.cands .cl { display: block; }
+.cands .cr { display: block; color: var(--text-dim); font-size: 13px; }
+.cands .cr.fired { color: var(--accretion); }
+.verdict { min-height: 1.5em; margin: 8px 0 0; }
+.tally { color: var(--text-dim); margin: 6px 0 18px; font-size: 13px; }
+.tally b { color: var(--accretion); font-weight: 500; }
+.tpl { display: grid; grid-template-columns: 112px 1fr; gap: 14px; align-items: start; margin-bottom: 18px; }
+.tpl canvas { width: 112px; height: 112px; image-rendering: pixelated; }
+.tpl p { margin: 0; font: 15px/1.45 Fraunces, serif; }
+.next { min-height: 48px; width: 100%; background: none; border: 1px solid var(--horizon); color: var(--text-bright); font: 500 14px 'IBM Plex Mono', monospace; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
+.foot { padding: 14px 32px 28px; color: var(--text-dim); font-size: 12px; border-top: 1px solid var(--line); }
+@media (max-width: 760px) {
+  .bar, .head, .grid, .foot { padding-left: 16px; padding-right: 16px; }
+  .grid { grid-template-columns: 1fr; gap: 26px; }
+  .pad { max-width: 220px; margin: 0 auto; }
+  .strip { justify-content: center; }
+  .simplex { max-width: 190px; }
+  .tblock { grid-template-columns: repeat(2, auto); }
+  h1 { font-size: 25px; }
+}
