@@ -575,7 +575,7 @@ def build_shelf_culture_lamp(P: dict, seed: int):
         return m
 
     street = street_mat()
-    ceramic = principled("ceramic", (0.09, 0.095, 0.105), rough=0.6)   # a dark glazed ceramic
+    ceramic = principled("ceramic", tuple(I["ceramic_rgb"]), rough=0.6)   # a pale bone glaze, lit only by the culture and the sky
     metal = principled("metal", (0.16, 0.17, 0.19), rough=0.35, metal=1.0)
     wood = principled("wood", (0.05, 0.045, 0.04), rough=0.8)
     glass = glass_mat()

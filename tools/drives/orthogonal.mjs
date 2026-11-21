@@ -45,7 +45,7 @@ const PAGE = '/labs/orthogonal.html';
 const GOLD = ['.edge.fired', '.edge.thread', '.leader', '.node.fired .sq', '.lg-gold', 'svg.ord-right text.num', '.ord-right .node.picked .ring',
   // Labs OS's own consent banner (shared code, os/ui.js), on a page opened on the browser's real store until it is answered
   '.los-bk'];
-const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your world lasts until you close it. A link still shares it.';
+const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your answers last until you close it. A link to a step still opens that step.';
 /* The fog's mean alpha (0 to 255) along the line from step a to step b, on the line and 20 px either side of it, over
    15 windows of 7 x 7 px: the texture's own mottling averages out, and what is left is the density. */
 const FOG_LINE = (a, b) => `(() => {

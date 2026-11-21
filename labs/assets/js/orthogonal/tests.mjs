@@ -599,7 +599,7 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   const failing = new Keeper({ get: async () => { throw new Error('refused'); }, set: async () => { throw new Error('refused'); } }, { persistent: true });
   ok('a store that refuses a read gives a fresh record, not kept', JSON.stringify(await failing.load(ids)) === JSON.stringify(fresh()) && !failing.kept);
   ok('a store that refuses a write is said to keep nothing', (await failing.save(s)) === false && !failing.kept);
-  ok('the words for that are the bindings\' storage-off diagnosis', STORAGE_OFF === 'Your browser is not letting this page keep anything, so your world lasts until you close it. A link still shares it.');
+  ok('the words for that are the bindings\' storage-off diagnosis', STORAGE_OFF === 'Your browser is not letting this page keep anything, so your answers last until you close it. A link to a step still opens that step.');
 
   // a record that does not hold together is never trusted
   ok('a record of another page reads as fresh', restore({ page: 'loom', answered: 3, right: 1, next: 1 }, ids).answered === 0);

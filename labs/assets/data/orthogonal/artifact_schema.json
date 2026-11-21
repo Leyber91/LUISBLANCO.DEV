@@ -11,6 +11,7 @@
       "instrument.brim_overhang_m": { "type": "number", "min": 0.02, "max": 0.3 },
       "instrument.louvers": { "type": "steps", "min": 1, "max": 6, "radius": [0.05, 0.6], "height": [0.0, 0.6] },
       "instrument.flask_radius_m": { "type": "number", "min": 0.0, "max": 0.2 },
+      "instrument.ceramic_rgb": { "type": "rgb" },
       "culture.front_caps": { "type": "int", "min": 1, "max": 8 },
       "culture.back_caps": { "type": "int", "min": 0, "max": 6 },
       "culture.front_radius_m": { "type": "range", "min": 0.08, "max": 0.45 },

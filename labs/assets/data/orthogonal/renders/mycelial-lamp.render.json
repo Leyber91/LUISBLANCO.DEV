@@ -5,9 +5,9 @@
   "tag": "ILLUSTRATIVE",
   "seed": 20261121,
   "params": "mycelial-lamp.json",
-  "params_sha256": "a0dba4180ebce3aa98bf34dc6528063fedd229838c5bcc6b15a9de237530d505",
+  "params_sha256": "e39eeb80f1c12743af176b338318789d423102bb18ca46fb6c0bdd84a147d190",
   "image": "mycelial-lamp.webp",
-  "image_bytes": 19920,
+  "image_bytes": 20614,
   "width": 900,
   "height": 1200,
   "blender": "5.1.0",
@@ -16,8 +16,8 @@
   "denoiser": "OpenImageDenoise",
   "exposure_stops": 4.8,
   "time_limit_s": 400,
-  "render_s": 231.1,
-  "rendered_utc": "2026-11-21T11:31:48+00:00",
+  "render_s": 212.9,
+  "rendered_utc": "2026-11-21T12:10:06+00:00",
   "measure": {
     "caps": [
       {
@@ -144,12 +144,12 @@
       "culture_p99": 0.9426,
       "beyond_column_p995": 0.283,
       "sky_p50": 0.0502,
-      "hood_p10": 0.0409,
-      "hood_p50": 0.0541,
-      "hood_p90": 0.0827,
-      "plinth_p10": 0.1146,
-      "plinth_p50": 0.1418,
-      "plinth_p90": 0.3304,
+      "hood_p10": 0.0454,
+      "hood_p50": 0.0592,
+      "hood_p90": 0.1141,
+      "plinth_p10": 0.1185,
+      "plinth_p50": 0.1527,
+      "plinth_p90": 0.4827,
       "frame_p50": 0.1107
     }
   }

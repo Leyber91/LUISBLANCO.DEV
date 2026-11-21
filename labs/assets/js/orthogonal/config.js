@@ -102,6 +102,6 @@ export const EXERCISE = Object.freeze({
 
 /* What the plate says when the browser keeps nothing: the bindings' storage-off diagnosis, verbatim from the lab's plan
    (bindings.known_setup_failures, id storage-off). */
-export const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your world lasts until you close it. A link still shares it.';
+export const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your answers last until you close it. A link to a step still opens that step.';
 
 export const EVENTS = Object.freeze({ node: 'alt-reality.node', order: 'alt-reality.order' });
