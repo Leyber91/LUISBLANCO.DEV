@@ -185,6 +185,7 @@ export const ROWS = [
     files: ['labs/altverse.html', 'labs/assets/js/altverse/pipeline.js', 'labs/assets/js/altverse/echo-world.js', 'labs/assets/js/altverse/divergence-presets.js', 'labs/assets/js/altverse/worldstate.js'],
     state: 'altverse.html?still&tab=dossier',
     mech: [
+      ['These rows grade Altverse (altverse.html), the lab\'s earlier page, which stays live; since 2026-11-21 the hub card opens Orthogonal (orthogonal.html), which no row here grades yet.', []],
       ['The visitor picks one of three preset divergences; free-text divergence is deferred.', ['av.constant']],
       ['On the public site the pipeline replays a hand-authored world as staged theatre, because the live path needs a worker whose base is empty.', ['av.pipeline']],
       ['Premise, chronology, a stylised map and a dossier of contrasts with causal paths render from that world; a structural ledger passes 8 of 8 checks while 0 causal edges are audited offline.', ['av.views', 'av.causal', 'av.consistent']],
