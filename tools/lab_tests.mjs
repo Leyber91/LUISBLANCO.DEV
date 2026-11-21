@@ -330,7 +330,7 @@ export function builtPaths(text, file, root) {
     // a key's value as written (an array whole), the key's own name for a shorthand, or null when it is not given
     const key = (k) => {
       const r = new RegExp(`\\b${k}\\s*:\\s*`).exec(obj);
-      if (r) { const at = r.index + r[0].length; return obj[at] === '[' ? `[${inside(obj, at)}]` : parts(obj.slice(at))[0]; }
+      if (r) { const at = r.index + r[0].length; return obj[at] === '[' ? `[${inside(obj, at)}]` : parts(obj.slice(at))[0]; }   // equivalent: parts() keeps brackets whole as inside() does, so its first part also opens with the whole array, and list() reads only up to the array's own bracket
       return new RegExp(`(^|[{,\\s])${k}\\s*(,|}|$)`).test(obj) ? k : null;
     };
     const list = (k) => { let v = key(k); if (!v) return []; if (!v.startsWith('[')) { const d = new RegExp(`\\b(?:const|let|var)\\s+${v}\\s*=\\s*\\[`).exec(text); if (!d) return null; v = text.slice(d.index + d[0].length - 1); } const body = inside(v, 0); return body === null ? null : parts(body).map((x) => (LITERAL.exec(x) || [])[2] ?? null); };
@@ -519,6 +519,7 @@ function selftest() {
     none: [], unknown: null,
     page: ['labs/a.html'], otherPage: ['labs/b.html'],
     bareOwn: [J + 'c/style.css'], bareOut: ['labs/style.css'], bareOther: [J + 'a/style.css'],
+    walkedTmp: [J + 'w/view.js'], declared: [J + 'shared3/v.css'], declaredOther: [J + 'zz4/u.css'],
     walked: [J + 'b/view.js'], walkedDeep: [J + 'b/deep/z.css'], walkedNear: [J + 'bb/view.css'],
     computed: [J + 'd/x.js'], dataJoin: ['labs/assets/data/gamma/q.json'], dataSameName: ['labs/assets/data/beta/x.json'],
     data: ['labs/assets/data/alpha/x.json'], dataFolder: ['labs/assets/data/alpha/other.json'], dataNone: ['labs/assets/data/beta/y.json'], dataNear: ['labs/assets/data/alphabet/z.json'],
@@ -575,6 +576,11 @@ function selftest() {
       [S + 'a/tests/data.test.mjs']: "const x = readFileSync(join(here, '../../../data/alpha/x.json'));\n",
       [S + 'b/tests.mjs']: "import fs from 'node:fs';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst all = fs.readdirSync(here);\n",
       [S + 'b/view.js']: 'export const v = 1;\n',
+      // a folder listed whose path is outside the repository: only the listing itself reaches the lab's folder
+      [S + 'w/tests.mjs']: "import fs from 'node:fs';\nimport os from 'node:os';\nconst all = fs.readdirSync(os.tmpdir());\n",
+      [S + 'w/view.js']: 'export const w = 1;\n',
+      // one const with two names: the second is read too
+      [S + 'r/tests.mjs']: "import path from 'node:path';\nimport { fileURLToPath } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url)), D = path.join(here, '..', 'shared3');\nconst p = path.join(D, String(1));\n",
       [S + 'c/tests.mjs']: "import { x } from '/labs/assets/js/c/x.js';\n",
       [S + 'c/x.js']: "import './x2.js';\nexport const x = 1;\n",
       [S + 'c/x2.js']: 'export const x2 = 1;\n',
@@ -678,7 +684,7 @@ function selftest() {
     ['a test that runs past the limit fails the gate', code.slow === 1],
     ['a test that prints three megabytes and exits 0 passes', code.loud === 0],
     // --changed-since
-    ['the small site has the twenty-one test files it was written with', planCount === 21, planCount],
+    ['the small site has the twenty-three test files it was written with', planCount === 23, planCount],
     ['a lab file changed runs only the test files that import it, not the lab\'s others', same(P.engine.run, ['a/tests/engine.test.mjs']) && !P.engine.all, JSON.stringify(P.engine)],
     ['a kit file changed runs every test file that imports it, in any lab, through a module between, and no other', same(P.kit.run, ['a/tests/engine.test.mjs', 'kit/tests/dom.test.mjs']) && !P.kit.all, JSON.stringify(P.kit)],
     ['an import is followed through export ... from, an import over several lines and a query after the path', same(P.deep.run, ['a/tests/two.test.mjs']), JSON.stringify(P.deep)],
@@ -692,6 +698,8 @@ function selftest() {
     ['a file a test names with its path runs that test; another file runs none and is listed', same(P.page.run, ['a/tests/page.test.mjs']) && P.page.why['a/tests/page.test.mjs'] === 'names labs/a.html' && P.otherPage.run.length === 0 && same(P.otherPage.unread, ['labs/b.html']), JSON.stringify([P.page, P.otherPage])],
     ['a bare file name reaches its own lab\'s folder and files outside the module folders, never another lab\'s module folder', same(P.bareOwn.run, ['c/named.test.mjs']) && same(P.bareOut.run, ['c/named.test.mjs']) && P.bareOther.run.length === 0 && !P.bareOther.all, JSON.stringify([P.bareOwn, P.bareOut, P.bareOther])],
     ['a test that lists a folder reaches every file of its lab\'s folder, at any depth, and no other lab\'s', same(P.walked.run, ['b/tests.mjs']) && same(P.walkedDeep.run, ['b/tests.mjs']) && P.walkedNear.run.length === 0 && !P.walkedNear.all, JSON.stringify([P.walked, P.walkedDeep, P.walkedNear])],
+    ['a test whose listing is of a folder outside the repository still reaches every file of its lab\'s folder', same(P.walkedTmp.run, ['w/tests.mjs']) && !P.walkedTmp.all, JSON.stringify(P.walkedTmp)],
+    ['every name of a const with several is read: a path built from the second name falls under its folder and not under every folder', same(P.declared.run, ['r/tests.mjs']) && P.declaredOther.run.length === 0 && !P.declaredOther.all && P.declaredOther.unread.length === 1, JSON.stringify([P.declared, P.declaredOther])],
     ['a test that imports a path it computes reaches every file of its lab\'s folder; one whose import() has a literal path does not', same(P.computed.run, ['d/tests.mjs']) && !P.engine.run.includes('a/tests/lazy.test.mjs'), JSON.stringify(P.computed)],
     ['a data folder named as \'data\', \'<folder>\' counts; a data file named with its path does not reach a file of that name in another folder', same(P.dataJoin.run, ['e/tests.mjs']) && /beta\/x\.json changed and no test names its folder/.test(P.dataSameName.all), JSON.stringify([P.dataJoin, P.dataSameName])],
     ['a data file runs the test that names it or its folder; a folder no test names, a near name included, runs all', same(P.data.run, ['a/tests/data.test.mjs']) && same(P.dataFolder.run, ['a/tests/data.test.mjs']) && !P.dataFolder.all
@@ -742,7 +750,7 @@ function selftest() {
 }
 
 // run as a command, not imported (an import runs nothing)
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === SELF;
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === SELF;   // equivalent: the module's entry, not a rule; broken, the selftest does not run and tools/mutate.mjs reads that as a pass (tools/invariants.mjs marks its entry the same way)
 const argv = isMain ? process.argv.slice(2) : [];
 const take = (flag) => { const i = argv.indexOf(flag); if (i < 0) return undefined; const v = argv[i + 1]; argv.splice(i, 2); return v === undefined ? '' : v; };
 const rootArg = take('--root'), limitArg = take('--limit'), sinceArg = take('--changed-since');
