@@ -24,8 +24,10 @@
 
    The fog is bound to state (engine.js fogDensity): it stands where
    the drawing is not real or has not happened. Earth's branch is
-   history and is drawn in clear ink, with no fog within reach of
-   it. This world's branch is invented: it condenses out of fog as
+   history and is drawn dotted, as the bindings ask ("Earth's
+   dotted beside it"; engine.js lineStyle), in clear ink with no
+   fog within reach of it. This world's branch is invented: it
+   condenses out of fog as
    it draws, and keeps a thin fog with a clear channel along its
    ink. The seed of trouble below the artifact stays in its fog.
 
@@ -64,7 +66,7 @@
 import { brushStroke } from '../kit/brush.js';
 import { seedOf } from '../kit/rng.js';
 import { INK, LAYOUT } from './config.js';
-import { layout, pairOf, reading } from './engine.js';
+import { layout, lineStyle, pairOf, reading } from './engine.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const svgEl = (tag, attrs = {}, parent = null) => {
@@ -94,12 +96,22 @@ export function drawLineage(svg, world, { width, height, leader }) {
   lay.edges.forEach((e, i) => {
     const row = lay.nodes.find((n) => n.id === e.from).row;
     const g = svgEl('g', { class: `edge ${e.kind}`, 'data-row': row, 'data-from': e.from, 'data-to': e.to, 'data-p': 1 }, gEdges);
+    const st = lineStyle(e.kind);
     // a brush stroke from the cause down to the effect, seeded by the two steps it joins. It is laid 5 px into both
     // squares, under them, so its blot sits in its cause and its tip reaches its effect's edge.
     const pts = [[e.pts[0][0], e.pts[0][1] - 5], ...e.pts, [e.pts[e.pts.length - 1][0], e.pts[e.pts.length - 1][1] + 5]];
-    const { paths, alphas, blot } = brushStroke(pts, { width: INK[e.kind], seed: seedOf('orthogonal', e.from, e.to) });
-    if (blot) svgEl('path', { d: blot, class: 'blot' }, g);
-    paths.forEach((d, k) => svgEl('path', { d, 'fill-opacity': alphas[k] }, g));
+    if (st.dash) {
+      // Earth's branch: round dots from the foot of its cause's square to the head of its effect's, the first half a
+      // gap in, so no dot sits on a square
+      svgEl('path', {
+        class: 'dots', d: `M${e.pts.map((q) => `${r1(q[0])} ${r1(q[1])}`).join(' L')}`, 'stroke-width': st.width,
+        'stroke-dasharray': st.dash.join(' '), 'stroke-dashoffset': -st.dash[1] / 2, 'stroke-linecap': st.cap,
+      }, g);
+    } else {
+      const { paths, alphas, blot } = brushStroke(pts, { width: st.brush, seed: seedOf('orthogonal', e.from, e.to) });
+      if (blot) svgEl('path', { d: blot, class: 'blot' }, g);
+      paths.forEach((d, k) => svgEl('path', { d, 'fill-opacity': alphas[k] }, g));
+    }
     if (e.kind === 'fired' || e.kind === 'thread') {
       // the strand draws itself through a mask: a line along the stroke's centre, its dash run out as it draws
       const id = `orth-ink-${i}`;

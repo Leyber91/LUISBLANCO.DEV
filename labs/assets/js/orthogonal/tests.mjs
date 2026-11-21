@@ -80,6 +80,9 @@
       marked a claim or a label, and every claim carries [REAL] or
       [ILLUSTRATIVE]; the header's evidence line is [REAL], with its
       venues and the lag said in the sentence (review H1).
+  20. Every Earth line, at every width, is drawn as round dots set
+      apart (engine.js lineStyle), and the legend's sample with the
+      same dots (review H2).
    ============================================================ */
 import { spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
@@ -88,10 +91,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { brushStroke } from '../kit/brush.js';
 import { seedOf } from '../kit/rng.js';
-import { EXERCISE, FOG, INK, LAYOUT, ROLES, SOURCES, STORAGE_OFF, TIMING } from './config.js';
+import { EARTH_DOTS, EXERCISE, FOG, INK, LAYOUT, ROLES, SOURCES, STORAGE_OFF, TIMING } from './config.js';
 import {
   arrival, check, checkOrder, drillFog, drillPlaces, fogAt, fogDensity, fogField, ignitionEnd, item, itemSets, judge, layout, needLine, srcsOf,
-  needPath, needsOf, needVerb, pairOf, reading, reasons, stateOf, step, stepBox, stepsOf, strandAt, strandGold, trunk, wrap,
+  lineStyle, needPath, needsOf, needVerb, pairOf, reading, reasons, stateOf, step, stepBox, stepsOf, strandAt, strandGold, trunk, wrap,
 } from './engine.js';
 import { countLine, fresh, isSalt, Keeper, KINDS, newSalt, RECORD_V, restore, withChoice, withLeave, withPress, withStart, withUndo } from './record.js';
 import { ALT_PLAIN, DEPARTURES, departureFaults, fallbackLine, provenance, RENDER_WORDS, renderSentences, renderWordFaults, wordsOf } from './render-words.js';
@@ -1152,6 +1155,41 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   ok('and a sentence in a caption that is marked neither a claim nor a label', classified(stray).loose.includes('Lit by coal gas from 1807.'));
 }
 
-console.log(`orthogonal: ${pass} passed, ${fail} failed`);
+// ---------------------------------------------------------------- 20. Earth's branch is dotted
+{
+  /* The review of 2026-11-21 (H2) found Earth's branch drawn solid where the bindings ("with Earth's dotted beside it",
+     plan.json) and the ladder (lineage-plate rung 2) say dotted: the world brief had chosen a solid line and drifted
+     from the bindings. One function, engine.js lineStyle, gives each kind of line its style; the view draws from it and
+     the drive reads the drawn dash back. Here: every Earth line, at every width, is drawn with a dash pattern of round
+     dots set apart, and every line of this world is a brush stroke. */
+  // dotted: a dash of 0 with a round cap is a dot of the line's width, and the gap between dots is wider than a dot
+  const isDotted = (st) => !!st.dash && st.dash.length === 2 && st.dash[0] === 0 && st.dash[1] > st.width && st.cap === 'round';
+  let earthLines = 0, bad = [];
+  for (let width = 300; width <= 640; width += 20) for (const height of [0, 560]) {
+    const lay = layout(WORLD, { width, height, leader: height > 0 });
+    for (const e of lay.edges) {
+      const st = lineStyle(e.kind);
+      if (e.kind === 'earth') {
+        earthLines++;
+        if (!isDotted(st)) bad.push(`${width}: ${e.from} to ${e.to}`);
+      } else if (st.dash || !(st.brush > 0)) bad.push(`${width}: ${e.from} to ${e.to} (${e.kind}) is not a brush stroke`);
+    }
+  }
+  const earthEdges = WORLD.nodes.filter((n) => n.branch === 'earth').reduce((a, n) => a + n.after.length, 0);
+  ok(`every Earth line is drawn dotted (round dots of ${INK.earth} px, ${EARTH_DOTS.gap} px apart) and every other line a brush stroke: ${earthLines} Earth lines over 36 layouts`,
+    bad.length === 0 && earthEdges === 4 && earthLines === earthEdges * 36, bad.slice(0, 4).join('; '));
+  ok("Earth's dots are larger and further apart than the dotted rule across a chosen row, so the two read apart",
+    INK.earth > 1 && EARTH_DOTS.gap > 4, JSON.stringify({ INK: INK.earth, EARTH_DOTS }));
+  // the legend's sample for Earth's branch is dotted as the drawing is
+  const html = fs.readFileSync(path.join(LABS, 'orthogonal.html'), 'utf8');
+  const sample = (html.match(/<path id="lg-earth"[^>]*>/) || [''])[0];
+  ok("the legend's sample of Earth's branch is drawn with the same dots", /stroke-dasharray="0 (\d+(\.\d+)?)"/.test(sample) && Number(sample.match(/stroke-dasharray="0 ([\d.]+)"/)[1]) === EARTH_DOTS.gap
+    && Number((sample.match(/stroke-width="([\d.]+)"/) || [])[1]) === INK.earth, sample);
+  // and the check bites: Earth drawn solid, as the review found it, fails; so do dots that touch (a gap of one dot), and
+  // dots a hair apart pass
+  ok('the check fails Earth drawn as a solid stroke, as the review found it', !isDotted({ brush: INK.earth, width: INK.earth, dash: null, cap: null }));
+  ok('and dots that touch, a gap of one dot, while a hair more passes', !isDotted({ width: 2, dash: [0, 2], cap: 'round' }) && isDotted({ width: 2, dash: [0, 2.01], cap: 'round' }) && !isDotted({ width: 2, dash: [0, 6], cap: 'butt' }));
+}
 
+console.log(`orthogonal: ${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

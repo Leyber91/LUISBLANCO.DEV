@@ -71,9 +71,16 @@ export const TIMING = Object.freeze({
 export const INK = Object.freeze({
   fired: 4.6,
   thread: 3,
-  earth: 2,
+  earth: 2,            // Earth's branch is not brushed: this is the diameter of its dots (EARTH_DOTS)
   pending: 1.6,
 });
+
+/* Earth's branch is drawn dotted: round dots of INK.earth px, one every EARTH_DOTS.gap px, in the ink ladder's dim
+   grey, clear of fog because it is history. The bindings say so ("with Earth's dotted beside it", plan.json
+   signature_move and the central scene) and so does the ladder (lineage-plate rung 2); the world brief had chosen a
+   solid line and drifted from them (review H2; the brief is amended). The dots are larger and further apart than the
+   dotted rule across a chosen row (orthogonal.css .pair-rule, 1 px every 4 px), so the two read apart. */
+export const EARTH_DOTS = Object.freeze({ gap: 6 });
 
 /* The fog (engine.js fogDensity, the world brief). Densities run 0 to 1; reaches are the scale, in px, of a gaussian
    about a line. The canvas draws density 1 at FOG.alpha of --horizon, through a seeded fog texture (kit/fog.js). */

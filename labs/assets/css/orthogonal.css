@@ -88,7 +88,8 @@ body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 21
 .edge.thread path { fill: var(--text-dim); fill-opacity: .72; }
 svg.gold .edge.fired path { fill: var(--accretion); }
 svg.gold .edge.thread path { fill: var(--accretion); }
-.edge.earth path { fill: var(--text-dim); }
+/* Earth's branch: round dots (engine.js lineStyle sets their size and spacing), not a brush stroke (review H2) */
+.edge.earth .dots { fill: none; stroke: var(--text-dim); }
 .edge.pending path { fill: var(--text-dim); fill-opacity: .7; }
 .leader { stroke: var(--text-faint); stroke-width: 1; }
 svg.gold .leader { stroke: var(--accretion); stroke-opacity: .7; }
@@ -175,7 +176,7 @@ svg.ord-right text.num { fill: var(--accretion); }
 .lg { display: inline-block; width: 26px; height: 8px; vertical-align: middle; margin: 0 6px 0 0; }
 .lg-branch { fill: var(--text-dim); }
 .lg-branch.gold { fill: var(--accretion); }
-.lg-ink { fill: var(--text-dim); }
+.lg-dots { fill: none; stroke: var(--text-dim); }
 /* the fog's swatch: the fog's own colour and alpha (config.js FOG.alpha), a soft patch */
 .lg-fog { display: inline-block; width: 26px; height: 12px; vertical-align: middle; margin: 0 6px 0 0;
   background: radial-gradient(closest-side, rgba(159, 179, 214, .24), rgba(159, 179, 214, .12) 60%, transparent); }

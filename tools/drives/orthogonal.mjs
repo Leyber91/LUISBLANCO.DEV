@@ -161,6 +161,15 @@ export default async function orthogonal(p, { base, width, height }) {
     earth: document.querySelectorAll('.edge.earth').length, leader: !!document.querySelector('.leader') })`);
   p.check('the lineage draws every step of the data, five of them gold', counts.nodes === 11 && counts.gold === 5, JSON.stringify(counts));
   p.check('the driver and the artifact are the filled stamps', counts.filled === 2, String(counts.filled));
+  // Earth's branch is dotted as the bindings ask (review H2): the drawn dash read back against the one rule's numbers
+  const dots = await p.ev(`Promise.all([import('${base}/labs/assets/js/orthogonal/config.js')]).then(([C]) => {
+    const want = '0px, ' + C.EARTH_DOTS.gap + 'px';
+    const lines = [...document.querySelectorAll('#lineage-svg .edge.earth')].map((g) => { const d = g.querySelector('.dots'), cs = d && getComputedStyle(d);
+      return { dots: !!d, dash: cs && cs.strokeDasharray, cap: cs && cs.strokeLinecap, width: cs && parseFloat(cs.strokeWidth), fill: cs && cs.fill, brush: g.querySelectorAll('path:not(.dots)').length }; });
+    const lg = getComputedStyle(document.getElementById('lg-earth'));
+    return { want, w: C.INK.earth, lines, legend: lg.strokeDasharray }; })`);
+  p.check("Earth's branch is drawn dotted: each of its four lines round dots of the rule's size and spacing, no brush stroke, and the legend's sample the same",
+    dots.lines.length === 4 && dots.lines.every((l) => l.dots && l.brush === 0 && l.dash === dots.want && l.cap === 'round' && l.width === dots.w && l.fill === 'none') && dots.legend === dots.want, JSON.stringify(dots));
   const cl = await p.ev(CLAIMS);
   p.check('every text of the header, the captions and the legend is a claim or a label, and every claim carries its tag (the evidence line, the note, the provenance, Earth\'s tag)',
     cl.texts >= 12 && cl.claims >= 4 && cl.loose.length === 0 && cl.untagged.length === 0, JSON.stringify(cl));

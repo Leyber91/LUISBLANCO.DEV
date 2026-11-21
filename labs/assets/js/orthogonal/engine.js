@@ -8,6 +8,7 @@
    - stateOf(world, id) what a node is: root, fired (the branch that happened, gold), earth, pending
    - wrap(text, chars)  a label broken into lines at word boundaries
    - layout(world, opt) every node's lane, row, box and label lines, and every edge's path, for a given width
+   - lineStyle(kind)    how a kind of line is drawn: a brush stroke, or Earth's dots
    - reading(world, id) what the plate says of a node: its role, label, note, Earth's step beside it, its evidence
    - pairOf(world, id)  the node on the other branch that does the same job at the same step
    - step(world, id, k) the next node a key moves to
@@ -27,7 +28,7 @@
    - strandGold(state)         whether the strand is gold in a page state: the drawing and the legend both ask it
    ============================================================ */
 import { mulberry32, seedOf, shuffle } from '../kit/rng.js';
-import { EXERCISE, FOG, LAYOUT, ROLES, SOURCES, TIMING } from './config.js';
+import { EARTH_DOTS, EXERCISE, FOG, INK, LAYOUT, ROLES, SOURCES, TIMING } from './config.js';
 
 const byId = (world) => new Map(world.nodes.map((n) => [n.id, n]));
 /* The sources an evidence item cites: none, one key of config.js SOURCES, or a list of them. */
@@ -177,6 +178,14 @@ function rowOrder(world) {
     todo.splice(todo.indexOf(n), 1);
   }
   return rows;
+}
+
+/* How a line of a given kind is drawn: this world's branch, its threads and what has not happened as brush strokes of
+   INK[kind] px (kit/brush.js); Earth's branch as round dots (config.js EARTH_DOTS), the bindings' "dotted". The view
+   draws every line from this, and tests.mjs and the drive read it back. */
+export function lineStyle(kind) {
+  if (kind === 'earth') return { brush: 0, width: INK.earth, dash: [0, EARTH_DOTS.gap], cap: 'round' };
+  return { brush: INK[kind], width: INK[kind], dash: null, cap: null };
 }
 
 /* Every node's position and every edge's path, for a drawing `width` px wide. `height`, when given, spreads the rows
