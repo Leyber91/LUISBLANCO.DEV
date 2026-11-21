@@ -125,7 +125,7 @@ export const EXERCISE = Object.freeze({
 
 /* What the plate says when the browser keeps nothing: the bindings' storage-off diagnosis, verbatim from the lab's plan
    (bindings.known_setup_failures, id storage-off). */
-export const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your answers last until you close it. A link to a step still opens that step.';
+export const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your answers last only until this page is reloaded or closed. A link to a step still opens that step.';
 
 /* What the plate says beside the count when the browser keeps the record: where it is and what the privacy page does
    with it (Labs OS keeps it in this browser; labs/privacy.html shows, exports and erases it). It takes the storage-off

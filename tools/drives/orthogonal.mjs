@@ -55,7 +55,7 @@ const WORLD_IDS = ['lignin', 'fungi', 'buried', 'farmed', 'nocoal', 'seams', 'lu
 const GOLD = ['.edge.fired', '.edge.thread', '.leader', '.node.fired .sq', '.lg-branch', 'svg.ord-right text.num', '.ord-right .node.picked .ring',
   // Labs OS's own consent banner (shared code, os/ui.js), on a page opened on the browser's real store until it is answered
   '.los-bk'];
-const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your answers last until you close it. A link to a step still opens that step.';
+const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your answers last only until this page is reloaded or closed. A link to a step still opens that step.';
 const STORAGE_ON = 'Your answers are kept in this browser. The privacy page shows what is kept, and exports or erases it.';
 /* The fog's peak alpha on the canvas, 0 to 255, and the most the world brief allows (config.js FOG_LIMIT, review H3):
    what the visitor sees, read from every pixel. */

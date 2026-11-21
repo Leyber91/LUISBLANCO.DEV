@@ -109,7 +109,7 @@ export const WORLD = Object.freeze({
       needs: 'farmed fungi that glow, and no coal',
       note: 'Two threads meet: farmed fungi that glow, and glass that keeps them wet and breathing.',
       evidence: [
-        { tag: 'REAL', text: 'Panellus stipticus glows on its gill edges, its cross-veins and its rolled margin.', src: 'okane1990' },
+        { tag: 'ILLUSTRATIVE', text: 'The glow is drawn on the gill edges, the cross-veins and the rolled margin, where Panellus stipticus is reported to glow. Uncertain: that report was read through a secondary source this lab did not record, and the primary was not opened.', src: 'okane1990' },
         { tag: 'ILLUSTRATIVE', text: 'Growing it under glass for light is invented.' },
       ],
     },
@@ -128,7 +128,7 @@ export const WORLD = Object.freeze({
         // what render_artifact.py does (review H5: it holds no grammar), with the two sources its header gives
         { tag: 'ILLUSTRATIVE', text: 'The lamp, its brightness and its world are invented. Each cap of its culture is a profile swept round an axis, built from the seed in its parameter file.', src: ['desbenoit2004', 'raistrick2023'] },
         // the lab's core claim is untested (Luis closed box 1 without the core test, 2026-11-21; CORE_TEST.md)
-        { tag: 'ILLUSTRATIVE', text: 'This lineage was written by hand. A test of whether lineages built by the method need their driver more than invented ones is designed and has not run.' },
+        { tag: 'ILLUSTRATIVE', text: 'This lineage was written by hand. A test of whether lineages built by the method need their driver more than invented ones is designed, and its first full run is under way.' },
       ],
     },
     {
