@@ -30,9 +30,11 @@ export const WORLD = Object.freeze({
   title: 'A world where the fungi came early',
   driver: 'lignin-eating fungi before the Carboniferous',
   job: 'light at night',
+  // the header's evidence line, a [REAL] claim (review H1): each source with its venue as config.js SOURCES gives it,
+  // and the lag it is about said in the sentence itself
   favours: {
     branch: 'earth',
-    line: 'The evidence favours the other branch: Nelsen et al. 2016 reject this lag; Floudas et al. 2012 support it in part.',
+    line: 'The evidence favours the other branch: Nelsen et al. 2016 (PNAS) reject that coal formed because fungi could not yet digest lignin; Floudas et al. 2012 (Science) support that lag in part.',
   },
   artifact: {
     node: 'lamp',

@@ -19,13 +19,13 @@
   <i class="corner tl" aria-hidden="true"></i><i class="corner tr" aria-hidden="true"></i><i class="corner bl" aria-hidden="true"></i><i class="corner br" aria-hidden="true"></i>
   <header class="head">
     <div class="head-main">
-      <p class="kick-line">Plate A &middot; Alternate Reality &middot; Orthogonal</p>
-      <h1 class="title">A world where the fungi came early</h1>
-      <p class="thesis">Changed driver: <b>lignin-eating fungi before the Carboniferous</b>. The evidence favours the other branch: Nelsen et al. 2016 reject this lag; Floudas et al. 2012 support it in part.</p>
+      <p class="kick-line" data-label>Plate A &middot; Alternate Reality &middot; Orthogonal</p>
+      <h1 class="title" data-label>A world where the fungi came early</h1>
+      <p class="thesis"><span class="driver-line" data-label>Changed driver: <b>lignin-eating fungi before the Carboniferous</b>.</span> <span class="favours" data-claim><b class="t real">[REAL]</b> <span class="favours-text">The evidence favours the other branch: Nelsen et al. 2016 (PNAS) reject that coal formed because fungi could not yet digest lignin; Floudas et al. 2012 (Science) support that lag in part.</span></span></p>
     </div>
     <div class="head-side">
-      <a class="back" href="index.html">&larr; labs</a>
-      <div class="titleblock" aria-label="Title block">
+      <a class="back" href="index.html" data-label>&larr; labs</a>
+      <div class="titleblock" aria-label="Title block" data-label>
         <span>Sheet</span><span>A / 1</span>
         <span>Rev</span><span>3</span>
         <span>Date</span><span>2026-11-21</span>
@@ -38,7 +38,7 @@
       <canvas id="lineage-fog" class="lin-fog" aria-hidden="true"></canvas>
       <svg id="lineage-svg" role="group" aria-label="Choose a step to read it; the arrow keys move along the rows and across to Earth's step"></svg>
     </div>
-    <p class="legend"><span><svg class="lg" viewBox="0 0 26 8" aria-hidden="true"><path id="lg-branch" class="lg-branch gold" d="M1 2.2 C9 2 17 3 25 3.8 L25 4.2 C17 4.9 9 6 1 5.8 Z" /></svg>The branch this world took</span> <span><svg class="lg" viewBox="0 0 26 8" aria-hidden="true"><path class="lg-ink" d="M1 2.9 C9 2.8 17 3.4 25 3.9 L25 4.1 C17 4.6 9 5.2 1 5.1 Z" /></svg>Earth's branch: history</span> <span><span class="lg-fog" aria-hidden="true"></span>Fog: invented, or not yet happened</span></p>
+    <p class="legend" data-label><span><svg class="lg" viewBox="0 0 26 8" aria-hidden="true"><path id="lg-branch" class="lg-branch gold" d="M1 2.2 C9 2 17 3 25 3.8 L25 4.2 C17 4.9 9 6 1 5.8 Z" /></svg>The branch this world took</span> <span><svg class="lg" viewBox="0 0 26 8" aria-hidden="true"><path class="lg-ink" d="M1 2.9 C9 2.8 17 3.4 25 3.9 L25 4.1 C17 4.6 9 5.2 1 5.1 Z" /></svg>Earth's branch: history</span> <span><span class="lg-fog" aria-hidden="true"></span>Fog: invented, or not yet happened</span></p>
   </section>
 
   <div class="drill-bar" id="drill-bar" data-mode="read">
@@ -60,20 +60,20 @@
       <svg id="art-ink" class="art-ink" hidden aria-hidden="true"></svg>
     </div>
     <figcaption class="art-cap">
-      <span class="art-name">The mycelial street lamp</span>
-      <span class="art-line">This world's answer to light at night</span>
-      <span class="art-exposure"><b class="t ill">[ILLUSTRATIVE]</b> <span class="art-exposure-text">Drawn as a long exposure, sky included, in the plate's blue-white; to the eye fungal light is dimmer, and green (Kotlobay et al. 2018, PNAS).</span></span>
-      <span class="art-status" id="art-status" role="status"></span>
-      <span class="provenance" id="provenance" data-state="loading">Reading the render's record.</span>
+      <span class="art-name" data-label>The mycelial street lamp</span>
+      <span class="art-line" data-label>This world's answer to light at night</span>
+      <span class="art-exposure" data-claim><b class="t ill">[ILLUSTRATIVE]</b> <span class="art-exposure-text">Drawn as a long exposure, sky included, in the plate's blue-white; to the eye fungal light is dimmer, and green (Kotlobay et al. 2018, PNAS).</span></span>
+      <span class="art-status" id="art-status" role="status" data-label></span>
+      <span class="provenance" id="provenance" data-state="loading" data-label>Reading the render's record.</span>
     </figcaption>
   </figure>
 
   <figure class="earth" aria-label="Earth's artifact for the same job, ghosted">
     <div class="earth-view"><svg id="earth-svg" class="earth-svg" aria-hidden="true"></svg></div>
     <figcaption class="earth-cap">
-      <span class="earth-name">The coal-gas street lamp</span>
-      <span class="dim-line">Earth's answer to the same job</span>
-      <span class="earth-tag">Outline [ILLUSTRATIVE] on the render's ground line, not to scale</span>
+      <span class="earth-name" data-label>The coal-gas street lamp</span>
+      <span class="dim-line" data-label>Earth's answer to the same job</span>
+      <span class="earth-tag" data-claim>Outline [ILLUSTRATIVE] on the render's ground line, not to scale</span>
     </figcaption>
   </figure>
 

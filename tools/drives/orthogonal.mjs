@@ -56,6 +56,17 @@ const GOLD = ['.edge.fired', '.edge.thread', '.leader', '.node.fired .sq', '.lg-
   // Labs OS's own consent banner (shared code, os/ui.js), on a page opened on the browser's real store until it is answered
   '.los-bk'];
 const STORAGE_OFF = 'Your browser is not letting this page keep anything, so your answers last until you close it. A link to a step still opens that step.';
+/* Every text of the header, the captions and the legend, as the live page has it: each inside a claim (data-claim) or
+   a label (data-label), and every claim on the page carrying [REAL] or [ILLUSTRATIVE] (review H1). */
+const CLAIMS = `(() => {
+  const loose = [], texts = [];
+  for (const r of document.querySelectorAll('.head, .art-cap, .earth-cap, .legend')) {
+    const w = document.createTreeWalker(r, NodeFilter.SHOW_TEXT);
+    for (let n = w.nextNode(); n; n = w.nextNode()) { const t = n.textContent.trim(); if (!t) continue; texts.push(t); if (!n.parentElement.closest('[data-claim], [data-label]')) loose.push(t); }
+  }
+  const claims = [...document.querySelectorAll('[data-claim]')].filter((e) => e.getClientRects().length).map((e) => e.textContent.replace(/\\s+/g, ' ').trim());
+  return { texts: texts.length, loose, claims: claims.length, untagged: claims.filter((c) => !/\\[(REAL|ILLUSTRATIVE)\\]/.test(c)), first: claims.map((c) => c.slice(0, 24)) };
+})()`;
 /* The fog's mean alpha (0 to 255) along the line from step a to step b, on the line and 20 px either side of it, over
    15 windows of 7 x 7 px: the texture's own mottling averages out, and what is left is the density. */
 const FOG_LINE = (a, b) => `(() => {
@@ -150,6 +161,9 @@ export default async function orthogonal(p, { base, width, height }) {
     earth: document.querySelectorAll('.edge.earth').length, leader: !!document.querySelector('.leader') })`);
   p.check('the lineage draws every step of the data, five of them gold', counts.nodes === 11 && counts.gold === 5, JSON.stringify(counts));
   p.check('the driver and the artifact are the filled stamps', counts.filled === 2, String(counts.filled));
+  const cl = await p.ev(CLAIMS);
+  p.check('every text of the header, the captions and the legend is a claim or a label, and every claim carries its tag (the evidence line, the note, the provenance, Earth\'s tag)',
+    cl.texts >= 12 && cl.claims >= 4 && cl.loose.length === 0 && cl.untagged.length === 0, JSON.stringify(cl));
   p.check(width >= 1000 ? 'a gold leader joins the artifact to its render' : 'no leader where the render is not beside the lineage', counts.leader === (width >= 1000));
   await p.shot('01-open');
 
@@ -200,6 +214,9 @@ export default async function orthogonal(p, { base, width, height }) {
   p.check('a missing render is said in words', s.failed && /did not load/.test(s.status), s.status);
   p.check('and the lamp is drawn in ink from its parameters in its place', await p.until(`!document.getElementById('art-ink').hidden && document.getElementById('art-ink').childElementCount > 20`, 8000));
   p.check('the strand that pointed at the render is no longer gold', await p.ev(`document.getElementById('lineage').classList.contains('no-art')`));
+  const clMissing = await p.ev(CLAIMS);
+  p.check('with the render missing, its outline line is a claim with its tag, and every text is still a claim or a label', clMissing.loose.length === 0 && clMissing.untagged.length === 0
+    && clMissing.first.some((c) => c.startsWith('The render did not load')), JSON.stringify(clMissing));
   const artH = await p.ev(`document.getElementById('art').offsetHeight`);
   p.check('in a box of the same height', artH > 300, String(artH));
   await p.shot('04-render-missing');

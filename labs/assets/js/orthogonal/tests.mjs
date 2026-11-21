@@ -73,7 +73,13 @@
       the alt text is held to a closed vocabulary; each fact bites
       from just outside and holds just inside; the provenance line
       prints the record's numbers, its time to the second (review
-      C1).
+      C1); the caption's note names every departure of the render
+      the pipeline declares (H4); the method sentence says what the
+      pipeline does (H5).
+  19. Every text of the header, the captions and the legend is
+      marked a claim or a label, and every claim carries [REAL] or
+      [ILLUSTRATIVE]; the header's evidence line is [REAL], with its
+      venues and the lag said in the sentence (review H1).
    ============================================================ */
 import { spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
@@ -1090,5 +1096,62 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   ok('the fallback names the parameter file it draws from, tagged, or says it did not load', fallbackLine('a.json', true).includes('a.json') && /\[ILLUSTRATIVE\]/.test(fallbackLine('a.json', true)) && /nor its parameters \(a\.json\)/.test(fallbackLine('a.json', false)));
 }
 
+// ---------------------------------------------------------------- 19. every claim the page marks carries its tag
+{
+  /* The review of 2026-11-21 (H1) found the header's evidence line, a claim, with no tag and no venue: a claim outside
+     the evidence footer escaped tagging, because nothing marked it as one. The page now marks each text block of its
+     header, its captions and its legend as a claim (data-claim) or a label (data-label: a name, a heading, a key or a
+     status, nothing that could be true or false of the world). This reads the markup with a small tokenizer: every
+     text in those blocks sits in one or the other, and every claim carries [REAL] or [ILLUSTRATIVE]. The drive reads
+     the same of the live page after the scripts have written it. */
+  const raw = fs.readFileSync(path.join(LABS, 'orthogonal.html'), 'utf8');
+  const VOID = new Set(['meta', 'link', 'img', 'br', 'input', 'source', 'hr']);
+  const classified = (html) => {
+    const stack = [], claims = [], loose = [];
+    let inBlock = 0;
+    const blockOpen = (name, attrs) => (name === 'header' && /class="head"/.test(attrs)) || name === 'figcaption' || (name === 'p' && /class="legend"/.test(attrs));
+    for (const m of html.matchAll(/<(\/?)([a-zA-Z][\w-]*)([^>]*?)(\/?)>|([^<]+)/g)) {
+      const [, close, rawName, attrs = '', self, text] = m;
+      if (text !== undefined) {
+        const t = text.replace(/&[a-z]+;|&#\d+;/g, ' ').trim();
+        if (!t || !inBlock) continue;
+        const claim = [...stack].reverse().find((e) => e.claim);
+        if (claim) claim.text += ` ${t}`;
+        else if (!stack.some((e) => e.label)) loose.push(t);
+        continue;
+      }
+      const name = rawName.toLowerCase();
+      if (close) {
+        const k = stack.map((e) => e.name).lastIndexOf(name);
+        if (k < 0) continue;
+        for (const e of stack.splice(k)) { if (e.claim) claims.push(e); if (e.block) inBlock--; }
+        continue;
+      }
+      if (VOID.has(name) || self) continue;
+      const e = { name, claim: /\sdata-claim\b/.test(attrs), label: /\sdata-label\b/.test(attrs), block: blockOpen(name, attrs), text: '' };
+      if (e.block) inBlock++;
+      stack.push(e);
+    }
+    return { claims, loose };
+  };
+  const { claims, loose } = classified(raw);
+  ok('every text of the header, the captions and the legend is marked a claim or a label', loose.length === 0, loose.join(' | '));
+  ok(`the markup marks its claims: the evidence line, the render's note, Earth's tag (${claims.length})`, claims.length >= 3);
+  for (const c of claims) ok(`a claim carries its tag: "${c.text.trim().slice(0, 60)}"`, /\[(REAL|ILLUSTRATIVE)\]/.test(c.text), c.text);
+  // the header's evidence line: tagged REAL, its venues named, and the lag it rejects said in the sentence itself
+  const favours = claims.find((c) => c.text.includes(WORLD.favours.line));
+  ok("the header's evidence line is a claim, tagged [REAL]", !!favours && /^\s*\[REAL\]/.test(favours.text), favours && favours.text);
+  ok('and it names each source with its venue, as config.js SOURCES writes them', /Nelsen et al\. 2016 \(PNAS\)/.test(WORLD.favours.line) && /Floudas et al\. 2012 \(Science\)/.test(WORLD.favours.line)
+    && /PNAS/.test(SOURCES.nelsen2016) && /Science/.test(SOURCES.floudas2012));
+  // sentences end at a full stop after a word of three letters or more, so "et al." does not end one
+  ok('and says what the lag is in the same sentence that names it', WORLD.favours.line.split(/(?<=[a-z]{3,}\.)\s+(?=[A-Z])/).some((s) => /\blag\b/.test(s) && /lignin/.test(s) && /fung/.test(s) && /coal/.test(s)) && !/\bthis lag\b/.test(WORLD.favours.line));
+  // the check bites: the evidence line as the review found it, and an unmarked sentence in a caption
+  const before = raw.replace(/<span class="favours"[^>]*data-claim[^>]*>[\s\S]*?<span class="favours-text">([\s\S]*?)<\/span><\/span>/, '<span class="favours" data-claim>$1</span>');
+  ok('the check catches the line the review found: a claim with no tag', before !== raw && classified(before).claims.some((c) => !/\[(REAL|ILLUSTRATIVE)\]/.test(c.text)));
+  const stray = raw.replace('<figcaption class="earth-cap">', '<figcaption class="earth-cap"><span>Lit by coal gas from 1807.</span>');
+  ok('and a sentence in a caption that is marked neither a claim nor a label', classified(stray).loose.includes('Lit by coal gas from 1807.'));
+}
+
 console.log(`orthogonal: ${pass} passed, ${fail} failed`);
+
 if (fail) process.exit(1);

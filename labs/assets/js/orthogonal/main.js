@@ -38,6 +38,10 @@ import { applyStrand, drawArtifactInk, drawEarthLamp, drawLineage, markChosen, m
 import { WORLD } from './worlds/fungi-early.js';
 
 const $ = (id) => document.getElementById(id);
+/* The page marks each text block of its header, captions and legend as a claim (data-claim: it carries [REAL] or
+   [ILLUSTRATIVE]) or a label (data-label: a name, a heading, a key or a status). A block whose words change says which
+   it is now. tests.mjs section 19 and the drive hold every claim to its tag (review H1). */
+const markClaim = (el, claim) => { el.toggleAttribute('data-claim', claim); el.toggleAttribute('data-label', !claim); };
 const params = new URLSearchParams(location.search);
 const still = params.has('still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wide = matchMedia('(min-width: 1000px)');
@@ -424,6 +428,7 @@ function art() {
     $('lineage').classList.remove('no-art');
     ink.hidden = true;
     status.textContent = '';
+    markClaim(status, false);
     show();
   };
   const fail = async () => {
@@ -435,8 +440,10 @@ function art() {
       drawArtifactInk(ink, JSON.parse(await readParams()), WORLD.artifact.frame);
       ink.hidden = false;
       status.textContent = fallbackLine(file, true);
+      markClaim(status, true);   // the outline is drawn from the parameter file: a claim, tagged in its words
     } catch {
       status.textContent = fallbackLine(file, false);
+      markClaim(status, false);
     }
   };
   img.addEventListener('load', ok);
@@ -472,7 +479,12 @@ async function provenance() {
       s.textContent = ', changed since this render';
       from.append(s);
     }
-    strip.replaceChildren(line(words.head), from);
+    // read from the render's record, so a claim tagged [REAL] (the rules; review L6, closed by H1's test of every claim)
+    const tag = document.createElement('b');
+    tag.className = 't real';
+    tag.textContent = '[REAL]';
+    strip.replaceChildren(line(tag, ' ', words.head), from);
+    markClaim(strip, true);
     strip.dataset.state = same === false ? 'stale' : same === null ? 'unchecked' : 'ok';
   } catch {
     strip.textContent = `The render's record did not load; its parameters are in ${WORLD.artifact.params.split('/').pop()}.`;
@@ -513,7 +525,8 @@ function words() {
   q('.title').textContent = WORLD.title;
   const b = document.createElement('b');
   b.textContent = WORLD.driver;
-  q('.thesis').replaceChildren('Changed driver: ', b, `. ${WORLD.favours.line}`);
+  q('.driver-line').replaceChildren('Changed driver: ', b, '.');
+  q('.favours-text').textContent = WORLD.favours.line;   // its [REAL] tag stays in the markup beside it
   q('.art-name').textContent = WORLD.artifact.title;
   q('.art-line').textContent = WORLD.artifact.line;
   q('.art-exposure-text').textContent = WORLD.artifact.exposure;

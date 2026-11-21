@@ -59,6 +59,8 @@ body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 21
 .title { margin: 2px 0 0; font: italic 400 36px/1.1 'Fraunces', Georgia, serif; color: var(--text-bright); letter-spacing: -.01em; }
 .thesis { margin: 6px 0 0; font-size: 13px; color: var(--text); max-width: 140ch; }
 .thesis b { font-weight: 500; color: var(--text-bright); }
+/* a claim's tag, as the evidence footer draws [REAL] (review H1: the header's evidence line had none) */
+.thesis .t, .provenance .t { font-weight: 500; color: var(--horizon); }
 
 .titleblock { display: grid; grid-template-columns: auto auto; border: 1px solid var(--line); font-size: 11px; color: var(--text-dim); }
 .titleblock span { padding: 1px 10px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
