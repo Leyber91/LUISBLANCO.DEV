@@ -158,12 +158,12 @@ const OUT = 'outside the repository';
 // the text inside the brackets that open at i, strings and nested brackets kept whole; null when they do not close
 function inside(text, i) {
   let depth = 0, q = null;
-  for (let k = i; k < text.length && k < i + 4000; k++) {
+  for (let k = i; k < text.length && k < i + 4000; k++) {   // equivalent: past the end text[k] is undefined and matches nothing; the cap is broken by 'a long call is cut short'
     const ch = text[k];
     if (q) { if (ch === '\\') k++; else if (ch === q) q = null; continue; }
     if (ch === '"' || ch === "'" || ch === '`') q = ch;
     else if ('([{'.includes(ch)) depth++;
-    else if (')]}'.includes(ch) && --depth === 0) return text.slice(i + 1, k);
+    else if (')]}'.includes(ch) && --depth === 0) return text.slice(i + 1, k);   // equivalent: depth falls by one from one or more, so it meets 0 before any value below it
   }
   return null;
 }
@@ -171,7 +171,7 @@ function inside(text, i) {
 function parts(s) {
   const out = [];
   let depth = 0, q = null, from = 0;
-  for (let k = 0; k < s.length; k++) {
+  for (let k = 0; k < s.length; k++) {   // equivalent: past the end s[k] is undefined and splits nothing
     const ch = s[k];
     if (q) { if (ch === '\\') k++; else if (ch === q) q = null; continue; }
     if (ch === '"' || ch === "'" || ch === '`') q = ch;
@@ -282,7 +282,7 @@ export function builtPaths(text, file, root) {
       if (args === null) continue;
       const head = m[0].replace(/\s*\($/, '');
       if (/^(?:readdir|opendir)/.test(head)) {   // a folder listed: anything under it
-        const v = evalPath(parts(args)[0] || '', scope, file);
+        const v = evalPath(parts(args)[0] || '', scope, file);   // equivalent: readdir with no argument throws, so no module that runs has one
         if (v && v.str === undefined) { if (v.at !== OUT) out.opaque.push(v.at); } else if (!v) place(v, `${head}(${args})`);
         continue;
       }
@@ -294,7 +294,7 @@ export function builtPaths(text, file, root) {
         continue;
       }
       if (head === 'new URL' && parts(args).length < 2) continue;   // a URL parsed, not a path built from a base
-      if (head !== 'new URL' && parts(args).length === 1 && LITERAL.test(parts(args)[0])) continue;
+      if (head !== 'new URL' && parts(args).length === 1 && LITERAL.test(parts(args)[0])) continue;   // equivalent: one literal evaluates to a plain string, which place() passes over
       place(evalPath(`${head}(${args})`, scope, file), `${head}(${args})`);
     }
   };
@@ -306,7 +306,7 @@ export function builtPaths(text, file, root) {
     if (!/\b(?:import|join|resolve|URL)\s*\(|`/.test(h.body)) continue;
     for (const c of text.matchAll(new RegExp(`(?<![\\w$.])${h.name.replace(/\$/g, '\\$')}\\s*\\(`, 'g'))) {
       const args = inside(text, c.index + c[0].length - 1);
-      if (args === null || c.index === h.at) continue;
+      if (args === null) continue;
       const a = parts(args)[0];
       const v = a === undefined ? null : evalPath(a, env, file);
       const scope = { ...env };
@@ -315,10 +315,10 @@ export function builtPaths(text, file, root) {
     }
   }
   // a process started: the module files named by exact paths are followed
-  if (SPAWNS.test(text)) for (const p of [...out.exact, ...Object.values(env).filter((v) => v.exact && v.at !== OUT).map((v) => v.at)]) if (/\.[cm]?js$/.test(p)) out.follow.push(p);
+  if (SPAWNS.test(text)) for (const p of [...out.exact, ...Object.values(env).filter((v) => v.exact && v.at !== OUT).map((v) => v.at)]) if (/\.[cm]?js$/.test(p)) out.follow.push(p);   // equivalent: an exact constant comes from a join, resolve or new URL the scan places in out.exact too
   // the kit's mutants runner: the caller's lab folder and the folders in also are copied; its module and test are run
   for (const m of text.matchAll(/\brunMutants\s*\(/g)) {
-    const obj = inside(text, m.index + m[0].length - 1) || '';
+    const obj = inside(text, m.index + m[0].length - 1) || '';   // equivalent: inside() is null only for a call left open, which a module that runs cannot have
     // a key's value as written (an array whole), the key's own name for a shorthand, or null when it is not given
     const key = (k) => {
       const r = new RegExp(`\\b${k}\\s*:\\s*`).exec(obj);
@@ -349,7 +349,7 @@ function readOne(f, root, cache) {
     one = { imports: [], names: [], data: [...text.matchAll(DATA_NAMED)].map((m) => m[1]), walks: code && WALKS.test(text), exact: [], opaque: [], anywhere: false };
     for (const n of text.match(PATH_RUN) || []) if (ENDS_AS_FILE.test(n)) one.names.push(n.replace(/^(\.{1,2}\/)+|^\/+/, ''));
     if (code) for (const m of text.matchAll(SPECIFIER)) {
-      const spec = (m[2] ?? m[4]).split(/[?#]/)[0];
+      const spec = (m[2] ?? m[4]).split(/[?#]/)[0];   // equivalent: m[2] is undefined or a path of one or more characters, so ?? and || pick the same
       if (spec.startsWith('./') || spec.startsWith('../')) one.imports.push(path.resolve(path.dirname(f), spec));
       else if (spec.startsWith('/') && !spec.startsWith('//')) one.imports.push(path.join(root, spec));
     }
@@ -502,6 +502,8 @@ function selftest() {
   let tests, missed, excused, why, code = {}, out = {}, planCount = 0, hasRepo = false;
   // the changes planned on the small site below, each a list of paths; P: what each runs
   const J = JS_DIR, P = {}, P2 = {};
+  // the path evaluator on one expression, for a module at <root>/r/f.mjs whose constant B is the folder <root>/r/b
+  const R0 = path.join(path.sep, 'r'), EP = (expr, env = { B: { at: path.join(R0, 'b'), exact: true } }) => evalPath(expr, env, path.join(R0, 'f.mjs'));
   const CHANGES = {
     engine: [J + 'a/engine.js'], kit: [J + 'kit/dom.js'], deep: [J + 'a/deep.js'], lazy: [J + 'a/lazy.js'], rooted: [J + 'c/x.js'], deeper: [J + 'a/deeper.js'], lazier: [J + 'a/lazy2.js'], rootedDeeper: [J + 'c/x2.js'], self: [J + 'a/tests/engine.test.mjs'],
     none: [], unknown: null,
@@ -515,7 +517,7 @@ function selftest() {
     tplIn: [J + 'lib/dom.js'], tplOut: [J + 'libs/x.css'], joinIn: ['labs/assets/data/delta/q_schema.json'], joinOut: ['labs/assets/data/deltas/z.json'], both: [J + 'lib/dom.js', 'labs/assets/data/delta/q_schema.json'],
     helperTarget: ['labs/seed.html'], helperNear: ['labs/seeds.html'], helperFollow: [J + 'g/registry.js'], helperOther: [J + 'g/other.js'],
     spawned: [J + 'h/deep.js'], copiedAlso: [J + 'lib/dom.js'], copiedLab: [J + 'k/x.css'], copiedData: ['labs/assets/data/epsilon/e.json'], copiedModule: [J + 'shared/s.js'], copiedNot: [J + 'a/engine.js'],
-    commented: [J + 'a/cm2.js'], copiedTest: [J + 'shared2/t.js'], tplVar: ['labs/assets/data/eta/q.json'], bareJoin: [J + 'theta/t.css'], listed: [J + 'iota/i.css'], exactRead: [J + 'shared/z.css'], fullName: ['labs/zeta.html'],
+    commented: [J + 'a/cm2.js'], bareResolve: [J + 'lambda/l.css'], copiedTest: [J + 'shared2/t.js'], tplVar: ['labs/assets/data/eta/q.json'], bareJoin: [J + 'theta/t.css'], listed: [J + 'iota/i.css'], exactRead: [J + 'shared/z.css'], fullName: ['labs/zeta.html'],
     ...Object.fromEntries(['tools/lab_tests.mjs', 'tools/mutate.mjs', '.github/workflows/gates.yml', 'package.json', 'labs-src/package-lock.json', 'yarn.lock', 'npm-shrinkwrap.json', 'pnpm-lock.yaml'].map((f) => ['all:' + f, [f, J + 'a/engine.js']])),
     ...Object.fromEntries(['tools/lab_tests.mjs.orig', 'x/tools/mutate.mjs', 'docs/package.json.md', 'tools/lab_tests.json'].map((f) => ['near:' + f, [f]])),
   };
@@ -574,7 +576,7 @@ function selftest() {
       [S + 'lib/dom.js']: 'export const dom = 1;\n',
       [S + 'f/tests/tpl.test.mjs']: "const name = 'dom';\nconst m = await import(`../../lib/${name}.js`);\n",
       [S + 'f/tests/join.test.mjs']: "import path from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst DATA = path.join(here, '../../../data');\nconst lab = 'delta', kind = String(1);\nconst raw = path.join(DATA, lab, kind + '_schema.json');\nconst t = `${DATA}/eta/${kind}.json`;\n",
-      [S + 'f/tests/bare.test.mjs']: "import { join, dirname } from 'node:path';\nimport { readdirSync } from 'node:fs';\nimport { fileURLToPath } from 'node:url';\nconst here = dirname(fileURLToPath(import.meta.url));\nconst p = join(here, '../../theta', String(5));\nconst listed = readdirSync(join(here, '../../iota'));\nconst s3 = [here].join(String(6));\n",
+      [S + 'f/tests/bare.test.mjs']: "import { join, dirname, resolve } from 'node:path';\nimport { readdirSync } from 'node:fs';\nimport { fileURLToPath } from 'node:url';\nconst here = dirname(fileURLToPath(import.meta.url));\nconst p = join(here, '../../theta', String(5));\nconst listed = readdirSync(join(here, '../../iota'));\nconst s3 = [here].join(String(6));\nconst r2 = resolve(here, '../../lambda', String(8));\n",
       // a computed import through a helper given a literal: its target is followed and read for names
       [S + 'g/tests.mjs']: "import path from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst imp = (p) => import(pathToFileURL(path.join(here, p)).href);\nconst { PAGES } = await imp('registry.js');\nconst api = new URL(String(3), globalThis.base);\nconst u = new URL(String(4));\nconst label = `${PAGES.length}/${2}`;\nnew Promise((resolve) => resolve(String(7)));\n",
       [S + 'g/registry.js']: "export const PAGES = ['seed.html'];\n",
@@ -604,7 +606,7 @@ function selftest() {
     const planTests = findTests(path.join(plan, 'labs', 'assets', 'js'));
     const planned = (changed) => { const p = testsToRun(planTests, changed, plan); return { all: p.all, run: [...p.run.keys()].map((t) => t.slice(S.length)).sort(), why: Object.fromEntries([...p.run].map(([t, w]) => [t.slice(S.length), w])), unread: p.unread }; };
     for (const [k, changed] of Object.entries(CHANGES)) P[k] = planned(changed);
-    const blind = site('plan2', { [S + 'i/tests.mjs']: "import path from 'node:path';\nexport function f(x) { return path.join(x, 'y'); }\n", [S + 'j/tests.mjs']: "import '../j/m.js';\n" });
+    const blind = site('plan2', { [S + 'i/tests.mjs']: "import path from 'node:path';\nexport function f(x) { return path.join(x, 'y'); }\n", [S + 'j/tests.mjs']: "import '../j/m.js';\n", [S + 'j/tests/m2.mutants.test.mjs']: "await runMutants({ here, file: 'm.js', test: 't.mjs', mutants: [], also: [FOLDER], data: [DFILE] });\n" });
     const blindTests = findTests(path.join(blind, 'labs', 'assets', 'js'));
     P2.inLabs = [...testsToRun(blindTests, ['labs/q.css'], blind).run.keys()].map((t) => t.slice(S.length));
     P2.outLabs = [...testsToRun(blindTests, ['tools/x.txt'], blind).run.keys()];
@@ -688,7 +690,17 @@ function selftest() {
     ['a template that starts with a folder constant falls under that folder and the text after it', same(P.tplVar.run, ['f/tests/join.test.mjs']), JSON.stringify(P.tplVar)],
     ['join and readdir taken from node:path and node:fs count; an array\'s join and a promise\'s resolve do not', same(P.bareJoin.run, ['f/tests/bare.test.mjs']) && same(P.listed.run, ['f/tests/bare.test.mjs']) && P.listed.why['f/tests/bare.test.mjs'] === 'builds paths under labs/assets/js/iota/, where labs/assets/js/iota/i.css changed', JSON.stringify([P.bareJoin, P.listed])],
     ['a file read by a path joined from literals runs its test, in another lab too; a full path named runs the test that names it', same(P.exactRead.run, ['h/tests/reads.test.mjs']) && P.exactRead.why['h/tests/reads.test.mjs'] === 'reads labs/assets/js/shared/z.css by a path it builds' && same(P.fullName.run, ['h/tests/reads.test.mjs']) && P.fullName.why['h/tests/reads.test.mjs'] === 'names labs/zeta.html', JSON.stringify([P.exactRead, P.fullName])],
-    ['a test whose path cannot be placed runs on any change under labs/, and on nothing outside it', !!P2.inLabs && P2.inLabs.includes('i/tests.mjs') && P2.inLabs.length === 1 && P2.outLabs.length === 0, JSON.stringify(P2)],
+    ['a test whose path cannot be placed, or whose copies name folders that cannot be told, runs on any change under labs/, and on nothing outside it', !!P2.inLabs && same(P2.inLabs, ['i/tests.mjs', 'j/tests/m2.mutants.test.mjs']) && P2.outLabs.length === 0, JSON.stringify(P2)],
+    ['resolve taken from node:path counts', same(P.bareResolve.run, ['f/tests/bare.test.mjs']), JSON.stringify(P.bareResolve)],
+    // the path evaluator itself, on expressions: strings of each quote kind with a bracket or a comma inside, an
+    // escaped quote, a call inside the arguments, the module's folder by name, a URL against a path, the temp folder
+    // and a web address
+    ['a string of any quote kind with a bracket and a comma inside stays one argument of the call', [['"'], ["'"], ['`']].every(([q]) => JSON.stringify(EP(`path.join(B, ${q}a),b${q}, x)`)) === JSON.stringify({ at: path.join(R0, 'b', 'a),b'), exact: false })), JSON.stringify(EP('path.join(B, "a),b", x)'))],
+    ['an escaped quote does not end a string, in a call or in its arguments', JSON.stringify(EP('path.join(B, "a\\")b", x)')) === JSON.stringify({ at: path.join(R0, 'b'), exact: false }) && JSON.stringify(EP("new URL('m\\',x', import.meta.url)")) === JSON.stringify({ at: R0, exact: false }), JSON.stringify([EP('path.join(B, "a\\")b", x)'), EP("new URL('m\\',x', import.meta.url)")])],
+    ['the arguments split at the commas of the top level only', JSON.stringify(EP('path.join(B, String(x), "q")')) === JSON.stringify({ at: path.join(R0, 'b'), exact: false }) && JSON.stringify(EP('path.join(B, "c", String(x, y))')) === JSON.stringify({ at: path.join(R0, 'b', 'c'), exact: false }), JSON.stringify(EP('path.join(B, String(x), "q")'))],
+    ['__dirname and import.meta.dirname are the module\'s folder', JSON.stringify(EP('__dirname')) === JSON.stringify({ at: R0, exact: true }) && JSON.stringify(EP('import.meta.dirname')) === JSON.stringify({ at: R0, exact: true }), JSON.stringify([EP('__dirname'), EP('import.meta.dirname')])],
+    ['a URL against import.meta.url is an exact path; against the temp folder it is outside; against a web address it is a plain string', JSON.stringify(EP("new URL('x/y.json', import.meta.url)")) === JSON.stringify({ at: path.resolve(R0, 'x/y.json'), exact: true })
+      && EP("new URL('x', TMP)", { TMP: EP('os.tmpdir()') }).at === EP('os.tmpdir()').at && JSON.stringify(EP("new URL('x', 'https://a.b/')")) === JSON.stringify({ str: '' }), JSON.stringify([EP("new URL('x/y.json', import.meta.url)"), EP("new URL('x', 'https://a.b/')")])],
     ['an import with a block and a line comment between its braces is followed', same(P.commented.run, ['a/tests/comment.test.mjs']), JSON.stringify(P.commented)],
     ['every reason to run all is given, not only the first', !!P.twoWide.all && P.twoWide.all.includes('a/ui.js') && P.twoWide.all.includes('beta/y.json'), P.twoWide.all],
     ['the command asks git: a rename counts as a deletion and an addition, so a test still on the old path runs (and fails), and says which ran, why, and which were skipped', hasRepo && code.renamed === 1

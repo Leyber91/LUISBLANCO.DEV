@@ -346,8 +346,8 @@
   },
   {
     "name": "closure: a query after the path hides the module",
-    "from": ".split(/[?#]/)[0];\n      if (spec",
-    "to": ";\n      if (spec"
+    "from": ".split(/[?#]/)[0];   // equivalent",
+    "to": ";   // equivalent"
   },
   {
     "name": "closure: only the test file's own imports are followed, not theirs in turn",
@@ -856,8 +856,8 @@
   },
   {
     "name": "helpers: every call of a helper is skipped",
-    "from": "if (args === null || c.index === h.at) continue;",
-    "to": "if (args !== null || c.index === h.at) continue;"
+    "from": "      if (args === null) continue;\n      const a = parts(args)[0];",
+    "to": "      if (args !== null) continue;\n      const a = parts(args)[0];"
   },
   {
     "name": "helpers: the literal given is never read",
@@ -925,11 +925,6 @@
     "to": "bare.filter((n) => n === 'resolve')"
   },
   {
-    "name": "helpers: a helper's own declaration is read as its call, and its calls are not",
-    "from": "if (args === null || c.index === h.at) continue;",
-    "to": "if (args === null || c.index !== h.at) continue;"
-  },
-  {
     "name": "names: a bare name reaches any file",
     "from": "(n === base && (!c.startsWith(JS_DIR)",
     "to": "(n !== base && (!c.startsWith(JS_DIR)"
@@ -938,5 +933,150 @@
     "name": "names: a bare name reaches every lab's module folder but its own",
     "from": "labOf(c) === t.lab))) return `names ${c}`;",
     "to": "labOf(c) !== t.lab))) return `names ${c}`;"
+  },
+  {
+    "name": "brackets: a backslash does not escape a quote",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)",
+    "to": "    if (q) { if (ch === '#') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)"
+  },
+  {
+    "name": "brackets: a double quote does not start a string",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '#' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)"
+  },
+  {
+    "name": "brackets: a single quote does not start a string",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === '#' || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)"
+  },
+  {
+    "name": "brackets: a backtick does not start a string",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '#') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)"
+  },
+  {
+    "name": "brackets: only a quote that is both double and single starts a string",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' && ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)"
+  },
+  {
+    "name": "brackets: only a quote that is both single and a backtick starts a string",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" && ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth === 0)"
+  },
+  {
+    "name": "arguments: a backslash does not escape a quote",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;",
+    "to": "    if (q) { if (ch === '#') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;"
+  },
+  {
+    "name": "arguments: a double quote does not start a string",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '#' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;"
+  },
+  {
+    "name": "arguments: a single quote does not start a string",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === '#' || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;"
+  },
+  {
+    "name": "arguments: a backtick does not start a string",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '#') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;"
+  },
+  {
+    "name": "arguments: only a quote that is both double and single starts a string",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' && ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;"
+  },
+  {
+    "name": "arguments: only a quote that is both single and a backtick starts a string",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" && ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;"
+  },
+  {
+    "name": "arguments: a comma does not split",
+    "from": "else if (ch === ',' && depth === 0)",
+    "to": "else if (ch === ';' && depth === 0)"
+  },
+  {
+    "name": "arguments: the commas one bracket down split, the top level's do not",
+    "from": "else if (ch === ',' && depth === 0)",
+    "to": "else if (ch === ',' && depth === 1)"
+  },
+  {
+    "name": "paths: the module's folder is known only by the dirname form",
+    "from": "|| e === '__dirname' || e === 'import.meta.dirname') return",
+    "to": "&& e === '__dirname' || e === 'import.meta.dirname') return"
+  },
+  {
+    "name": "paths: __dirname is the folder only together with import.meta.dirname",
+    "from": "|| e === '__dirname' || e === 'import.meta.dirname') return",
+    "to": "|| e === '__dirname' && e === 'import.meta.dirname') return"
+  },
+  {
+    "name": "paths: __dirname is not the module's folder",
+    "from": "|| e === '__dirname' || e === 'import.meta.dirname') return",
+    "to": "|| e === '__dirnam' || e === 'import.meta.dirname') return"
+  },
+  {
+    "name": "paths: import.meta.dirname is not the module's folder",
+    "from": "|| e === '__dirname' || e === 'import.meta.dirname') return",
+    "to": "|| e === '__dirname' || e === 'import.meta.dirnam') return"
+  },
+  {
+    "name": "paths: a URL against a path is taken for a web address",
+    "from": "if (!base || base.str !== undefined) return { str: '' };",
+    "to": "if (!base || base.str === undefined) return { str: '' };"
+  },
+  {
+    "name": "paths: a URL against a folder of the site stops at the base",
+    "from": "if (base.at === OUT) return base;",
+    "to": "if (base.at !== OUT) return base;"
+  },
+  {
+    "name": "paths: a URL's literal part is not resolved against its base",
+    "from": "if (s && s.str !== undefined) return { at: path.resolve(base.at, s.str), exact: base.exact };",
+    "to": "if (s && s.str === undefined) return { at: path.resolve(base.at, s.str), exact: base.exact };"
+  },
+  {
+    "name": "scan: only a plain string from the temp folder is passed over",
+    "from": "else if (v.at === OUT || v.str !== undefined) {",
+    "to": "else if (v.at === OUT && v.str !== undefined) {"
+  },
+  {
+    "name": "scan: resolve taken from node:path is not counted",
+    "from": "bare.filter((n) => n === 'join' || n === 'resolve')",
+    "to": "bare.filter((n) => n === 'join' || n === 'resolv')"
+  },
+  {
+    "name": "scan: a folder listed by an exact path is not counted",
+    "from": "if (v && v.str === undefined) { if (v.at !== OUT)",
+    "to": "if (v && v.str !== undefined) { if (v.at !== OUT)"
+  },
+  {
+    "name": "copies: a list is taken for missing",
+    "from": "return body === null ? null : parts(body)",
+    "to": "return body !== null ? null : parts(body)"
+  },
+  {
+    "name": "copies: no entry of a list is read",
+    "from": "(LITERAL.exec(x) || [])[2] ?? null",
+    "to": "(LITERAL.exec(x) && [])[2] ?? null"
+  },
+  {
+    "name": "copies: an entry that cannot be told is taken for a folder",
+    "from": "(LITERAL.exec(x) || [])[2] ?? null",
+    "to": "(LITERAL.exec(x) || [])[2] ?? 'x'"
+  },
+  {
+    "name": "copies: folders in also that cannot be told are joined as they are",
+    "from": "if (!also || also.includes(null)) place",
+    "to": "if (!also && also.includes(null)) place"
+  },
+  {
+    "name": "copies: data files that cannot be told are joined as they are",
+    "from": "if (!data || data.includes(null)) place",
+    "to": "if (!data && data.includes(null)) place"
   }
 ]
