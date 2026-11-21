@@ -36,8 +36,8 @@
   12. The fog thins to none at the drawing's edges, at every moment.
   13. The exercise: what each step needs, against an oracle written
       apart from the engine; the sets (every four steps with at most
-      one unordered pair); the check on all 960 orders of every set,
-      on the 420 orders of the whole lineage its links allow, and on
+      one unordered pair); the check on all 384 orders of every set,
+      on the 56 orders of the whole lineage its links allow, and on
       every swap of a step with the step it grows from; the items
       (each set dealt once a round, a draw seeded by its attempt);
       where the steps stand while ordered, with what each needs
@@ -103,11 +103,14 @@ import {
 } from './engine.js';
 import { countLine, fresh, isSalt, Keeper, KINDS, newSalt, RECORD_V, restore, withChoice, withLeave, withPress, withStart, withUndo } from './record.js';
 import { ALT_PLAIN, DEPARTURES, departureFaults, fallbackLine, provenance, RENDER_WORDS, renderSentences, renderWordFaults, wordsOf } from './render-words.js';
-import { WORLD } from './worlds/fungi-early.js';
+import { buildWorld, TABLE_PATH } from './worlds/fungi-early.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const LABS = path.resolve(HERE, '..', '..', '..');
 const DATA = path.join(LABS, 'assets', 'data', 'orthogonal');
+// the world as the page grows it: the engine run on the table the page reads (worlds/fungi-early.js buildWorld)
+const TABLE = JSON.parse(fs.readFileSync(path.join(LABS, TABLE_PATH), 'utf8'));
+const WORLD = buildWorld(TABLE);
 let pass = 0, fail = 0;
 const ok = (name, cond, detail = '') => {
   if (cond) pass++;
@@ -122,25 +125,25 @@ const broken = [
   ['two roots', (w) => { node(w, 'fungi').role = 'root'; node(w, 'fungi').after = []; }],
   ['two drivers', (w) => { node(w, 'farmed').role = 'driver'; }],
   ['an unknown role', (w) => { node(w, 'farmed').role = 'widget'; }],
-  ['a parent that is not a node', (w) => { node(w, 'nocoal').after = ['nowhere']; }],
-  ['a world node grown from Earth', (w) => { node(w, 'farmed').after = ['buried']; }],
-  ['an Earth node grown from the world', (w) => { node(w, 'seams').after = ['fungi']; }],
-  ['an Earth node with no pair', (w) => { delete node(w, 'coalgas').pair; }],
-  ['a world node that names a pair', (w) => { node(w, 'nocoal').pair = 'seams'; }],
-  ['an Earth node paired off the trunk', (w) => { node(w, 'coalgas').pair = 'farmed'; }],
-  ['two Earth nodes on one pair', (w) => { node(w, 'coalgas').pair = 'nocoal'; }],
-  ['an Earth step paired above its parent', (w) => { node(w, 'seams').pair = 'lamp'; node(w, 'gaslamp').pair = 'nocoal'; }],
-  ['a cycle', (w) => { node(w, 'fungi').after = ['lignin', 'lamp']; }],
-  ['a REAL claim with no source and no gap', (w) => { node(w, 'coalgas').evidence = [{ tag: 'REAL', text: 'x' }]; }],
+  ['a parent that is not a node', (w) => { node(w, 'luminous').after = ['nowhere']; }],
+  ['a world node grown from Earth', (w) => { node(w, 'farmed').after = ['whaling']; }],
+  ['an Earth node grown from the world', (w) => { node(w, 'whaleoil').after = ['fungi']; }],
+  ['an Earth node with no pair', (w) => { delete node(w, 'whaleoil').pair; }],
+  ['a world node that names a pair', (w) => { node(w, 'fungi').pair = 'whaleoil'; }],
+  ['an Earth node paired off the trunk', (w) => { node(w, 'whaleoil').pair = 'trouble'; }],
+  ['two Earth nodes on one pair', (w) => { node(w, 'whaleoil').pair = 'farmed'; }],
+  ['an Earth step paired above its parent', (w) => { node(w, 'whaleoil').pair = 'lamp'; node(w, 'oillamp').pair = 'luminous'; }],
+  ['a cycle', (w) => { node(w, 'fungi').after = ['ground', 'lamp']; }],
+  ['a REAL claim with no source and no gap', (w) => { node(w, 'whaleoil').evidence = [{ tag: 'REAL', text: 'x' }]; }],
   ['a source that does not exist', (w) => { node(w, 'fungi').evidence[0].src = 'nobody2099'; }],
   ['a list of sources with one that does not exist', (w) => { node(w, 'lamp').evidence[1].src = ['desbenoit2004', 'nobody2099']; }],
   ['an empty list of sources', (w) => { node(w, 'lamp').evidence[1].src = []; }],
   ['a tag other than REAL or ILLUSTRATIVE', (w) => { node(w, 'fungi').evidence[0].tag = 'LIKELY'; }],
   ['no evidence', (w) => { node(w, 'farmed').evidence = []; }],
-  ['a step with no line saying what it needs', (w) => { node(w, 'nocoal').needs = ' '; }],
+  ['a step with no line saying what it needs', (w) => { node(w, 'luminous').needs = ' '; }],
   ['an artifact that is not one', (w) => { w.artifact.node = 'luminous'; }],
-  ["Earth's artifact not paired with this world's", (w) => { w.earthArtifact.node = 'coalgas'; }],
-  ['no path from the driver through first parents', (w) => { node(w, 'luminous').after = ['farmed', 'nocoal']; node(w, 'farmed').after = ['lignin']; }],
+  ["Earth's artifact not paired with this world's", (w) => { w.earthArtifact.node = 'whaleoil'; }],
+  ['no path from the driver through first parents', (w) => { node(w, 'farmed').after = ['ground']; }],
 ];
 for (const [name, breakIt] of broken) {
   const w = clone(WORLD);
@@ -150,18 +153,29 @@ for (const [name, breakIt] of broken) {
 // just inside: a REAL claim with a declared gap and no source is allowed
 {
   const w = clone(WORLD);
-  node(w, 'buried').evidence = [{ tag: 'REAL', text: 'x', gap: 'No source opened yet.' }];
+  node(w, 'whaling').evidence = [{ tag: 'REAL', text: 'x', gap: 'No source opened yet.' }];
   ok('check allows a REAL claim whose gap is declared', check(w).length === 0, check(w).join('; '));
 }
 
 // ---------------------------------------------------------------- 2. what fired
-ok('the trunk runs driver, pressure, combination, artifact', JSON.stringify(trunk(WORLD)) === JSON.stringify(['fungi', 'nocoal', 'luminous', 'lamp']));
+ok('the trunk runs driver, substrate, combination, artifact', JSON.stringify(trunk(WORLD)) === JSON.stringify(['fungi', 'farmed', 'luminous', 'lamp']), trunk(WORLD).join());
 const states = Object.fromEntries(WORLD.nodes.map((n) => [n.id, stateOf(WORLD, n.id)]));
-ok('gold is the driver, the threads and the steps the artifact grew from', ['fungi', 'farmed', 'nocoal', 'luminous', 'lamp'].every((id) => states[id] === 'fired'));
-ok('nothing else is gold', Object.values(states).filter((s) => s === 'fired').length === 5);
+const goldWant = WORLD.grown && WORLD.grown.kept === false ? ['fungi', 'farmed', 'luminous'] : ['fungi', 'farmed', 'luminous', 'lamp'];
+ok('gold is the driver and the steps the engine keeps; an artifact built and not kept is not gold', goldWant.every((id) => states[id] === 'fired') && (goldWant.includes('lamp') || states.lamp !== 'fired'));
+ok('nothing else is gold', Object.values(states).filter((s) => s === 'fired').length === goldWant.length);
 ok('the seed of trouble has not happened', states.trouble === 'pending');
-ok("Earth's branch is the ghost", ['buried', 'seams', 'coalgas', 'gaslamp'].every((id) => states[id] === 'earth'));
-ok('the root belongs to both', states.lignin === 'root');
+ok("Earth's branch is the ghost", ['whaling', 'whaleoil', 'oillamp'].every((id) => states[id] === 'earth'));
+ok('the root belongs to both', states.ground === 'root');
+// the plate is what the engine grew (grow.js, worlds/fungi-early.js): its artifact is the first lamp this world builds
+// and Earth never does, Earth's is Earth's lamp in use at that step, and every step but the root, the driver and the
+// seed of trouble shows a row the engine built. Under "better" (2026-11-21, second pass) the lamp is built and not
+// kept, since it has no price and whale oil serves; the artifact's line says what the run says
+ok("the artifact is the engine's: the first lamp this world builds that Earth never does", WORLD.grown.artifactRow === 'mycelial-lamp' && !WORLD.grown.earthLamps.includes('mycelial-lamp'));
+ok("the artifact's line says whether this world keeps it, as the run does", WORLD.grown.kept === WORLD.grown.lamps.includes('mycelial-lamp')
+  && (WORLD.grown.kept ? /answer to/.test(WORLD.artifact.line) : !/answer to/.test(WORLD.artifact.line) && /lamp for/.test(WORLD.artifact.line)), WORLD.artifact.line);
+ok("Earth's artifact is Earth's lamp in use at that step", WORLD.grown.earthRow === 'whale-oil-lamp' && WORLD.grown.how === 'in use' && WORLD.grown.earthStep < WORLD.grown.step, JSON.stringify(WORLD.grown));
+ok('every step of either branch shows a row the engine kept', WORLD.nodes.filter((n) => n.row).length === WORLD.nodes.length - 3 && WORLD.nodes.every((n) => !n.row || TABLE.rows.some((r) => r.id === n.row)));
+ok('no step of the plate is typed: a table that grows no such lamp stops the plate', (() => { try { buildWorld({ ...TABLE, rows: TABLE.rows.filter((r) => r.id !== 'luminous-culture') }); return false; } catch { return true; } })());
 
 // ---------------------------------------------------------------- 3. the layout
 const textBox = (n) => {
@@ -212,7 +226,7 @@ for (let width = 300; width <= 640; width += 4) {   // the phone's 300 to 420, a
     if (lay.leader) ok(`${where}: the leader runs right from the artifact's label`, lay.leader.x1 < lay.leader.x2 && lay.leader.x1 > pos.get('lamp').x);
   }
 }
-ok('wrap keeps every word and its order', wrap('No coal; iron from rationed forests', 18).join(' ') === 'No coal; iron from rationed forests');
+ok('wrap keeps every word and its order', wrap('Luminous culture under glass', 12).join(' ') === 'Luminous culture under glass');
 ok('wrap keeps each line within its width', wrap('The rot that lights the city eats its timber', 19).every((l) => l.length <= 19));
 ok('wrap keeps a word longer than a line whole', JSON.stringify(wrap('Carboniferous era', 6)) === JSON.stringify(['Carboniferous', 'era']));
 
@@ -223,15 +237,15 @@ ok('wrap keeps a word longer than a line whole', JSON.stringify(wrap('Carbonifer
   while (id && seen.length < 40) { seen.push(id); id = step(WORLD, id, 'ArrowDown'); }
   const world = WORLD.nodes.filter((n) => n.branch !== 'earth').map((n) => n.id);
   ok('ArrowDown from the root walks every node of the world, once', seen.length === world.length && world.every((x) => seen.includes(x)), seen.join(' '));
-  ok('End reaches the last row', step(WORLD, 'lignin', 'End') === seen[seen.length - 1]);
+  ok('End reaches the last row', step(WORLD, 'ground', 'End') === seen[seen.length - 1]);
   for (const n of WORLD.nodes.filter((x) => x.branch === 'earth')) {
     ok(`ArrowRight from ${n.id} crosses to ${n.pair}`, step(WORLD, n.id, 'ArrowRight') === n.pair);
     ok(`ArrowLeft from ${n.pair} crosses back`, step(WORLD, n.pair, 'ArrowLeft') === n.id);
   }
-  ok("ArrowUp from Earth's first step reaches the root", step(WORLD, 'buried', 'ArrowUp') === 'lignin');
-  ok("ArrowDown walks Earth's branch on Earth's branch", step(WORLD, 'seams', 'ArrowDown') === 'coalgas');
+  ok("ArrowUp from Earth's first step reaches the root", step(WORLD, 'whaling', 'ArrowUp') === 'ground');
+  ok("ArrowDown walks Earth's branch on Earth's branch", step(WORLD, 'whaling', 'ArrowDown') === 'whaleoil');
   ok('a key the drawing does not use moves nowhere', step(WORLD, 'lamp', 'x') === null);
-  ok('a step with no pair has nowhere to cross', pairOf(WORLD, 'farmed') === null && step(WORLD, 'farmed', 'ArrowLeft') === null);
+  ok('a step with no pair has nowhere to cross', pairOf(WORLD, 'fungi') === null && step(WORLD, 'fungi', 'ArrowLeft') === null);
 }
 
 // ---------------------------------------------------------------- 5. the claims
@@ -312,6 +326,13 @@ for (const [what, text] of [['title', WORLD.title], ['driver', WORLD.driver], ['
   ['image', WORLD.artifact.image], ['alt text', WORLD.artifact.alt], ['exposure note', WORLD.artifact.exposure]]) {
   ok(`the markup's ${what} is the data's`, html.includes(text), text);
 }
+// the engine's verdict (worlds/fungi-early.js verdictOf): the markup holds each clause after its tag, in order, as the
+// script writes it, so a browser without scripts reads the engine's line too
+{
+  const marked = [...html.matchAll(/<span class="verdict-claim" data-claim><b class="t (real|ill)">\[(REAL|ILLUSTRATIVE)\]<\/b> <span class="verdict-text">([^<]*)<\/span><\/span>/g)];
+  ok("the markup's verdict is the data's: each clause after its tag, in order", marked.length === WORLD.verdict.clauses.length
+    && WORLD.verdict.clauses.every((c, i) => marked[i][2] === c.tag && marked[i][1] === (c.tag === 'REAL' ? 'real' : 'ill') && marked[i][3] === c.text), JSON.stringify(marked.map((m) => m.slice(1))));
+}
 
 // ---------------------------------------------------------------- 8. the ignition clock
 {
@@ -323,10 +344,10 @@ for (const [what, text] of [['title', WORLD.title], ['driver', WORLD.driver], ['
   ok("at 0 Earth's branch is all there", lay.edges.every((e, i) => (e.kind === 'earth' ? s0.edges[i] === 1 : true)));
   ok('at 0 no step of this world shows, and Earth and the root do', lay.nodes.every((n) => s0.nodes.get(n.id) === (n.state === 'fired' || n.state === 'pending' ? 0 : 1)));
   const art = arrival(WORLD, lay), into = idx('luminous', 'lamp');
-  ok('the line into the artifact is drawn at arrival', at(art).edges[into] === 1);
+  if (!(WORLD.grown && WORLD.grown.kept === false)) ok('the line into the artifact is drawn at arrival', at(art).edges[into] === 1);
   ok('and not 1 ms before', at(art - 1).edges[into] < 1);
   ok('arrival is the artifact row less one, times a row, plus a line', art === (lay.nodes.find((n) => n.id === 'lamp').row - 1) * TIMING.perRow + TIMING.edge);
-  ok('the driver is drawn before the step under it', at(TIMING.edge).edges[idx('lignin', 'fungi')] === 1 && at(TIMING.edge).edges[idx('fungi', 'nocoal')] < 1);
+  ok('the driver is drawn before the step under it', at(TIMING.edge).edges[idx('ground', 'fungi')] === 1 && at(TIMING.edge).edges[idx('fungi', 'farmed')] < 1);
   let mono = true;
   for (let t = 0; t < ignitionEnd(WORLD, lay); t += 17) {
     const a = at(t), b = at(t + 17);
@@ -356,7 +377,7 @@ for (const [width, height] of [[640, 560], [360, 0]]) {
     const clear = e.pts.every(([x, y]) => [0, end / 2, end].every((t) => fogOf(at(t), x, y) === 0));
     ok(`${where}: no fog along Earth's line ${e.from} to ${e.to}, at any moment`, clear);
   }
-  for (const id of ['fungi', 'farmed', 'nocoal', 'luminous']) {
+  for (const id of ['fungi', 'farmed', 'luminous']) {
     const p = n(id);
     ok(`${where}: before the strand, ${id} stands in nearly full fog`, fogOf(d0, p.x, p.y) >= 0.9 * FOG.full, fogOf(d0, p.x, p.y).toFixed(2));
     const side = p.x + (p.x > lay.lanes.side ? 20 : -20);
@@ -371,7 +392,7 @@ for (const [width, height] of [[640, 560], [360, 0]]) {
     const v = fogOf(d1, t.label.x + w / 2, t.label.y);
     ok(`${where}: and its fog runs over its words`, v >= 0.6, v.toFixed(2));
   }
-  ok(`${where}: more fog on what has not happened than beside what was invented`, fogOf(d1, t.x + 20, t.y) > fogOf(d1, n('nocoal').x + 20, n('nocoal').y + 16));
+  ok(`${where}: more fog on what has not happened than beside what was invented`, fogOf(d1, t.x + 20, t.y) > fogOf(d1, n('farmed').x + 20, n('farmed').y + 16));
   let grew = 0;
   let prev = d0;
   for (let ms = 60; ms <= end; ms += 60) {
@@ -466,12 +487,12 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
     const want = ids.filter((b) => needs(a, b)).sort().join();
     ok(`needsOf ${a} is every step its links reach`, [...needsOf(WORLD, a)].sort().join() === want, [...needsOf(WORLD, a)].join());
   }
-  ok('the root needs nothing', needsOf(WORLD, 'lignin').size === 0);
-  ok('a step one link away is named by that link', needLine(WORLD, needPath(WORLD, 'farmed', 'fungi')) === 'Fungi farmed needs Fungi eat lignin');
-  ok('a step further away is named through each step between', needLine(WORLD, needPath(WORLD, 'lamp', 'farmed')) === 'Mycelial lamp needs Luminous mycelium + glass, which needs Fungi farmed');
-  ok('a seed of trouble grows from the success that plants it, and is said so', needLine(WORLD, needPath(WORLD, 'trouble', 'luminous')) === 'The rot that lights the city eats its timber grows from Mycelial lamp, which needs Luminous mycelium + glass');
+  ok('the root needs nothing', needsOf(WORLD, 'ground').size === 0);
+  ok('a step one link away is named by that link', needLine(WORLD, needPath(WORLD, 'farmed', 'fungi')) === 'Glowing fungi farmed needs Fungi eat lignin');
+  ok('a step further away is named through each step between', needLine(WORLD, needPath(WORLD, 'lamp', 'farmed')) === 'Mycelial lamp needs Luminous culture under glass, which needs Glowing fungi farmed');
+  ok('a seed of trouble grows from the success that plants it, and is said so', needLine(WORLD, needPath(WORLD, 'trouble', 'luminous')) === 'The rot that lights the city eats its timber grows from Mycelial lamp, which needs Luminous culture under glass');
   ok('a step does not need what grows after it', needPath(WORLD, 'fungi', 'farmed') === null && needPath(WORLD, 'lamp', 'lamp') === null);
-  ok("this world's steps never need Earth's, nor Earth's this world's", needPath(WORLD, 'lamp', 'coalgas') === null && needPath(WORLD, 'gaslamp', 'fungi') === null);
+  ok("this world's steps never need Earth's, nor Earth's this world's", needPath(WORLD, 'lamp', 'oillamp') === null && needPath(WORLD, 'oillamp', 'fungi') === null);
   for (const a of ids) for (const b of ids) {
     const p = needPath(WORLD, a, b);
     if (!p) { if (needs(a, b)) ok(`needPath finds ${a} to ${b}`, false); continue; }
@@ -490,10 +511,20 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
     if (inSets) kept++;
     if (inSets !== (loose(s) <= EXERCISE.free)) ok(`the set ${s.join(' ')} is an item exactly when at most ${EXERCISE.free} pair is unordered`, false, `loose ${loose(s)}`);
   }
-  ok(`the sets are the ${kept} of ${all4} fours with at most one unordered pair`, kept === sets.length && sets.length === 40, `${sets.length}`);
-  ok('a set with two unordered pairs is not an item, one with one is', itemSets(WORLD, 4, 2).length > sets.length && sets.some((s) => loose(s) === 1) && sets.every((s) => loose(s) <= 1));
+  ok(`the sets are the ${kept} of ${all4} fours with at most one unordered pair`, kept === sets.length && sets.length === 16, `${sets.length}`);
+  ok('a set with two unordered pairs is not an item', itemSets(WORLD, 4, 2).length > sets.length && sets.every((s) => loose(s) <= 1));
+  // the grown lineage is one chain, so none of its fours leaves a pair unordered; just inside the bound is shown on a
+  // copy with one thread beside the trunk, where a four with exactly one unordered pair is an item
+  {
+    const w = clone(WORLD);
+    w.nodes.push({ id: 'beside', label: 'A thread beside it', role: 'substrate', branch: 'world', after: ['fungi'], needs: 'x', note: 'x', evidence: [{ tag: 'ILLUSTRATIVE', text: 'x' }] });
+    node(w, 'luminous').after.push('beside');
+    const one = itemSets(w).filter((s) => s.includes('beside') && s.includes('farmed'));
+    ok('a set with one unordered pair is an item', one.length > 0 && one.every((s) => s.length === 4));
+  }
 
-  // the check, on every order of every set: 40 sets, 24 orders each
+  // the check, on every order of every set: 16 sets, 24 orders each (40 on the typed lineage, whose thread left more fours
+  // with one pair unordered)
   let orders = 0, agree = 0;
   const perms = (a) => (a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map((p) => [x, ...p])));
   for (const s of sets) for (const o of perms(s)) {
@@ -503,7 +534,7 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
     if (same) agree++;
     else if (orders - agree <= 5) ok(`check of ${o.join(' ')}`, false, JSON.stringify({ got, want }));
   }
-  ok(`the check agrees with the oracle on all ${orders} orders of every set`, agree === orders && orders === 960, `${agree} of ${orders}`);
+  ok(`the check agrees with the oracle on all ${orders} orders of every set`, agree === orders && orders === 384, `${agree} of ${orders}`);
   ok('a set with an unordered pair has two right orders, every other set one', sets.every((s) => perms(s).filter((o) => checkOrder(WORLD, o).right).length === (loose(s) ? 2 : 1)));
 
   // every order of the whole lineage the links allow is right, and every swap of two linked neighbours in one is wrong
@@ -513,7 +544,7 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
     for (const id of left) if (WORLD.nodes.find((n) => n.id === id).after.every((p) => done.includes(p))) grow([...done, id], left.filter((x) => x !== id));
   };
   grow([], ids);
-  ok('the whole lineage has 420 orders its links allow (the two threads either way, Earth woven in)', exts.length === 420, String(exts.length));
+  ok("the whole lineage has 56 orders its links allow (Earth's three steps woven into this world's chain)", exts.length === 56, String(exts.length));
   ok('every one of them is right', exts.every((o) => checkOrder(WORLD, o).right));
   let swaps = 0, caught = 0;
   for (const o of exts) for (let i = 0; i + 1 < o.length; i++) {
@@ -537,12 +568,12 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
       ok(`draw ${i} is a set's steps, shuffled`, false, it.steps.join(' '));
     }
   }
-  ok('the first 40 items deal every set once', firstRound.size === sets.length);
+  ok(`the first ${sets.length} items deal every set once`, firstRound.size === sets.length);
   ok('a draw is the same on every call with its seed (a reload draws an order in progress again as it was)', JSON.stringify(item(WORLD, 7, 3, SALT)) === JSON.stringify(item(WORLD, 7, 3, SALT)));
   const places7 = new Set();
   for (let seed = 0; seed < 100; seed++) places7.add(item(WORLD, 7, seed, SALT).steps.join());
   ok('a new seed brings the same four steps in new places: 100 attempts at one item show at least 20 of its 24 orders', places7.size >= 20 && [...places7].every((o) => o.split(',').sort().join() === item(WORLD, 7, 0, SALT).steps.slice().sort().join()), String(places7.size));
-  ok('item 40 deals item 0\'s set again', item(WORLD, 40, 5, SALT).steps.slice().sort().join() === item(WORLD, 0, 9, SALT).steps.slice().sort().join());
+  ok(`item ${sets.length} deals item 0's set again`, item(WORLD, sets.length, 5, SALT).steps.slice().sort().join() === item(WORLD, 0, 9, SALT).steps.slice().sort().join());
   ok('an item or a seed that is not a whole number from 0 gives no draw', item(WORLD, -1, 0, SALT) === null && item(WORLD, 1.5, 0, SALT) === null && item(WORLD, 1, -1, SALT) === null && item(WORLD, 1, 0.5, SALT) === null && item(WORLD, 1, undefined, SALT) === null);
   // the salt is required, so no caller can fall back to the counter alone (review C2); its bounds, just inside and out
   ok('a draw with no salt, or a salt that is not 32 bits, is none', item(WORLD, 1, 0) === null && item(WORLD, 1, 0, -1) === null && item(WORLD, 1, 0, 2 ** 32) === null && item(WORLD, 1, 0, 1.5) === null
@@ -559,8 +590,8 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
     ok('a draw is seeded by the salt: two salts deal the same steps for an item and its attempt, in other places for at least 30 of 40 items', moved >= 30, String(moved));
   }
   ok('judge keeps the check as the record does: right, or the step and the nearest step it needs that came after it',
-    judge(WORLD, ['lignin', 'fungi', 'farmed', 'lamp']).right === true && judge(WORLD, ['lignin', 'fungi', 'farmed', 'lamp']).needs === null
-    && judge(WORLD, ['lamp', 'lignin', 'fungi', 'farmed']).right === false && judge(WORLD, ['lamp', 'lignin', 'fungi', 'farmed']).needs.join() === 'lamp,farmed');
+    judge(WORLD, ['ground', 'fungi', 'farmed', 'lamp']).right === true && judge(WORLD, ['ground', 'fungi', 'farmed', 'lamp']).needs === null
+    && judge(WORLD, ['lamp', 'ground', 'fungi', 'farmed']).right === false && judge(WORLD, ['lamp', 'ground', 'fungi', 'farmed']).needs.join() === 'lamp,farmed');
 
   // the reasons the footer is reserved for: every one a wrong order of an item gives, and only those
   const given = new Set();
@@ -689,12 +720,12 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   ok('an item that is not a whole number from 0 starts nothing', withStart(fresh(), { t: 1, item: -1 }).open === null && withStart(fresh(), { t: 1, item: 1.5 }).attempts === 0);
 
   // a walk down the drawing with the arrow keys is one choice, the step it ended on
-  let walk = withChoice(fresh(), { t: 0, node: 'lignin' });
+  let walk = withChoice(fresh(), { t: 0, node: 'ground' });
   walk = withChoice(walk, { t: 100, node: 'fungi', walk: true });
   walk = withChoice(walk, { t: 100 + EXERCISE.walkMs, node: 'farmed', walk: true });
-  walk = withChoice(walk, { t: 101 + 2 * EXERCISE.walkMs, node: 'nocoal', walk: true });
+  walk = withChoice(walk, { t: 101 + 2 * EXERCISE.walkMs, node: 'luminous', walk: true });
   ok(`arrow-key choices within ${EXERCISE.walkMs} ms are one walk, logged as where it ended; one just past that is a new choice`,
-    walk.log.map((e) => e.node).join() === 'lignin,farmed,nocoal' && walk.chosen === 'nocoal', walk.log.map((e) => e.node).join());
+    walk.log.map((e) => e.node).join() === 'ground,farmed,luminous' && walk.chosen === 'luminous', walk.log.map((e) => e.node).join());
   ok('a press is never merged into a walk', withChoice(withChoice(fresh(), { t: 0, node: 'fungi', walk: true }), { t: 10, node: 'lamp' }).log.length === 2);
   ok('a reload keeps every kind of entry the log may hold', restore({ ...s, log: [...s.log, ...o.log, ...walk.log] }, ids, drawOf).log.length === s.log.length + o.log.length + walk.log.length && Object.keys(KINDS).join() === 'practice,explore');
   let big = s;
@@ -707,7 +738,7 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   const loaded1 = await k1.load(ids, drawOf);
   ok('a fresh store reads as a fresh record, with a salt', JSON.stringify(unsalted(loaded1)) === JSON.stringify(unsalted(fresh())) && isSalt(loaded1.salt));
   ok('a fresh store reads the same record until it is first written: its salt is made once', JSON.stringify(await k1.read()) === JSON.stringify(loaded1));
-  await k1.apply((r) => withChoice(r, { t: 9, node: 'nocoal' }));
+  await k1.apply((r) => withChoice(r, { t: 9, node: 'luminous' }));
   ok('and the first write keeps that salt', (await new Progress(store).get('alt-reality')).data.salt === loaded1.salt);
   {
     // a record erased from the privacy page (os/privacy.js deleteAll) while the tab is open: the next change starts a
@@ -734,7 +765,7 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   ok('after a reload the order in progress comes back: its item, its seed and the two presses', back.open && back.open.item === 3 && back.open.seed === 1 && back.open.picks.join() === steps3.slice(0, 2).join(), JSON.stringify(back.open));
   ok('and its draw is the one shown before the reload, step for step and place for place', drawOf(back.open, back.salt).join() === steps3.join());
   ok('a returning record keeps the salt it was created with', back.salt === started.salt && isSalt(back.salt));
-  ok('and the attempts, the chosen step and the next item with it', back.attempts === 2 && back.chosen === 'nocoal' && back.next === 0);
+  ok('and the attempts, the chosen step and the next item with it', back.attempts === 2 && back.chosen === 'luminous' && back.next === 0);
   const rest = rightOf(steps3).filter((id) => !back.open.picks.includes(id));
   let after = null;
   for (const id of rest) after = (await k2.apply((r) => press(r, 20, id))).state;
@@ -930,7 +961,7 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   for (const [name, get] of rows) console.log(`  ${name.padEnd(42)} ${res.map((r) => f(get(r)).padStart(25)).join('')}`);
   for (const [k, [name]] of paths.entries()) {
     const r = res[k], bar = r.random + MARGIN;
-    ok(`L17, ${name}: ${r.n} draws, and random pressing's rate is between 1 and 2 in 24, as the sets allow`, r.n === N && r.random >= 1 / 24 && r.random <= 2 / 24, `${r.n} draws, ${f(r.random)}`);
+    ok(`L17, ${name}: ${r.n} draws, and random pressing's rate is between 1 and 2 in 24, as the sets allow`, r.n === N && r.random >= 1 / 24 - 1e-12 && r.random <= 2 / 24 + 1e-12, `${r.n} draws, ${f(r.random)}`);
     ok(`L17, ${name}: the order shown, given back, is right no more often than random pressing plus ${MARGIN}`, r.display <= bar, `${f(r.display)} against ${f(bar)}`);
     KEYS.forEach((key, i) => ok(`L17, ${name}: always pressing the places ${key.map((j) => j + 1).join('')} is right no more often than random plus ${MARGIN}`, r.keys[i] <= bar, `${f(r.keys[i])} against ${f(bar)}`));
     ok(`L17, ${name}: pressing the last draw's right places is right no more often than random plus ${MARGIN}`, r.prev <= bar, `${f(r.prev)} against ${f(bar)}`);
@@ -997,7 +1028,7 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
     if (o && checkOrder(WORLD, o).right) solved++;
     else if (tried - solved <= 3) ok(`the reader orders ${shown.join(' ')}`, false, o ? o.join(' ') : 'a circle');
   }
-  ok(`a reader given only the four steps' words orders every item right: ${solved} of ${tried} draws (40 sets, 24 orders shown)`, solved === tried && tried === 960, `${solved} of ${tried}`);
+  ok(`a reader given only the four steps' words orders every item right: ${solved} of ${tried} draws (16 sets, 24 orders shown)`, solved === tried && tried === 384, `${solved} of ${tried}`);
 }
 
 // ---------------------------------------------------------------- 17. one rule decides gold
@@ -1182,7 +1213,7 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   }
   const earthEdges = WORLD.nodes.filter((n) => n.branch === 'earth').reduce((a, n) => a + n.after.length, 0);
   ok(`every Earth line is drawn dotted (round dots of ${INK.earth} px, ${EARTH_DOTS.gap} px apart) and every other line a brush stroke: ${earthLines} Earth lines over 36 layouts`,
-    bad.length === 0 && earthEdges === 4 && earthLines === earthEdges * 36, bad.slice(0, 4).join('; '));
+    bad.length === 0 && earthEdges === 3 && earthLines === earthEdges * 36, bad.slice(0, 4).join('; '));
   ok("Earth's dots are larger and further apart than the dotted rule across a chosen row, so the two read apart",
     INK.earth > 1 && EARTH_DOTS.gap > 4, JSON.stringify({ INK: INK.earth, EARTH_DOTS }));
   // the legend's sample for Earth's branch is dotted as the drawing is

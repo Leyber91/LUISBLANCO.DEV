@@ -9,6 +9,10 @@
    ?still      the finished frame, no ignition and no drift (as
                under prefers-reduced-motion)
 
+   The world is grown when the page loads: main.js reads the
+   technology table and the engine (grow.js) grows the lineage from
+   it, as the tests do.
+
    One clock runs the ignition (engine.js strandAt): the strokes,
    the steps and the fog behind them are read from it each frame.
    It is a Labs OS scene, so it advances only while the drawing is
@@ -35,7 +39,7 @@ import { FogPainter } from './fogview.js';
 import { countLine, fresh, Keeper, withChoice, withLeave, withPress, withStart, withUndo } from './record.js';
 import { fallbackLine, provenance as provenanceLine } from './render-words.js';
 import { applyStrand, drawArtifactInk, drawEarthLamp, drawLineage, markChosen, markPicks, markWhy, placeDrill, writeDrill, writeReading } from './view.js';
-import { WORLD } from './worlds/fungi-early.js';
+import { buildWorld, TABLE_PATH } from './worlds/fungi-early.js';
 
 const $ = (id) => document.getElementById(id);
 /* The page marks each text block of its header, captions and legend as a claim (data-claim: it carries [REAL] or
@@ -45,6 +49,19 @@ const markClaim = (el, claim) => { el.toggleAttribute('data-claim', claim); el.t
 const params = new URLSearchParams(location.search);
 const still = params.has('still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wide = matchMedia('(min-width: 1000px)');
+
+/* The world is grown on load: the page reads the technology table and runs the engine on it (worlds/fungi-early.js
+   buildWorld, grow.js), so the lineage drawn is the one the rules grow, never a typed one. A table that does not load,
+   or a world the engine cannot grow, is said in the footer instead of a plate drawn from nothing. */
+let WORLD;
+try {
+  const r = await fetch(TABLE_PATH);
+  if (!r.ok) throw new Error(`the technology table answered ${r.status}`);
+  WORLD = buildWorld(await r.json());
+} catch (e) {
+  $('reading').textContent = `This world could not be grown: ${e.message}.`;
+  throw e;
+}
 
 const problems = check(WORLD);
 if (problems.length) {
@@ -546,6 +563,15 @@ function words() {
   b.textContent = WORLD.driver;
   q('.driver-line').replaceChildren('Changed driver: ', b, '.');
   q('.favours-text').textContent = WORLD.favours.line;   // its [REAL] tag stays in the markup beside it
+  // the engine's verdict: each clause after its tag, both computed (worlds/fungi-early.js verdictOf)
+  const cl = document.querySelectorAll('.verdict-claim');
+  WORLD.verdict.clauses.forEach((c, i) => {
+    if (!cl[i]) return;
+    const t = cl[i].querySelector('.t');
+    t.textContent = `[${c.tag}]`;
+    t.className = `t ${c.tag === 'REAL' ? 'real' : 'ill'}`;
+    cl[i].querySelector('.verdict-text').textContent = c.text;
+  });
   q('.art-name').textContent = WORLD.artifact.title;
   q('.art-line').textContent = WORLD.artifact.line;
   q('.art-exposure-text').textContent = WORLD.artifact.exposure;
@@ -556,7 +582,7 @@ function words() {
 
 function boot() {
   words();
-  drawEarthLamp($('earth-svg'), WORLD.earthArtifact.supply, WORLD.artifact.frame);
+  drawEarthLamp($('earth-svg'), WORLD.earthArtifact, WORLD.artifact.frame);
   draw();
   fixReadingHeight();
   // the plate's mono face arrives after the first layout: the reserved heights are measured again in it
