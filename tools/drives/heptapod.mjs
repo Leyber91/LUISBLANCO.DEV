@@ -259,14 +259,6 @@ export default async function heptapod(p, { base, width }) {
   await p.drag(t.x, t.y, t.x, t.y - 0.11 * g.height, { steps: 12 });      // up into the air, short of the glass
   await p.sleep(200);
   p.check('taking a thing writes ring 1', (await ringNo()).includes('ring 1 of 40'), await ringNo());
-  {
-    await p.sleep(600);
-    const h = await probe(), ht = h.things[name];
-    const heldStat = await pix(ht.box);
-    p.check('C1: a thing held up is no brighter than the disc where it is whole', heldStat.max < edge, `${name}: ${heldStat.max.toFixed(1)}, disc ${edge}`);
-    p.check('C3: a thing held up enters the disc\'s light (it is brighter than at rest)', heldStat.p95 > restStat.p95 && ht.light.all > t.light.all && ht.dist < t.dist,
-      `${name}: brightest 5% ${restStat.p95.toFixed(1)} at rest, ${heldStat.p95.toFixed(1)} held; light ${t.light.all.toFixed(4)}, ${ht.light.all.toFixed(4)}; ${t.dist} px from the fog, then ${ht.dist}`);
-  }
   p.check('the greeting gave way to the new ring', await p.until('document.getElementById("pod").probe().crop', 6000));
   // both sides are cut while the ring hangs, before any picture: a picture of this page took seconds in the headless
   // browser, and a ring lives 9.6 s (2026-11-17: the second crop came after the ring had gone)
@@ -276,6 +268,15 @@ export default async function heptapod(p, { base, width }) {
   p.check('the left of ring 1 is the radical at the foot of the greeting', (await entries()) === 1 && said.includes('already in the notebook'), `${await entries()} entries; "${said}"; read ${JSON.stringify((await probe()).lastKeep)}`);
   await cropSide(g, 90);
   p.check('a crop of the right side lands in the notebook', (await entries()) === 2, `${await entries()} entries; read ${JSON.stringify((await probe()).lastKeep)}; ring ${(await probe()).age} ms old`);
+  // the held thing's light, after the crops: its pixel reads take seconds under load, and the ring lives 9.6 s (on
+  // 2026-11-21 at 1440 px they came first and ring 1 had thinned away before its crops, on main's code as on this)
+  {
+    const h = await probe(), ht = h.things[name];
+    const heldStat = await pix(ht.box);
+    p.check('C1: a thing held up is no brighter than the disc where it is whole', heldStat.max < edge, `${name}: ${heldStat.max.toFixed(1)}, disc ${edge}`);
+    p.check('C3: a thing held up enters the disc\'s light (it is brighter than at rest)', heldStat.p95 > restStat.p95 && ht.light.all > t.light.all && ht.dist < t.dist,
+      `${name}: brightest 5% ${restStat.p95.toFixed(1)} at rest, ${heldStat.p95.toFixed(1)} held; light ${t.light.all.toFixed(4)}, ${ht.light.all.toFixed(4)}; ${t.dist} px from the fog, then ${ht.dist}`);
+  }
   await p.shot('02-ring-hangs');
   // late in the thinning only hairlines are left on that side: a crop of them is a scrap
   await p.until('!document.getElementById("pod").probe().ink', 12000);
@@ -521,6 +522,8 @@ export default async function heptapod(p, { base, width }) {
     await ready();
     await p.ev('document.getElementById("pod").scrollIntoView({ block: "center" })');
     p.check('a species greeting can be cropped', await p.until('document.getElementById("pod").probe().crop', 8000));
+    // settled first, so the change of grid below meets a ring at rest (a moving one moves on from where it was)
+    await p.until('(() => { const f = document.getElementById("pod").probe().field; return f.mass > 10 && f.fit > 0.95; })()', 8000);
     const g2 = await probe();
     const cx = g2.ring.x, cy = g2.ring.y + g2.ring.R, h = 0.55 * g2.ring.R;
     await p.down(cx - h, cy - h);
@@ -530,10 +533,15 @@ export default async function heptapod(p, { base, width }) {
     // only these
     await p.ev(`import('${base}/labs/assets/js/heptapod/stage.js').then((m) => { for (let i = 0; i < 120; i++) m.Tier.sample(50); return m.Tier.name; })`);
     const mid = await probe();
+    await p.sleep(300);
+    const laid = (await probe()).field;
     await p.move(cx + h, cy + h);
     await p.up(cx + h, cy + h);
     await p.sleep(250);
     const kept = (await probe()).lastKeep;
+    // the field laid again on the light tier's grid keeps the ring's ink (it once began empty, and the ring formed again
+    // out of the fog, 2026-11-21)
+    p.check("the ring's ink stays through the change of grid", laid.N !== g2.field.N && laid.fit > 0.8, `N ${g2.field.N} to ${laid.N}, fit ${laid.fit}`);
     p.check('a crop goes on through a change of tier and is kept', mid.tier === 'lite' && mid.dragging === 'crop' && !!kept && kept.cells > 0,
       `tier ${mid.tier}, dragging ${mid.dragging} after the change; read ${JSON.stringify(kept)}`);
   }
