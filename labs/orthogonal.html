@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Orthogonal · Alternate Reality</title>
+<meta name="description" content="Change one driver of a world and follow the technologies it grows. Here lignin-eating fungi arrive early, coal never forms, and a street lamp is grown from glowing fungus under glass, drawn beside Earth's coal-gas lamp for the same job." />
+<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/plate.css" />
+<link rel="stylesheet" href="assets/css/os.css" />
+<link rel="stylesheet" href="assets/css/orthogonal.css" />
+</head>
+<body>
+<span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
+
+<main class="sheet">
+  <header class="head">
+    <div class="head-row">
+      <p class="kick-line">Plate A &middot; Alternate Reality &middot; Orthogonal</p>
+      <a class="back" href="index.html">&larr; labs</a>
+    </div>
+    <h1 class="title">A world where the fungi came early</h1>
+    <p class="thesis">Changed driver: <b>lignin-eating fungi before the Carboniferous</b>. The evidence favours the other branch: Nelsen et al. 2016 reject this lag; Floudas et al. 2012 support it in part.</p>
+  </header>
+
+  <section class="lineage" id="lineage" aria-label="The lineage of the lamp: this world's branch and Earth's">
+    <svg id="lineage-svg" role="group" aria-label="Choose a step to read it; the arrow keys move along the rows and across to Earth's step"></svg>
+  </section>
+
+  <figure class="art" id="art">
+    <img id="art-img" src="assets/data/orthogonal/renders/mycelial-lamp.webp" width="940" height="1316" decoding="async"
+      alt="A wide glass column on a ceramic plinth under a louvered hood, seen from low down: shelves of gilled bracket fungus climb a wooden spindle inside, their gill edges and rolled margins glowing blue-white in fog." />
+    <figcaption class="art-cap">
+      <span class="art-name">The mycelial street lamp</span>
+      <span class="art-line">This world, built for light at night</span>
+      <span class="art-status" id="art-status" role="status"></span>
+      <span class="provenance" id="provenance" data-state="loading">Reading the render's record.</span>
+    </figcaption>
+  </figure>
+
+  <section class="earth" aria-label="Earth's artifact for the same job, ghosted">
+    <p class="earth-head"><span class="dim-line">Earth, same job</span><span class="earth-name">The coal-gas street lamp</span></p>
+    <svg id="earth-svg" class="earth-svg" aria-hidden="true"></svg>
+    <p class="earth-foot">Gas main</p>
+  </section>
+
+  <section class="reading" id="reading" aria-live="polite" aria-label="The chosen step's reading and its evidence"></section>
+
+  <div class="titleblock" aria-label="Title block">
+    <span>Sheet</span><span>A / 1</span>
+    <span>Rev</span><span>slice 1</span>
+    <span>Date</span><span>2026-11-21</span>
+  </div>
+</main>
+
+<script type="module" src="assets/js/orthogonal/main.js"></script>
+</body>
+</html>

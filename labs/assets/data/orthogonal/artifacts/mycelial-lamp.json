@@ -1,0 +1,53 @@
+{
+  "artifact": "mycelial-lamp",
+  "family": "shelf-culture-lamp",
+  "title": "The mycelial street lamp",
+  "tag": "ILLUSTRATIVE",
+  "about": "An invented lamp: a glass column on a ceramic plinth under a louvered hood, a culture of gilled shelf fungus on a wooden spindle inside, the glow on the gill edges and the rolled margins. Lengths in metres, angles in degrees.",
+  "seed": 20261121,
+  "instrument": {
+    "column_radius_m": 0.48,
+    "column_height_m": 1.35,
+    "plinth_height_m": 0.36,
+    "plinth_overhang_m": 0.08,
+    "spindle_radius_m": 0.045,
+    "brim_overhang_m": 0.12,
+    "louvers": [[0.40, 0.07], [0.34, 0.15], [0.27, 0.23], [0.19, 0.31]],
+    "flask_radius_m": 0.10
+  },
+  "culture": {
+    "front_caps": 4,
+    "back_caps": 2,
+    "front_radius_m": [0.34, 0.38],
+    "back_radius_m": [0.22, 0.26],
+    "front_raise_deg": [18, 24],
+    "back_raise_deg": [4, 9],
+    "front_spread_deg": [28, 58],
+    "back_spread_deg": 35,
+    "floor_m": 0.17,
+    "ceiling_m": 0.36
+  },
+  "bracket": {
+    "rise": [0.20, 0.28],
+    "thick": [0.14, 0.18],
+    "full_gills": [18, 25],
+    "gill_depth": [0.07, 0.09],
+    "short_gill_chance": 0.35,
+    "edge_power": 4.0,
+    "sweep_steps": 96,
+    "gill_steps": 24
+  },
+  "glow": { "rgb": [0.70, 0.84, 1.0], "gill": 5.0, "flesh": 1.8 },
+  "air": { "fog_density": 0.075, "fog_anisotropy": 0.35, "rim_energy_w": 140 },
+  "camera": { "distance_m": 3.6, "height_m": 0.55, "look_at_m": 1.05, "azimuth_deg": -53.88, "fill": 0.93, "fill_x": 0.95 },
+  "ink": { "thickness_px": 0.7, "rgb": [0.62, 0.70, 0.84], "alpha": 0.55 },
+  "render": {
+    "width": 1000,
+    "height": 1400,
+    "percent": 94,
+    "samples": 32,
+    "time_limit_s": 330,
+    "webp_quality": 82,
+    "plate_width_px": 470
+  }
+}
