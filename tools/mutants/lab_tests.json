@@ -341,8 +341,8 @@
   },
   {
     "name": "closure: an import over several lines is not followed",
-    "from": "(?:[\\w$*{}\\s,]*?\\bfrom\\s*)?",
-    "to": "(?:[\\w$*{} ,]*?\\bfrom\\s*)?"
+    "from": "(?:(?:[\\w$*{}\\s,]|",
+    "to": "(?:(?:[\\w$*{} ,]|"
   },
   {
     "name": "closure: a query after the path hides the module",
@@ -423,16 +423,6 @@
     "name": "walks: readdir does not count as listing a folder",
     "from": "const WALKS = /\\b(?:readdir|opendir|glob)",
     "to": "const WALKS = /\\b(?:opendir|glob)"
-  },
-  {
-    "name": "walks: an import of a computed path does not count",
-    "from": "(?:Sync)?\\s*\\(|\\bimport\\s*\\(\\s*(?!(['\"`])[^'\"`$\\n]+\\1\\s*\\))/;",
-    "to": "(?:Sync)?\\s*\\(/;"
-  },
-  {
-    "name": "walks: an import with a literal path counts as computed",
-    "from": "(?:Sync)?\\s*\\(|\\bimport\\s*\\(\\s*(?!(['\"`])[^'\"`$\\n]+\\1\\s*\\))/;",
-    "to": "(?:Sync)?\\s*\\(|\\bimport\\s*\\(/;"
   },
   {
     "name": "data: a data folder a test names runs nothing",
@@ -558,5 +548,395 @@
     "name": "command: with one lab named, the plan reads only that lab's tests",
     "from": "const plan = testsToRun(findTests(JS), changed, root);",
     "to": "const plan = testsToRun(found, changed, root);"
+  },
+  {
+    "name": "closure: a file that cannot be read is read as text",
+    "from": "if (text !== null) {",
+    "to": "if (true) {"
+  },
+  {
+    "name": "closure: import() with a literal path gives no path",
+    "from": "(m[2] ?? m[4])",
+    "to": "(m[2] ?? '')"
+  },
+  {
+    "name": "closure: an import that starts with ./ is not followed",
+    "from": "if (spec.startsWith('./') || spec.startsWith('../'))",
+    "to": "if (spec.startsWith('../'))"
+  },
+  {
+    "name": "closure: only an import that starts with both ./ and ../ is followed",
+    "from": "if (spec.startsWith('./') || spec.startsWith('../'))",
+    "to": "if (spec.startsWith('./') && spec.startsWith('../'))"
+  },
+  {
+    "name": "names: a full path named does not reach the file it names",
+    "from": "(c === n || c.endsWith(",
+    "to": "(c.endsWith("
+  },
+  {
+    "name": "changed: the runner files run every test only with a package file",
+    "from": "RUNS_ALL.includes(c) || PACKAGE.test(c)",
+    "to": "RUNS_ALL.includes(c) && PACKAGE.test(c)"
+  },
+  {
+    "name": "command: the skipped count starts at one",
+    "from": "(left.get(lab) || 0) + 1",
+    "to": "(left.get(lab) || 1) + 1"
+  },
+  {
+    "name": "command: the count of a lab's test files counts the other labs'",
+    "from": "labOf(rel(f)) === lab).length",
+    "to": "labOf(rel(f)) !== lab).length"
+  },
+  {
+    "name": "command: run as a command it runs nothing",
+    "from": "path.resolve(process.argv[1]) === SELF",
+    "to": "path.resolve(process.argv[1]) !== SELF"
+  },
+  {
+    "name": "command: --root is ignored",
+    "from": "const root = rootArg === undefined ? ROOT : path.resolve(rootArg);",
+    "to": "const root = rootArg !== undefined ? ROOT : path.resolve(rootArg);"
+  },
+  {
+    "name": "command: with no --changed-since the files are asked of git",
+    "from": "if (sinceArg !== undefined) {",
+    "to": "if (sinceArg === undefined) {"
+  },
+  {
+    "name": "closure: a block comment between the braces hides the import",
+    "from": "|\\/\\*[\\s\\S]*?\\*\\/|\\/\\/[^\\n]*\\n)*?\\bfrom",
+    "to": "|\\/\\/[^\\n]*\\n)*?\\bfrom"
+  },
+  {
+    "name": "closure: a line comment between the braces hides the import",
+    "from": "|\\/\\*[\\s\\S]*?\\*\\/|\\/\\/[^\\n]*\\n)*?\\bfrom",
+    "to": "|\\/\\*[\\s\\S]*?\\*\\/)*?\\bfrom"
+  },
+  {
+    "name": "spawn: a test that starts another does not follow it",
+    "from": "if (SPAWNS.test(text)) for (const p of",
+    "to": "if (false) for (const p of"
+  },
+  {
+    "name": "spawn: a test that only reads another follows it",
+    "from": "if (SPAWNS.test(text)) for (const p of",
+    "to": "if (true) for (const p of"
+  },
+  {
+    "name": "copies: the runner's own copies make every caller run on any change",
+    "from": "if (slash(path.relative(root, file)) === COPY_RUNNER) return out;",
+    "to": ""
+  },
+  {
+    "name": "copies: the caller's lab is not copied",
+    "from": "    out.opaque.push(lab);\n",
+    "to": ""
+  },
+  {
+    "name": "copies: the folders in also are not copied",
+    "from": "else for (const d of also) out.opaque.push(path.join(js, d));",
+    "to": "else { /* not copied */ }"
+  },
+  {
+    "name": "copies: the data files are not read",
+    "from": "else for (const d of data) out.exact.push(path.join(path.dirname(js), d));",
+    "to": "else { /* not read */ }"
+  },
+  {
+    "name": "copies: the module is not followed",
+    "from": "    if (mod) out.follow.push(path.join(lab, mod));\n",
+    "to": ""
+  },
+  {
+    "name": "copies: the test is not followed",
+    "from": "    if (test) out.follow.push(path.resolve(here, test));\n",
+    "to": ""
+  },
+  {
+    "name": "copies: an array is cut at its first comma",
+    "from": "return obj[at] === '[' ? `[${inside(obj, at)}]` : parts(obj.slice(at))[0];",
+    "to": "return parts(obj.slice(at))[0];"
+  },
+  {
+    "name": "paths: the module's folder is not known",
+    "from": "if (/^(?:(?:path|url)\\.)?dirname\\(",
+    "to": "if (/^NEVER(?:(?:path|url)\\.)?dirname\\("
+  },
+  {
+    "name": "paths: pathToFileURL is not passed over",
+    "from": "(?:fileURLToPath|pathToFileURL)|String)",
+    "to": "(?:fileURLToPath)|String)"
+  },
+  {
+    "name": "paths: .href is not passed over",
+    "from": "w = /^([\\s\\S]*)\\.(?:href|pathname)$/.exec(e);",
+    "to": "w = /^([\\s\\S]*)\\.(?:pathname)$/.exec(e);"
+  },
+  {
+    "name": "paths: a constant is not looked up",
+    "from": "return Object.hasOwn(env, e) ? env[e] : null;",
+    "to": "return null;"
+  },
+  {
+    "name": "paths: the temp folder is a folder of the site",
+    "from": "if (/^(?:os\\.)?tmpdir\\(\\)$/.test(e) || /^mkdtempSync\\(/.test(e)) return { at: OUT, exact: true };",
+    "to": ""
+  },
+  {
+    "name": "paths: a URL against a base that is no path cannot be placed",
+    "from": "if (!base || base.str !== undefined) return { str: '' };",
+    "to": "if (!base || base.str !== undefined) return null;"
+  },
+  {
+    "name": "paths: a join of literals alone cannot be placed",
+    "from": "    if (first && first.str !== undefined && args.every((a) => LITERAL.test(a))) return",
+    "to": "    if (false) return"
+  },
+  {
+    "name": "paths: a join with a computed part is exact",
+    "from": "      if (!v || v.str === undefined) return { at, exact: false };",
+    "to": "      if (!v || v.str === undefined) return { at, exact: true };"
+  },
+  {
+    "name": "paths: a template that starts with a constant is not placed",
+    "from": "      return v.at === OUT ? v : { at: path.join(v.at, t[2].replace(/[^/]*$/, '')), exact: false };",
+    "to": "      return null;"
+  },
+  {
+    "name": "paths: a template that starts with ../ is not placed",
+    "from": "    if (/^\\.{1,2}\\//.test(head)) return {",
+    "to": "    if (false) return {"
+  },
+  {
+    "name": "declarations: only the first of several names is read",
+    "from": "for (const one of parts(d[1])) {",
+    "to": "for (const one of parts(d[1]).slice(0, 1)) {"
+  },
+  {
+    "name": "scan: a template that is a count, not a path, cannot be placed",
+    "from": "if (v || m[0] !== '`${') place(v, tpl);",
+    "to": "place(v, tpl);"
+  },
+  {
+    "name": "scan: a folder listed is not counted",
+    "from": "        if (v && v.str === undefined) { if (v.at !== OUT) out.opaque.push(v.at); }",
+    "to": "        if (v && v.str === undefined) { /* not counted */ }"
+  },
+  {
+    "name": "scan: a computed import that evaluates is placed, not followed",
+    "from": "if (v && v.exact && v.at !== OUT) out.follow.push(v.at); else place(v,",
+    "to": "if (false) out.follow.push(v.at); else place(v,"
+  },
+  {
+    "name": "scan: a URL parsed alone cannot be placed",
+    "from": "      if (head === 'new URL' && parts(args).length < 2) continue;",
+    "to": "      if (false) continue;"
+  },
+  {
+    "name": "scan: join and resolve taken from node:path are not counted",
+    "from": "${bare.filter((n) => n === 'join' || n === 'resolve')",
+    "to": "${[].filter((n) => n === 'join' || n === 'resolve')"
+  },
+  {
+    "name": "scan: a promise's resolve counts as a path",
+    "from": "${bare.filter((n) => n === 'join' || n === 'resolve')",
+    "to": "${['join', 'resolve'].filter((n) => n === 'join' || n === 'resolve')"
+  },
+  {
+    "name": "scan: an array's join counts as a path",
+    "from": "`|(?<![\\\\w$.])${n}",
+    "to": "`|(?<![\\\\w$])${n}"
+  },
+  {
+    "name": "helpers: a helper is read as a plain constant",
+    "from": "      if (fn) { helpers.push(",
+    "to": "      if (false) { helpers.push("
+  },
+  {
+    "name": "helpers: a literal given to a helper is not used",
+    "from": "if (v) scope[h.param] = v; else delete scope[h.param];",
+    "to": "delete scope[h.param];"
+  },
+  {
+    "name": "helpers: a helper's calls are not read",
+    "from": "    if (!/\\b(?:import|join|resolve|URL)\\s*\\(|`/.test(h.body)) continue;",
+    "to": "    if (true) continue;"
+  },
+  {
+    "name": "reach: a file read by a path it builds runs nothing",
+    "from": "if (t.reads.has(c)) return",
+    "to": "if (false) return"
+  },
+  {
+    "name": "reach: a folder its computed paths fall under runs nothing",
+    "from": "for (const d of t.opaque) if (c.startsWith(d)) return",
+    "to": "for (const d of t.opaque) if (false) return"
+  },
+  {
+    "name": "reach: a test whose path cannot be placed runs on no change",
+    "from": "if (t.anywhere && c.startsWith('labs/')) return",
+    "to": "if (false && c.startsWith('labs/')) return"
+  },
+  {
+    "name": "reach: a test whose path cannot be placed runs on changes outside labs/",
+    "from": "if (t.anywhere && c.startsWith('labs/')) return",
+    "to": "if (t.anywhere) return"
+  },
+  {
+    "name": "reach: an opaque folder is matched without its slash",
+    "from": "for (const p of one.opaque) opaque.add(slash(path.relative(root, p)) + '/');",
+    "to": "for (const p of one.opaque) opaque.add(slash(path.relative(root, p)));"
+  },
+  {
+    "name": "closure: a static import reads the dynamic import's place",
+    "from": "(m[2] ?? m[4])",
+    "to": "(m[2] ?? m[2])"
+  },
+  {
+    "name": "names: a full path named reaches every other file",
+    "from": "(c === n || c.endsWith('/' + n))",
+    "to": "(c !== n || c.endsWith('/' + n))"
+  },
+  {
+    "name": "paths: a URL with a base cannot be placed",
+    "from": "if (b === undefined) return null;",
+    "to": "if (b !== undefined) return null;"
+  },
+  {
+    "name": "paths: a URL against import.meta.url is read against the base given",
+    "from": "const base = b === 'import.meta.url' ?",
+    "to": "const base = b !== 'import.meta.url' ?"
+  },
+  {
+    "name": "paths: a join whose first part cannot be told is read",
+    "from": "if (!first || first.str !== undefined) return null;",
+    "to": "if (!first && first.str !== undefined) return null;"
+  },
+  {
+    "name": "paths: a join from a folder of the site stops at its first part",
+    "from": "if (first.at === OUT) return first;",
+    "to": "if (first.at !== OUT) return first;"
+  },
+  {
+    "name": "paths: a computed part of a join is joined as text",
+    "from": "if (!v || v.str === undefined) return { at, exact: false };",
+    "to": "if (!v && v.str === undefined) return { at, exact: false };"
+  },
+  {
+    "name": "paths: a template that starts with ${} is read as one that starts with text",
+    "from": "    if (head === '') {",
+    "to": "    if (head !== '') {"
+  },
+  {
+    "name": "paths: a template whose first ${} cannot be told is read",
+    "from": "      if (!v || v.str !== undefined) return null;\n      return v.at",
+    "to": "      if (!v && v.str !== undefined) return null;\n      return v.at"
+  },
+  {
+    "name": "scan: an exact path of the site is taken for the temp folder",
+    "from": "else if (v.at === OUT || v.str !== undefined) {",
+    "to": "else if (v.at !== OUT || v.str !== undefined) {"
+  },
+  {
+    "name": "scan: every call whose brackets close is skipped",
+    "from": "      if (args === null) continue;\n      const head",
+    "to": "      if (args !== null) continue;\n      const head"
+  },
+  {
+    "name": "scan: a folder listed is counted only when it is the temp folder",
+    "from": "if (v.at !== OUT) out.opaque.push(v.at); }",
+    "to": "if (v.at === OUT) out.opaque.push(v.at); }"
+  },
+  {
+    "name": "scan: an import is read as a join, and a join as an import",
+    "from": "      if (head === 'import') {",
+    "to": "      if (head !== 'import') {"
+  },
+  {
+    "name": "helpers: every call of a helper is skipped",
+    "from": "if (args === null || c.index === h.at) continue;",
+    "to": "if (args !== null || c.index === h.at) continue;"
+  },
+  {
+    "name": "helpers: the literal given is never read",
+    "from": "const v = a === undefined ? null : evalPath(a, env, file);",
+    "to": "const v = a !== undefined ? null : evalPath(a, env, file);"
+  },
+  {
+    "name": "brackets: a long call is cut short",
+    "from": "k < text.length && k < i + 4000; k++)",
+    "to": "k < text.length && k < i + 40; k++)"
+  },
+  {
+    "name": "brackets: a string never ends",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch !== q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch) && --depth"
+  },
+  {
+    "name": "arguments: a string never ends",
+    "from": "    if (q) { if (ch === '\\\\') k++; else if (ch === q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;",
+    "to": "    if (q) { if (ch === '\\\\') k++; else if (ch !== q) q = null; continue; }\n    if (ch === '\"' || ch === \"'\" || ch === '`') q = ch;\n    else if ('([{'.includes(ch)) depth++;\n    else if (')]}'.includes(ch)) depth--;"
+  },
+  {
+    "name": "arguments: a list is split at every character of the top level",
+    "from": "else if (ch === ',' && depth === 0)",
+    "to": "else if (ch === ',' || depth === 0)"
+  },
+  {
+    "name": "paths: a call's brackets are taken to close where they do not",
+    "from": "const whole = (body) => inside(e, e.indexOf('(')) === body;",
+    "to": "const whole = (body) => inside(e, e.indexOf('(')) !== body;"
+  },
+  {
+    "name": "paths: only one wrapper is passed over",
+    "from": "for (let k = 0; k < 4; k++) {   // wrappers",
+    "to": "for (let k = 0; k < 1; k++) {   // wrappers"
+  },
+  {
+    "name": "paths: a URL against a base that cannot be told is read",
+    "from": "if (!base || base.str !== undefined) return { str: '' };",
+    "to": "if (!base && base.str !== undefined) return { str: '' };"
+  },
+  {
+    "name": "paths: a join from a folder of the site is taken for one of literals",
+    "from": "if (!first || first.str !== undefined) return null;",
+    "to": "if (!first || first.str === undefined) return null;"
+  },
+  {
+    "name": "paths: a literal part stops a join",
+    "from": "if (!v || v.str === undefined) return { at, exact: false };",
+    "to": "if (!v || v.str !== undefined) return { at, exact: false };"
+  },
+  {
+    "name": "paths: a template that starts with a folder constant is not placed",
+    "from": "      if (!v || v.str !== undefined) return null;\n      return v.at",
+    "to": "      if (!v || v.str === undefined) return null;\n      return v.at"
+  },
+  {
+    "name": "scan: a path of the site is taken for a plain string",
+    "from": "else if (v.at === OUT || v.str !== undefined) {",
+    "to": "else if (v.at === OUT || v.str === undefined) {"
+  },
+  {
+    "name": "scan: join taken from node:path is not counted",
+    "from": "bare.filter((n) => n === 'join' || n === 'resolve')",
+    "to": "bare.filter((n) => n === 'resolve')"
+  },
+  {
+    "name": "helpers: a helper's own declaration is read as its call, and its calls are not",
+    "from": "if (args === null || c.index === h.at) continue;",
+    "to": "if (args === null || c.index !== h.at) continue;"
+  },
+  {
+    "name": "names: a bare name reaches any file",
+    "from": "(n === base && (!c.startsWith(JS_DIR)",
+    "to": "(n !== base && (!c.startsWith(JS_DIR)"
+  },
+  {
+    "name": "names: a bare name reaches every lab's module folder but its own",
+    "from": "labOf(c) === t.lab))) return `names ${c}`;",
+    "to": "labOf(c) !== t.lab))) return `names ${c}`;"
   }
 ]

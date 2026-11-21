@@ -33,10 +33,18 @@
      a path missing on disk included;
    - its closure names the changed file: a path that ends the same way,
      or a bare file name, which reaches no other lab's module folder;
-   - its closure lists a folder (readdir, opendir, glob) or imports a
-     path it computes, and the change sits under its lab's folder;
+   - its closure lists a folder (readdir, opendir, glob), and the change
+     sits under its lab's folder;
    - its closure names labs/assets/data/<folder> and the change sits
-     there.
+     there;
+   - its reach is not wholly static (a computed import, a path joined
+     at runtime, a test it starts or the kit's runner copies) and the
+     change sits under a folder its computed paths fall under (the
+     part of the path that evaluates; the lab and the folders in also
+     for a copy), or, when no folder can be told, anywhere under labs/.
+     A test it starts, and the module and test a copy runs, are part
+     of its closure. Each test decides for itself: another test that
+     reaches the file never stands in for it.
    Every test runs when tools/lab_tests.mjs, tools/mutate.mjs, the gates
    workflow, a package.json or a lockfile changed; when a change under
    labs/assets/data reaches no test (which test reads it cannot be
@@ -121,10 +129,16 @@ const RUNS_ALL = ['tools/lab_tests.mjs', 'tools/mutate.mjs', '.github/workflows/
 const PACKAGE = /(^|\/)(package\.json|package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml)$/;
 // a module or data a test can load by a path it builds
 const LOADABLE = /\.([cm]?js|json)$/;
-// the paths a module imports: import and export ... from '<path>', import '<path>', import('<literal path>')
-const SPECIFIER = /\b(?:import|export)\s*(?:[\w$*{}\s,]*?\bfrom\s*)?(['"])([^'"\n]+)\1|\bimport\s*\(\s*(['"`])([^'"`$\n]+)\3\s*\)/g;
-// a folder listed, or an import whose path is computed: the test may read any file of its lab's folder
-const WALKS = /\b(?:readdir|opendir|glob)(?:Sync)?\s*\(|\bimport\s*\(\s*(?!(['"`])[^'"`$\n]+\1\s*\))/;
+// the paths a module imports: import and export ... from '<path>', import '<path>', import('<literal path>'); a comment
+// between the braces is passed over
+const SPECIFIER = /\b(?:import|export)\s*(?:(?:[\w$*{}\s,]|\/\*[\s\S]*?\*\/|\/\/[^\n]*\n)*?\bfrom\s*)?(['"])([^'"\n]+)\1|\bimport\s*\(\s*(['"`])([^'"`$\n]+)\3\s*\)/g;
+// a folder listed: the test may read any file of its lab's folder
+const WALKS = /\b(?:readdir|opendir|glob)(?:Sync)?\s*\(/;
+// a process started: the module files it names are followed as imports (a test run by another, e1.args runs e1)
+const SPAWNS = /\b(?:spawn|spawnSync|fork|execFile|execFileSync|exec|execSync)\s*\(/;
+// the kit's mutants runner copies its caller's lab and the folders in also; its callers say what, so its own copies
+// are read at each call (runMutants), not in its text
+const COPY_RUNNER = 'labs/assets/js/kit/tests/mutants.mjs';
 // a file named in a text, with the path before it: a run of path characters that ends in a dot and an extension
 // (two steps, so that a long run is read once: one pattern with both parts took seconds on a long line)
 const PATH_RUN = /[\w./-]+/g, ENDS_AS_FILE = /[\w-]\.[A-Za-z][A-Za-z0-9]{0,5}$/;
@@ -132,6 +146,197 @@ const PATH_RUN = /[\w./-]+/g, ENDS_AS_FILE = /[\w-]\.[A-Za-z][A-Za-z0-9]{0,5}$/;
 const DATA_NAMED = /\bdata(?:\/|['"`]\s*,\s*['"`])([\w-]+)/g;
 const slash = (p) => p.split(path.sep).join('/');
 const labOf = (rel) => (rel.startsWith(JS_DIR) ? rel.slice(JS_DIR.length).split('/')[0] : '');
+
+/* ---- paths a module builds at runtime: a test whose reach is not wholly static is opaque ----
+   A path is evaluated from the module's own text: its folder (dirname(fileURLToPath(import.meta.url)), __dirname,
+   new URL('<literal>', import.meta.url)), the constants built from it (join, resolve, new URL), string literals, and
+   the temp folder, outside the repository. A path whose parts all evaluate is exact: a file the test reads by name.
+   One with a part that does not (a parameter, a template's ${}) can fall anywhere under the part before it: that
+   folder is the test's. One whose first part does not evaluate cannot be placed: the test runs on any change under
+   labs/. A computed part is taken not to climb out of its folder with '..'. */
+const OUT = 'outside the repository';
+// the text inside the brackets that open at i, strings and nested brackets kept whole; null when they do not close
+function inside(text, i) {
+  let depth = 0, q = null;
+  for (let k = i; k < text.length && k < i + 4000; k++) {
+    const ch = text[k];
+    if (q) { if (ch === '\\') k++; else if (ch === q) q = null; continue; }
+    if (ch === '"' || ch === "'" || ch === '`') q = ch;
+    else if ('([{'.includes(ch)) depth++;
+    else if (')]}'.includes(ch) && --depth === 0) return text.slice(i + 1, k);
+  }
+  return null;
+}
+// a list of arguments split at its top-level commas
+function parts(s) {
+  const out = [];
+  let depth = 0, q = null, from = 0;
+  for (let k = 0; k < s.length; k++) {
+    const ch = s[k];
+    if (q) { if (ch === '\\') k++; else if (ch === q) q = null; continue; }
+    if (ch === '"' || ch === "'" || ch === '`') q = ch;
+    else if ('([{'.includes(ch)) depth++;
+    else if (')]}'.includes(ch)) depth--;
+    else if (ch === ',' && depth === 0) { out.push(s.slice(from, k)); from = k + 1; }
+  }
+  out.push(s.slice(from));
+  return out.map((a) => a.trim()).filter(Boolean);
+}
+const LITERAL = /^(['"`])([^'"`\\$\n]*)\1$/;
+// a path expression's value: { at: an absolute path or OUT, exact: whether it is that path and not a folder it falls
+// under }, a string { str }, or null when it cannot be evaluated. env: the constants of the module, by name
+export function evalPath(expr, env, file) {
+  let e = expr.trim();
+  // the brackets after a call's name close at its end: f(a)(b) and f(a).x are not one call
+  const whole = (body) => inside(e, e.indexOf('(')) === body;
+  for (let k = 0; k < 4; k++) {   // wrappers that keep the path: X.href, X.pathname, fileURLToPath(X), pathToFileURL(X), String(X)
+    let w = /^(?:(?:url\.)?(?:fileURLToPath|pathToFileURL)|String)\(([\s\S]*)\)$/.exec(e);
+    if (w && whole(w[1])) { e = w[1].trim(); continue; }
+    w = /^([\s\S]*)\.(?:href|pathname)$/.exec(e);
+    if (w) { e = w[1].trim(); continue; }
+    break;
+  }
+  const lit = LITERAL.exec(e);
+  if (lit) return { str: lit[2] };
+  if (/^(?:(?:path|url)\.)?dirname\(\s*(?:(?:url\.)?fileURLToPath\(\s*)?import\.meta\.url\s*\)?\s*\)$/.test(e) || e === '__dirname' || e === 'import.meta.dirname') return { at: path.dirname(file), exact: true };
+  if (/^(?:os\.)?tmpdir\(\)$/.test(e) || /^mkdtempSync\(/.test(e)) return { at: OUT, exact: true };
+  if (/^[A-Za-z_$][\w$]*$/.test(e)) return Object.hasOwn(env, e) ? env[e] : null;
+  let m = /^new URL\(([\s\S]*)\)$/.exec(e);
+  if (m && whole(m[1])) {
+    const [a, b] = parts(m[1]);
+    if (b === undefined) return null;
+    const base = b === 'import.meta.url' ? { at: path.dirname(file), exact: true } : evalPath(b, env, file);
+    if (!base || base.str !== undefined) return { str: '' };   // a base that is no path of the module: a web address
+    if (base.at === OUT) return base;
+    const s = evalPath(a, env, file);
+    if (s && s.str !== undefined) return { at: path.resolve(base.at, s.str), exact: base.exact };
+    return { at: base.at, exact: false };
+  }
+  m = /^(?:path\.)?(join|resolve)\(([\s\S]*)\)$/.exec(e);
+  if (m && whole(m[2])) {
+    const args = parts(m[2]);
+    const first = args.length ? evalPath(args[0], env, file) : null;
+    // literals alone: a relative name, which the names a module spells already cover
+    if (first && first.str !== undefined && args.every((a) => LITERAL.test(a))) return { str: path.posix.join(...args.map((a) => LITERAL.exec(a)[2])) };
+    if (!first || first.str !== undefined) return null;
+    if (first.at === OUT) return first;
+    let at = first.at;
+    for (const a of args.slice(1)) {
+      const v = evalPath(a, env, file);
+      if (!v || v.str === undefined) return { at, exact: false };
+      at = path.join(at, v.str);
+    }
+    return { at, exact: first.exact };
+  }
+  if (e.startsWith('`')) {   // a template: the folder its text before the first ${ names, or the folder of a ${} first
+    const head = /^`((?:[^`$\\]|\$(?!\{))*)/.exec(e)[1];
+    if (head === '') {
+      const t = /^`\$\{([^}]*)\}((?:[^`$\\]|\$(?!\{))*)/.exec(e);
+      const v = t && evalPath(t[1], env, file);
+      if (!v || v.str !== undefined) return null;
+      return v.at === OUT ? v : { at: path.join(v.at, t[2].replace(/[^/]*$/, '')), exact: false };
+    }
+    if (/^\.{1,2}\//.test(head)) return { at: path.resolve(path.dirname(file), head.replace(/[^/]*$/, '')), exact: false };
+    return null;
+  }
+  return null;
+}
+
+// What a module builds at runtime: { exact: the paths it reads by name, opaque: the folders its computed paths fall
+// under, anywhere: a computed path it cannot place, follow: module files it runs or copies, followed as imports }
+export function builtPaths(text, file, root) {
+  const out = { exact: [], opaque: [], anywhere: false, follow: [], unknown: [] };
+  if (slash(path.relative(root, file)) === COPY_RUNNER) return out;
+  const env = {}, helpers = [];
+  for (const d of text.matchAll(/\b(?:const|let|var)\s+([^;\n]+)/g)) {
+    for (const one of parts(d[1])) {
+      const m = /^([A-Za-z_$][\w$]*)\s*=\s*([\s\S]+)$/.exec(one);
+      if (!m) continue;
+      const fn = /^\(?\s*([A-Za-z_$][\w$]*)\s*\)?\s*=>\s*([\s\S]+)$/.exec(m[2].trim());
+      if (fn) { helpers.push({ name: m[1], param: fn[1], body: fn[2], at: d.index, end: d.index + d[0].length }); continue; }
+      const v = evalPath(m[2], env, file);
+      if (v) env[m[1]] = v;
+    }
+  }
+  const place = (v, what) => {
+    if (!v) { out.anywhere = true; out.unknown.push(what.replace(/\s+/g, ' ').slice(0, 80)); }
+    else if (v.at === OUT || v.str !== undefined) { /* the temp folder, or a plain string */ }
+    else if (v.exact) out.exact.push(v.at);
+    else out.opaque.push(v.at);
+  };
+  // join and resolve without path. count when the module takes them from node:path (else resolve is a promise's)
+  const bare = [...text.matchAll(/\bimport\s*\{([^}]*)\}\s*from\s*['"](?:node:)?path['"]/g)].flatMap((m) => m[1].split(',').map((x) => x.trim().split(/\s+as\s+/).pop()));
+  const CALL = new RegExp(`\\b(?:readdir|opendir)(?:Sync)?\\s*\\(|\\bimport\\s*\\(|\\bpath\\.(?:join|resolve)\\s*\\(|\\bnew URL\\s*\\(|\`(?:\\.{1,2}/|\\$\\{)${bare.filter((n) => n === 'join' || n === 'resolve').map((n) => `|(?<![\\w$.])${n}\\s*\\(`).join('')}`, 'g');
+  // the computed paths of one stretch of text: import(), join(), resolve(), new URL(_, _), and path templates
+  const scan = (s, scope) => {
+    for (const m of s.matchAll(CALL)) {
+      const start = m.index + m[0].length - 1;
+      if (m[0].startsWith('`')) {
+        const end = s.indexOf('`', m.index + 1);
+        const tpl = s.slice(m.index, end + 1), v = evalPath(tpl, scope, file);
+        // a template that starts with ./ or ../ is a path; one that starts with ${x} is one only when x is a path
+        if (v || m[0] !== '`${') place(v, tpl);
+        continue;
+      }
+      const args = inside(s, start);
+      if (args === null) continue;
+      const head = m[0].replace(/\s*\($/, '');
+      if (/^(?:readdir|opendir)/.test(head)) {   // a folder listed: anything under it
+        const v = evalPath(parts(args)[0] || '', scope, file);
+        if (v && v.str === undefined) { if (v.at !== OUT) out.opaque.push(v.at); } else if (!v) place(v, `${head}(${args})`);
+        continue;
+      }
+      if (head === 'import') {
+        const a = args.trim();
+        if (LITERAL.test(a) && !a.startsWith('`')) continue;   // SPECIFIER follows it
+        const v = evalPath(a, scope, file);
+        if (v && v.exact && v.at !== OUT) out.follow.push(v.at); else place(v, `import(${a})`);
+        continue;
+      }
+      if (head === 'new URL' && parts(args).length < 2) continue;   // a URL parsed, not a path built from a base
+      if (head !== 'new URL' && parts(args).length === 1 && LITERAL.test(parts(args)[0])) continue;
+      place(evalPath(`${head}(${args})`, scope, file), `${head}(${args})`);
+    }
+  };
+  // the helpers' own bodies are read at each call, with the argument the call gives
+  let rest = text;
+  for (const h of [...helpers].reverse()) rest = rest.slice(0, h.at) + ' '.repeat(h.end - h.at) + rest.slice(h.end);
+  scan(rest, env);
+  for (const h of helpers) {
+    if (!/\b(?:import|join|resolve|URL)\s*\(|`/.test(h.body)) continue;
+    for (const c of text.matchAll(new RegExp(`(?<![\\w$.])${h.name.replace(/\$/g, '\\$')}\\s*\\(`, 'g'))) {
+      const args = inside(text, c.index + c[0].length - 1);
+      if (args === null || c.index === h.at) continue;
+      const a = parts(args)[0];
+      const v = a === undefined ? null : evalPath(a, env, file);
+      const scope = { ...env };
+      if (v) scope[h.param] = v; else delete scope[h.param];
+      scan(h.body, scope);
+    }
+  }
+  // a process started: the module files named by exact paths are followed
+  if (SPAWNS.test(text)) for (const p of [...out.exact, ...Object.values(env).filter((v) => v.exact && v.at !== OUT).map((v) => v.at)]) if (/\.[cm]?js$/.test(p)) out.follow.push(p);
+  // the kit's mutants runner: the caller's lab folder and the folders in also are copied; its module and test are run
+  for (const m of text.matchAll(/\brunMutants\s*\(/g)) {
+    const obj = inside(text, m.index + m[0].length - 1) || '';
+    // a key's value as written (an array whole), the key's own name for a shorthand, or null when it is not given
+    const key = (k) => {
+      const r = new RegExp(`\\b${k}\\s*:\\s*`).exec(obj);
+      if (r) { const at = r.index + r[0].length; return obj[at] === '[' ? `[${inside(obj, at)}]` : parts(obj.slice(at))[0]; }
+      return new RegExp(`(^|[{,\\s])${k}\\s*(,|}|$)`).test(obj) ? k : null;
+    };
+    const list = (k) => { let v = key(k); if (!v) return []; if (!v.startsWith('[')) { const d = new RegExp(`\\b(?:const|let|var)\\s+${v}\\s*=\\s*\\[`).exec(text); if (!d) return null; v = text.slice(d.index + d[0].length - 1); } const body = inside(v, 0); return body === null ? null : parts(body).map((x) => (LITERAL.exec(x) || [])[2] ?? null); };
+    const str = (k) => { const v = key(k); if (!v) return null; const l = LITERAL.exec(v); if (l) return l[2]; const d = new RegExp(`\\b(?:const|let|var)\\s+${v}\\s*=\\s*(['"\`])([^'"\`]+)\\1`).exec(text); return d ? d[2] : null; };
+    const here = path.dirname(file), lab = path.dirname(here), js = path.dirname(lab), also = list('also'), data = list('data');
+    out.opaque.push(lab);
+    if (!also || also.includes(null)) place(null, 'runMutants also'); else for (const d of also) out.opaque.push(path.join(js, d));
+    if (!data || data.includes(null)) place(null, 'runMutants data'); else for (const d of data) out.exact.push(path.join(path.dirname(js), d));
+    const mod = str('file'), test = str('test');
+    if (mod) out.follow.push(path.join(lab, mod));
+    if (test) out.follow.push(path.resolve(here, test));
+  }
+  return out;
+}
 
 // one file read once: what it imports, names and lists; null when it cannot be read. cache: path -> that
 function readOne(f, root, cache) {
@@ -141,23 +346,25 @@ function readOne(f, root, cache) {
   let one = null;
   if (text !== null) {
     const code = /\.[cm]?js$/.test(f);   // a JSON import is read, not followed
-    one = { imports: [], names: [], data: [...text.matchAll(DATA_NAMED)].map((m) => m[1]), walks: code && WALKS.test(text) };
+    one = { imports: [], names: [], data: [...text.matchAll(DATA_NAMED)].map((m) => m[1]), walks: code && WALKS.test(text), exact: [], opaque: [], anywhere: false };
     for (const n of text.match(PATH_RUN) || []) if (ENDS_AS_FILE.test(n)) one.names.push(n.replace(/^(\.{1,2}\/)+|^\/+/, ''));
     if (code) for (const m of text.matchAll(SPECIFIER)) {
       const spec = (m[2] ?? m[4]).split(/[?#]/)[0];
       if (spec.startsWith('./') || spec.startsWith('../')) one.imports.push(path.resolve(path.dirname(f), spec));
       else if (spec.startsWith('/') && !spec.startsWith('//')) one.imports.push(path.join(root, spec));
     }
+    if (code) { const b = builtPaths(text, f, root); one.exact = b.exact; one.opaque = b.opaque; one.anywhere = b.anywhere; one.imports.push(...b.follow); }
   }
   cache.set(f, one);
   return one;
 }
 // What a test file can read, from its own text and its import closure's: imports (root-relative paths, missing ones
 // included: a file added there later counts), names (the file names its closure spells, with their path, ./ and ../
-// taken off), walks, data (the folders under labs/assets/data it names).
+// taken off), walks, data (the folders under labs/assets/data it names), and what it builds at runtime (builtPaths):
+// reads (exact paths), opaque (the folders its computed paths fall under, with a slash), anywhere.
 export function reachOf(test, root, cache = new Map()) {
-  const seen = new Set(), queue = [test], names = new Set(), data = new Set();
-  let walks = false;
+  const seen = new Set(), queue = [test], names = new Set(), data = new Set(), reads = new Set(), opaque = new Set();
+  let walks = false, anywhere = false;
   while (queue.length) {
     const f = queue.shift();
     if (seen.has(f)) continue;
@@ -167,21 +374,27 @@ export function reachOf(test, root, cache = new Map()) {
     for (const n of one.names) names.add(n);
     for (const d of one.data) data.add(d);
     if (one.walks) walks = true;
+    if (one.anywhere) anywhere = true;
+    for (const p of one.exact) reads.add(slash(path.relative(root, p)));
+    for (const p of one.opaque) opaque.add(slash(path.relative(root, p)) + '/');
     queue.push(...one.imports);
   }
   const rel = slash(path.relative(root, test));
-  return { rel, lab: labOf(rel), imports: new Set([...seen].map((f) => slash(path.relative(root, f)))), names, walks, data };
+  return { rel, lab: labOf(rel), imports: new Set([...seen].map((f) => slash(path.relative(root, f)))), names, walks, data, reads, opaque, anywhere };
 }
 
 // why a test file runs for a changed path, or null
 function reaches(t, c) {
   if (c === t.rel) return 'changed itself';
   if (t.imports.has(c)) return `imports ${c}`;
+  if (t.reads.has(c)) return `reads ${c} by a path it builds`;
   const base = c.split('/').pop();
   for (const n of t.names) {
     if (n.includes('/') ? (c === n || c.endsWith('/' + n)) : (n === base && (!c.startsWith(JS_DIR) || labOf(c) === t.lab))) return `names ${c}`;
   }
-  if (t.walks && t.lab && c.startsWith(`${JS_DIR}${t.lab}/`)) return `lists a folder or imports a computed path, and ${c} is in ${JS_DIR}${t.lab}/`;
+  if (t.walks && t.lab && c.startsWith(`${JS_DIR}${t.lab}/`)) return `lists a folder, and ${c} is in ${JS_DIR}${t.lab}/`;
+  for (const d of t.opaque) if (c.startsWith(d)) return `builds paths under ${d}, where ${c} changed`;
+  if (t.anywhere && c.startsWith('labs/')) return `builds a path whose folder cannot be told, so any change under labs/ runs it: ${c}`;
   if (c.startsWith(DATA_DIR) && t.data.has(c.slice(DATA_DIR.length).split('/')[0])) return `reads ${DATA_DIR}${c.slice(DATA_DIR.length).split('/')[0]}/, where ${c} changed`;
   return null;
 }
@@ -288,7 +501,7 @@ function selftest() {
   };
   let tests, missed, excused, why, code = {}, out = {}, planCount = 0, hasRepo = false;
   // the changes planned on the small site below, each a list of paths; P: what each runs
-  const J = JS_DIR, P = {};
+  const J = JS_DIR, P = {}, P2 = {};
   const CHANGES = {
     engine: [J + 'a/engine.js'], kit: [J + 'kit/dom.js'], deep: [J + 'a/deep.js'], lazy: [J + 'a/lazy.js'], rooted: [J + 'c/x.js'], deeper: [J + 'a/deeper.js'], lazier: [J + 'a/lazy2.js'], rootedDeeper: [J + 'c/x2.js'], self: [J + 'a/tests/engine.test.mjs'],
     none: [], unknown: null,
@@ -299,6 +512,10 @@ function selftest() {
     data: ['labs/assets/data/alpha/x.json'], dataFolder: ['labs/assets/data/alpha/other.json'], dataNone: ['labs/assets/data/beta/y.json'], dataNear: ['labs/assets/data/alphabet/z.json'],
     loose: [J + 'a/ui.js'], looseJson: [J + 'a/ui.json'], looseCjs: [J + 'a/ui.cjs'], looseJsx: [J + 'a/ui.jsx'], looseMd: [J + 'a/notes.md'], looseCss: ['labs/a.css'], looseTool: ['tools/drives/x.mjs'],
     twoWide: [J + 'a/ui.js', 'labs/assets/data/beta/y.json'],
+    tplIn: [J + 'lib/dom.js'], tplOut: [J + 'libs/x.css'], joinIn: ['labs/assets/data/delta/q_schema.json'], joinOut: ['labs/assets/data/deltas/z.json'], both: [J + 'lib/dom.js', 'labs/assets/data/delta/q_schema.json'],
+    helperTarget: ['labs/seed.html'], helperNear: ['labs/seeds.html'], helperFollow: [J + 'g/registry.js'], helperOther: [J + 'g/other.js'],
+    spawned: [J + 'h/deep.js'], copiedAlso: [J + 'lib/dom.js'], copiedLab: [J + 'k/x.css'], copiedData: ['labs/assets/data/epsilon/e.json'], copiedModule: [J + 'shared/s.js'], copiedNot: [J + 'a/engine.js'],
+    commented: [J + 'a/cm2.js'], copiedTest: [J + 'shared2/t.js'], tplVar: ['labs/assets/data/eta/q.json'], bareJoin: [J + 'theta/t.css'], listed: [J + 'iota/i.css'], exactRead: [J + 'shared/z.css'], fullName: ['labs/zeta.html'],
     ...Object.fromEntries(['tools/lab_tests.mjs', 'tools/mutate.mjs', '.github/workflows/gates.yml', 'package.json', 'labs-src/package-lock.json', 'yarn.lock', 'npm-shrinkwrap.json', 'pnpm-lock.yaml'].map((f) => ['all:' + f, [f, J + 'a/engine.js']])),
     ...Object.fromEntries(['tools/lab_tests.mjs.orig', 'x/tools/mutate.mjs', 'docs/package.json.md', 'tools/lab_tests.json'].map((f) => ['near:' + f, [f]])),
   };
@@ -344,21 +561,53 @@ function selftest() {
       [S + 'a/tests/lazy.test.mjs']: "const m = await import('../lazy.js');\n",
       [S + 'a/tests/page.test.mjs']: "const t = readFileSync(join(here, '../../../../a.html'));\n",
       [S + 'a/tests/data.test.mjs']: "const x = readFileSync(join(here, '../../../data/alpha/x.json'));\n",
-      [S + 'b/tests.mjs']: "import fs from 'node:fs';\nconst all = fs.readdirSync(here);\n",
+      [S + 'b/tests.mjs']: "import fs from 'node:fs';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst all = fs.readdirSync(here);\n",
       [S + 'b/view.js']: 'export const v = 1;\n',
       [S + 'c/tests.mjs']: "import { x } from '/labs/assets/js/c/x.js';\n",
       [S + 'c/x.js']: "import './x2.js';\nexport const x = 1;\n",
       [S + 'c/x2.js']: 'export const x2 = 1;\n',
       [S + 'c/named.test.mjs']: "const s = readFileSync(join(here, 'style.css'));\n",
-      [S + 'd/tests.mjs']: "const m = await import(pathToFileURL(join(here, name)).href);\n",
+      [S + 'd/tests.mjs']: "const here = path.dirname(fileURLToPath(import.meta.url));\nconst m = await import(pathToFileURL(path.join(here, name)).href);\n",
       [S + 'd/x.js']: 'export const x = 1;\n',
-      [S + 'e/tests.mjs']: "const D = path.join(here, '..', '..', 'data', 'gamma');\n",
+      [S + 'e/tests.mjs']: "const here = path.dirname(fileURLToPath(import.meta.url));\nconst D = path.join(here, '..', '..', 'data', 'gamma');\n",
+      // a template import into another folder, and a path joined at runtime under a data folder
+      [S + 'lib/dom.js']: 'export const dom = 1;\n',
+      [S + 'f/tests/tpl.test.mjs']: "const name = 'dom';\nconst m = await import(`../../lib/${name}.js`);\n",
+      [S + 'f/tests/join.test.mjs']: "import path from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst DATA = path.join(here, '../../../data');\nconst lab = 'delta', kind = String(1);\nconst raw = path.join(DATA, lab, kind + '_schema.json');\nconst t = `${DATA}/eta/${kind}.json`;\n",
+      [S + 'f/tests/bare.test.mjs']: "import { join, dirname } from 'node:path';\nimport { readdirSync } from 'node:fs';\nimport { fileURLToPath } from 'node:url';\nconst here = dirname(fileURLToPath(import.meta.url));\nconst p = join(here, '../../theta', String(5));\nconst listed = readdirSync(join(here, '../../iota'));\nconst s3 = [here].join(String(6));\n",
+      // a computed import through a helper given a literal: its target is followed and read for names
+      [S + 'g/tests.mjs']: "import path from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst imp = (p) => import(pathToFileURL(path.join(here, p)).href);\nconst { PAGES } = await imp('registry.js');\nconst api = new URL(String(3), globalThis.base);\nconst u = new URL(String(4));\nconst label = `${PAGES.length}/${2}`;\nnew Promise((resolve) => resolve(String(7)));\n",
+      [S + 'g/registry.js']: "export const PAGES = ['seed.html'];\n",
+      [S + 'g/other.js']: 'export const o = 1;\n',
+      // a test that starts another, and one that only reads the other's text
+      [S + 'h/tests/args.test.mjs']: "import { spawnSync } from 'node:child_process';\nimport path from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst T = path.join(here, 'main.test.mjs');\nspawnSync(process.execPath, [T]);\n",
+      [S + 'h/tests/reads.test.mjs']: "import fs from 'node:fs';\nimport os from 'node:os';\nimport path from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst t = fs.readFileSync(path.join(here, 'main.test.mjs'), 'utf8');\nconst z = fs.readFileSync(path.join(here, '..', '..', 'shared', 'z.css'));\nconst tmp = path.join(os.tmpdir(), 'x', String(2));\nconst rel = path.join('x', 'y.txt');\nconst full = 'labs/zeta.html';\n",
+      [S + 'h/tests/main.test.mjs']: "import { v } from '../engine.js';\n",
+      [S + 'h/engine.js']: "import './deep.js';\nexport const v = 1;\n",
+      [S + 'h/deep.js']: 'export const hd = 1;\n',
+      // a mutants test the kit's runner copies with its lab, a folder in also and a data file; its module imports one more
+      [S + 'k/tests/m.mutants.test.mjs']: "import { runMutants } from '../../kit/tests/mutants.mjs';\nconst here = 1;\nawait runMutants({ here, file: 'mod.js', test: 'mod.test.mjs', mutants: [], also: ['lib'], data: ['data/epsilon/e.json'] });\n",
+      [S + 'k/tests/mod.test.mjs']: "import '../helper.js';\n",
+      [S + 'k/helper.js']: "import '../shared2/t.js';\n",
+      [S + 'shared2/t.js']: 'export const t = 1;\n',
+      // the kit's runner itself: its copies are read at each call, not in its text
+      [S + 'kit/tests/mutants.mjs']: "import { cpSync } from 'node:fs';\nimport { join } from 'node:path';\nexport async function runMutants({ here, also }) { for (const d of also) cpSync(join(here, d), join(here, 'x')); }\n",
+      [S + 'k/mod.js']: "import '../shared/s.js';\n",
+      [S + 'shared/s.js']: 'export const s = 1;\n',
+      // an import with comments between its braces, whose module imports one more
+      [S + 'a/tests/comment.test.mjs']: "import {\n  e, /* a note */\n  f, // another\n} from '../cm.js';\n",
+      [S + 'a/cm.js']: "import './cm2.js';\nexport const e = 1, f = 2;\n",
+      [S + 'a/cm2.js']: 'export const c2 = 1;\n',
       'labs/assets/data/alpha/x.json': '{}\n',
       'labs/assets/data/beta/y.json': '{}\n',
     });
     const planTests = findTests(path.join(plan, 'labs', 'assets', 'js'));
     const planned = (changed) => { const p = testsToRun(planTests, changed, plan); return { all: p.all, run: [...p.run.keys()].map((t) => t.slice(S.length)).sort(), why: Object.fromEntries([...p.run].map(([t, w]) => [t.slice(S.length), w])), unread: p.unread }; };
     for (const [k, changed] of Object.entries(CHANGES)) P[k] = planned(changed);
+    const blind = site('plan2', { [S + 'i/tests.mjs']: "import path from 'node:path';\nexport function f(x) { return path.join(x, 'y'); }\n", [S + 'j/tests.mjs']: "import '../j/m.js';\n" });
+    const blindTests = findTests(path.join(blind, 'labs', 'assets', 'js'));
+    P2.inLabs = [...testsToRun(blindTests, ['labs/q.css'], blind).run.keys()].map((t) => t.slice(S.length));
+    P2.outLabs = [...testsToRun(blindTests, ['tools/x.txt'], blind).run.keys()];
     planCount = planTests.length;
     // the command, as the gates run it, in a git repository: a kit module renamed, one lab's test moved to the new name,
     // another lab's test left on the old one (it fails: the old path still counts), a third lab untouched
@@ -371,7 +620,7 @@ function selftest() {
     const git = (...a) => spawnSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'init.defaultBranch=main', ...a], { cwd: repo, stdio: 'pipe' }).status;
     hasRepo = git('init', '-q') === 0 && git('add', '.') === 0 && git('commit', '-qm', 'one') === 0 && git('checkout', '-qb', 'work') === 0
       && git('mv', `${S}kit/dom.js`, `${S}kit/dom2.js`) === 0
-      && (fs.writeFileSync(path.join(repo, S, 'a/tests/engine.test.mjs'), "import { dom } from '../../kit/dom2.js';\nconst q = '../../../../data/q/x.json';\nconsole.log('ran a');\n"), fs.writeFileSync(path.join(repo, 'labs', 'notes.css'), 'a {}\n'), fs.mkdirSync(path.join(repo, 'labs', 'assets', 'data', 'q'), { recursive: true }), fs.writeFileSync(path.join(repo, 'labs', 'assets', 'data', 'q', 'x.json'), '{}\n'), git('add', '.') === 0) && git('commit', '-qm', 'two') === 0;
+      && (fs.writeFileSync(path.join(repo, S, 'a/tests/engine.test.mjs'), "import { dom } from '../../kit/dom2.js';\nconst q = '../../../../data/q/x.json';\nconsole.log('ran a');\n"), fs.writeFileSync(path.join(repo, 'labs', 'notes.css'), 'a {}\n'), fs.writeFileSync(path.join(repo, 'labs', 'caf\u00e9.css'), 'a {}\n'), fs.mkdirSync(path.join(repo, 'labs', 'assets', 'data', 'q'), { recursive: true }), fs.writeFileSync(path.join(repo, 'labs', 'assets', 'data', 'q', 'x.json'), '{}\n'), git('add', '.') === 0) && git('commit', '-qm', 'two') === 0;
     const cli = (name, ...args) => { const r = spawnSync(process.execPath, [SELF, '--root', repo, ...args], { cwd: tmp, encoding: 'utf8', timeout: 120000 }); code[name] = r.status; out[name] = (r.stdout || '') + (r.stderr || ''); };
     if (hasRepo) { cli('renamed', '--changed-since', 'main'); cli('unchanged', '--changed-since', 'HEAD'); cli('no-ref', '--changed-since'); cli('bad-ref', '--changed-since', 'no-such-ref'); cli('push'); cli('one-lab-plan', 'c', '--changed-since', 'main'); }
   } finally {
@@ -407,7 +656,7 @@ function selftest() {
     ['a test that runs past the limit fails the gate', code.slow === 1],
     ['a test that prints three megabytes and exits 0 passes', code.loud === 0],
     // --changed-since
-    ['the small site has the eleven test files it was written with', planCount === 11, planCount],
+    ['the small site has the twenty-one test files it was written with', planCount === 21, planCount],
     ['a lab file changed runs only the test files that import it, not the lab\'s others', same(P.engine.run, ['a/tests/engine.test.mjs']) && !P.engine.all, JSON.stringify(P.engine)],
     ['a kit file changed runs every test file that imports it, in any lab, through a module between, and no other', same(P.kit.run, ['a/tests/engine.test.mjs', 'kit/tests/dom.test.mjs']) && !P.kit.all, JSON.stringify(P.kit)],
     ['an import is followed through export ... from, an import over several lines and a query after the path', same(P.deep.run, ['a/tests/two.test.mjs']), JSON.stringify(P.deep)],
@@ -427,11 +676,25 @@ function selftest() {
       && /beta\/y\.json changed and no test names its folder/.test(P.dataNone.all) && /alphabet\/z\.json changed and no test names its folder/.test(P.dataNear.all), JSON.stringify([P.data, P.dataFolder, P.dataNone.all, P.dataNear.all])],
     ['a module or JSON file under labs/assets/js no test reaches runs all and is named; another file no test reaches runs none and is listed', [P.loose, P.looseJson, P.looseCjs].every((p, i) => p.all && p.all.includes(['a/ui.js', 'a/ui.json', 'a/ui.cjs'][i] + ' changed and no test imports, names or lists it'))
       && [[P.looseJsx, 'a/ui.jsx'], [P.looseMd, 'a/notes.md'], [P.looseCss, 'labs/a.css'], [P.looseTool, 'tools/drives/x.mjs']].every(([p, f]) => !p.all && p.run.length === 0 && p.unread.length === 1 && p.unread[0].endsWith(f)), JSON.stringify([P.loose, P.looseJsx, P.looseMd])],
+    // tests whose reach is not wholly static
+    ['a template import runs its test for every file under the folder before its ${}, beside the tests that import the file; a folder that only starts the same way does not', P.tplIn.run.includes('f/tests/tpl.test.mjs') && P.tplIn.why['f/tests/tpl.test.mjs'] === 'builds paths under labs/assets/js/lib/, where labs/assets/js/lib/dom.js changed' && P.tplIn.run.includes('k/tests/m.mutants.test.mjs') && !P.tplOut.run.includes('f/tests/tpl.test.mjs') && !P.tplOut.all, JSON.stringify([P.tplIn, P.tplOut])],
+    ['a path joined at runtime runs its test for every file under the evaluated part; a folder beside it does not', same(P.joinIn.run, ['f/tests/join.test.mjs']) && P.joinIn.why['f/tests/join.test.mjs'] === 'builds paths under labs/assets/data/delta/, where labs/assets/data/delta/q_schema.json changed' && /deltas\/z\.json changed and no test names its folder/.test(P.joinOut.all), JSON.stringify([P.joinIn, P.joinOut.all])],
+    ['each test decides for itself: a change that two opaque tests reach runs both', P.both.run.includes('f/tests/tpl.test.mjs') && P.both.run.includes('f/tests/join.test.mjs'), JSON.stringify(P.both)],
+    ['a computed import given a literal is followed and read for names: the page its target names runs the test; another page, or a module beside it no one imports, does not', same(P.helperTarget.run, ['g/tests.mjs']) && same(P.helperFollow.run, ['g/tests.mjs']) && P.helperFollow.why['g/tests.mjs'] === 'imports labs/assets/js/g/registry.js' && P.helperNear.run.length === 0 && /g\/other\.js changed and no test imports/.test(P.helperOther.all), JSON.stringify([P.helperTarget, P.helperFollow, P.helperNear, P.helperOther.all])],
+    ['a test that starts another follows the other\'s closure; one that only reads the other\'s text does not', same(P.spawned.run, ['h/tests/args.test.mjs', 'h/tests/main.test.mjs']), JSON.stringify(P.spawned)],
+    ['a mutants test the kit\'s runner copies runs on its lab, the folders in also, its data files and its module\'s closure, and on nothing else', [P.copiedAlso, P.copiedLab, P.copiedData, P.copiedModule].every((p) => p.run.includes('k/tests/m.mutants.test.mjs')) && !P.copiedNot.run.includes('k/tests/m.mutants.test.mjs')
+      && P.copiedLab.why['k/tests/m.mutants.test.mjs'] === 'builds paths under labs/assets/js/k/, where labs/assets/js/k/x.css changed' && P.copiedData.why['k/tests/m.mutants.test.mjs'] === 'reads labs/assets/data/epsilon/e.json by a path it builds' && P.copiedModule.why['k/tests/m.mutants.test.mjs'] === 'imports labs/assets/js/shared/s.js', JSON.stringify([P.copiedAlso, P.copiedLab, P.copiedData, P.copiedModule, P.copiedNot])],
+    ['the module and the test the runner runs are each followed', P.copiedTest.run.includes('k/tests/m.mutants.test.mjs') && P.copiedModule.run.includes('k/tests/m.mutants.test.mjs') && !P.copiedModule.run.includes('k/tests/mod.test.mjs'), JSON.stringify([P.copiedTest, P.copiedModule])],
+    ['a template that starts with a folder constant falls under that folder and the text after it', same(P.tplVar.run, ['f/tests/join.test.mjs']), JSON.stringify(P.tplVar)],
+    ['join and readdir taken from node:path and node:fs count; an array\'s join and a promise\'s resolve do not', same(P.bareJoin.run, ['f/tests/bare.test.mjs']) && same(P.listed.run, ['f/tests/bare.test.mjs']) && P.listed.why['f/tests/bare.test.mjs'] === 'builds paths under labs/assets/js/iota/, where labs/assets/js/iota/i.css changed', JSON.stringify([P.bareJoin, P.listed])],
+    ['a file read by a path joined from literals runs its test, in another lab too; a full path named runs the test that names it', same(P.exactRead.run, ['h/tests/reads.test.mjs']) && P.exactRead.why['h/tests/reads.test.mjs'] === 'reads labs/assets/js/shared/z.css by a path it builds' && same(P.fullName.run, ['h/tests/reads.test.mjs']) && P.fullName.why['h/tests/reads.test.mjs'] === 'names labs/zeta.html', JSON.stringify([P.exactRead, P.fullName])],
+    ['a test whose path cannot be placed runs on any change under labs/, and on nothing outside it', !!P2.inLabs && P2.inLabs.includes('i/tests.mjs') && P2.inLabs.length === 1 && P2.outLabs.length === 0, JSON.stringify(P2)],
+    ['an import with a block and a line comment between its braces is followed', same(P.commented.run, ['a/tests/comment.test.mjs']), JSON.stringify(P.commented)],
     ['every reason to run all is given, not only the first', !!P.twoWide.all && P.twoWide.all.includes('a/ui.js') && P.twoWide.all.includes('beta/y.json'), P.twoWide.all],
     ['the command asks git: a rename counts as a deletion and an addition, so a test still on the old path runs (and fails), and says which ran, why, and which were skipped', hasRepo && code.renamed === 1
       && out.renamed.includes('lab_tests: ran labs/assets/js/a/tests/engine.test.mjs: names labs/assets/data/q/x.json') && out.renamed.includes('lab_tests: ran labs/assets/js/b/tests.mjs: imports labs/assets/js/kit/dom.js')
       && out.renamed.includes('lab_tests: skipped 1 of 1 test files of c: none imports, names or lists a changed file') && out.renamed.includes('FAIL labs/assets/js/b/tests.mjs') && !out.renamed.includes('ran c')
-      && out.renamed.includes('lab_tests: changed and read by no test: labs/notes.css') && out.renamed.includes('lab_tests: 2 files, 1 failed, 1 skipped as out of the change\'s reach'), out.renamed],
+      && out.renamed.includes('lab_tests: changed and read by no test: labs/caf\u00e9.css, labs/notes.css') && out.renamed.includes('lab_tests: 2 files, 1 failed, 1 skipped as out of the change\'s reach'), out.renamed],
     ['the command with nothing changed runs none and passes', hasRepo && code.unchanged === 0 && out.unchanged.includes('lab_tests: 0 files, 0 failed, 3 skipped') && !/ran [abc]/.test(out.unchanged), out.unchanged],
     ['--changed-since with no ref, or a ref git cannot read, runs every test and says so; with no --changed-since every test runs and no plan is printed', hasRepo
       && out['no-ref'].includes('lab_tests: --changed-since was given no ref, so every test runs') && out['no-ref'].includes('ran c') && code['no-ref'] === 1

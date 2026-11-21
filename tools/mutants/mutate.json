@@ -151,13 +151,13 @@
   },
   {
     "name": "git asked with renames",
-    "from": "['diff', '--name-only', '--no-renames', `${ref}...HEAD`]",
-    "to": "['diff', '--name-only', `${ref}...HEAD`]"
+    "from": "'diff', '--name-only', '--no-renames', `${ref}...HEAD`]",
+    "to": "'diff', '--name-only', `${ref}...HEAD`]"
   },
   {
     "name": "git asked from the ref itself",
-    "from": "['diff', '--name-only', '--no-renames', `${ref}...HEAD`]",
-    "to": "['diff', '--name-only', '--no-renames', `${ref}`]"
+    "from": "'diff', '--name-only', '--no-renames', `${ref}...HEAD`]",
+    "to": "'diff', '--name-only', '--no-renames', `${ref}`]"
   },
   {
     "name": "git that fails read as no change",
@@ -538,5 +538,10 @@
     "name": "a change to .github/workflows/gates.yml does not run the slow lists",
     "from": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
     "to": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];"
+  },
+  {
+    "name": "git quotes a name with a letter outside ASCII",
+    "from": "['-c', 'core.quotePath=false', 'diff',",
+    "to": "['diff',"
   }
 ]

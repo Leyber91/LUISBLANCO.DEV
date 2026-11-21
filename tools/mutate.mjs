@@ -121,11 +121,12 @@ export function listsToRun(names, changed) {
   }
   return { run: names.filter((n) => !skipped.includes(n)), skipped, hits };
 }
-// the files changed since a ref, as git names them with renames split; null when git cannot say, or no ref is given
-// (git would read "...HEAD" as HEAD against itself: nothing changed)
+// the files changed since a ref, as git names them with renames split and every name as it is (core.quotePath=false:
+// git quotes a name with a letter outside ASCII by default); null when git cannot say, or no ref is given (git would
+// read "...HEAD" as HEAD against itself: nothing changed)
 export function changedSince(ref, cwd = process.cwd()) {
   if (!ref) return null;
-  const r = spawnSync('git', ['diff', '--name-only', '--no-renames', `${ref}...HEAD`], { cwd, encoding: 'utf8' });
+  const r = spawnSync('git', ['-c', 'core.quotePath=false', 'diff', '--name-only', '--no-renames', `${ref}...HEAD`], { cwd, encoding: 'utf8' });
   return r.status === 0 ? r.stdout.split('\n').map((l) => l.trim()).filter(Boolean) : null;
 }
 // the paths in a file of git's names, one a line; null when it cannot be read
@@ -278,7 +279,7 @@ async function selftest(part) {
   const MACHINE = process.env.LABS_DRIVE_LOCK, DRIVE = pathToFileURL(path.join(TOOLS, 'drive.mjs')).href;
   const { WATCHDOG_EXIT } = await import(DRIVE);
   const read = (f) => (fs.existsSync(f) ? fs.readFileSync(f, 'utf8').split(String.fromCharCode(10)).map((l) => l.trim()).filter(Boolean) : []);
-  let r, crlf, broken, hung, cli = {}, tm, said = {}, codes = {}, runsPast = '', reruns = [], readBack = {}, lockSeen = '', slowRuns = [], renamed = null, gitless = null;
+  let unquoted = null, r, crlf, broken, hung, cli = {}, tm, said = {}, codes = {}, runsPast = '', reruns = [], readBack = {}, lockSeen = '', slowRuns = [], renamed = null, gitless = null;
   let held = {}, fake = {}, imported = {}, ranAt = 0, busyStarted = true, orphans = {};
   try {
     const M = [CAUGHT, { name: 'label threshold moved', from: 'n > 9', to: 'n > 99' }, { name: 'text that is not there', from: 'a * b', to: 'a / b' },
@@ -402,6 +403,9 @@ process.exit(await run(undefined, ${J(tools)}, () => {}, how === 'limit' ? { lim
     const onMain = () => { fs.mkdirSync(path.join(repo, 'labs'), { recursive: true }); fs.writeFileSync(path.join(repo, 'labs', 'x.css'), 'a {}' + String.fromCharCode(10)); return git('checkout', '-q', 'main') === 0 && git('add', 'labs') === 0 && git('commit', '-qm', 'main moves') === 0 && git('checkout', '-q', 'moved') === 0; };
     const hasRepo = git('init', '-q') === 0 && git('add', '.') === 0 && git('commit', '-qm', 'one') === 0 && git('checkout', '-qb', 'moved') === 0 && git('mv', 'tools/drive.mjs', 'tools/driver.mjs') === 0 && git('commit', '-qm', 'two') === 0 && onMain();
     if (hasRepo) renamed = changedSince('main', repo);
+    // a name with a letter outside ASCII comes back as it is
+    const accented = 'labs/caf' + String.fromCharCode(0xe9) + '.css';
+    if (hasRepo && (fs.mkdirSync(path.join(repo, 'labs'), { recursive: true }), fs.writeFileSync(path.join(repo, accented), 'a {}' + String.fromCharCode(10)), git('add', '.') === 0) && git('commit', '-qm', 'three') === 0) unquoted = changedSince('HEAD~1', repo);
     gitless = changedSince('no-such-ref', repo);
     const listed = path.join(root, 'changed.txt');
     fs.writeFileSync(listed, 'labs/a.css' + String.fromCharCode(13, 10) + '  tools/drives/air.mjs ' + String.fromCharCode(10, 10));
@@ -552,6 +556,7 @@ process.exit(await run(undefined, ${J(tools)}, () => {}, how === 'limit' ? { lim
     ['imported, from a script or from node -e, it runs nothing and gives WATCHDOG', [imported.script, imported.evaluated].every((x) => x.code === 0 && x.text === 'imported ' + WATCHDOG), JSON.stringify(imported)],
     ['--changed-since with no ref runs every list and says so; git is not asked', changedSince('') === null && cli.noRef.code === 0 && cli.noRef.text.includes('mutate: --changed-since was given no ref, so every list runs') && /mutate drive: 2 broken rules, 2 caught/.test(cli.noRef.text), cli.noRef.text],
     ['git names a watched file renamed away, so the slow lists run; the command asks it with --changed-since', JSON.stringify(renamed) === JSON.stringify(['tools/drive.mjs', 'tools/driver.mjs']) && !!cli.renamed && cli.renamed.code === 0 && cli.renamed.text.includes('mutate: ran drive: changed files tools/drive.mjs'), JSON.stringify([renamed, cli.renamed])],
+    ['a changed name with a letter outside ASCII comes back as it is, not quoted', JSON.stringify(unquoted) === JSON.stringify(['labs/caf' + String.fromCharCode(0xe9) + '.css']), JSON.stringify(unquoted)],
     ['when git cannot name the files, every list runs and the command says so', gitless === null && cli.gitless.code === 0 && cli.gitless.text.includes('mutate: git could not name the files changed since no-such-ref, so every list runs') && /mutate drive: 2 broken rules/.test(cli.gitless.text), cli.gitless.text],
     ['the changed files are read one a line, trimmed, blank lines left out; a file that cannot be read gives none', JSON.stringify(readBack.file) === JSON.stringify(['labs/a.css', 'tools/drives/air.mjs']) && readBack.none === null],
     ['the command reads --changed, and runs every list when the file cannot be read, saying so', cli.skip.code === 0 && /mutate: skipped drive:/.test(cli.skip.text) && !/mutate drive:/.test(cli.skip.text)
