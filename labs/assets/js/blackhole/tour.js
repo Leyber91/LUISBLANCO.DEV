@@ -18,6 +18,7 @@ import { TOUR, VIEWS, COLOR_MODES } from './config.js';
 import { compareSentence, measurement, ringGamma, sci, s3, dur, deg, spinText, SHADOW_HOW, BODY_M } from './physics.js';
 import { colourWord } from './palette.js';
 import { liveAnchors } from './probe.js';
+import { clockShort, clockShown, clockTag } from './flow.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -181,8 +182,14 @@ export class Tour {
         : `Seen from far away at ${deg(ms.incl)} deg, through hot thin gas as the EHT sees it. ${named ? `The ${curve} curve is the ${named}; the bright ring the rays found sits on it.` : 'No closed-form curve is drawn for a charged, spinning hole; the bright ring the rays found marks the edge of its shadow.'}`)
       : s.view === 'journey'
         ? 'Free fall from rest far away. Drag the Fall chart to scrub; your clock and the far clock part ways near the horizon.'
-        : `Spin ${spinText(s.a)}, ${COLOR_MODES[s.color].label.toLowerCase()} colour. Click any pixel to trace its ray; drag to orbit.`;
-    const built = setHTML(this.caption, `<div class="cap"><div class="cap-k">${esc(VIEWS[s.view].label)} view</div><div class="cap-t">${esc(title)}</div><div class="cap-b">${esc(line)}</div>
+        : `Spin ${spinText(s.a)}, ${COLOR_MODES[s.color].label.toLowerCase()} colour.${clockShown(s, store.reduced) ? ' ' + clockShort(m) : ''} Click any pixel to trace its ray; drag to orbit.`;
+    // the clock's sentence tagged as every claim on the page is, by its weakest input (flow.js clockTag; the final
+    // grade, 2026-11-18)
+    const clock = !ms && s.view !== 'journey' && clockShown(s, store.reduced) ? esc(clockShort(m)) : '';
+    const real = clockTag(o) === 'REAL';
+    const tagHtml = real ? '<span class="bh-tagr" title="real: computed or sourced">R</span>' : '<span class="bh-tagi" title="illustrative">I</span>';
+    const lineHtml = clock ? esc(line).replace(clock, () => `${clock} ${tagHtml}`) : esc(line);
+    const built = setHTML(this.caption, `<div class="cap"><div class="cap-k">${esc(VIEWS[s.view].label)} view</div><div class="cap-t">${esc(title)}</div><div class="cap-b">${lineHtml}</div>
       <div class="cap-nav"><button class="bh-btn go" type="button" data-n="tour">Take the tour</button></div></div>`);
     if (built) this.caption.querySelector('button').addEventListener('click', () => this.start(0));
   }

@@ -20,6 +20,7 @@
    ============================================================ */
 
 import { glslMark, glslConst, PHYSICAL, LAB, DIAG_EXPO, DRIFT_LIMIT } from './palette.js';
+import { FLOW } from './flow.js';
 
 const header = `#version 300 es
 precision highp float;
@@ -253,24 +254,41 @@ uniform float uTdisp;        // display temperature of the peak (thermal mode), 
 uniform float uTpeakK;       // physical peak temperature, K (true colour mode)
 uniform float uFcol;         // colour-correction factor (true colour)
 uniform float uStretch;      // display stretch exponent
-uniform float uIgnite;       // 0..1 ignition from the ISCO outward
+uniform float uIgnite;       // 0..1 the disk fading in on load, everywhere at once
+uniform float uCycle;        // M a copy of the disk's pattern is carried along the orbits (flow.js flowCycle)
 uniform vec3 uHot;           // hot spot: (r, phi(t), on)
 uniform int uMode;           // 0 thermal 1 true 2 redshift 3 order 4 steps
 float profileT(float r){
   float u = sqrt(clamp((r - uRin)/(uRout - uRin), 0.0, 1.0));
   return texture(uProfile, vec2(u*(511.0/512.0) + 0.5/512.0, 0.5)).r;
 }
-float turbulence(float r, float phiW){
-  // co-rotating, differentially sheared texture: each annulus turns at its own Omega,
-  // so the pattern winds into trailing spirals as the clock runs (illustrative structure)
-  float Om = circularOrbit(max(r, uRin)).x;
-  float ang = phiW - Om*uTime;
-  float lr = log(r);
-  vec3 p = vec3(cos(ang)*5.5, sin(ang)*5.5, lr*16.0);
+// one copy of the disk pattern's random core at an angle in the co-moving frame, from one of flow.js's seeds
+// (illustrative structure)
+float diskCore(float ang, float lr, float seed){
+  vec3 p = vec3(cos(ang)*5.5, sin(ang)*5.5, lr*16.0) + vec3(seed*13.7, seed*7.9, 0.0);   // seeds far apart: independent copies
   float body = fbm(p*vec3(1.0, 1.0, 0.5));
   float ridge = 1.0 - abs(2.0*fbm(p*vec3(1.7, 1.7, 1.3) + 4.0) - 1.0);   // filaments
-  float lanes = 0.5 + 0.5*sin(lr*42.0 + 3.0*body);                         // thin radial lanes
-  return 0.30 + 1.05*body*body*2.0*(0.55 + 0.75*ridge*ridge) * (0.75 + 0.35*lanes);
+  return 1.05*body*body*2.0*(0.55 + 0.75*ridge*ridge);
+}
+float turbulence(float r, float phiW){
+  // Each annulus turns at its own Kerr orbital frequency. One pattern carried along wound into rings finer than the
+  // pixels, and a turning spiral read as the disk expanding and contracting (2026-11-18). Two copies are carried, each
+  // for one cycle from a fresh seed, and crossfaded with the copy at its reset weighing nothing (flow.js flowPhases,
+  // line for line; Neyret 2003), so the shear stays bounded and an inner feature is seen going round.
+  float Om = circularOrbit(max(r, uRin)).x;
+  float lr = log(r);
+  float T = uCycle;
+  float c0 = floor(uTime/T), c1 = floor(uTime/T + 0.5);
+  float t0 = uTime - c0*T, t1 = uTime + 0.5*T - c1*T;
+  float w0 = 1.0 - abs(2.0*t0/T - 1.0), w1 = 1.0 - w0;
+  float x0 = diskCore(phiW - Om*t0, lr, mod(c0*2.0, ${FLOW.seeds.toFixed(1)}));
+  float x1 = diskCore(phiW - Om*t1, lr, mod(c1*2.0 + 1.0, ${FLOW.seeds.toFixed(1)}));
+  // the two independent cores blended around the core's own mean, their spread kept (flow.js flowBlend)
+  float m = ${FLOW.coreMean.toFixed(4)};
+  float x = max(0.0, m + (w0*(x0 - m) + w1*(x1 - m))*inversesqrt(w0*w0 + w1*w1));
+  // thin lanes along the orbits: rings drawn once, the same for both copies and however far the disk turns
+  float lanes = 0.5 + 0.5*sin(lr*42.0);
+  return 0.30 + x*(0.75 + 0.35*lanes);
 }
 vec3 diskColor(vec4 g0, vec4 g2){
   float r = g0.x, phiW = g0.y + uAz, g = max(g0.z, 1e-3);
@@ -279,7 +297,7 @@ vec3 diskColor(vec4 g0, vec4 g2){
   float tob = g*Tn;                                   // observed T / T_peak
   float limb = (1.0 + 2.06*g2.y)/3.06*1.5;            // Chandrasekhar electron-scattering limb law
   float turb = turbulence(r, phiW);
-  float ign = smoothstep(0.0, 1.0, (uIgnite*1.35 - (r - uRin)/(uRout - uRin))*3.0);
+  float ign = smoothstep(0.0, 1.0, uIgnite);          // in place: lit from the ISCO outward, it read as the disk expanding
   float outer = 1.0 - smoothstep(uRout*0.72, uRout, r);
   float spot = 0.0;
   if (uHot.z > 0.5) {

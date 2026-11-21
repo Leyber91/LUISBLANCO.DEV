@@ -448,6 +448,146 @@
         }
       ],
       "not_checked": "No model route was called, so intelligence 2.1 to 2.4 are read from the code. The lab's drive ran at 1440 only and stopped at its 380 s limit after 104 passing checks; at 390 the rater's two scenarios stood in for it. The rater opened no plate and imported no state file (the lab's drive checked the plate's lines and the privacy export). None of the bindings' ten known setup failures was triggered. Only headless Chrome with software GL was used: no GPU, no real phone. No citation was checked at its source. The style gates and the platform block were not counted; the style gates cap only rungs above 4."
+    },
+    {
+      "date": "2026-11-18",
+      "by": "single rater, two skeptic passes, delta from the grade at a905796",
+      "commit": "8031b7e",
+      "atlas": 3,
+      "scale": "labs/levels/atlas.json version 3: product and subject levels are each min(lower median of the axis rungs, weakest axis + 2) and never above the scope level; the lab level is the lowest of product, subject and scope.",
+      "previous": "The grade at a905796 (2026-11-18, pull request 71), the first entry of atlas_grades: lab 1, with product 1, subject 1 (it computes to 2 and the scope caps it) and scope 1.",
+      "basis": "origin/main at 8031b7e (pull request 76), served on 2026-11-18 from the clean worktree _labs_wt/_grade_bh2. Since a905796 three Black Hole pull requests merged: 68 (the shader's annotation layer keeps only the pointed annulus; palette.js drops the edge and ISCO marks; probe.js outline and ticksOf; ui.js drawOverlay draws the telescope view's traced edge as ticks; one black_hole.css rule), 73 (adapt.js; main.js frame loop and tier rule; renderer.js preview buffers shaded at their own size and the final pass's level offset) and 76 (flow.js; shaders.js turbulence and uIgnite; renderer.js uCycle; main.js clock from FLOW.mPerSecond; ui.js view note and tour.js caption state the clock), with their tests (adapt, edge and flow, and their mutants) and three steps of tools/drives/blackhole.mjs (SPIN, RES, EDGE). bh_animation_page.html, config.js, state.js, record.js, keep.js, ask.js, diagrams.js and tokens.css are not in the diff. Read whole: that diff, flow.js and adapt.js; read in part: main.js frameUniforms and autoExposure, shaders.js circularOrbit, ui.js probeAt and the canvas keydown, renderer.js renderStill. Run: node tools/lab_tests.mjs blackhole (28 files, 0 failed; verify.mjs: all checks passed); the clock's numbers recomputed in node from kerr.js and by the Kerr formula by hand for the four presets. In headless Chrome with software GL (Microsoft Basic Render Driver, tier min), through tools/labs-wt.mjs drive at 1440 x 900 and 390 x 844, two rater scenarios kept outside the repository: bh2_rot (11 of 11 at each width: the clock stated in the caption card and the view note for M87*, Sgr A* and Cygnus X-1; the page clock's rate over 6 s; six live frames of the default view and four of a face-on view, each with its page time; two face-on stills 3 M and 12 M apart measured ring by ring; reduced motion) and bh2_steps (10 of 10 at each width: the lab's EDGE_STEP and RES_STEP as written, the telescope view's shot, and a frame in the middle of a real drag). Every page loaded with a clean console.",
+      "bindings": {
+        "declared_in": "Unchanged since a905796: the diff declares no binding. The ladder declares none. Every binding below is declared in the lab's private plan, dated 2026-11-13, written for the thesis this ladder states; the road keeps its 12 units \"until the eye adds its own\" and names a new concept, Earth-Sized Eye, pending its kill test, which declares no binding yet. The lab's public files declare none. The grade reads the plan's bindings, as Exomania's grades read its plan's.",
+        "canon": "Declared in the plan: the published physics of the Schwarzschild, Kerr and Kerr-Newman spacetimes and the published measurements of real black holes (Schwarzschild 1916, Kerr 1963, Newman et al. 1965, Bardeen, Press and Teukolsky 1972, Bardeen 1973, Synge 1966 and the papers it lists). Ladder: missing. Public files: missing (config.js CITE lists citations, no canon).",
+        "units": "Declared in the plan: 12 units, bh-u1 to bh-u12, in two tracks (light and the image; matter, motion and the fall) and five weighted modules. Ladder: missing. Public files: missing.",
+        "challenge_blueprint": "Declared in the plan: weights over the 12 units summing to 100, predict-then-reveal formats on the live image, 40 items, 60 minutes. Ladder: missing. Public files: missing.",
+        "central_scene": "Declared in the plan: the descent (pick a hole, set the traced shadow beside the EHT ring at 1,000 M, then fall in with two clocks and the tide to the end), sourced to this ladder's thesis and Exploring Black Holes, chapter 12. Ladder: missing. Public files: missing.",
+        "fiction_inventory": "Declared in the plan: 22 entries, bh-f1 to bh-f22. Ladder: missing. Public files: missing.",
+        "known_setup_failures": "Declared in the plan: 10 entries, bh-k1 to bh-k10, each with its diagnosis. Ladder: missing. Public files: missing (the page shows one notice, \"This instrument traces light rays on the GPU and needs WebGL2.\", with the renderer's error)."
+      },
+      "na": {},
+      "levels": {
+        "product": 1,
+        "subject": 1,
+        "scope": 1,
+        "lab": 1
+      },
+      "grade": {
+        "orientation": {
+          "level": 2,
+          "evidence": "Regraded on the caption, which the diff changed (tour.js caption line, flow.js clockShort). 1.1 and 1.2 hold: the page opens on the instrument, the title block reads \"Measure the shadow of a spinning black hole.\", and the caption card under the picture reads \"Spin 0.940, thermal colour. Time here runs at 7.5 M a second: an orbit at the ISCO takes 3.2 s here and 8.89 d by a distant clock. Click any pixel to trace its ray; drag to orbit.\" at 1440 and at 390, every word shown (the card's overflow 0 px at 390). 2.1 holds: the render draws, and the disk turns at rest. 2.2 and 2.3 hold as at a905796 (the title block's one action; the record card's empty line beside the controls; record.js and keep.js are not in the diff, and tour.js changed only in its caption line). 3.1 to 3.4 fail as at a905796: state.js, the record and the entry view's actions are not in the diff."
+        },
+        "lessons": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch the lab's words beyond two clock sentences, and adds no page of text from a source. As at a905796: 1.1 fails: no page of text is rendered from a source. The lab's words are the intro paragraph, the eight tour captions (config.js TOUR), the probe's causes and equations (ui.js probeAt) and the guide's answers (ask.js answerOffline), all typed in code, none a lesson of a declared unit. Rung 2: no units, modules, track page or pager."
+        },
+        "tutoring": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch the five-minute check (ui.js drawQuiz). As at a905796: 1.1 holds: the five-minute check marks a pick \"right\" or \"not quite\" at once (ui.js drawQuiz). 1.2 holds by its three items keyed by the engine on the live state: the shadow against the horizon (physics.js measurement), the ISCO at the state's spin, and whether the tide passes 10 g before the horizon at the state's mass (derive, tide10g); the other two items have fixed keys and count for nothing. 2.1 fails: after a wrong pick the scenario read only \"not quite\" on the chosen button at both widths; the right answer is not named, no option is explained (2.2) and nothing links to a lesson (2.3)."
+        },
+        "practice": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch the five-minute check or its score. As at a905796: 1.1 and 1.2 hold by the same three engine-keyed items of the five-minute check. 2.1 fails: the five questions stand on one card at once, with no session and no check, feedback and next; no readout of position and accuracy (2.2), no progress strip (2.3), no end (2.4), no star (2.5), and the score is recorded nowhere (2.6: \"0 / 5\" again after a reload in the scenario at both widths)."
+        },
+        "missions": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch any task, and adds none. As at a905796: 1.1 fails: no task states a goal and its material. \"Measure the shadow of a spinning black hole.\" is the page's title, with no task, steps or check behind it."
+        },
+        "evidence": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch record.js or the check's state. As at a905796: 1.1 fails. The record keeps a kept hole, a pressed ray and a fall run to its stop, each with its time (record.js keep, ray, fall; both widths) and none with the mode it came from; the five-minute check's answers, the answers the cosmos line names as the lab's, are stored nowhere (ui.js quizState lives in memory and a reload clears it). 2.1 fails: no state per unit."
+        },
+        "progress": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch the record card (record.js lineWords). As at a905796: 1.1 holds: the record card's line counts what the visitor did, \"0 kept · 1 ray · 1 fall\" after a press and a fall at 390 (record.js lineWords), and the check shows its score. 2.1 to 2.4 fail: no session is listed, and there is no streak, no activity calendar and no recent sessions on the entry view."
+        },
+        "material": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch config.js, measurements.json or the Sources panel; flow.js and adapt.js add their constants in code (FLOW, ADAPT, PREVIEW), as config.js holds the rest. As at a905796: 1.1 holds: the objects with their sources, the citations, the views and the tour (config.js), and measurements.json. 2.1 fails: config.js is a module of constants, and the check's items (ui.js drawQuiz), the guide's answers (ask.js answerOffline) and the probe's causes (ui.js probeAt) are written inside functions; no material is a data file loaded into indexes. 2.3 holds: the Sources panel reads \"Objects (data version 2026-11-17)\" (config.js VERSION). 2.4 fails: no material file is loaded, so none is checked when it loads."
+        },
+        "records": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch record.js or keep.js. As at a905796: 1.1 holds: kept holes, rays and falls survive a reload, in Labs OS under lab black-hole (rater's scenarios at 1440 and 390; the lab's drive: \"the hole is still kept after a reload\", and the privacy export carries the record). 2.1 fails twice: record.js declares no types (no // @ts-check, and labs-src/tsconfig.labs.json includes only exoplanet/record.js), and its three lists cover the cosmos line's configurations (kept holes) and observations (rays, falls) with no prediction or note kind. 2.3 holds: keep, ray and fall refuse a bad link, time, place, fate or order with the reason. 2.4 fails: no health check on the page reports the record's version or sync state; keep.js says only where the record is kept."
+        },
+        "interface": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch the font link or the tokens: it adds one overlay rule (black_hole.css #bh-overlay .edge, drawn in --text-bright). As at a905796: 1.1 holds: tokens.css is applied, and the lab's drive found IBM Plex Mono and Fraunces loaded. 2.1 fails: the Google Fonts stylesheet is a plain render-blocking link (bh_animation_page.html line 11, read in the scenario with no media and no onload), where Exomania's rooms load theirs without blocking first paint."
+        },
+        "reach": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch the reduced-motion rule, the focus ring, the skip link or the sheet's layout; at 390 the page still does not scroll sideways (scrollWidth 390) and the longer caption card shows every word. As at a905796: 1.1 holds. 2.1 holds: at 390 the controls and readouts restack into one bottom sheet over the render, and the page does not scroll sideways (scrollWidth 390 with the sheet open). 2.3 holds: tokens.css draws a focus ring on every focusable element. 2.2 fails: there is no global rule; black_hole.css collapses transitions for five selectors under reduced motion (lines 253 to 256 and 305), and with reduced motion emulated the back link still ran a 0.18 s transition (the page stops the disk and the tour in script). 2.4 fails: no skip link; the tab order starts at the canvas, Back and the object options at both widths."
+        },
+        "engineering": {
+          "level": 1,
+          "evidence": "Regraded: the diff touches main.js. 1.1 holds: the page runs from its URL, and node tools/lab_tests.mjs blackhole passes 28 files with 0 failed (the flow, adapt and edge tests and their mutants added since a905796). 2.1 still fails: the tier rule for a renderer with float targets moved to adapt.js, a pure module with tests, but main.js still holds the rule for the path without them (the ORDER walk on 40, 110 and 14 ms), the hot spot's Omega = 1/(r^1.5 + a) in frameUniforms and the exposure law in g_max^4 in autoExposure. 2.2 fails as material 2.1 does. 2.3 fails: flow.js and adapt.js are untyped like the rest (no // @ts-check; labs-src/tsconfig.labs.json still includes only exoplanet/record.js). 2.5 fails: no derived digest."
+        },
+        "fiction": {
+          "level": 3,
+          "evidence": "Regraded by count against the plan's 22 entries, by the rule of a905796 (an entry counts when its capability runs end to end from the visitor's own input on the page, at any detail). The diff changes f2 (the rim: no drawn line on it), f4 (the disk's texture turns at the orbits' rates) and f5 (the telescope view's traced edge as ticks on the theory curve), each already counted as running at a905796, and makes no entry run that did not: f3, f11, f16 and f18 still run in part, and f9, f13, f19, f21 and f22 do not (the hot spot, the sky, the fall's stop and the frame-dragging readout are not in the diff). 3.1 holds at 13 to 17 of 22, 59 to 77%. 4.1 fails: 80% is 18 entries."
+        },
+        "fidelity": {
+          "level": 2,
+          "evidence": "Regraded: the diff adds the page's clock (flow.js) and the traced edge (probe.js outline). 2.1 and 2.2 hold: the disk's rate is the prograde circular orbit of Kerr-Newman, Omega = sqrt(r - Q^2)/(r^2 + a sqrt(r - Q^2)), written in shaders.js circularOrbit, and flow.js iscoOrbitM takes it from kerr.js circular. 3.1 fails by the letter of the cosmos world line that replaces it, as at a905796: no transit model. The clock's numbers hold against a computation by hand: for M87* (6.5x10^9 solar masses, a = 0.94) t_g = 32,016 s, so 7.5 M is 2.78 d, and r_ISCO = 2.0236 M gives 2 pi (r^1.5 + a) = 23.99 M, which is 3.2 s at 7.5 M a second and 8.89 d by a distant clock; Sgr A* 2.65 min and 20.4 min, Cygnus X-1 783 us and 1.56 ms, each as the page states. Read as Exomania's line alone, rung 3 would hold and rung 4 would fail at 4.3 as at a905796 (thresholds still sit where they are used, and adapt.js adds its own, ADAPT and PREVIEW, with no source)."
+        },
+        "graphics": {
+          "level": 2,
+          "evidence": "Regraded: the diff changes the disk's motion (shaders.js turbulence, flow.js), its ignition (shaders.js uIgnite), the rim (the shader's annotation layer) and the moving view (renderer.js _previewBuffers). 2.1 holds. Of rung 3: the dashed hairline on the shadow's edge is gone, since a still with the labels on and one with them off differ in 0 of 144,000 pixels at 1440 and 0 of 499,200 at 390 (the lab's EDGE_STEP, run by the rater); the telescope view draws the traced edge as 120 ticks at 1440 and 60 at 390, each centred within 0.1 px of the theory curve, one per traced direction (probe.js outline, ticksOf), marks that encode a value; and the disk turns each annulus at its own rate, measured on two face-on stills 3 M apart, whose rings at a flat-mapped r of about 4.6, 6.4, 8.5 and 11 M turned 22 to 23, 13, 8 and 6 deg at both widths, each 1.2 to 1.4 times Omega(r) dt at that radius, inner rings further.3.4 still fails: on a load that carries no state the disk fades in over 2.6 s (main.js app.ignite, shaders.js uIgnite, now in place rather than from the ISCO outward), and the veil's bar still scans every 1.4 s (black_hole.css bh-scan), changes that mark no state. 3.3 fails by its letter as well: the disk's texture and the sky are illustrative, and the page tags them only in the footer's list of kinds, not as regions of the scene. At 390 the telescope view's label \"shadow 9.73 M wide\" sits on the ticks at the top of the ring."
+        },
+        "interaction": {
+          "level": 2,
+          "evidence": "Regraded: the diff changes how a moving view is drawn. 2.1 holds: a drag re-traces live, and the frame read in mid-drag is the preview enlarged smoothly, with 24.4% of lit neighbouring pairs equal at scale 0.3 at 1440 and 12.9% at scale 0.4 at 390, where rays copied to every pixel they cover would make about 70% and 60% (the lab's RES_STEP, run by the rater); a real drag on the render at 1440 showed a soft preview, then the full picture. 3.1 and 3.4 hold as at a905796. 3.2 and 3.3 still fail, and neither is in the diff: the probe is clamped inside the window (ui.js probeAt, its left set by Math.min(innerWidth - pw - 12, ...)), and Enter on the canvas probes the centre pixel only (ui.js, the canvas keydown)."
+        },
+        "intelligence": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch ask.js, the route panel or the Ask control. As at a905796: 1.1 holds: the tracer and physics.js make every image and number with no model, and ask.js answerOffline answers 20 topics from the live state. 2.1 to 2.4 hold by the code: one LLM.complete call per question (ask.js ask), the route panel mounted (ui.js mountRoutePanel), the instrument's answer shown first and kept when no route answers (both widths, every route refused: \"instrument answer: no model route answered\"), the model called only on Ask. 2.5 fails: the Ask button reads the same in every state (bh-btn go, ink on no ground), and nothing tells the visitor when the guide has something to say."
+        },
+        "explanation": {
+          "level": 1,
+          "evidence": "Regraded: the diff adds the clock sentences (flow.js clockLine in the view note, clockShort in the caption card) and the telescope legend's \"ticks: traced edge\". 1.1 and 2.1 hold. 2.2 fails as at a905796, and the new sentences carry no tag either. 2.3 fails on a sentence the diff did not write: the cinematic view's note opens with \"a camera 46 M away, 5 M above the disk plane\", fixed text (config.js VIEWS.cinematic.hint, written into the note by ui.js as it stands), true at the preset's 84 deg and false at other inclinations: at ?i=6 the camera sits about 45.7 M above the plane (read from the code, not from that page's note). The clock sentences themselves are true: the page's clock ran 7.546 M a second at 1440 and 7.518 at 390 over 6 s (stated 7.5; main.js caps one frame's step at 250 ms, and the longest frame was 66.7 ms), their numbers match a computation by hand (fidelity), they are said only where a textured disk turns (flow.js clockShown: absent from the telescope view's caption and under reduced motion, where the clock stood at 0 M over 6 s), and the caption card shows all of its words at 390."
+        }
+      },
+      "scope": {
+        "level": 1,
+        "organs": [
+          "the instrument (the Kerr tracer on the visitor's hole: the render, the drawing's scales and title block, the probe of a ray, the overlay, the Instrument and Measure cards with the GPU strip and the sub-rings, the cross-section, disk profile, potential and spectrum; the tour and the guide that narrate it; the plates, link and files that export it; the kept holes and rays that are its states)",
+          "the fall (the Fall card: a free fall from 40 M on the rain geodesic to its stop at 3 M, with its two clocks and the tide, scrubbed on its chart; keeps its place, and the falls run to their stop)",
+          "the five-minute check (five questions on the state shown, three keyed by the engine; keeps the picks and the score until the page closes)"
+        ],
+        "instrument": "the instrument",
+        "links": [],
+        "reach": "Every one of the 12 units is worked on by at least one organ: u1 to u9, u11 and u12 by the instrument (mass sets km, s and K; the horizon and ergosurface; the probe's L/E; the shadow; the sub-rings; the ISCO and the potential; the disk's flux, temperature and spectrum; the g map; the three observers; the objects and the EHT comparison; the lensed sky), u10 by the fall: reach 1.0 at one organ per unit.",
+        "evidence": "Carried: the diff adds no organ and no link. The clock sentences narrate the instrument, flow.js and adapt.js run inside it, and the ticks are its overlay; the fall, the check and the record are not in the diff. As at a905796: Level 1 holds: 3 organs, reach 1.0. Level 2 fails: it needs one link and the graph has none. The fall and the check read the hole and the camera from the store every part shares, which the atlas counts as a shared selection and no link; nothing reads the check's score or the falls; the kept holes, rays and falls are lists of the organs that made them, and the record card computes only their counts, so it is no record view. The guide and the tour narrate or set the instrument and are its own. Before the scope cap, product computes to 1 (lower median of 0,0,0,1,1,1,1,1,1,1,1,2) and subject to 2 (lower median of 1,1,2,2,2,3, weakest 1 + 2 = 3); the cap holds subject at 1."
+      },
+      "skeptic": [
+        {
+          "axis": "graphics",
+          "pass": "the letter of the clause, held",
+          "why": "graphics.3.4 asks that colour, motion and size change only to mark a state. The turning disk marks the model's time at the orbits' rates, and the veil's bar can be read as marking the load; the 2.6 s fade-in of the disk on a load with no state marks nothing, so 3.4 fails on it alone. Uncertain whether the crossfade of two noise copies (flow.js flowPhases) is a change that marks no state; the page lists turbulence as illustrative. 3.3 fails by its letter too. Graphics stays 2."
+        },
+        {
+          "axis": "explanation",
+          "from": 1,
+          "to": 1,
+          "pass": "the letter of the clause",
+          "why": "explanation.2.3 read literally against every statement on the page: the cinematic note's \"5 M above the disk plane\" is fixed text and false at any inclination far from 84 deg. A failure the grade at a905796 did not name; the level stays 1 because 2.2 already fails."
+        },
+        {
+          "axis": "fidelity",
+          "pass": "the letter of the clause, held",
+          "why": "As at a905796: fidelity.3.1 is replaced in the cosmos world by a line that asks for a published transit model, and the lab has none. Uncertain, so the lower. No level moves: subject computes to 2 before the cap with fidelity at 2 or 3."
+        },
+        {
+          "axis": "engineering",
+          "pass": "the letter of the clause, held",
+          "why": "engineering.2.1 asks that the entry file hold no domain logic. Moving the tier rule into adapt.js narrowed what main.js holds; the second tier rule, the hot spot's rate and the exposure law remain."
+        },
+        {
+          "pass": "does it run",
+          "why": "No axis lowered. The rotation, the clock sentences, the ticks and the smooth preview run on the page's real path: main.js loop advances app.time by FLOW.mPerSecond, frameUniforms passes it as uTime to the shade pass every frame, renderer.js pushGeometry sets uCycle from flowCycle, ui.js writes the view note and tour.js the caption. Every page loaded with a clean console at 1440 and 390. The rotation reads as rotation: on face-on stills the change along each ring is matched by a turn (correlation 0.67 to 0.96) and not by a radial slide (0.27 to 0.58) or by no turn (0.09 to 0.40), inner rings turning further; on live frames 0.6 s apart at 390 the face-on swirl advances around the hole, and at the default view the streaks move along the lensed arch, whose direction a pair of stills does not show by eye. At tier min the n = 1 image on the shadow's left rim still shows as a serrated row of bright pixels in the cinematic view: the image's own sampling, not a drawn line."
+        }
+      ],
+      "not_checked": "No model route was called; intelligence is carried. The lab's full drive was not run: of its steps the rater ran EDGE_STEP and RES_STEP at both widths, and SPIN_STEP's paused case was read from the code (flow.js clockShown). The rotation was measured on face-on stills rendered at the page's own uniforms and read by eye on live frames; no video was recorded, and the direction of motion at the default edge-on view was not measured. Every run was at tier min under software GL, where adapt.js keeps the tier by design; the climb and drop of tiers on a hardware GPU were not seen. No real phone. No citation was checked at its source (Max and Becker 1995 and Neyret 2003, named in flow.js). The tour after idle, the probe, the fall, the record and the check were not driven again: none is in the diff. The style gates and the platform block were not counted."
     }
   ]
 }
