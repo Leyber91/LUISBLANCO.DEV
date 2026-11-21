@@ -74,7 +74,7 @@ export const CATEGORIES = [
         blurb: 'Cross a singularity, return ten thousand years late, and speak with the last machine mind awake.' },
       { id: 'alt-reality', title: 'Alternate Reality Scenarios', status: 'beta',
         href: 'orthogonal.html',
-        blurb: 'One world where lignin-eating fungi came early and no coal formed: the technologies it grew, each with what it needs, drawn beside Earth's, ending in a street lamp of living light that Earth never built.' },
+        blurb: 'One world where lignin-eating fungi came early and no coal formed: the technologies it grew, each with what it needs, drawn beside Earth\'s, ending in a street lamp of living light that Earth never built.' },
     ],
   },
   {
