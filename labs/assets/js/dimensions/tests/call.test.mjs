@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { forward, argmax } from '../mlp.js';
-import { netFromFile, digitFrom, candidates, verdict, tally, softmax, answerAndRival, stepTo, KINDS } from '../call.js';
+import { netFromFile, digitFrom, candidates, verdict, tally, softmax, answerAndRival, stepTo, KINDS, smallestFlip, signsFor } from '../call.js';
 import { frameAlong, clipRun, run } from '../plate.js';
 import { mosaic, certify } from '../split.js';
 
@@ -90,6 +90,17 @@ ok(certify(net, fr, M.cells) === 0, `the plate's mosaic is certified (${M.cells.
 const R = run(M.cells, fr.L);
 ok(R.ticks.length === R.passed.length - 1 && R.ticks.every((v, i) => i === 0 || v > R.ticks[i - 1]), `the run crosses ${R.ticks.length} walls, in order`);
 ok(Math.abs(R.passed.reduce((a, p) => a + (p.s[1] - p.s[0]), 0) - 1) < 1e-9, 'the cells it passes through cover the whole step');
+
+// 6b. The flip ledger reproduces the kill test's: the first test 4 on the seed-1 network flips at 0.042236328125
+//     (kill_test/out/measure_1.json, base.ledger[0]: the same corner, bisection on [0, 0.5], 12 steps).
+ok(smallestFlip(net, xs[four]) === 0.042236328125, `the ledger's entry for the first 4 is the kill test's (${smallestFlip(net, xs[four])})`);
+ok(smallestFlip(net, xs[four], 0.01) === null, 'a bound that does not flip it gives null');
+{
+  const e = smallestFlip(net, xs[four]);
+  const { answer, rival } = answerAndRival(net, xs[four]);
+  const sg = signsFor('template', net, xs[four], rival, answer, 0);
+  ok(argmax(forward(net, stepTo(xs[four], sg, e))) !== 4 && argmax(forward(net, stepTo(xs[four], sg, e - 0.5 / 4096))) === 4, 'the entry flips it and one bisection step less does not');
+}
 
 // 7. stepTo keeps every pixel in range.
 const st = stepTo(Float64Array.from([0, 0.05, 0.5, 0.95, 1]), [-1, -1, 1, 1, 1], 0.1);

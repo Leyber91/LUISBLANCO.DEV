@@ -82,6 +82,19 @@ export function verdict(cands, picked) {
   return { picked, changed, counted, right: counted && cands.list[picked].changes };
 }
 
+/** The flip ledger's entry (BAR_L1 part 11): the smallest size of the template's corner that moves the answer off
+ *  its class, by bisection on [0, hi] to hi / 2^iters (the kill test's ledger). null when hi does not move it. The
+ *  corner's signs are taken once, at the drawing, from the network given: a hardened network has its own. */
+export function smallestFlip(net, x, hi = 0.5, iters = 12) {
+  const { answer, rival } = answerAndRival(net, x);
+  const signs = signsFor('template', net, x, rival, answer, 0);
+  const off = (e) => argmax(forward(net, stepTo(x, signs, e))) !== answer;
+  if (!off(hi)) return null;
+  let lo = 0, top = hi;
+  for (let r = 0; r < iters; r++) { const mid = (lo + top) / 2; if (off(mid)) top = mid; else lo = mid; }
+  return top;
+}
+
 /** The tally after one more verdict. A call that is not counted leaves it as it was. */
 export function tally(t, v) {
   if (!v.counted) return { made: t.made, right: t.right };

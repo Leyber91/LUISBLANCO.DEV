@@ -47,6 +47,9 @@
       <p class="verdict" id="verdict" aria-live="polite">&nbsp;</p>
       <p class="tally" id="tally">Calls right: <b>0</b> of 0</p>
       <div class="tpl"><canvas id="tpl" width="28" height="28" aria-label="The template of the cell the drawing is in"></canvas><p>Inside this cell the network applies this one picture. Its sign is the sharpest corner of the cube.</p></div>
+      <button class="act" id="harden" type="button">Harden the network</button>
+      <p class="actnote" id="hardnote" aria-live="polite">300 steps on 2,000 digits and your drawings, in this tab.</p>
+      <table class="ledger"><thead><tr><th>Smallest step that changes it</th><th class="n">before</th><th class="n">after</th></tr></thead><tbody id="ledger"></tbody></table>
       <button class="next" id="next" type="button">Next drawing</button>
     </section>
   </main>

@@ -6,7 +6,8 @@
 
 import { forward, template, argmax } from './mlp.js';
 import { mosaic, certify } from './split.js';
-import { netFromFile, digitFrom, candidates, verdict, tally, softmax } from './call.js';
+import { netFromFile, digitFrom, candidates, verdict, tally, softmax, smallestFlip } from './call.js';
+import { fnv1a } from '../kit/rng.js';
 import { frameAlong, run } from './plate.js';
 import { reduce } from './pad.js';
 import { el } from '../kit/dom.js';
@@ -31,6 +32,50 @@ const S = { net: null, digits: [], xs: [], eps: 0.1, i: 0, cands: null, plate: n
 /* The pad: strokes of PAD_LINE px on a PAD px square (MNIST's strokes are about a tenth of a digit's height). Each
    stroke is read as it is drawn (the answer moves); on release the drawing joins the strip and gets its cells. */
 const PAD = 280, PAD_LINE = 20;
+
+/* Hardening (BAR_L1 part 10): the worker trains a copy; every 50 steps the page redraws the walls of the current
+   plane with the new weights, so the visitor sees them move. Then the second call runs on the hardened network. */
+const HARDEN = { steps: 300, batch: 64, every: 50 };
+let subsetData = null;
+const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+async function harden() {
+  if (S.hardening || S.hardened) return;
+  S.hardening = true;
+  const btn = $('harden'); btn.disabled = true; btn.textContent = 'Hardening';
+  if (!subsetData) {
+    const o = await fetch('assets/data/dimensions/subset.json').then((r) => r.json());
+    subsetData = { labels: o.labels, pixels: Uint8Array.from(atob(o.pixels), (c) => c.charCodeAt(0)) };
+  }
+  const extra = S.xs.map((x, k) => (S.digits[k].mine ? { x: Array.from(x), label: argmax(forward(S.net, x)) } : null)).filter(Boolean);
+  const x0 = S.xs[S.i], name = S.digits[S.i].mine ? 'Your drawing' : `The example ${S.digits[S.i].label}`;
+  const before = smallestFlip(S.net, x0);
+  const worker = new Worker(new URL('./harden.worker.js', import.meta.url), { type: 'module' });
+  worker.onmessage = (e) => {
+    const m = e.data, tmp = { sizes: S.net.sizes, W: m.W, b: m.b };
+    $('hardnote').textContent = `Step ${m.step} of ${m.steps}, ${(m.ms / 1000).toFixed(1)} s.`;
+    document.body.dataset.hardenStep = String(m.step);
+    if (!m.done && !reducedMotion()) {
+      const M = mosaic(tmp, S.plate.fr);
+      S.plate = { ...S.plate, M, R: run(M.cells, S.plate.fr.L) };
+      drawPlate(false); $('t-cells').textContent = `${M.cells.length.toLocaleString('en-US')}, exact`;
+    }
+    if (m.done) {
+      worker.terminate();
+      S.net = tmp; S.hardening = false; S.hardened = true;
+      const after = smallestFlip(S.net, x0);
+      const fmt = (v) => (v === null ? 'over 0.5' : v.toFixed(3));
+      const row = el('tr', ''); row.append(el('td', '', name), el('td', 'n', fmt(before)), el('td', 'n', fmt(after)));
+      $('ledger').append(row);
+      btn.textContent = 'Hardened';
+      $('hardnote').textContent = `Hardened in ${(m.ms / 1000).toFixed(1)} s. Call again: the corners are the hardened network's own.`;
+      show(S.i, { keepPad: S.digits[S.i].mine });
+      Object.assign(document.body.dataset, { hardened: '1', ledgerBefore: String(before), ledgerAfter: String(after) });
+    }
+  };
+  worker.onerror = () => { S.hardening = false; btn.disabled = false; btn.textContent = 'Harden the network'; $('hardnote').textContent = 'Hardening stopped. Press again to retry.'; };
+  worker.postMessage({ sizes: S.net.sizes, W: S.net.W, b: S.net.b, pixels: subsetData.pixels, labels: subsetData.labels, extra, eps: S.eps,
+    steps: HARDEN.steps, batch: HARDEN.batch, every: HARDEN.every, seed: fnv1a('folded|harden|' + S.digits[S.i].index) });
+}
 function padGray() {
   const d = $('pad').getContext('2d').getImageData(0, 0, PAD, PAD).data;
   const g = new Float64Array(PAD * PAD);
@@ -160,7 +205,9 @@ function call(i) {
   S.v = verdict(S.cands, i);
   S.tally = tally(S.tally, S.v);
   const c = S.cands.list[i];
-  $('verdict').textContent = !S.v.counted ? 'None of the three changes the answer here, so this call is not counted.'
+  $('verdict').textContent = !S.v.counted
+    ? (S.hardened ? `None of the three changes it now: after hardening, a step of ${S.eps} keeps the answer at ${S.cands.answer}. This call is not counted.`
+      : 'None of the three changes the answer here, so this call is not counted.')
     : S.v.right ? `Right. This corner changes the answer to ${c.read}.` : `Not this one. It leaves the answer at ${S.cands.answer}.`;
   drawTally(); drawCands(); drawPlate(true);
   document.body.dataset.called = String(S.tally.made);
@@ -193,7 +240,7 @@ function show(i, { keepPad = false } = {}) {
   $('t-cells').textContent = `${M.cells.length.toLocaleString('en-US')}, exact`;
   $('t-eps').textContent = `${S.eps} of full ink`;
   $('t-ms').textContent = `${Math.round(ms)} ms`;
-  $('question').textContent = `Each corner moves every pixel by ${S.eps}. Which one changes the answer from ${answer}?`;
+  $('question').textContent = `${S.hardened ? 'The network is hardened. ' : ''}Each corner moves every pixel by ${S.eps}. Which one changes the answer from ${answer}?`;
   $('verdict').textContent = '';
   drawCands(); drawPlate(false);
   Object.assign(document.body.dataset, { digit: String(i), answer: String(answer), cells: String(M.cells.length), walls: String(S.plate.R.ticks.length), cert: String(S.plate.certFailures) });
@@ -211,6 +258,7 @@ async function start() {
   S.xs.forEach((_, j) => addStripButton(j));
   setupPad();
   $('next').addEventListener('click', () => show((S.i + 1) % S.xs.length));
+  $('harden').addEventListener('click', harden);
   drawTally();
   show(Math.max(0, S.digits.findIndex((d) => d.label === 4)));
   document.body.dataset.state = 'ready';
