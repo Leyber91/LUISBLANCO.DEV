@@ -19,6 +19,9 @@
                              row tested against what existed when the round began), so the order a row enters in does
                              not depend on where it sits in the table; the set is the paper's unique maximal CAF.
    - figure(row, table)      how well a row serves the job, by the table's measure (lower is better), or null for a gap
+   - figureAt(row, table, y) a row's figure at a year: the latest stage of its series on or before y; none before its first
+   - dated(table, food, job) the answer kept at each date of the table: the cheapest by figureAt among those CAF allows
+   - eras(table, food, job, ids) which of a list of answers (Earth's eras) dated() keeps at some date, and which it misses
    - grow(table, food, job)  the keep rule, after Arthur and Polak 2006 (Complexity 11(5), 23-31): step by step, among
                              the rows CAF admits for the first time, keep each one that meets an unmet need, and lose
                              for good each one that meets none (theirs is discarded when it improves no need); an answer
@@ -59,10 +62,11 @@
    What this rule cannot see, said here so no page claims it:
    - quantities: how much of a thing, its scarcity, a price other than the job's. Only the job has a measure; a second
      maker of a thing (coke iron after charcoal iron) is never kept, however much cheaper.
-   - time: a step is one round of CAF, a depth of prerequisites, not a year. Each answer has one figure, its price at
-     the earliest date the source gives, and is weighed against the answer in use at its step, whose figure is of
-     another date: the incumbent's later fall in price, and the newcomer's, are not seen. Dates in the table are read
-     by the tests to check the ledger's order and never by this rule.
+   - time, in grow: a step is one round of CAF, a depth of prerequisites, not a year. grow gives each answer one figure,
+     its price at the earliest date the source gives, and weighs it against the answer in use at its step, whose figure
+     is of another date. dated() is the rule that sees time: it ranks at each date of the table's figures, so a later fall
+     in the incumbent's price, and the newcomer's, are seen there. A row's own date (the table's `date`) is read by the
+     tests to check the ledger's order and never by either.
    ============================================================ */
 
 /* What a kept row puts into the world: its id and every job it serves. */
@@ -81,10 +85,45 @@ export function figure(row, table) {
   if (typeof p.series === 'string') {
     const s = table && table.measure && table.measure.series && table.measure.series[p.series];
     if (!s || !s.length) throw new Error(`the measure has no series "${p.series}" (row ${row.id})`);
-    const year = (at) => Number(String(at).match(/-?\d{1,4}/)[0]);
-    return [...s].sort((a, b) => year(a[1]) - year(b[1]))[0][2];
+    return [...s].sort((a, b) => yearOf(a[1]) - yearOf(b[1]))[0][2];
   }
   return typeof p.value === 'number' ? p.value : null;
+}
+
+/* A row's figure at a year: its series' figure at the latest stage dated on or before that year (a stage's date is its
+   first year, so "1815-45" is 1815); null before the series' first stage (the row is unavailable then), for a row with a
+   gap, and for a row on a test table that gives one figure and no series. */
+export const yearOf = (at) => Number(String(at).match(/-?\d{1,4}/)[0]);
+export function figureAt(row, table, year) {
+  const p = row.perf;
+  if (!p || typeof p.series !== 'string') return null;
+  const s = table && table.measure && table.measure.series && table.measure.series[p.series];
+  if (!s || !s.length) throw new Error(`the measure has no series "${p.series}" (row ${row.id})`);
+  let f = null, at = -Infinity;
+  for (const st of s) { const y = yearOf(st[1]); if (y <= year && y >= at) { f = st[2]; at = y; } }
+  return f;
+}
+
+/* Every date the table gives a figure at: the union of its series' stage dates, ascending. */
+export function datesOf(table) {
+  const s = (table.measure && table.measure.series) || {};
+  return [...new Set(Object.values(s).flatMap((st) => st.map((x) => yearOf(x[1]))))].sort((a, b) => a - b);
+}
+
+/* The keep rule at each date (the one change of the dated pass). The answers to the job CAF allows from `food` are
+   ranked at every date of the table by their figure at that date (figureAt); a row with no figure then (before its first
+   stage, or a gap) is not in the ranking, and the cheapest is the one kept at that date; a tie on a figure goes to the
+   table's order. Returns [{ year, kept, figure, ranked: [{ id, f }] }] in date order; kept is null where no answer has a
+   figure yet. Nothing here reads a row's date, era or label: only the table's figures. */
+export function dated(table, food, job) {
+  const reach = new Set(caf(table, food).map((e) => e.id));
+  const at = new Map(table.rows.map((r, i) => [r.id, i]));
+  const lamps = table.rows.filter((r) => reach.has(r.id) && r.jobs.includes(job));
+  return datesOf(table).map((year) => {
+    const ranked = lamps.map((r) => ({ id: r.id, f: figureAt(r, table, year) })).filter((x) => x.f !== null)
+      .sort((a, b) => a.f - b.f || at.get(a.id) - at.get(b.id));
+    return { year, kept: ranked.length ? ranked[0].id : null, figure: ranked.length ? ranked[0].f : null, ranked };
+  });
 }
 
 /* Whether answer a serves the job better than answer b (Arthur and Polak: better, or as well at a lower cost): each is
@@ -215,6 +254,32 @@ export function grow(table, food, job) {
 
 /* The answers the job kept, each replacing the one before, in the order they did. */
 export const branch = (run) => run.kept.filter((k) => k.met.some((m) => m.kind === 'job')).map((k) => k.id);
+
+/* Which of a list of answers (Earth's eras: the table's ledger rows) the rule regrows. Each answer is held when dated()
+   keeps it at some date, with the years it is kept at; before is the same list under grow's step rule (earliest figure
+   only), the count this pass replaces. A missed answer carries its figures (the stages of its series, or none) and, at the
+   date it came nearest, the answer kept instead and by how much it was dearer. */
+export function eras(table, food, job, ids) {
+  const days = dated(table, food, job);
+  const row = new Map(table.rows.map((r) => [r.id, r]));
+  const held = [], missed = [];
+  for (const id of ids) {
+    const years = days.filter((d) => d.kept === id).map((d) => d.year);
+    if (years.length) { held.push({ id, years }); continue; }
+    const p = row.get(id).perf || {};
+    const stages = typeof p.series === 'string' ? table.measure.series[p.series].map((x) => ({ year: yearOf(x[1]), f: x[2] })) : [];
+    let near = null;
+    for (const d of days) {
+      const mine = d.ranked.find((x) => x.id === id);
+      if (!mine || !d.kept) continue;
+      const ratio = mine.f / d.figure;
+      if (!near || ratio < near.ratio) near = { year: d.year, f: mine.f, by: d.kept, byF: d.figure, ratio };
+    }
+    missed.push({ id, stages, near });
+  }
+  const before = branch(grow(table, food, job)).filter((id) => ids.includes(id));
+  return { held, missed, before, total: ids.length };
+}
 
 /* The answer in use when the run ends, or null when nothing serves the job. */
 export const winner = (run) => branch(run).pop() || null;

@@ -39,6 +39,9 @@
    J. Sources honest: no row cites the Historical Tech Tree.
    K. The verdict line: composed from the engine's findings, each
       clause tagged by the rows it rests on.
+   L. "Better" at each date (brief dated.md): figureAt, dated(), and the
+      eras line: the count and the misses against an oracle read from
+      the page images' copy, and a removal promoting the next cheapest.
    ============================================================ */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -109,7 +112,9 @@ const T16 = {
     ['Welsbach mantle', '1885-95', 0.083, 1.573], ['Welsbach mantle', '1916', 0.012, 0.346]],
   'kerosene-lamp': [["Silliman's experiment", '1855', 0.2306, 4.036], ['19th century', '1875-85', 0.2253, 3.479], ['Coleman lantern', '1993', 0.0098, 10.323]],
   'electric-lamp': [['Edison carbon lamp', '1883', 0.750239, 9.228], ['Carbon filament', '1900', 0.220431, 2.692], ['Carbon filament', '1910', 0.092096, 1.384],
-    ['Filament lamp', '1920', 0.013538, 0.630]],
+    ['Filament lamp', '1920', 0.013538, 0.630], ['Filament lamp', '1930', 0.010396, 0.509], ['Filament lamp', '1940', 0.005490, 0.323],
+    ['Filament lamp', '1950', 0.001883, 0.241], ['Filament lamp', '1960', 0.001016, 0.207], ['Filament lamp', '1970', 0.000551, 0.175],
+    ['Filament lamp', '1980', 0.000678, 0.447], ['Filament lamp', '1990', 0.000605, 0.600], ['Compact fluorescent', '1992', 0.000119, 0.124]],
 };
 const firstYear = (at) => Number(String(at).match(/\d{3,4}/)[0]);
 
@@ -581,6 +586,97 @@ const world1 = grow(TABLE, WORLD1, JOB);
     return [v.line.length <= 190, `${v.line.length}: ${v.line}`];
   });
   try { console.log(`  measured: the verdict line: ${W1.buildWorld(TABLE).verdict.line}`); } catch { /* the line first */ }
+}
+
+// ---------------------------------------------------------------- L. "better" at each date (brief dated.md)
+{
+  // an oracle written apart from grow.js: T16, the page images' copy above, read for the lamps the table gives a series
+  // and CAF allows on Earth, at every date T16 gives
+  const lampSeries = TABLE.rows.filter((r) => r.jobs.includes(JOB) && r.perf && r.perf.series).map((r) => [r.id, T16[r.perf.series]]);
+  const yr = (at) => firstYear(at);
+  const figAt = (st, y) => { const ok = st.filter((x) => yr(x[1]) <= y); return ok.length ? ok.sort((a, b) => yr(a[1]) - yr(b[1])).pop()[2] : null; };
+  const allYears = [...new Set(Object.values(T16).flatMap((st) => st.map((x) => yr(x[1]))))].sort((a, b) => a - b);
+  const rankAt = (lamps, y) => lamps.map(([id, st]) => [id, figAt(st, y)]).filter(([, f]) => f !== null).sort((a, b) => a[1] - b[1]);
+  const builtIds = new Set(need('built')(earth).map((b) => b.id));
+  const earthLamps = lampSeries.filter(([id]) => builtIds.has(id));
+  t('dated: figureAt is the latest stage on or before the year, and none before the first', () => {
+    const f = need('figureAt'), r = byId.get('gas-lamp');
+    return [f(r, TABLE, 1826) === null && f(r, TABLE, 1827) === 7.398 && f(r, TABLE, 1854) === 7.398 && f(r, TABLE, 1855) === 2.978
+      && f(r, TABLE, 1885) === 0.083 && f(r, TABLE, 1915) === 0.083 && f(r, TABLE, 1916) === 0.012 && f(r, TABLE, 3000) === 0.012,
+      [1826, 1827, 1854, 1855, 1885, 1915, 1916].map((y) => f(r, TABLE, y)).join(' ')];
+  });
+  t('dated: a gap has no figure at any date', () => need('figureAt')(byId.get('arc-lamp'), TABLE, 2000) === null && need('figureAt')(byId.get('mycelial-lamp'), TABLE, 2000) === null);
+  t("dated: the dates are the union of the table's series' dates", () => [same(need('datesOf')(TABLE), allYears), need('datesOf')(TABLE).join()]);
+  t('dated: at every date the engine keeps the cheapest lamp CAF allows, as the page images give it', () => {
+    const d = need('dated')(TABLE, EARTH, JOB);
+    const bad = d.filter((x) => { const w = rankAt(earthLamps, x.year)[0]; return !w || x.kept !== w[0] || x.figure !== w[1]; }).map((x) => x.year);
+    return [d.length === allYears.length && bad.length === 0, `dates ${d.length}/${allYears.length}; differ at ${bad.join()}`];
+  });
+  t('dated: before its first date a lamp is unavailable: every lamp ranked at a date has a stage on or before it', () => {
+    const d = need('dated')(TABLE, EARTH, JOB);
+    return [d[0].year === 1800 && d.every((x) => x.ranked.every((r) => figAt(T16[byId.get(r.id).perf.series], x.year) !== null)), String(d[0].year)];
+  });
+  // test 1, the count and the misses, whatever they are: the eras of the ledger the rule regrows, derived from the oracle
+  const keptAt = allYears.map((y) => rankAt(earthLamps, y)[0][0]);
+  const wantHeld = LEDGER.filter((id) => keptAt.includes(id));
+  const wantMissed = LEDGER.filter((id) => !keptAt.includes(id));
+  t("test 1 (dated): the eras the rules regrow, and the misses, are the oracle's", () => {
+    const e = need('eras')(TABLE, EARTH, JOB, LEDGER);
+    return [same(e.held.map((h) => h.id), wantHeld) && same(e.missed.map((m) => m.id), wantMissed) && e.total === 6, `held ${e.held.map((h) => h.id)}; missed ${e.missed.map((m) => m.id)}`];
+  });
+  t('test 1 (dated): the count before is what the step rule keeps of the ledger', () => {
+    const e = need('eras')(TABLE, EARTH, JOB, LEDGER);
+    return [same(e.before, branch(earth).filter((id) => LEDGER.includes(id))), e.before.join()];
+  });
+  t('test 1 (dated): a missed era names its figures (the stages of its series) or says it has none', () => {
+    const e = need('eras')(TABLE, EARTH, JOB, LEDGER);
+    return [e.missed.every((m) => { const p = byId.get(m.id).perf || {}; return p.series ? m.stages.length === T16[p.series].length : (m.stages.length === 0 && typeof p.gap === 'string'); }), JSON.stringify(e.missed)];
+  });
+  t('test 1 (dated): the plate line is written from that run, tagged REAL, and one line (at most 190 characters)', () => {
+    const e = W1.erasOf(TABLE), run = need('eras')(TABLE, EARTH, JOB, LEDGER);
+    const nameOf = (id) => byId.get(id).name || byId.get(id).label.toLowerCase();
+    return [e.tag === 'REAL' && e.line.startsWith('[REAL] ') && e.line.includes(`regrow ${run.held.length} of Earth's ${run.total}`) && e.line.includes(`against ${run.before.length} of ${run.total}`)
+      && run.missed.every((m) => e.line.includes(nameOf(m.id))) && e.line.length <= 190, `${e.line.length}: ${e.line}`];
+  });
+  t('test 1 (dated): the line follows the engine: an arc lamp priced 0.1 from 1867 is held, and the line drops it from the misses', () => {
+    const T = JSON.parse(JSON.stringify(TABLE));
+    T.measure.series['test-arc'] = [['Arc', '1867', 0.1, 0.5]];
+    T.rows.find((r) => r.id === 'arc-lamp').perf = { series: 'test-arc' };
+    const a = W1.erasOf(TABLE), b = W1.erasOf(T);
+    return [a.line !== b.line && b.held.some((h) => h.id === 'arc-lamp') && b.missed.length === 0 && /regrow 6 of Earth's 6/.test(b.line) && !/missed/.test(b.line), b.line];
+  });
+  // removing the kept lamp at a date promotes the cheapest remaining at that date (written on a table without the row, so
+  // the engine is not asked about its own ranking: the oracle ranks what is left)
+  t('dated: removing the lamp kept at a date promotes the cheapest remaining lamp at that date, at every date', () => {
+    const base = need('dated')(TABLE, EARTH, JOB);
+    const bad = [];
+    for (const x of base) {
+      const rest = earthLamps.filter(([id]) => id !== x.kept);
+      const T = { ...TABLE, rows: TABLE.rows.filter((r) => r.id !== x.kept) };
+      const after = need('dated')(T, EARTH, JOB).find((y) => y.year === x.year);
+      const want = rankAt(rest, x.year)[0];
+      if (!after) { bad.push(`${x.year}: no date`); continue; }
+      if ((want ? want[0] : null) !== after.kept) bad.push(`${x.year}: ${x.kept} out, engine ${after.kept}, oracle ${want && want[0]}`);
+    }
+    return [bad.length === 0, bad.join('; ')];
+  });
+  t('dated: at 1900, gas out promotes incandescent (0.220431), and incandescent out too promotes kerosene (0.2253)', () => {
+    const f = (drop) => need('dated')({ ...TABLE, rows: TABLE.rows.filter((r) => !drop.includes(r.id)) }, EARTH, JOB).find((x) => x.year === 1900).kept;
+    return [f([]) === 'gas-lamp' && f(['gas-lamp']) === 'incandescent-lamp' && f(['gas-lamp', 'incandescent-lamp']) === 'kerosene-lamp', [f([]), f(['gas-lamp']), f(['gas-lamp', 'incandescent-lamp'])].join()];
+  });
+  t('dated: a lamp CAF cannot build is not ranked: without coal, no coal-gas lamp is kept at any date', () => {
+    const d = need('dated')(TABLE, NOCOAL, JOB);
+    const free = new Set(caf(TABLE, NOCOAL).map((e) => e.id));
+    return [d.every((x) => x.ranked.every((r) => free.has(r.id))), d.map((x) => x.kept).join()];
+  });
+  t('dated: no date, era or label is read: stripping them changes no kept lamp', () => {
+    const bare = { ...TABLE, rows: TABLE.rows.map((r) => { const { date, era, label, source, ...rest } = r; return { ...rest, label: r.id, era: 'x' }; }) };
+    return same(need('dated')(bare, EARTH, JOB), need('dated')(TABLE, EARTH, JOB));
+  });
+  try {
+    console.log(`  measured: kept at each date: ${need('dated')(TABLE, EARTH, JOB).map((x) => `${x.year} ${x.kept}`).join(', ')}`);
+    console.log(`  measured: the eras line: ${W1.erasOf(TABLE).line}`);
+  } catch { /* measured only once the rule exists */ }
 }
 
 console.log(`orthogonal engine: ${pass} passed, ${fail} failed`);

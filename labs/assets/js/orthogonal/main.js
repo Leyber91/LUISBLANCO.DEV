@@ -564,7 +564,7 @@ function words() {
   q('.driver-line').replaceChildren('Changed driver: ', b, '.');
   q('.favours-text').textContent = WORLD.favours.line;   // its [REAL] tag stays in the markup beside it
   // the engine's verdict: each clause after its tag, both computed (worlds/fungi-early.js verdictOf)
-  const cl = document.querySelectorAll('.verdict-claim');
+  const cl = document.querySelectorAll('#verdict .verdict-claim');
   WORLD.verdict.clauses.forEach((c, i) => {
     if (!cl[i]) return;
     const t = cl[i].querySelector('.t');
@@ -572,6 +572,11 @@ function words() {
     t.className = `t ${c.tag === 'REAL' ? 'real' : 'ill'}`;
     cl[i].querySelector('.verdict-text').textContent = c.text;
   });
+  // the eras line under it: its count, its misses and their figures are computed (worlds/fungi-early.js erasOf)
+  const er = document.querySelector('#eras .verdict-claim');
+  er.querySelector('.t').textContent = `[${WORLD.eras.tag}]`;
+  er.querySelector('.t').className = `t ${WORLD.eras.tag === 'REAL' ? 'real' : 'ill'}`;
+  er.querySelector('.verdict-text').textContent = WORLD.eras.text;
   q('.art-name').textContent = WORLD.artifact.title;
   q('.art-line').textContent = WORLD.artifact.line;
   q('.art-exposure-text').textContent = WORLD.artifact.exposure;

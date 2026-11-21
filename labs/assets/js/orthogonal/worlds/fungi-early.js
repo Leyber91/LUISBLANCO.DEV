@@ -54,7 +54,7 @@
    ILLUSTRATIVE. A REAL item cites a key of config.js SOURCES (or a
    list of them), or declares the gap where no source was opened.
    ============================================================ */
-import { branch, divergence, endowmentOf, findings, grow, lineage } from '../grow.js';
+import { branch, divergence, endowmentOf, eras, findings, grow, lineage } from '../grow.js';
 
 /* The driver as the engine reads it: Earth's endowment with coal taken out and the early fungi put in. */
 export const DRIVER = Object.freeze({ remove: ['coal'], add: ['fungi-early'] });
@@ -230,6 +230,7 @@ export function buildWorld(table) {
     },
     earthArtifact: { node: earthArt.id, ...earthArt.artifact },
     verdict,
+    eras: erasOf(table),
     nodes: [ROOT, { ...DRIVER_NODE, after: [ROOT.id] }, ...worldNodes, ...earthNodes, { ...TROUBLE, after: [art.id] }],
     grown: {
       table: TABLE_PATH, rows: table.rows.length, artifactRow: div.world, earthRow: div.earth, how: div.how, kept: div.kept,
@@ -273,4 +274,23 @@ export function verdictOf(table, f) {
     { tag: tagOf(L.rows), text: lamp, rows: L.rows },
   ];
   return { clauses, line: clauses.map((c) => `[${c.tag}] ${c.text}`).join(' ') };
+}
+
+/* The eras line: how many of Earth's lighting eras (the table's ledger rows for the job, in the order of their dates) the
+   rule regrows when it ranks at each date (grow.js dated, eras), against how many it regrew ranked by each lamp's first
+   price, and the misses with their figures. Written from the engine's run; the words are fixed, the counts, the names and
+   the figures are computed, and the tag is [REAL] unless a row it names is invented (a ledger row never is). */
+export function erasOf(table) {
+  const row = new Map(table.rows.map((r) => [r.id, r]));
+  const name = (id) => row.get(id).name || row.get(id).label.toLowerCase();
+  const ids = table.rows.filter((r) => r.ledger && r.jobs.includes(table.job)).sort((a, b) => a.date - b.date).map((r) => r.id);
+  const e = eras(table, endowmentOf(table, {}), table.job, ids);
+  const num = (x) => String(Number(x.toPrecision(3)));
+  const miss = e.missed.map((m) => (m.stages.length && m.near
+    ? `${name(m.id)} (never cheapest: ${num(m.near.f)} against ${num(m.near.byF)} for ${name(m.near.by)} in ${m.near.year}, hours of work per 1,000 lumen-hours)`
+    : `${name(m.id)} (Table 1.6 gives it no price)`));
+  const tag = ids.some((id) => row.get(id).invented) ? 'ILLUSTRATIVE' : 'REAL';
+  const text = `Ranked by the price of light at each date, the rules regrow ${e.held.length} of Earth's ${e.total} lighting eras, against ${e.before.length} of ${e.total} by first price`
+    + (miss.length ? `; missed: ${miss.join(', ')}.` : '.');
+  return { tag, text, line: `[${tag}] ${text}`, held: e.held, missed: e.missed, before: e.before, total: e.total, ids };
 }

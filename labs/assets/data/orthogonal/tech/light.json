@@ -6,7 +6,7 @@
     "unit": "hours of work per 1,000 lumen-hours",
     "better": "lower",
     "source": "Nordhaus (1996), in Bresnahan and Gordon (eds.), The Economics of New Goods, University of Chicago Press, Table 1.6, 'Labor Price of Light', pp. 52 and 53, read on the page images (the scan's text layer misaligns the table's columns)",
-    "rule": "A lamp's figure is its series' labor price at the earliest date the table gives for it, the version nearest the one that came into use. The labor price is used, not the cents, because it is the table's own measure across eras: a cent of 1800 and a cent of 1883 are not one unit. A lamp the table does not price carries a gap and ranks below every priced lamp.",
+    "rule": "A lamp's figure at a date is its series' labor price at the latest stage dated on or before that date (a stage's date is its first year: 1815-45 is 1815); before its first stage the lamp has no figure and is unavailable. The engine ranks the lamps CAF allows at each date of the table, and keeps the cheapest. Its figure for the step rule that builds the world (grow) is the one at the earliest date, the version nearest the one that came into use. The labor price is used, not the cents, because it is the table's own measure across eras: a cent of 1800 and a cent of 1883 are not one unit. A lamp the table does not price carries a gap and ranks below every priced lamp.",
     "uncertain": "Tables 1.5 and 1.6 give the oils four times the price per 1,000 lumen-hours that Table 1.2 gives for the same 1855 tests (sperm oil 160.256 against 40.1 cents; other oils 59.441 against 14.9), and kerosene twice (4.036 against 2.0, Table 1.2's kerosene priced in 1870); the pages read do not say why. The engine reads Table 1.6 alone.",
     "columns": ["stage","approximate date","labor price, hours of work per 1,000 lumen-hours","price, cents per 1,000 lumen-hours"],
     "series": {
@@ -17,7 +17,7 @@
       "lamp-other-oils": [["Silliman's experiment: other oils","1855",5.94,59.441]],
       "town-gas": [["Early lamp","1827",7.398,52.524],["Silliman's experiment","1855",2.978,29.777],["Early lamp","1875-85",0.326,5.0345],["Welsbach mantle","1885-95",0.083,1.573],["Welsbach mantle","1916",0.012,0.346]],
       "kerosene-lamp": [["Silliman's experiment","1855",0.2306,4.036],["19th century","1875-85",0.2253,3.479],["Coleman lantern","1993",0.0098,10.323]],
-      "electric-lamp": [["Edison carbon lamp","1883",0.750239,9.228],["Carbon filament","1900",0.220431,2.692],["Carbon filament","1910",0.092096,1.384],["Filament lamp","1920",0.013538,0.63]]
+      "electric-lamp": [["Edison carbon lamp","1883",0.750239,9.228],["Carbon filament","1900",0.220431,2.692],["Carbon filament","1910",0.092096,1.384],["Filament lamp","1920",0.013538,0.63],["Filament lamp","1930",0.010396,0.509],["Filament lamp","1940",0.00549,0.323],["Filament lamp","1950",0.001883,0.241],["Filament lamp","1960",0.001016,0.207],["Filament lamp","1970",0.000551,0.175],["Filament lamp","1980",0.000678,0.447],["Filament lamp","1990",0.000605,0.6],["Compact fluorescent","1992",0.000119,0.124]]
     }
   },
   "ties": [
