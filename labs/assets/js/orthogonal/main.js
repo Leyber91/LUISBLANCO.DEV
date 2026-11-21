@@ -563,6 +563,15 @@ function words() {
   b.textContent = WORLD.driver;
   q('.driver-line').replaceChildren('Changed driver: ', b, '.');
   q('.favours-text').textContent = WORLD.favours.line;   // its [REAL] tag stays in the markup beside it
+  // the engine's verdict: each clause after its tag, both computed (worlds/fungi-early.js verdictOf)
+  const cl = document.querySelectorAll('.verdict-claim');
+  WORLD.verdict.clauses.forEach((c, i) => {
+    if (!cl[i]) return;
+    const t = cl[i].querySelector('.t');
+    t.textContent = `[${c.tag}]`;
+    t.className = `t ${c.tag === 'REAL' ? 'real' : 'ill'}`;
+    cl[i].querySelector('.verdict-text').textContent = c.text;
+  });
   q('.art-name').textContent = WORLD.artifact.title;
   q('.art-line').textContent = WORLD.artifact.line;
   q('.art-exposure-text').textContent = WORLD.artifact.exposure;

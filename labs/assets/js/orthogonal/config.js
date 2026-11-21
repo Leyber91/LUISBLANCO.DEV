@@ -37,11 +37,12 @@ export const SOURCES = Object.freeze({
   // for this species is printed.
   kotlobay2018: 'Kotlobay et al., PNAS 115, 12728 (2018)',
   // the engine's table (assets/data/orthogonal/tech/light.json), opened 2026-11-21 from the copies the road's wheel scout
-  // downloaded (research/wheel_graphs.md G1, G7, M1, M4): Nordhaus's chapter read in sections 1.2.4 to 1.2.7 and Table
-  // 1.1; the Historical Tech Tree's records (title, year, links, date notes) for each row that cites it; Hordijk's
-  // Algorithms 1 to 3; Arthur and Polak's working paper whole
+  // downloaded (research/wheel_graphs.md G7, M1, M4): Nordhaus's chapter read in sections 1.2.4 to 1.2.7 and Tables 1.1
+  // to 1.6, the tables on the page images (the scan's text layer misaligns their columns), Table 1.6's labor price of
+  // light being the measure of "better"; Hordijk's Algorithms 1 to 3; Arthur and Polak's working paper whole. The
+  // Historical Tech Tree has no licence: it is cited by no row and no claim, and the dates checked against it say so
+  // (light.json, checkedAgainst).
   nordhaus1996: 'Nordhaus, in Bresnahan and Gordon (eds.), The Economics of New Goods, University of Chicago Press (1996)',
-  htt2025: 'Fortier-Dubois, Historical Tech Tree, historicaltechtree.com (2025)',
   // Hordijk's note is 'A Concise and Formal Definition of RAF Sets and the RAF Algorithm'; Arthur and Polak were read as
   // SFI Working Paper 2004-12-042, the paper's version before Complexity
   hordijk2023: 'Hordijk, arXiv 2303.01809 (2023)',

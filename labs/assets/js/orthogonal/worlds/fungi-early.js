@@ -6,9 +6,16 @@
    light.json) twice, for Earth's endowment and for this world's
    (Earth's with the driver applied), and reads the plate from what
    grew:
-   - the artifact is the first lamp this world keeps that Earth
+   - the artifact is the first lamp this world builds that Earth
      never does (grow.js divergence), and Earth's artifact is
-     Earth's lamp in use at that step;
+     Earth's lamp in use at that step. Under "better" (grow.js,
+     2026-11-21's second pass) the lamp may be built and not kept,
+     when a lamp in use serves the job better; the artifact's line
+     and the lamp's engine line say which, from the run;
+   - the verdict line, one line under the header, is written here
+     from grow.js findings: what the removal of coal changes, and
+     what the lamp rests on and whether it is kept. Its words are
+     fixed; which words, which rows and which tag are computed;
    - this world's steps are the rows of the artifact's lineage Earth
      never keeps; each grows from the steps it drew on, or from the
      driver when it drew on none and rests on the driver's own item.
@@ -47,7 +54,7 @@
    ILLUSTRATIVE. A REAL item cites a key of config.js SOURCES (or a
    list of them), or declares the gap where no source was opened.
    ============================================================ */
-import { branch, divergence, endowmentOf, grow, lineage } from '../grow.js';
+import { branch, divergence, endowmentOf, findings, grow, lineage } from '../grow.js';
 
 /* The driver as the engine reads it: Earth's endowment with coal taken out and the early fungi put in. */
 export const DRIVER = Object.freeze({ remove: ['coal'], add: ['fungi-early'] });
@@ -62,7 +69,8 @@ const ROOT = {
   evidence: [
     { tag: 'REAL', text: "Earth's endowment, as the engine's table lists it.", gap: "No source opened for the endowment's items." },
     // the rules every step below is grown by (grow.js), cited once here so the lamp's reading stays one footer tall
-    { tag: 'REAL', text: 'Every step below is grown from it by two rules: a step enters when all it consumes and one of its tools exist, and is kept when it meets a need.', src: ['hordijk2023', 'arthurpolak2006'] },
+    // and the measure that decides between lamps (light.json measure: Table 1.6, the labor price of light)
+    { tag: 'REAL', text: 'Every step below is grown from it by two rules: a step enters when all it consumes and one of its tools exist, and is kept when it meets a need; a lamp only when its light costs fewer hours of work than the lamp in use.', src: ['hordijk2023', 'arthurpolak2006', 'nordhaus1996'] },
   ],
 };
 
@@ -103,21 +111,23 @@ const WORDS = {
       // what render_artifact.py does (review H5: it holds no grammar), with the two sources its header gives
       { tag: 'ILLUSTRATIVE', text: 'The lamp, its brightness and its world are invented. Each cap of its culture is a profile swept round an axis, built from the seed in its parameter file.', src: ['desbenoit2004', 'raistrick2023'] },
       // the lab's core claim is untested (Luis closed box 1 without the core test, 2026-11-21; CORE_TEST.md); since the
-      // engine (2026-11-21) the lineage is grown by its rules, which is all this line now adds
-      { tag: 'ILLUSTRATIVE', text: "Grown by the engine's rules; the method's core claim is not yet tested." },
+      // engine (2026-11-21) the lineage is built by its rules, which is all this line now adds. Built, not grown: under
+      // "better" the engine builds the lamp and may not keep it, which the verdict line under the header says
+      { tag: 'ILLUSTRATIVE', text: "Built by the engine's rules; the method's core claim is not yet tested." },
     ],
   },
   whaling: {
     id: 'whaling', label: 'Whaling',
     needs: 'harpoons and boats, at sea',
     note: 'On Earth whales were hunted from boats for their blubber.',
-    evidence: [{ tag: 'REAL', text: "Whaling, in Earth's record from about 6000 BC.", src: 'htt2025' }],
+    // the date was checked against the Historical Tech Tree, which has no licence and is cited by no row (light.json)
+    evidence: [{ tag: 'REAL', text: "Whaling, in Earth's record from about 6000 BC.", gap: 'No primary source opened for the date.' }],
   },
   'whale-oil': {
     id: 'whaleoil', label: 'Whale oil',
     needs: 'blubber from whaling',
     note: 'On Earth the fat of whales was boiled down into lamp oil.',
-    evidence: [{ tag: 'REAL', text: 'Whale oil was sold for lighting by 670, from Bayonne.', src: 'htt2025' }],
+    evidence: [{ tag: 'REAL', text: 'Whale oil was sold for lighting by 670, from Bayonne.', gap: 'No primary source opened for the date.' }],
   },
   'whale-oil-lamp': {
     id: 'oillamp', label: 'Whale-oil lamp',
@@ -147,7 +157,7 @@ export function buildWorld(table) {
   const earth = grow(table, endowmentOf(table, {}), table.job);
   const run = grow(table, endowmentOf(table, DRIVER), table.job);
   const div = divergence(earth, run, table);
-  if (!div || !div.earth) throw new Error('the engine grew no lamp this world has and Earth lacks');
+  if (!div || !div.earth) throw new Error('the engine built no lamp this world has and Earth lacks');
   const kept = new Set(earth.kept.map((k) => k.id));
   const L = lineage(run, table, div.world);
   const at = new Map(L.map((s) => [s.id, s]));
@@ -180,9 +190,10 @@ export function buildWorld(table) {
     return { id: w.id, label: w.label, role: 'earth', branch: 'earth', after: [i ? words(chain[i - 1]).id : ROOT.id], pair: trunk[offset + i], needs: w.needs, note: w.note, evidence: w.evidence, row };
   });
   const art = words(div.world), earthArt = words(div.earth);
-  // the same driver with coal restored and the fungi kept: does the lamp rest on the missing coal?
+  // the same driver with coal restored and the fungi kept: does the lamp rest on the missing coal? (the step it is built)
   const restored = grow(table, endowmentOf(table, { add: DRIVER.add }), table.job);
-  const stepOf = (r, id) => (r.kept.find((k) => k.id === id) || {}).step || null;
+  const stepOf = (r, id) => (r.kept.find((k) => k.id === id) || r.lost.find((k) => k.id === id) || {}).step || null;
+  const verdict = verdictOf(table, findings(table, DRIVER));
   return {
     id: 'fungi-early',
     plate: 'A',
@@ -201,7 +212,9 @@ export function buildWorld(table) {
       image: 'assets/data/orthogonal/renders/mycelial-lamp.webp',
       record: 'assets/data/orthogonal/renders/mycelial-lamp.render.json',
       title: 'The mycelial street lamp',
-      line: "This world's answer to light at night",
+      // what the lamp is to its world, from the run: its answer to the job when kept, else only its lamp (built, not kept,
+      // which the verdict line says); one line of the caption at 1440
+      line: div.kept ? "This world's answer to light at night" : "This world's lamp for light at night",
       // [ILLUSTRATIVE] said beside the render: every way it departs from what the culture would look like, as the
       // pipeline declares them (render-words.js DEPARTURES, tests.mjs section 18). The scene is exposed up, as a long
       // exposure records a dim source; an exposure that long records the night sky's faint light too (air.sky_ambient);
@@ -216,11 +229,48 @@ export function buildWorld(table) {
       frame: { top: 0.09, ground: 0.79 },
     },
     earthArtifact: { node: earthArt.id, ...earthArt.artifact },
+    verdict,
     nodes: [ROOT, { ...DRIVER_NODE, after: [ROOT.id] }, ...worldNodes, ...earthNodes, { ...TROUBLE, after: [art.id] }],
     grown: {
-      table: TABLE_PATH, rows: table.rows.length, artifactRow: div.world, earthRow: div.earth, how: div.how,
+      table: TABLE_PATH, rows: table.rows.length, artifactRow: div.world, earthRow: div.earth, how: div.how, kept: div.kept,
       step: div.step, earthStep: stepOf(earth, div.earth), restoredStep: stepOf(restored, div.world),
       earthLamps: branch(earth), lamps: branch(run),
     },
   };
+}
+
+/* The verdict line: what the engine finds for this world, in one line of two clauses, each tagged by the rows it rests on
+   ([ILLUSTRATIVE] when any of them is invented, else [REAL]). The words are fixed here; which words, which rows, which
+   outcome and which tag come from grow.js findings, so a table that grows something else writes another line (the
+   engine's tests change a figure and read the line change). Names are the table's (row.name, else its label; the
+   endowment's label). */
+export function verdictOf(table, f) {
+  const row = new Map(table.rows.map((r) => [r.id, r]));
+  const name = (id) => (row.get(id) && (row.get(id).name || row.get(id).label.toLowerCase())) || id;
+  const item = (id) => { const e = table.endowment.find((x) => x.id === id); return e ? e.label.toLowerCase() : id; };
+  const list = (xs) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
+  const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+  const tagOf = (ids) => (ids.some((id) => row.get(id) && row.get(id).invented) ? 'ILLUSTRATIVE' : 'REAL');
+  const without = `Without ${list(f.removed.map(item))}`;
+  // the removal: what replaced what Earth made from the removed item, and how the answer it fed fared
+  let removal;
+  const s = f.removal.swaps[0];
+  const a = s && s.answers[0];
+  if (s && a) {
+    const fared = a.alone.kept ? `and ${name(a.id)} wins the job`
+      : a.earth.kept ? `and ${name(a.id)} loses to ${name(a.alone.by)} on price`
+        : `but ${name(a.id)} still loses to ${name(a.alone.by)} on price`;
+    removal = `${without}, ${name(s.world)} replaces ${name(s.earth)}, ${fared}.`;
+  } else if (f.removal.same) removal = `${without}, no lamp that wins changes.`;
+  else removal = `${without}, the lamps that win are ${list(f.removal.lamps.map(name))}.`;
+  // the lamp: what it needs that is invented, and whether it is kept, or what served the job better when it came
+  const L = f.lamp;
+  const needs = L.needs.length ? `needs ${list(L.needs.map(name))} and` : 'is built and';
+  const lamp = L.kept ? `${cap(name(L.id))} ${needs} is kept.`
+    : `${cap(name(L.id))} ${needs}, ${L.figure === null ? 'unpriced' : 'dearer'}, loses to ${name(L.by)}.`;
+  const clauses = [
+    { tag: tagOf(f.removal.rows), text: removal, rows: f.removal.rows },
+    { tag: tagOf(L.rows), text: lamp, rows: L.rows },
+  ];
+  return { clauses, line: clauses.map((c) => `[${c.tag}] ${c.text}`).join(' ') };
 }

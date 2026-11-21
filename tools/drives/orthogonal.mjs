@@ -186,7 +186,19 @@ export default async function orthogonal(p, { base, width, height }) {
     const fit = await p.ev(`(() => { const r = document.getElementById('reading').getBoundingClientRect(), s = document.querySelector('.sheet').getBoundingClientRect();
       return { reading: Math.round(r.bottom), sheet: Math.round(s.bottom), view: innerHeight, scroll: document.documentElement.scrollHeight }; })()`);
     if (height <= 900) p.check('the whole plate, its evidence footer included, is in one frame', fit.sheet <= fit.view && fit.reading <= fit.view, JSON.stringify(fit));
+    // the engine's verdict (brief engine_b.md 3): one line under the header, in the frame, its text the one the engine
+    // computes from the table the page loaded, each clause after its tag
+    const verdict = await p.ev(`Promise.all([import('${base}/labs/assets/js/orthogonal/worlds/fungi-early.js'), fetch('${base}/labs/assets/data/orthogonal/tech/light.json').then((r) => r.json())])
+      .then(([W, T]) => { const v = document.getElementById('verdict'), r = v.getBoundingClientRect(), lh = parseFloat(getComputedStyle(v).lineHeight);
+        const text = v.textContent.replace(/\\s+/g, ' ').trim(), want = W.buildWorld(T).verdict.line;
+        return { h: Math.round(r.height), lh, top: Math.round(r.top), bottom: Math.round(r.bottom), view: innerHeight, text, want, ok: text === 'The engine: ' + want }; })`);
+    p.check('the engine\'s verdict is one line, in the frame, and the line the engine computes', verdict.h <= verdict.lh * 1.5 && verdict.bottom <= verdict.view && verdict.ok, JSON.stringify(verdict));
   }
+  // at every width the verdict's box is as tall as its text: on a phone the header is a column, where a basis of 100%
+  // once stretched it into a band of empty sky above the render (the first drive of 2026-11-21's second engine pass)
+  const vbox = await p.ev(`(() => { const v = document.getElementById('verdict'), r = document.createRange(); r.selectNodeContents(v);
+    return { box: Math.round(v.getBoundingClientRect().height), text: Math.round(r.getBoundingClientRect().height) }; })()`);
+  p.check('the verdict\'s box is as tall as its text', vbox.box <= vbox.text + 4, JSON.stringify(vbox));
   const counts = await p.ev(`({ nodes: document.querySelectorAll('.node').length, gold: document.querySelectorAll('.node.fired').length,
     filled: [...document.querySelectorAll('.node.fired .sq')].filter((r) => getComputedStyle(r).fill !== 'rgb(6, 8, 13)').length,
     earth: document.querySelectorAll('.edge.earth').length, leader: !!document.querySelector('.leader') })`);

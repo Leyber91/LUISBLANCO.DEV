@@ -165,10 +165,13 @@ ok('nothing else is gold', Object.values(states).filter((s) => s === 'fired').le
 ok('the seed of trouble has not happened', states.trouble === 'pending');
 ok("Earth's branch is the ghost", ['whaling', 'whaleoil', 'oillamp'].every((id) => states[id] === 'earth'));
 ok('the root belongs to both', states.ground === 'root');
-// the plate is what the engine grew (grow.js, worlds/fungi-early.js): its artifact is the first lamp this world keeps
+// the plate is what the engine grew (grow.js, worlds/fungi-early.js): its artifact is the first lamp this world builds
 // and Earth never does, Earth's is Earth's lamp in use at that step, and every step but the root, the driver and the
-// seed of trouble shows a row the engine kept
-ok("the artifact is the engine's: the first lamp this world keeps that Earth never does", WORLD.grown.artifactRow === 'mycelial-lamp' && !WORLD.grown.earthLamps.includes('mycelial-lamp') && WORLD.grown.lamps.includes('mycelial-lamp'));
+// seed of trouble shows a row the engine built. Under "better" (2026-11-21, second pass) the lamp is built and not
+// kept, since it has no price and whale oil serves; the artifact's line says what the run says
+ok("the artifact is the engine's: the first lamp this world builds that Earth never does", WORLD.grown.artifactRow === 'mycelial-lamp' && !WORLD.grown.earthLamps.includes('mycelial-lamp'));
+ok("the artifact's line says whether this world keeps it, as the run does", WORLD.grown.kept === WORLD.grown.lamps.includes('mycelial-lamp')
+  && (WORLD.grown.kept ? /answer to/.test(WORLD.artifact.line) : !/answer to/.test(WORLD.artifact.line) && /lamp for/.test(WORLD.artifact.line)), WORLD.artifact.line);
 ok("Earth's artifact is Earth's lamp in use at that step", WORLD.grown.earthRow === 'whale-oil-lamp' && WORLD.grown.how === 'in use' && WORLD.grown.earthStep < WORLD.grown.step, JSON.stringify(WORLD.grown));
 ok('every step of either branch shows a row the engine kept', WORLD.nodes.filter((n) => n.row).length === WORLD.nodes.length - 3 && WORLD.nodes.every((n) => !n.row || TABLE.rows.some((r) => r.id === n.row)));
 ok('no step of the plate is typed: a table that grows no such lamp stops the plate', (() => { try { buildWorld({ ...TABLE, rows: TABLE.rows.filter((r) => r.id !== 'luminous-culture') }); return false; } catch { return true; } })());
@@ -321,6 +324,13 @@ for (const [what, text] of [['title', WORLD.title], ['driver', WORLD.driver], ['
   ["Earth's line", WORLD.earthArtifact.line],
   ['image', WORLD.artifact.image], ['alt text', WORLD.artifact.alt], ['exposure note', WORLD.artifact.exposure]]) {
   ok(`the markup's ${what} is the data's`, html.includes(text), text);
+}
+// the engine's verdict (worlds/fungi-early.js verdictOf): the markup holds each clause after its tag, in order, as the
+// script writes it, so a browser without scripts reads the engine's line too
+{
+  const marked = [...html.matchAll(/<span class="verdict-claim" data-claim><b class="t (real|ill)">\[(REAL|ILLUSTRATIVE)\]<\/b> <span class="verdict-text">([^<]*)<\/span><\/span>/g)];
+  ok("the markup's verdict is the data's: each clause after its tag, in order", marked.length === WORLD.verdict.clauses.length
+    && WORLD.verdict.clauses.every((c, i) => marked[i][2] === c.tag && marked[i][1] === (c.tag === 'REAL' ? 'real' : 'ill') && marked[i][3] === c.text), JSON.stringify(marked.map((m) => m.slice(1))));
 }
 
 // ---------------------------------------------------------------- 8. the ignition clock
