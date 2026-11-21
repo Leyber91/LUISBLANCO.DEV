@@ -425,5 +425,145 @@
     { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
     { "gen": "G0", "date": "2026-11-18", "by": "ladder rewritten for a changed concept, before its first grade, by an independent writer who built none of the lab; a second pass tries to break it before it merges with the page", "commit": "ee4366f", "note": "The concept changed in the session of 2026-11-18 to 19, on Luis's direction: Altverse (the visitor dials or types any change to physics or history and a stage graph weaves a world) became Orthogonal (a changed driver grows the technologies Earth never built, drawn as a lineage beside Earth's and ending in a rendered artifact). LABS_LEVELS.md rule 3 lets a ladder change between generations with the reason recorded; this is the reason. The page is now orthogonal.html; the hub title is unchanged. Every axis, metric and rung replaces the ladder of 2026-11-11, whose axes and G0 grades of altverse.html stay in git history (cd1e9f7). The G0 here records origin/main at ee4366f, which has no labs/orthogonal.html, at 0 on every axis, and grades nothing of the slice. Rungs are cumulative. Each axis lists, under units and fiction_inventory, the ids of the bindings declared in the lab's plan on 2026-11-21 (10 units, 12 inventory entries). Written 2026-11-21." },
     { "gen": "G0", "date": "2026-11-21", "by": "second pass (LABS_LEVELS.md rule 1) by a reviewer who wrote none of the ladder and built none of the lab, before any grade", "commit": "947ecdd", "note": "Rungs tightened or made checkable, none loosened, the G0 grades unchanged. A step is defined (a technology after the driver), so 5 steps and steps 3 to 5 read one way. branch-growth: a model-grown lineage must pass the needs check in code (r3); r5 adds one more era and no Earth-mimicry step, as the bound eras entry and the thesis's Orthogonal Path require, and r6 asks 3 eras with 2 cross-era needs each; r7 was the ablation already counted by method-checks r6 and became Earth regrown with no driver changed, the model's check against reality; r9 bars lineages sharing over half their steps. method-checks: the REAL-or-gap rule left r2, counted by method-explained r2; the physics check is computed against a bound (r4), not a carried label; mimicry matches by function and needs whatever the name (r5), or method-explained r6's relabelled device escapes it; r8 and r9 count only the page's own code and rules, since CORE_TEST tests the method's text in a model's hands and KILL_TEST a separate rule set; r10's held-out set is sealed by a hash. artifact-necessity r5: a derived parameter comes from what a step provides or needs, never a hash of its text. artifact-render r5: a visitor's tip is rendered, not only inked, since the binding says each branch ends in a rendered artifact; r8 is the blind test alone. earth-ledger r8 has a bar (90% match within stated uncertainty, or at most 5 of 50 in error). world-making r8 defines a correct answer as traced and consistent. Every rung 10 asks 5 independent entries in the reference ledger, as atlas.json ledger_schema and stage 10 do. reach: a throttling profile by numbers, not a preset name; r5's 1440 x 900 and 390 px clauses, counted by lineage-plate r5, became a 320 px reflow check; r10 names its CPU slowdown. engine-shape: r0 does not read the old page's code as this page's; r4 no longer repeats artifact-necessity r3's schema check and adds a stale-render test." }
+  ],
+  "atlas_grades": [
+    {
+      "date": "2026-11-21",
+      "by": "single rater, two skeptic passes",
+      "commit": "ea2c541",
+      "atlas": 3,
+      "scale": "labs/levels/atlas.json version 3: product and subject levels are each min(lower median of the axis rungs, weakest axis + 2) and never above the scope level; the lab level is the lowest of product, subject and scope.",
+      "previous": "None on the atlas for labs/orthogonal.html. The ladder history above records G0 at 0 on every axis of this file at ee4366f, which had no orthogonal.html. The planner grade in the lab plan (plan.json grade) is of altverse.html, the earlier page, at e0693ce, and is not carried.",
+      "basis": "origin/main at ea2c541 (pull request 87, \"Alternate Reality, level 1: the Orthogonal plate and its ladder\"), graded in the worktree _labs_wt/_grade_orth on the branch labs/orthogonal-grade-1121, whose tree is ea2c541. Read: labs/orthogonal.html; labs/assets/js/orthogonal/main.js in full; engine.js (check, trunk, itemSets, item, judge, checkOrder, needPath, needLine, strandGold); record.js (its header, KINDS, fresh, the with* changes, countLine); view.js (writeReading, writeDrill); config.js in full; render-words.js (its header, RENDER_WORDS, fallbackLine); worlds/fungi-early.js in full; orthogonal.css (its media rules, focus rules and colours); the hub card in labs/assets/js/config/site.config.js (id alt-reality, href orthogonal.html); the bindings in the lab plan (_reference/labs/plans/alt-reality/plan.json); the road's claims (ROAD.md) and the two advisor reports of 2026-11-21, read as claims. Run: node tools/lab_tests.mjs orthogonal, 1 file, tests.mjs 56,946 passed, 0 failed, 13 s. Drives through tools/labs-wt.mjs on this tree, headless Chrome with software GL: the lab's own tools/drives/orthogonal.mjs, 100 of 100 at 1440x900 (46 s) and 98 of 98 at 390x844 (61 s), console clean; the rater's own scenario at both sizes, 16 checks recorded each, its one failure at each size the 404 the rater planted to take the render away. The rater's scenario: a first visit on the browser's real store, the first eight Tab stops, the sharing question answered, a wrong order then a right one, the record read back, a reload, nine deep links with valid, empty and malformed values, emulated reduced motion, and the render missing. All 28 frames of the lab's drive and the 14 of the rater's were read. node tools/anti_tells.mjs scan over the page, its CSS and five of its modules: 0 tells.",
+      "bindings": "Graded against the bindings declared in the lab plan on 2026-11-21, which replace those of 2026-11-13: canon, the lab's thesis, Luis's worldbuilding method (source private); 10 units (driver, function, necessity, pressure, combination, consequence, trouble, orthogonality, artifact, evidence), weights summing to 100; a challenge blueprint of 12 items in 6 formats over 15 minutes; the central scene, one plate with the driver at the root, the grown technologies as a branching graph, this world's branch in gold and Earth's dotted, the rendered artifact with Earth's ghosted beside it, and one evidence line; a fiction inventory of 12 entries (change-driver, branch-graph, why-now, earth-beside, artifact-render, animation, combination, seed-of-trouble, eras, evidence-line, narrative, keep-share); 3 known setup failures (render-missing, data-missing, storage-off); record kinds worlds, their eras and the answers to the challenge. Every required field is present, so no axis is ungraded for a missing binding. The page shows the storage-off diagnosis verbatim; its render-missing line differs from the bindings' words (\"The render did not load; this outline is drawn from mycelial-lamp.json [ILLUSTRATIVE].\"), and the data-missing diagnosis is in no file of the lab.",
+      "na": {},
+      "levels": {
+        "product": 1,
+        "subject": 1,
+        "scope": 1,
+        "lab": 1
+      },
+      "grade": {
+        "orientation": {
+          "level": 1,
+          "evidence": "1.1 holds: labs/orthogonal.html opens the plate from one URL, and the hub card (site.config.js, id alt-reality) points to it. 1.2 holds: the bar under the lineage carries one labelled action, \"Order four steps by what each needs\", and the drawing is labelled \"Choose a step to read it\". 2.1 holds: on load the plate shows the lineage, the render and the artifact's reading, never an empty panel (both drives, both sizes). 2.2 holds at 1440, where the action sits at 722 to 748 px of a 900 px frame; at 390 it sits at 1,692 px, under the title, the render and the lineage, and on a first visit Labs OS's sharing question covers the lower render (rater's scenario, first visit). 2.3 fails: the bindings' data-missing failure leaves an empty entry view that names nothing. main.js imports worlds/fungi-early.js statically (line 38), so when that file does not load no script of the plate runs, and the visitor gets the static markup: an empty drawing, a disabled button and an empty reading. A world that breaks its rules gets \"This world's data breaks the lineage's rules: ...\" (main.js lines 49 to 53), with no action and no link. Read from the code, not driven. Rung 3 is not reached; for the record, ?order= with an empty value opens item 0 (Number of an empty string is 0, main.js line 533), ?order=abc, -1 and 1.5 are dropped, and ?node=nope and ?node= open the artifact (rater's scenario, deep links)."
+        },
+        "lessons": {
+          "level": 0,
+          "evidence": "1.1 fails: no page of text explains the subject, the method of growing technology from a driver. The plate's words are a title, the driver line, the evidence line, a caption under each figure, and one note per step of this world (worlds/fungi-early.js note, written as text by view.js writeReading). They describe this world's steps; no text on the page states a rule of the method or teaches any of the 10 declared units. 1.2: no worked example is labelled or stepped. Rung 2: no units, modules, weights or pager."
+        },
+        "tutoring": {
+          "level": 1,
+          "evidence": "1.1 holds: the fourth press of an order is checked and marked \"Right: ...\" or \"Not in order: ...\" (view.js writeDrill; rater's scenario at both sizes, a wrong order farmed, trouble, nocoal, lignin, then a right one fungi, nocoal, lamp, trouble). 1.2 holds: the check runs on this world's own parent links (engine.js checkOrder and needPath), not on a key typed beside the drawing. 2.1 fails: a wrong answer shows the visitor's order as a numbered list and names the first pair out of order with the links between them (\"Not in order: Fungi farmed needs Fungi eat lignin, which needs Land plants make lignin.\"), and never names a right order. 2.2 fails: no reason is given for each step's place, only for the first pair. 2.3 fails: there is no lesson to link to."
+        },
+        "practice": {
+          "level": 1,
+          "evidence": "1.1 and 1.2 hold, as tutoring 1.1 and 1.2: one exercise, \"Order four steps by what each needs\", answered on the drawing and checked by the engine from the world's links. 2.1 holds: one item at a time, checked on the fourth press, with its verdict and \"Next four steps\". 2.2 fails: the bar's count (\"2 answered, 1 right\", record.js countLine) is a running total over every visit, and nothing gives a position in a session; \"2 of 4 pressed\" is the position inside one item. 2.3 to 2.6 fail: no progress strip, no session to end early with a confirmation (\"Leave\" drops the item at once), no star, no session score."
+        },
+        "missions": {
+          "level": 0,
+          "evidence": "1.1 fails: no task is described with its goal and its material. The ordering exercise is practice, scored by item."
+        },
+        "evidence": {
+          "level": 1,
+          "evidence": "1.1 holds: each answer and each action is written to the Labs OS progress store with its time and its mode (record.js withStart, withPress, withUndo, withLeave, withAnswer, withChoice). The rater's scenario read 12 entries back from IndexedDB after two orders, each with t and mode \"practice\" (start, press, answer), each answer with its order, its verdict and the pair out of order; a step chosen in the reading is mode \"explore\". A walk of arrow-key choices within 1.5 s is stored as its last choice, and the log keeps its last 400 entries while the counts are never trimmed (config.js EXERCISE). 1.2 holds: the answers are checked on the lab's own links. 2.1 fails: no state per unit is computed; the answers name no unit."
+        },
+        "progress": {
+          "level": 1,
+          "evidence": "1.1 holds: the bar shows \"0 answered, 0 right\" on a first visit, \"2 answered, 1 right\" after two orders, and the same after a reload (rater's scenario at both sizes). 2.1 to 2.4 fail: there are no sessions to list, and no streak, activity calendar or recent sessions."
+        },
+        "material": {
+          "level": 1,
+          "evidence": "1.1 holds: the world is typed in worlds/fungi-early.js (11 steps, each with its role, parent links, needs line, note and tagged evidence), the sources in config.js SOURCES, and the artifact's parameter file, schema, render and render record under labs/assets/data/orthogonal. 2.1 fails: the world is an ES module and the sources a constant in config.js beside the plate's tuning constants, not data apart from code in one file family per kind. 2.2 holds for the render alone (render_artifact.py precomputes it offline; the page reads the WebP and its record). 2.3 fails: the world carries no version; the title block's \"Rev 3\" and date are typed in the markup (orthogonal.html lines 29 to 31), and the parameter file's SHA-256 is compared with the record's (main.js provenance) but not shown. 2.4 fails: a world file that does not load stops the plate with no word (orientation 2.3), and a world that breaks the rules is named by its first fault, not by its file."
+        },
+        "records": {
+          "level": 1,
+          "evidence": "1.1 holds: the record lives in Labs OS's IndexedDB store, and a reload reads back the count, the step last chosen and the next item (rater's scenario: \"2 answered, 1 right\", 12 log entries, store indexeddb, at both sizes; the lab's drive reloads mid-order and keeps the two presses, frame 08b). With storage refused the page says so in the bindings' words (frame 11b). 2.1 fails: the bindings list three record kinds (worlds, their eras, and the answers to the challenge); record.js keeps the ordering exercise's answers and actions only, and its shapes are written in a comment, not typed (no // @ts-check in the lab; labs-src/tsconfig.labs.json includes only exomania's record.js)."
+        },
+        "interface": {
+          "level": 1,
+          "evidence": "1.1 holds: tokens.css, plate.css and os.css are loaded, and the palette and the faces are the site's. 2.1 holds: Google Fonts load with media=print swapped to all on load, so first paint does not wait (orthogonal.html line 11); there is no noscript fallback. 2.2 fails: orthogonal.css writes the horizon colour as literal rgba(159, 179, 214, ...) in four rules (lines 26, 36, 185 and 196). 2.3 fails: the plate's buttons are its own .drill-btn (orthogonal.css line 162), not a shared component; the page has no form field or checkbox."
+        },
+        "reach": {
+          "level": 1,
+          "evidence": "1.1 holds: the page starts from its URL and works at 1440 with a clean console (the lab's drive, 100 of 100; the rater's scenario logged only the 404 it planted). 2.1 holds: below 1000 px the plate restacks (orthogonal.css, max-width 999px) to the render, Earth's lamp, the lineage, the bar and the reading, with scrollWidth 390 of 390. 2.2 fails: no global rule collapses transitions. orthogonal.css lines 288 to 290 list chosen selectors, and under emulated reduced motion the five .drill-btn buttons still declare a 0.18 s transition (rater's scenario); the script gives the finished frame and no animation runs. 2.3 holds in part: links and Labs OS's buttons take the site's 2 px ring (tokens.css), and a step's ring goes to full opacity on focus, but the plate's own buttons set outline none and mark focus by a border colour alone (orthogonal.css line 162). 2.4 fails: the page has no skip link; the first Tab lands on the kick line's link to altverse.html (rater's scenario at both sizes)."
+        },
+        "engineering": {
+          "level": 1,
+          "evidence": "1.1 holds: the page runs from labs/orthogonal.html, and node tools/lab_tests.mjs orthogonal passes (tests.mjs, 56,946 passed, 0 failed). 2.1 fails: main.js (626 lines) holds the exercise's flow, the URL sync of node and order, the footer's reserved heights and the scene's clock beside the wiring; the domain rules are in engine.js. 2.2 holds in part: the world is a data module apart from the engine. 2.3 fails: no module of the lab declares // @ts-check, and tsc checks none of it. 2.6 fails: the repository has no .gitattributes."
+        },
+        "fiction": {
+          "level": 1,
+          "evidence": "1.1 holds: the central scene is shown as a preset: one world's lineage with this world's branch in gold and Earth's dotted beside it, the branch drawing itself while the render surfaces from the fog (the lab's drive, frames 05 and 06), the rendered lamp with Earth's coal-gas lamp ghosted beside it, and one evidence line. 2.1 fails: none of the 12 entries runs from the visitor's own input. The visitor changes no driver (change-driver), grows no era (eras), keeps and shares no world (keep-share; ?node= shares a step of the one shipped world), and reads no account of how the world came to be (narrative). branch-graph, earth-beside, artifact-render, animation, combination, seed-of-trouble and evidence-line are shown for the one hand-written world only, and most fall short of their depicted detail besides: Earth's steps carry no dates; the lamp's form comes from a hand-written parameter file, not from its lineage; the combination has no physics check; why-now is given for one step (\"No coal; iron from rationed forests\", role Why now), not for every technology. The page says so itself: \"[ILLUSTRATIVE] Hand-written lineage; the core claim of the method is not yet tested.\""
+        },
+        "fidelity": {
+          "level": 2,
+          "evidence": "1.1 holds: the lineage's links and needs are a table typed into worlds/fungi-early.js. 2.1 holds: engine.js computes outputs from inputs along the exercise's path. check() applies the lineage's structural rules to the world (one root and one driver, every parent a node, no cycle, a branch from the driver to the artifact through first parents, Earth's steps paired on that branch in order) and the page refuses a world that breaks them; checkOrder() with needPath() judges the visitor's order by the transitive closure of the parent links and returns the shortest chain of links that orders the first pair out of place, a chain computed and not typed (rater's scenario: \"Fungi farmed needs Fungi eat lignin, which needs Land plants make lignin\"). 2.2 holds: the rules are in the source. 3.1 fails: the model is Luis's own method from a private source (the bindings' canon), not a published model with its author, year and venue, and the page does not name it."
+        },
+        "graphics": {
+          "level": 2,
+          "evidence": "1.1 holds. 2.1 holds: the lineage is one live SVG view laid out by engine.js layout() from the world and redrawn on resize, its strand drawn on one clock (strandAt), the fog's density computed from the strand's progress (fogField, fogDensity), and the exercise's steps placed by drillPlaces(); the drives show the ignition part drawn (frame 05), the order in progress and both verdicts at both sizes. 3.1 holds: the view is procedural. 3.3 fails: the fog's mottling is seeded noise (kit/fog.js, config.js FOG.seed) that encodes nothing, inside the lineage box, which carries no [ILLUSTRATIVE] tag; the legend's \"Fog: invented, or not yet happened\" explains the density and is not a tag. 3.4 fails: at rest the fog drifts 4 px a second across and 1.5 px down (config.js TIMING.drift), motion that marks no state. 3.2 is uncertain for the drafting grid and the corner marks, which encode nothing and sit on the sheet rather than in the drawing."
+        },
+        "interaction": {
+          "level": 1,
+          "evidence": "1.1 holds: a press or Enter on a step chooses it and fills the reading, the arrow keys walk the rows (the lab's drive, frames 02 and 03), and the bar's buttons start, undo, leave and go on with an order. 2.1 fails: there is no free input. The visitor picks among the 11 steps of one world and orders 4 of them, checked on the fourth press; no field, slider or drag sets a value of the subject (a driver, its domain, its magnitude)."
+        },
+        "intelligence": {
+          "level": 1,
+          "evidence": "1.1 holds: the plate is produced with no model. main.js imports no file of labs/assets/js/ai, and engine.js computes the branch that fired (trunk), the layout, the readings, the fog and the exercise's verdicts from the world's data. The lineage itself is typed by hand, so the engine computes the plate, not the world. 2.1 fails: there is no model call and no route panel."
+        },
+        "explanation": {
+          "level": 1,
+          "evidence": "1.1 holds: the title \"A world where the fungi came early\", the driver line and a caption under each figure. 2.1 fails: no intro paragraph explains the mechanism. Nothing on the page says how a lineage is formed or checked (that a step lists what it needs and comes after it; that Earth's step sits on the row of the world step that does the same job), and the method behind the plate is never named. 2.2 fails: the reading's notes are claims with no tag of their own, for example \"Wood is stiffened with lignin, which few organisms can break down.\" and \"On Earth the buried peat became coal.\"; the tagged items under each note do not tag its sentences, and the class test written for review H1 reads only the header, the captions and the legend (tests.mjs section 19; the drive's CLAIMS). 2.3: no false statement was found in the header, captions, legend, readings, exercise text or meta description; the coal-gas and gas-lamp steps carry \"[REAL] Earth's history.\" beside \"No source opened for this step yet.\", a REAL tag on a claim whose source is declared missing. 2.4 is not reached; the page does tag that its lineage is hand-written and its core claim untested."
+        }
+      },
+      "scope": {
+        "level": 1,
+        "organs": [
+          "the lineage plate (draws the one world's lineage from its data under the engine's rules, refuses a world that breaks them, and reads a chosen step; keeps the step last chosen)",
+          "the ordering exercise (practice: deals four steps per item from a seeded draw, checks an order against the links, keeps the order in progress, the counts and the log)"
+        ],
+        "instrument": "The lineage plate. The bindings' instrument, a driver the visitor states growing a lineage, does not exist yet; the plate runs the engine on the world file and on the visitor's choice of a step.",
+        "links": [],
+        "reach": "Of the 10 declared units, the exercise practises one, necessity (each step after every step it needs), and the plate computes the same rule in check(). driver, pressure, combination, trouble, artifact and evidence appear as role names, one line or a caption for the one world, which the scope rule counts as named, not worked on. Reach 0.1 at one organ per unit. The units were not read against the published work the thesis answers to: the method's text is in a private source the rater did not open.",
+        "evidence": "Level 1 holds: 2 organs (1 needed), 0 links (0 needed), reach 0.1 (0.01 needed). Level 2 fails on all three: it needs 3 organs, 1 link and reach 0.25. No link: the exercise deals from the world's sets by the record's attempt counter and salt (engine.js item), not from the steps the visitor read, and the plate reads nothing the exercise wrote."
+      },
+      "skeptic": [
+        {
+          "axis": "orientation",
+          "from": 2,
+          "to": 1,
+          "pass": "the letter of the clause",
+          "why": "The first reading took orientation.2.3 as empty of cases, since the entry view is never empty in use. The clause applies to every empty entry view, and the bindings declare data-missing: with the world file refused, the plate is an empty view that names no action and links nowhere (main.js line 38 and lines 49 to 53). Lowered to 1. At 390 the one named action is also 1,692 px down an 844 px window."
+        },
+        {
+          "axis": "interaction",
+          "from": 2,
+          "to": 1,
+          "pass": "the letter of the clause",
+          "why": "The first reading counted composing an order (24 orders of four steps, each press numbered at once) as free input. The clause asks for input that changes the view live with no submit step; an order is a choice among four given steps, judged only on the fourth press, and nothing sets a value of the subject. Lowered to 1."
+        },
+        {
+          "axis": "fidelity",
+          "pass": "does it run, held",
+          "why": "Tried to lower fidelity to 1 because nothing grows: the lineage is typed. Held at 2: rung 2 asks for a mechanism that computes outputs from inputs along one path, and checkOrder with needPath computes a verdict and a chain of links that no data file holds, on the page's real path at both sizes, with the rules in the source."
+        },
+        {
+          "axis": "intelligence",
+          "pass": "the letter of the clause, held",
+          "why": "Tried 0, since the thesis's main output is a lineage grown from a driver and none is grown. Held at 1: intelligence.1.1 asks that the lab's main output be produced with no model, and the plate the page shows is computed by engine.js from data with no model call. The missing growth is counted by fiction 2.1 and by the lab's own ladder."
+        },
+        {
+          "axis": "evidence",
+          "pass": "the letter of the clause, held",
+          "why": "evidence.1.1 asks that each answer or action be stored with its time and mode. The log keeps its last 400 entries, so a long record loses its oldest answers, and an arrow-key walk is stored as its last choice. Held at 1: each is stored on arrival with t and mode, read back from IndexedDB; the bound is retention, which the clause does not set."
+        },
+        {
+          "pass": "does it run",
+          "why": "No axis lowered on this lens. Every rung counted was seen on the running page in a drive at 1440x900 and 390x844 with a clean console, the record was read back from IndexedDB after a real reload, and the lab's tests pass (56,946)."
+        }
+      ],
+      "not_checked": "The data-missing failure was read from the code, not driven: a drive cannot refuse an ES module import. node tools/labs-wt.mjs shoot was not run: it serves the lab's own worktree (_labs_wt/altverse, page altverse.html) on port 8807, not this tree; the pictures are the two drives' 42 frames at 1440x900 and 390x844, every one read. Touch was not emulated (the drives press by pointer and by keys); no screen reader and no axe scan were run. The method's text, the bindings' canon, was not opened: it is in a private source, so the declared units were not checked against it. The page's sources were not re-opened: Floudas et al. 2012 (Science 336, 1715), Nelsen et al. 2016 (PNAS 113, 2442), Kotlobay et al. 2018 (PNAS 115, 12728), Desbenoit et al. 2004 (Eurographics) and Raistrick et al. 2023 (CVPR) match the rater's memory of them; Rabara and Xie 2025 (J. Fungi 11, 774) and O'Kane et al. 1990 (Mycologia 82, 595) the rater cannot confirm, and the page marks the second as read through an unrecorded secondary source. The lab's own 12-axis ladder in this file was not graded by this entry; its G0 stands. The style gates and the platform block were not counted. Only headless Chrome with software GL; no real phone."
+    }
   ]
 }
