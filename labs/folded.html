@@ -18,8 +18,8 @@
   <header class="bar"><a href="index.html">Labs</a><span class="mark">THE LAB · L212</span></header>
   <div class="head">
     <h1>Folded Space</h1>
-    <p class="lede">A network trained on handwritten digits cuts the space of all drawings into flat-walled cells, and inside each cell it is one fixed linear map <span class="tag">[REAL: Montufar et al. 2014; Hanin and Rolnick 2019]</span>. Draw a digit, then call which corner of the cube of small changes around it changes the answer.</p>
-    <p class="nextwrap"><a class="nextline" id="nextline" href="#call" aria-live="polite">Next: call which corner changes the 4.</a></p>
+    <p class="lede">A network trained on handwritten digits cuts the space of all drawings into flat-walled cells, and inside each cell it is one fixed affine map, a linear map plus a constant <span class="tag">[REAL: Montufar, Pascanu, Cho and Bengio, NeurIPS 2014; Hanin and Rolnick, ICML 2019]</span>. Draw a digit, then call which corner of the cube of small changes around it changes the answer.</p>
+    <p class="nextwrap"><a class="nextline" id="nextline" href="#call" aria-live="polite"></a></p>
   </div>
   <main class="grid">
     <section class="col-a" aria-labelledby="h-a">
@@ -39,7 +39,7 @@
       <div class="tblock" id="tblock">
         <div>Cells<b id="t-cells">&nbsp;</b></div>
         <div>Walls crossed<b id="t-walls">&nbsp;</b></div>
-        <div>Each pixel moved<b id="t-eps">&nbsp;</b></div>
+        <div>Each pixel moves at most<b id="t-eps">&nbsp;</b></div>
         <div>Computed in<b id="t-ms">&nbsp;</b></div>
       </div>
     </section>
@@ -47,21 +47,21 @@
       <h2 id="h-c"><span class="idx">C</span>Your call</h2>
       <p class="q" id="question">&nbsp;</p>
       <div id="cands" class="cands"></div>
-      <p class="verdict" id="verdict" aria-live="polite">&nbsp;</p>
+      <p class="verdict" id="verdict" aria-live="polite" tabindex="-1">&nbsp;</p>
       <p class="tally" id="tally">Calls right: <b>0</b> of 0</p>
       <p class="health" id="health">Reading the record.</p>
       <p class="keepnote" id="keepnote" aria-live="polite"></p>
       <div class="tpl" id="tplbox" hidden><canvas id="tpl" width="28" height="28" aria-label="The template of the cell the drawing is in"></canvas><p id="tplnote"></p></div>
       <button class="fill" id="harden" type="button">Harden the network</button>
-      <p class="actnote" id="hardnote" aria-live="polite">300 steps on 2,000 digits and your drawings, in this tab.</p>
-      <table class="ledger"><thead><tr><th>Smallest step that changes it, in full ink</th><th class="n">before</th><th class="n">after</th></tr></thead><tbody id="ledger"></tbody></table>
-      <p class="ledgernote" id="ledgernote">Harden the network to fill this table: for the drawing on the pad, the smallest step that changes its answer, before and after.</p>
+      <p class="actnote" id="hardnote" aria-live="polite"></p>
+      <table class="ledger"><thead><tr><th>Smallest step along the template’s corner that changes it, in full ink</th><th class="n">before</th><th class="n">after</th></tr></thead><tbody id="ledger"></tbody></table>
+      <p class="ledgernote" id="ledgernote">Harden the network to fill this table: for the drawing on the pad, the smallest step along its template’s corner that changes its answer, before and after [REAL].</p>
       <button class="kact" id="next" type="button"><kbd class="key" aria-hidden="true">N</kbd>Next drawing</button>
     </section>
   </main>
   <p class="prov" id="prov"></p>
   <p class="earlier"><a href="md_animation_page.html">An n-dimensional hypercube, this lab’s earlier page</a></p>
-  <footer class="foot">[REAL] Every number and mark is computed in this page by a network of 784, 64, 64 and 10 neurons trained on MNIST (LeCun, Cortes and Burges). The cells are exact, never sampled. The examples in the strip are MNIST test digits; your own drawing is reduced to 28 by 28 the way MNIST’s were (a 20 pixel box, centred by its centre of mass).</footer>
+  <footer class="foot" id="footnote">[REAL] The answer, the cells, the corners, the verdict and the ledger are computed in this page by the network named above.</footer>
   <script type="module" src="assets/js/dimensions/folded.js"></script>
 </body>
 </html>

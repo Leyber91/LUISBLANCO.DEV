@@ -72,8 +72,23 @@ ok(c4.list.filter((q) => q.kind !== 'template').every((q) => q.read === 4), 'and
   const best = c4.list.reduce((a, b) => (b.lift > a.lift ? b : a));
   ok(best.kind === 'template', `on the first 4 the template's corner lifts the most (${c4.list.map((q) => q.kind + ' ' + q.lift.toFixed(2)).join(', ')})`);
   const ti = c4.list.findIndex((q) => q.kind === 'template'), ri = c4.list.findIndex((q) => q.kind === 'random');
-  ok(/^It raised 9's score over 4's by -?\d+\.\d \(the cell’s map predicted -?\d+\.\d\), the most of the three\.$/.test(reasonOf(c4, ti)), reasonOf(c4, ti));
-  ok(/^It raised 9's score over 4's by -?\d+\.\d \(the cell’s map predicted -?\d+\.\d\); the template’s corner raised it by -?\d+\.\d\.$/.test(reasonOf(c4, ri)), reasonOf(c4, ri));
+  ok(/^It raised 9's score against 4's by [0-9]+\.[0-9] \(the cell’s map predicted -?[0-9]+\.[0-9]\), the most of the three\.$/.test(reasonOf(c4, ti)), reasonOf(c4, ti));
+  ok(/^It (raised|lowered) 9's score against 4's by [0-9]+\.[0-9] \(the cell’s map predicted -?[0-9]+\.[0-9]\); the template’s corner raised 9's score against 4's by [0-9]+\.[0-9]\.$/.test(reasonOf(c4, ri)), reasonOf(c4, ri));
+  // Hand-made: a negative lift reads "lowered" with its size, and a best corner that is not the template is named.
+  const hand = { rival: 9, answer: 4, list: [{ kind: 'ink', lift: -0.24, predicted: -0.2 }, { kind: 'random', lift: 1.5, predicted: 1.2 }, { kind: 'template', lift: 0.3, predicted: 0.3 }] };
+  ok(reasonOf(hand, 0) === "It lowered 9's score against 4's by 0.2 (the cell’s map predicted -0.2); the random corner raised 9's score against 4's by 1.5.", reasonOf(hand, 0));
+  ok(reasonOf(hand, 1) === "It raised 9's score against 4's by 1.5 (the cell’s map predicted 1.2), the most of the three.", reasonOf(hand, 1));
+  // The moved pixels add up, and the ink corner of the 4 moves fewer pixels by the full step than the template's.
+  for (const q of c4.list) ok(q.moved.full + q.moved.part + q.moved.none === 784, `${q.kind}: the moved pixels add up (${q.moved.full}, ${q.moved.part}, ${q.moved.none})`);
+  ok(c4.list.find((q) => q.kind === 'ink').moved.full < c4.list.find((q) => q.kind === 'template').moved.full, 'the ink corner moves fewer pixels by the full step');
+  // The network's state is in the seed: on some digit the order or the random corner differs between the two states.
+  let differs = 0;
+  for (let k = 0; k < xs.length; k++) {
+    const a = candidates(net, xs[k], eps, dj.items[k].index, 'original'), b = candidates(net, xs[k], eps, dj.items[k].index, 'hardened');
+    const ra = a.list.find((q) => q.kind === 'random').signs.join(''), rb = b.list.find((q) => q.kind === 'random').signs.join('');
+    if (a.list.map((q) => q.kind).join() !== b.list.map((q) => q.kind).join() || ra !== rb) differs++;
+  }
+  ok(differs === xs.length, `the order or the random corner is drawn afresh for the hardened state on every digit (${differs} of ${xs.length})`);
 }
 
 // 4. The verdict and the tally, on hand-made candidates.

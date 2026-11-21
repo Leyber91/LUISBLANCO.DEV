@@ -61,11 +61,13 @@ export function stepTo(x, signs, eps) {
 }
 
 /** The three candidates for a drawing, in a seeded order. `key` names the drawing (its index) for the seed. */
-export function candidates(net, x, eps, key) {
+export function candidates(net, x, eps, key, network = 'original') {
   const { answer, rival, z } = answerAndRival(net, x);
   const lead0 = z[rival] - z[answer];
   const t = template(net, x, rival, answer);
-  const seed = fnv1a('folded|call|' + key);
+  // The seed names the network's state too (review 1, finding 3): after hardening the places and the random corner
+  // are drawn afresh, so a second call cannot be answered from memory of the first.
+  const seed = fnv1a('folded|call|' + key + '|' + network);
   const list = KINDS.map((kind, i) => {
     const signs = signsFor(kind, net, x, rival, answer, (seed + i * 2654435761) >>> 0);
     const xc = stepTo(x, signs, eps);
@@ -75,7 +77,10 @@ export function candidates(net, x, eps, key) {
     // measured by the network (lift), and what the drawing's cell's map predicts for the same step (predicted).
     let predicted = 0;
     for (let p = 0; p < t.length; p++) predicted += t[p] * (xc[p] - x[p]);
-    return { kind, label: LABELS[kind], signs, xc, read, changes: read !== answer, lift: zc[rival] - zc[answer] - lead0, predicted };
+    // How far the corner really moved the drawing: a pixel at 0 or 1 cannot move past it (review 1, finding 7).
+    let full = 0, part = 0;
+    for (let p = 0; p < x.length; p++) { const d = Math.abs(xc[p] - x[p]); if (Math.abs(d - eps) < 1e-12) full++; else if (d > 0) part++; }
+    return { kind, label: LABELS[kind], signs, xc, read, changes: read !== answer, lift: zc[rival] - zc[answer] - lead0, predicted, moved: { full, part, none: x.length - full - part } };
   });
   const rng = mulberry32(seed);
   for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
@@ -92,7 +97,8 @@ export function verdict(cands, picked) {
 /** The flip ledger's entry (BAR_L1 part 11): the smallest size of the template's corner that moves the answer off
  *  its class, by bisection on [0, hi] to hi / 2^iters (the kill test's ledger). null when hi does not move it. The
  *  corner's signs are taken once, at the drawing, from the network given: a hardened network has its own. */
-export function smallestFlip(net, x, hi = 0.5, iters = 12) {
+export const LEDGER_HI = 0.5;
+export function smallestFlip(net, x, hi = LEDGER_HI, iters = 12) {
   const { answer, rival } = answerAndRival(net, x);
   const signs = signsFor('template', net, x, rival, answer, 0);
   const off = (e) => argmax(forward(net, stepTo(x, signs, e))) !== answer;
@@ -104,12 +110,15 @@ export function smallestFlip(net, x, hi = 0.5, iters = 12) {
 
 /** The verdict's reason, from computed values only: the picked corner's lift of the rival's score over the answer's,
  *  against the largest of the three. `fmt` writes a number. */
+export const NAMES = { template: 'the template’s corner', random: 'the random corner', ink: 'the ink corner' };
 export function reasonOf(cands, picked, fmt = (v) => v.toFixed(1)) {
+  // Signed, in words: a lift below 0 lowered the rival's lead (review 1, finding 7: "raised by -0.2").
+  const moved = (q) => `${q.lift >= 0 ? 'raised' : 'lowered'} ${cands.rival}'s score against ${cands.answer}'s by ${fmt(Math.abs(q.lift))}`;
   const c = cands.list[picked];
   const best = cands.list.reduce((a, b) => (b.lift > a.lift ? b : a));
-  const lift = (q) => `${fmt(q.lift)} (the cell’s map predicted ${fmt(q.predicted)})`;
-  if (c === best) return `It raised ${cands.rival}'s score over ${cands.answer}'s by ${lift(c)}, the most of the three.`;
-  return `It raised ${cands.rival}'s score over ${cands.answer}'s by ${lift(c)}; the ${best.kind === 'template' ? 'template’s corner' : best.label.toLowerCase()} raised it by ${fmt(best.lift)}.`;
+  const pred = (q) => ` (the cell’s map predicted ${fmt(q.predicted)})`;
+  if (c === best) return `It ${moved(c)}${pred(c)}, the most of the three.`;
+  return `It ${moved(c)}${pred(c)}; ${NAMES[best.kind]} ${moved(best)}.`;
 }
 
 /** The tally after one more verdict. A call that is not counted leaves it as it was. */

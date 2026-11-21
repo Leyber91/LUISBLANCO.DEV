@@ -28,6 +28,7 @@ const EVENTS = [['dimensional.call', 'outcome'], ['dimensional.draw', 'action'],
  * @property {(d: R.Drawing) => Promise<void>} drawing
  * @property {(l: R.LedgerRow) => Promise<void>} ledger
  * @property {() => R.Rec} current
+ * @property {() => Promise<void>} reread
  */
 
 /**
@@ -44,7 +45,16 @@ export function startKeep({ onRecord, onSay }) {
   let queue = Promise.resolve();
   /** @param {() => Promise<void>} job */
   const inTurn = (job) => { const run = queue.then(job); queue = run.catch(() => {}); return run; };
-  const publish = () => onRecord(rec, R.health(rec, storage, readOnly));
+  const publish = () => {
+    try { onRecord(rec, R.health(rec, storage, readOnly)); }
+    catch { onSay('The record could not be drawn on this page.'); }
+  };
+  /** Read what the store holds now. @returns {Promise<boolean>} */
+  const readNow = async () => {
+    if (!os) return true;
+    try { const got = await os.progress.get(); const r = R.read(got ? got.data : null); rec = r.record; readOnly = r.readOnly; return true; }
+    catch { return false; }
+  };
   const ready = (async () => {
     try {
       os = await LabsOS.init({ lab: LAB, ui: false });
@@ -63,6 +73,9 @@ export function startKeep({ onRecord, onSay }) {
   /** @param {(x: R.Rec) => R.Change} apply @param {KeepEvent} event */
   const change = (apply, event) => inTurn(async () => {
     await ready;
+    // Each change applies to what the store holds now, never to the copy read at load (review 1, finding 2): an erase
+    // made on the privacy page or another tab's write since then is kept, not written over.
+    if (!(await readNow())) { onSay('The record could not be read, so this change is not kept.'); return; }
     if (readOnly) { onSay('This record was kept by a later version of the page, so nothing new is written to it.'); return; }
     const r = apply(rec);
     if (r.refused) { onSay(`Not kept: ${r.refused}.`); return; }
@@ -82,5 +95,7 @@ export function startKeep({ onRecord, onSay }) {
     drawing: (d) => change((x) => R.putDrawing(x, d), { type: 'dimensional.draw', data: null }),
     ledger: (l) => change((x) => R.addLedger(x, l), { type: 'dimensional.harden', data: { flipped: l.after !== null } }),
     current: () => rec,
+    // Read again when the tab comes back into view, so an erase made elsewhere shows here then.
+    reread: () => inTurn(async () => { await ready; await readNow(); publish(); }),
   };
 }

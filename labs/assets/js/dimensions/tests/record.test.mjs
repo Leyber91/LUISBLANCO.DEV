@@ -1,6 +1,6 @@
 // record.test.mjs: the record's contract (record.js, version 2), each rule just inside and just outside its bound.
 // Run: node labs/assets/js/dimensions/tests/record.test.mjs (exit 1 on any failure).
-import { empty, read, addCall, addAction, addLedger, putDrawing, tallyOf, health, callProblem, actionProblem, drawingProblem, ledgerProblem, pixelsTo64, pixelsFrom64, modeOf, MAX, RECORD_V } from '../record.js';
+import { calledBefore, empty, read, addCall, addAction, addLedger, putDrawing, tallyOf, health, callProblem, actionProblem, drawingProblem, ledgerProblem, pixelsTo64, pixelsFrom64, modeOf, MAX, RECORD_V } from '../record.js';
 
 let n = 0, fails = 0;
 const ok = (c, m) => { n++; if (!c) { fails++; console.log('FAIL ' + m); } };
@@ -68,7 +68,7 @@ ok(rec.actions.length === MAX.actions && rec.dropped.actions === 1, 'the actions
 
 // 6. The tally comes from the kept calls.
 rec = empty();
-for (const o of [{}, { right: false }, { right: false, counted: false }, {}]) rec = addCall(rec, call(o)).record;
+for (const o of [{}, { right: false, drawing: 'ex-5' }, { right: false, counted: false, drawing: 'ex-6' }, { drawing: 'ex-7' }]) rec = addCall(rec, call(o)).record;
 const t = tallyOf(rec);
 ok(t.made === 3 && t.right === 2, `the tally counts calls that count (${t.right} of ${t.made})`);
 
@@ -81,6 +81,20 @@ const v1 = read({ v: 1, calls: [call()], drawings: [{ t: T, id: 'pad-1', pixels:
 ok(v1.problems.length === 0 && v1.record.v === 2 && v1.record.drawings[0].mode === 'pad' && v1.record.ledger[0].mode === 'example' && v1.record.actions.length === 0 && v1.record.dropped.calls === 2, `a version-1 record is read forward (${v1.problems})`);
 const mixed = read({ v: 2, calls: [call(), call({ kind: 'x' })], actions: [act(), act({ what: 'x' })], drawings: [drawing()], ledger: [] });
 ok(mixed.record.calls.length === 1 && mixed.record.actions.length === 1 && mixed.problems.length === 2, `bad entries are left out and named (${mixed.problems})`);
+
+// 7b. Review 1: a later version with another shape is set aside, never handed on; a repeat call counts once.
+{
+  const odd = read({ v: 3, log: [1, 2], drawings: [{ id: 'pad-1' }] });
+  ok(odd.readOnly && odd.record.calls.length === 0 && odd.record.drawings.length === 0 && odd.record.v === 3 && /later version of this page \(version 3\)/.test(odd.problems[0]), `a later version's record is not read into version 2's shape (${odd.problems[0]})`);
+  ok(/^Record version 3 \(read only\): 0 calls/.test(health(odd.record, { kind: 'indexeddb', persistent: true }, true)), 'its health line still draws');
+  let r2 = empty();
+  for (let k = 0; k < 4; k++) r2 = addCall(r2, call({ t: T + k })).record;
+  r2 = addCall(r2, call({ t: T + 9, network: 'hardened', right: false })).record;
+  const t2 = tallyOf(r2);
+  ok(t2.made === 2 && t2.right === 1, `four calls on one drawing and network count once, and the hardened state once more (${t2.right} of ${t2.made})`);
+  ok(calledBefore(r2, 'ex-4', 'original') && calledBefore(r2, 'ex-4', 'hardened') && !calledBefore(r2, 'ex-5', 'original'), 'calledBefore names a drawing and network already called');
+  ok(!calledBefore(addCall(empty(), call({ counted: false, right: false })).record, 'ex-4', 'original'), 'a call that was not counted does not block the next');
+}
 
 // 8. The health line names the version, what is kept and where.
 ok(/^Record version 2: 4 calls, 0 actions, 0 drawings, 0 ledger rows, kept in this browser\.$/.test(health(rec, { kind: 'indexeddb', persistent: true })), health(rec, { kind: 'indexeddb', persistent: true }));

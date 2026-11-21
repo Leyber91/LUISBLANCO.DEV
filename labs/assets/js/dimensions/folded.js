@@ -6,7 +6,8 @@
 
 import { forward, template, argmax } from './mlp.js';
 import { mosaic, certify } from './split.js';
-import { netFromFile, digitFrom, candidates, verdict, softmax, smallestFlip, reasonOf } from './call.js';
+import { netFromFile, digitFrom, candidates, verdict, softmax, smallestFlip, reasonOf, LEDGER_HI } from './call.js';
+import { FIELD, BOX } from './pad.js';
 import { fnv1a } from '../kit/rng.js';
 import { frameAlong, run } from './plate.js';
 import { reduce } from './pad.js';
@@ -14,7 +15,7 @@ import { el } from '../kit/dom.js';
 import { int, fixed } from '../kit/format.js';
 import { tallySvg } from '../kit/controls.js';
 import { startKeep } from './keep.js';
-import { tallyOf, pixelsTo64, pixelsFrom64, modeOf } from './record.js';
+import { tallyOf, pixelsTo64, pixelsFrom64, modeOf, calledBefore } from './record.js';
 
 /** The record's id of drawing i: 'ex-<test index>' for an example, 'pad-<n>' for the visitor's. */
 const idOf = (i) => (S.digits[i].mine ? S.digits[i].index : 'ex-' + S.digits[i].index);
@@ -50,6 +51,7 @@ const PAD = 280, PAD_LINE = 20;
    plane with the new weights, so the visitor sees them move. Then the second call runs on the hardened network. */
 const HARDEN = { steps: 300, batch: 64, every: 50 };
 let subsetData = null;
+const WORKER_FAILED = 'This browser could not start the hardening in the background. Press Harden the network to try again.';
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 async function harden() {
   if (S.hardening || S.hardened) return;
@@ -65,35 +67,45 @@ async function harden() {
     } catch { stop('The digits for hardening did not load. Press Harden the network to try again.'); return; }
   }
   const extra = S.xs.map((x, k) => (S.digits[k].mine ? { x: Array.from(x), label: argmax(forward(S.net, x)) } : null)).filter(Boolean);
-  const x0 = S.xs[S.i], name = S.digits[S.i].mine ? 'Your drawing' : `The example ${S.digits[S.i].label}`;
+  // Everything the result is filed under is captured at the press (review 1, finding 6): the visitor may pick
+  // another drawing while the worker runs.
+  const i0 = S.i, id0 = idOf(i0), x0 = S.xs[i0], name = S.digits[i0].mine ? 'Your drawing' : `The example ${S.digits[i0].label}`;
+  if (S.digits[i0].mine) S.digits[i0].open = false;
   const before = smallestFlip(S.net, x0);
   let worker;
   try { worker = new Worker(new URL('./harden.worker.js', import.meta.url), { type: 'module' }); }
-  catch { stop('This browser could not start the hardening in the background. Press Harden the network to try again.'); return; }
+  catch { stop(WORKER_FAILED); return; }
+  let started = 0;
   worker.onmessage = (e) => {
     const m = e.data, tmp = { sizes: S.net.sizes, W: m.W, b: m.b };
+    started = m.step;
     $('hardnote').textContent = `Step ${int(m.step)} of ${int(m.steps)}, ${fixed(m.ms / 1000, 1)} s.`;
     document.body.dataset.hardenStep = String(m.step);
     if (!m.done && !reducedMotion()) {
+      const t0 = performance.now();
       const M = mosaic(tmp, S.plate.fr);
-      S.plate = { ...S.plate, M, R: run(M.cells, S.plate.fr.L) };
-      drawPlate(false); $('t-cells').textContent = `${int(M.cells.length)}, exact`;
+      const ms = performance.now() - t0;
+      S.plate = { ...S.plate, M, R: run(M.cells, S.plate.fr.L), ms };
+      // The call's run stays drawn on the moving walls (review 1, finding 11); its ticks, and Walls crossed, are the
+      // walls it crosses on the network as it is now, so the count shown is the count drawn.
+      drawPlate(!!S.v, { during: true }); certifyLater(tmp, S.plate); $('t-ms').textContent = `${int(Math.round(ms))} ms`;
+      if (S.v) $('hardnote').textContent += ' The run is your call\u2019s; its ticks are the walls it crosses as the network hardens.';
     }
     if (m.done) {
       worker.terminate();
       S.net = tmp; S.hardening = false; S.hardened = true;
       const after = smallestFlip(S.net, x0);
-      S.ledgerNames[idOf(S.i)] = name;
-      S.keep.ledger({ t: Date.now(), mode: modeOf(idOf(S.i)), drawing: idOf(S.i), before, after });
+      S.ledgerNames[id0] = name;
+      S.keep.ledger({ t: Date.now(), mode: modeOf(id0), drawing: id0, before, after });
       btn.textContent = 'Hardened';
-      $('hardnote').textContent = `Hardened in ${fixed(m.ms / 1000, 1)} s. Call again: the corners are the hardened network's own.`;
+      $('hardnote').textContent = `Hardened in ${fixed(m.ms / 1000, 1)} s. Call again: the template\u2019s corner is the hardened network\u2019s own, and the random corner and the order of the three are drawn afresh.`;
       show(S.i, { keepPad: S.digits[S.i].mine });
       Object.assign(document.body.dataset, { hardened: '1', ledgerBefore: String(before), ledgerAfter: String(after) });
     }
   };
-  worker.onerror = () => { S.hardening = false; btn.disabled = false; btn.textContent = 'Harden the network'; $('hardnote').textContent = 'Hardening stopped. Press again to retry.'; };
+  worker.onerror = (ev) => { ev?.preventDefault?.(); worker.terminate(); stop(started ? `Hardening stopped at step ${int(started)}. Press Harden the network to try again.` : WORKER_FAILED); };
   worker.postMessage({ sizes: S.net.sizes, W: S.net.W, b: S.net.b, pixels: subsetData.pixels, labels: subsetData.labels, extra, eps: S.eps,
-    steps: HARDEN.steps, batch: HARDEN.batch, every: HARDEN.every, seed: fnv1a('folded|harden|' + S.digits[S.i].index) });
+    steps: HARDEN.steps, batch: HARDEN.batch, every: HARDEN.every, seed: fnv1a('folded|harden|' + S.digits[i0].index) });
 }
 function padGray() {
   const d = $('pad').getContext('2d').getImageData(0, 0, PAD, PAD).data;
@@ -177,7 +189,7 @@ function drawSimplex(p) {
   root.append(svg('circle', { cx: px, cy: py, r: 5, class: 'answer' }));
 }
 
-function drawPlate(revealed) {
+function drawPlate(revealed, { during = false } = {}) {
   const root = $('plate'); root.replaceChildren();
   const { fr, M, R } = S.plate, size = 640, k = size / (2 * fr.H);
   const X = (u) => (u + fr.H) * k, Y = (v) => (fr.H - v) * k;
@@ -199,10 +211,25 @@ function drawPlate(revealed) {
   const from = $('pl-from'), to = $('pl-to');
   from.textContent = `your ${S.cands.answer}`; from.style.left = pct(X(xa)); from.style.top = `calc(${pct(Y(0))} - 26px)`;
   const tmpl = S.cands.list.find((c) => c.kind === 'template');
-  to.textContent = revealed ? `the template's corner, read ${tmpl.read}` : '';
+  to.textContent = revealed ? `the template's corner, read ${tmpl.read}${during ? ' at the call' : ''}` : '';
   to.classList.toggle('quiet', revealed && !tmpl.changes);
-  to.style.left = pct(X(xb) - 40); to.style.top = `calc(${pct(Y(0))} + 12px)`;
-  $('t-walls').textContent = revealed ? String(R.ticks.length) : 'after the call';
+  to.style.left = pct(X(xb)); to.style.top = `calc(${pct(Y(0))} + 12px)`; // right-anchored at the run's end (folded.css)
+  $('t-walls').textContent = revealed ? String(R.ticks.length) : S.hardening ? 'while hardening' : 'after the call';
+}
+
+/** The certificate (split.js certify, about 40 ms) runs after the plate is painted, so a press is answered first, and
+ *  "exact" is printed only once it passed (review 1, finding 7's class: a claim printed before its check). */
+function certifyLater(net, plate) {
+  const cells = $('t-cells');
+  cells.textContent = `${int(plate.M.cells.length)}, checking`;
+  document.body.dataset.cert = 'pending';
+  const later = window.requestIdleCallback ? (f) => window.requestIdleCallback(f, { timeout: 500 }) : (f) => setTimeout(f, 0);
+  requestAnimationFrame(() => later(() => {
+    if (S.plate !== plate) return; // a later drawing or step replaced it
+    plate.certFailures = certify(net, plate.fr, plate.M.cells);
+    cells.textContent = plate.certFailures === 0 ? `${int(plate.M.cells.length)}, exact` : `${int(plate.M.cells.length)}, ${int(plate.certFailures)} not certified`;
+    document.body.dataset.cert = String(plate.certFailures);
+  }));
 }
 
 function drawCands() {
@@ -214,7 +241,7 @@ function drawCands() {
     // Before the call a corner is named by its place only, so its name is not the key (atlas practice.1.1).
     txt.append(el('span', 'cl', S.v ? c.label : `Corner ${i + 1}`));
     const res = el('span', 'cr', '');
-    if (S.v) { res.textContent = c.changes ? `read as ${c.read}` : `still read as ${S.cands.answer}`; if (c.changes) res.classList.add('fired'); }
+    if (S.v) { res.textContent = `${c.changes ? `read as ${c.read}` : `still read as ${S.cands.answer}`}; moved ${int(c.moved.full)} pixels by ${S.eps}, ${int(c.moved.part)} by less`; if (c.changes) res.classList.add('fired'); }
     txt.append(res);
     b.append(cv, txt);
     b.setAttribute('aria-pressed', String(S.picked === i));
@@ -227,15 +254,24 @@ function drawCands() {
 function call(i) {
   if (S.v) return;
   S.picked = i;
+  const network = S.hardened ? 'hardened' : 'original', id = idOf(S.i);
+  // A drawing counts once per network state (review 1, finding 3): a repeat is shown and kept, not counted.
+  const repeat = calledBefore(S.keep.current(), id, network);
   S.v = verdict(S.cands, i);
+  if (repeat) S.v = { ...S.v, counted: false, right: false, repeat: true };
   const c = S.cands.list[i], d = S.digits[S.i];
-  S.keep.call({ t: Date.now(), mode: d.mine ? 'pad' : 'example', drawing: d.mine ? d.index : 'ex-' + d.index, kind: c.kind, answer: S.cands.answer, read: c.read,
-    right: S.v.right, counted: S.v.counted, network: S.hardened ? 'hardened' : 'original' });
+  // A called drawing is closed (review 1, finding 5): a later stroke starts a new drawing, so the call keeps naming
+  // the pixels it was made on.
+  if (d.mine && d.open) { d.open = false; $('hint').textContent = 'Your drawing is kept as you called it. More strokes make a new drawing from it.'; }
+  S.keep.call({ t: Date.now(), mode: modeOf(id), drawing: id, kind: c.kind, answer: S.cands.answer, read: c.read,
+    right: S.v.right, counted: S.v.counted, network });
   $('verdict').textContent = !S.v.counted
-    ? (S.hardened ? `None of these three corners changes it now: after hardening, each of these steps of ${S.eps} of full ink keeps the answer at ${S.cands.answer}. This call is not counted.`
+    ? (S.v.repeat ? `This drawing was already called on the ${network} network, so this call is not counted. The corner you picked was read as ${c.read}.`
+      : S.hardened ? `None of these three corners changes it now: on the hardened network each of them keeps the answer at ${S.cands.answer}. This call is not counted.`
       : 'None of the three changes the answer here, so this call is not counted.')
     : S.v.right ? `Right. This corner changes the answer to ${c.read}. ${reasonOf(S.cands, i, (v) => fixed(v, 1))}` : `Not this one. It leaves the answer at ${S.cands.answer}. ${reasonOf(S.cands, i, (v) => fixed(v, 1))}`;
   drawCands(); drawPlate(true); showTemplate(true);
+  $('verdict').focus(); // the pressed corner is gone from the list, so the focus goes to what it did (finding 12)
   nextAction(S.hardened ? 'Next: draw your own digit, or pick another, and call again.' : 'Next: harden the network, then call the same drawing again.');
 }
 
@@ -249,12 +285,12 @@ function nextAction(s) { $('nextline').textContent = s; }
 /** The template and its sentence, shown once the call is made (its sign is the key). */
 function showTemplate(on) {
   $('tplbox').hidden = !on;
-  if (!on) return;
+  if (!on) { $('tplnote').textContent = ''; return; }
   const { rival, answer } = S.cands;
-  $('tplnote').textContent = `Inside this cell, the network's score for ${rival} against ${answer} is this picture times the drawing, plus a constant [REAL]. Its sign is the corner that changes that score most to first order; a step can cross walls, where the picture changes.`;
+  $('tplnote').textContent = `Inside this cell, the network's score for ${rival} against ${answer} is this picture times the drawing, plus a constant [REAL]. Its sign is the corner that changes that score most to first order, as long as the step stays in this cell; a step can cross walls, where the picture changes [REAL: Goodfellow, Shlens and Szegedy, ICLR 2015].`;
 }
 function drawLedger(rec) {
-  const fmt = (v) => (v === null ? 'over 0.5' : fixed(v, 3));
+  const fmt = (v) => (v === null ? `none up to ${LEDGER_HI}` : fixed(v, 3));
   const name = (id) => S.ledgerNames[id] || (id.startsWith('pad-') ? 'Your drawing' : `The example ${S.digits.find((d) => 'ex-' + d.index === id)?.label ?? ''}`);
   $('ledgernote').hidden = rec.ledger.length > 0;
   $('ledger').replaceChildren(...rec.ledger.slice(-6).map((l) => { const row = el('tr', ''); row.append(el('td', '', name(l.drawing)), el('td', 'n', fmt(l.before)), el('td', 'n', fmt(l.after))); return row; }));
@@ -278,7 +314,7 @@ function show(i, { keepPad = false } = {}) {
   const z = Array.from(forward(S.net, x)), p = softmax(z), a = argmax(z);
   drawSimplex(p);
   $('readout').replaceChildren('Read as ', el('b', '', String(a)), ` at ${fixed(100 * p[a], 1)}%`);
-  S.cands = candidates(S.net, x, S.eps, S.digits[i].index);
+  S.cands = candidates(S.net, x, S.eps, S.digits[i].index, S.hardened ? 'hardened' : 'original');
   const { rival, answer } = S.cands;
   paintSigned($('tpl'), template(S.net, x, rival, answer));
   const tmpl = S.cands.list.find((c) => c.kind === 'template');
@@ -287,27 +323,46 @@ function show(i, { keepPad = false } = {}) {
   const t0 = performance.now();
   const M = mosaic(S.net, fr);
   const ms = performance.now() - t0;
-  S.plate = { fr, M, R: run(M.cells, fr.L), ms, certFailures: certify(S.net, fr, M.cells) };
-  $('t-cells').textContent = `${int(M.cells.length)}, exact`;
+  S.plate = { fr, M, R: run(M.cells, fr.L), ms, certFailures: null };
   $('t-eps').textContent = `${S.eps} of full ink`;
   $('t-ms').textContent = `${int(Math.round(ms))} ms`;
   nextAction(`Next: call which corner changes the ${answer}.`);
   showTemplate(false);
-  $('question').textContent = `${S.hardened ? 'The network is hardened. ' : ''}Each corner moves every pixel by ${S.eps} of full ink. Which one changes the answer from ${answer}?`;
+  $('question').textContent = `${S.hardened ? 'The network is hardened. ' : ''}Each corner pushes every pixel up or down by ${S.eps} of full ink, stopping at black or white [REAL]. Which one changes the answer from ${answer}?`;
   $('verdict').textContent = '';
   drawCands(); drawPlate(false);
-  Object.assign(document.body.dataset, { digit: String(i), answer: String(answer), cells: String(M.cells.length), walls: String(S.plate.R.ticks.length), cert: String(S.plate.certFailures) });
+  Object.assign(document.body.dataset, { digit: String(i), answer: String(answer), cells: String(M.cells.length), walls: String(S.plate.R.ticks.length) });
+  certifyLater(S.net, S.plate);
 }
 
 async function start() {
   try {
-    const get = (f, tag) => fetch(`assets/data/dimensions/${f}`).then((r) => { if (!r.ok) throw new Error(tag); return r.json(); }).catch((err) => { throw new Error(err && err.message === tag ? tag : tag); });
-    const [nj, dj] = await Promise.all([get('net.json', 'network'), get('digits.json', 'digits')]);
-    S.net = netFromFile(nj); S.eps = nj.source.eps_by_rule;
+    // Each file is fetched, parsed and decoded under its own name, so the line that says what failed names it.
+    const get = (f, tag, use) => fetch(`assets/data/dimensions/${f}`).then((r) => { if (!r.ok) throw new Error(tag); return r.text(); })
+      .then((t) => ({ t, o: JSON.parse(t), v: use(JSON.parse(t)) })).catch(() => { throw new Error(tag); });
+    const [n1, d1] = await Promise.all([get('net.json', 'network', netFromFile), get('digits.json', 'digits', (o) => o.items.map(digitFrom))]);
+    const nt = n1.t, nj = n1.o, dj = d1.o;
+    // The file's own version: the first 12 hex digits of its SHA-256 (review 1, finding 7: the code hash named the
+    // training code, not the file).
+    let sha = '';
+    try { const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(nt)); sha = Array.from(new Uint8Array(h), (b) => b.toString(16).padStart(2, '0')).join('').slice(0, 12); } catch { /* no subtle crypto: the version line is left out */ }
+    S.net = n1.v; S.eps = nj.source.eps_by_rule;
     // The network's provenance and version, read from its own file (the lab's ladder, network-provenance rung 2).
-    $('prov').textContent = `The network: ${nj.sizes.join(', ')} neurons, ReLU, trained on MNIST (Yann LeCun, Corinna Cortes and Christopher J.C. Burges; yann.lecun.com/exdb/mnist). Test accuracy ${fixed(100 * nj.source.test_accuracy, 2)}% on MNIST's 10,000 test digits, as recorded in its file. File version ${String(nj.source.kill_test_code).slice(0, 12)}. [REAL]`; S.digits = dj.items; S.xs = dj.items.map(digitFrom);
+    const MNIST = 'MNIST (Yann LeCun, Corinna Cortes and Christopher J.C. Burges, yann.lecun.com/exdb/mnist; LeCun, Bottou, Bengio and Haffner, Proceedings of the IEEE 1998)';
+    $('prov').textContent = `The network: ${nj.sizes.join(', ')} neurons, ReLU, trained on ${MNIST}. Test accuracy ${fixed(100 * nj.source.test_accuracy, 2)}% on MNIST's 10,000 test digits, as recorded in its file.${sha ? ` File SHA-256 ${sha}.` : ''} [REAL]`;
+    $('footnote').textContent = `[REAL] The answer, the cells, the corners, the verdict and the ledger are computed in this page by the network above. The cells are exact, never sampled. The examples in the strip are MNIST test digits; your own drawing is reduced to ${FIELD} by ${FIELD} the way MNIST's were (the longer side to ${BOX} pixels, centred by its centre of mass).`;
+    $('hardnote').textContent = `${int(HARDEN.steps)} steps on the shipped MNIST training digits and your drawings, in this tab. [REAL]`;
+    S.digits = dj.items; S.xs = d1.v;
   } catch (e) {
-    $('readout').textContent = `${e && e.message === 'digits' ? 'The example digits' : 'The network\'s file'} did not load. Reload the page to try again.`;
+    // A failed start leaves no line that promises what the page cannot do (review 1, finding 8): the diagnosis goes
+    // where the next action stands, on the first screen, and every control that needs the network is off.
+    const said = `${e && e.message === 'digits' ? 'The example digits' : 'The network\'s file'} did not load. Reload the page to try again.`;
+    $('readout').textContent = said; $('nextline').textContent = said; $('nextline').removeAttribute('href');
+    $('hint').textContent = 'The pad needs the network, which did not load.';
+    $('health').textContent = 'The record was not read, because the page did not load.';
+    $('question').textContent = 'The call needs the network, which did not load.';
+    $('hardnote').textContent = '';
+    for (const id of ['harden', 'next', 'clear']) $(id).disabled = true;
     document.body.dataset.state = 'error';
     return;
   }
@@ -324,6 +379,7 @@ async function start() {
     onRecord: (rec, line) => { restoreDrawings(rec); drawTally(); drawLedger(rec); $('health').textContent = line; document.body.dataset.kept = String(rec.calls.length); },
     onSay: (s) => { $('keepnote').textContent = s; },
   });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) S.keep.reread(); });
   drawTally();
   show(Math.max(0, S.digits.findIndex((d) => d.label === 4)));
   document.body.dataset.state = 'ready';

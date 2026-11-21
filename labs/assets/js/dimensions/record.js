@@ -102,7 +102,9 @@ export function ledgerProblem(l) {
 export function read(raw) {
   if (raw == null) return { record: empty(), readOnly: false, problems: [] };
   if (typeof raw !== 'object' || !Number.isInteger(raw.v)) return { record: empty(), readOnly: false, problems: ['the stored record has no version; it was set aside'] };
-  if (raw.v > RECORD_V) return { record: raw, readOnly: true, problems: [`kept by a later version of this page (${raw.v}); shown, not written`] };
+  // A later version's shape is unknown here, so it is left as it is, never read into version 2's readers and never
+  // written (review 1, finding 4: handing it on raw broke every reader). The page shows an empty record and says why.
+  if (raw.v > RECORD_V) return { record: { ...empty(), v: raw.v }, readOnly: true, problems: [`This record was kept by a later version of this page (version ${raw.v}), so it is left as it is: not shown here and not written.`] };
   /** @type {string[]} */
   const problems = [];
   const v1 = raw.v === 1;
@@ -150,8 +152,17 @@ export function putDrawing(rec, d) {
 
 /** The tally the page shows, computed from the kept calls (progress 1). @param {{ calls: Call[] }} rec */
 export function tallyOf(rec) {
-  const counted = rec.calls.filter((c) => c.counted);
+  // A drawing counts once per network state (review 1, finding 3): the first counted call on (drawing, network).
+  /** @type {Set<string>} */
+  const seen = new Set();
+  const counted = rec.calls.filter((c) => { if (!c.counted) return false; const k = c.drawing + '|' + c.network; if (seen.has(k)) return false; seen.add(k); return true; });
   return { made: counted.length, right: counted.filter((c) => c.right).length };
+}
+
+/** Whether a counted call on this drawing and network state is already kept: a later one is not counted.
+ *  @param {{ calls: Call[] }} rec @param {string} drawing @param {'original' | 'hardened'} network */
+export function calledBefore(rec, drawing, network) {
+  return rec.calls.some((c) => c.counted && c.drawing === drawing && c.network === network);
 }
 
 /** The health line (records 2.4): the contract's version, what is kept, and where. @param {Rec} rec @param {StorageInfo} storage @param {boolean} [readOnly] */

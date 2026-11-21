@@ -1,10 +1,13 @@
 /* folded.css: Folded Space (Dimensions), Inside the Machine's material, by BAR_L1.md. Tokens from tokens.css. */
 * { box-sizing: border-box; }
+/* The hidden attribute always wins over a rule that sets display (review 1, finding 1). */
+[hidden] { display: none !important; }
 html, body { margin: 0; background: var(--void); color: var(--text); font: 14px/1.5 var(--font-mono); }
 .skip { position: absolute; left: -999px; top: 8px; background: var(--text-bright); color: var(--void); padding: 8px 12px; }
 .skip:focus { left: 16px; }
 .bar { display: flex; justify-content: space-between; align-items: baseline; padding: 18px 32px; border-bottom: 1px solid var(--line); }
 .bar a, .bar .mark { color: var(--text-dim); text-decoration: none; }
+.bar a { display: inline-block; min-height: 44px; line-height: 44px; padding: 0 8px; margin-left: -8px; }
 .head { padding: 26px 32px 10px; }
 h1 { font: 400 30px/1.15 Fraunces, serif; color: var(--text-bright); margin: 0; }
 .lede { font: 16px/1.5 Fraunces, serif; color: var(--text); max-width: 60ch; margin: 8px 0 0; }
@@ -18,6 +21,7 @@ h2 { font: 400 19px/1.2 Fraunces, serif; color: var(--text-bright); margin: 0 0 
 .hint { color: var(--text-dim); font-size: 12px; }
 /* The kit's keycap action (controls.css .kact), at the page's 44 px target. */
 .kact { min-height: 44px; }
+.kact .key { font-size: 12px; }
 #next { width: 100%; justify-content: center; border: 1px solid var(--horizon); color: var(--text-bright); font-size: 14px; }
 .strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .strip button { width: 48px; height: 48px; padding: 0; border: 1px solid var(--line); background: var(--void); cursor: pointer; }
@@ -25,7 +29,7 @@ h2 { font: 400 19px/1.2 Fraunces, serif; color: var(--text-bright); margin: 0 0 
 .strip button[aria-current="true"] { border-color: var(--horizon); }
 .simplex { width: 100%; max-width: 260px; display: block; margin: 6px auto 0; }
 .simplex .edge { stroke: var(--horizon); stroke-opacity: .12; stroke-width: .7; }
-.simplex .vlabel { fill: var(--text-dim); font: 12px var(--font-mono); text-anchor: middle; }
+.simplex .vlabel { fill: var(--text-dim); font: 14px var(--font-mono); text-anchor: middle; }
 .simplex .vlabel.on { fill: var(--text-bright); }
 .simplex .answer { fill: var(--accretion); }
 .readout { font-variant-numeric: tabular-nums; }
@@ -42,6 +46,7 @@ h2 { font: 400 19px/1.2 Fraunces, serif; color: var(--text-bright); margin: 0 0 
 .to { fill: var(--accretion); }
 .pl { position: absolute; transform: translate(-50%, 0); font-size: 12px; color: var(--text-bright); white-space: nowrap; pointer-events: none; }
 .pl.gold { color: var(--accretion); }
+#pl-to { transform: translate(-100%, 0); }
 .tblock { display: grid; grid-template-columns: repeat(4, auto); gap: 4px 22px; margin-top: 10px; color: var(--text-dim); font-size: 12px; font-variant-numeric: tabular-nums; }
 .tblock b { display: block; color: var(--text); font-weight: 400; font-size: 13px; }
 .q { margin: 0 0 12px; }
@@ -53,7 +58,9 @@ h2 { font: 400 19px/1.2 Fraunces, serif; color: var(--text-bright); margin: 0 0 
 .cands .cl { display: block; }
 .cands .cr { display: block; color: var(--text-dim); font-size: 13px; }
 .cands .cr.fired { color: var(--accretion); }
-.verdict { min-height: 1.5em; margin: 8px 0 0; }
+.verdict { min-height: 44px; margin: 8px 0 0; }
+.verdict:focus { outline: none; }
+.verdict:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 4px; }
 .tally { color: var(--text-dim); margin: 6px 0 18px; font-size: 13px; }
 .tally b { color: var(--accretion); font-weight: 500; }
 .tpl { display: grid; grid-template-columns: 112px 1fr; gap: 14px; align-items: start; margin-bottom: 18px; }
@@ -68,8 +75,8 @@ h2 { font: 400 19px/1.2 Fraunces, serif; color: var(--text-bright); margin: 0 0 
 .next { min-height: 48px; width: 100%; background: none; border: 1px solid var(--horizon); color: var(--text-bright); font: 500 14px var(--font-mono); cursor: pointer; }
 button:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
 .nextwrap { margin: 10px 0 0; }
-.nextline { color: var(--text-bright); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--horizon); }
-.tag { color: var(--text-dim); font: 11px var(--font-mono); }
+.nextline { display: inline-flex; align-items: center; min-height: 44px; color: var(--text-bright); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--horizon); }
+.tag { color: var(--text-dim); font: 12px var(--font-mono); }
 .ledgernote { color: var(--text-dim); font-size: 12px; margin: -10px 0 18px; }
 .run.quiet, .tick.quiet { stroke: var(--horizon); }
 .to.quiet { fill: var(--horizon); }
@@ -89,7 +96,7 @@ button:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2p
   .grid { grid-template-columns: 1fr; gap: 26px; }
   .pad { max-width: 220px; margin: 0 auto; }
   .strip { justify-content: center; }
-  .simplex { max-width: 190px; }
+  .simplex { max-width: 230px; }
   .tblock { grid-template-columns: repeat(2, auto); }
   h1 { font-size: 25px; }
 }

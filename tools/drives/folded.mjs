@@ -10,21 +10,24 @@
    - the plate's labels stay readable at every width (the bar sheet's defect at 390).
    ============================================================ */
 
+import { createHash } from 'node:crypto';
+
 export default async function folded(p, { base }) {
   await p.go(`${base}/labs/folded.html`);
   p.check('the page loads the network and is ready', await p.until('document.body.dataset.state === "ready"', 30000));
-  const at = () => p.ev(`(() => { const d = document.body.dataset; return { cells: +d.cells, walls: +d.walls, cert: +d.cert, answer: +d.answer,
+  // The certificate runs after the paint: wait for its result, never read 'pending' as a number.
+  const at = async () => (await p.until('!!document.body.dataset.cert && document.body.dataset.cert !== "pending"', 5000), p.ev(`(() => { const d = document.body.dataset; return { cells: +d.cells, walls: +d.walls, cert: +d.cert, answer: +d.answer,
     runs: document.querySelectorAll('#plate line.run').length, ticks: document.querySelectorAll('#plate line.tick').length,
     polys: document.querySelectorAll('#plate polygon.wall').length, tally: document.getElementById('tally').textContent,
-    verdict: document.getElementById('verdict').textContent, cands: document.querySelectorAll('#cands button').length }; })()`);
+    verdict: document.getElementById('verdict').textContent, cands: document.querySelectorAll('#cands button').length }; })()`));
   const s0 = await at();
   p.check('at rest the plate shows its exact cells, certified, with no run yet', s0.cells > 0 && s0.polys === s0.cells && s0.cert === 0 && s0.runs === 0, `${s0.cells} cells, ${s0.polys} drawn, certificate failures ${s0.cert}, runs ${s0.runs}`);
   p.check('three candidates wait for a call, and the tally is empty', s0.cands === 3 && /^Calls right: 0 of 0$/.test(s0.tally), `${s0.cands} candidates, "${s0.tally}"`);
-  const rest = await p.ev(`(() => ({ labels: [...document.querySelectorAll('#cands .cl')].map((x) => x.textContent), tpl: document.getElementById('tplbox').hidden,
+  const rest = await p.ev(`(() => ({ labels: [...document.querySelectorAll('#cands .cl')].map((x) => x.textContent), tpl: getComputedStyle(document.getElementById('tplbox')).display,
     next: document.getElementById('nextline').tagName + ' ' + document.getElementById('nextline').getAttribute('href'),
     kact: ['next', 'clear'].map((id) => document.getElementById(id).className + ':' + !!document.querySelector('#' + id + ' kbd.key')).join(' '),
-    ledgernote: !document.getElementById('ledgernote').hidden && document.getElementById('ledgernote').textContent }))()`);
-  p.check('before the call the corners are named by place only, and the template is not shown', rest.labels.join('|') === 'Corner 1|Corner 2|Corner 3' && rest.tpl === true, rest.labels.join(', '));
+    ledgernote: getComputedStyle(document.getElementById('ledgernote')).display !== 'none' && document.getElementById('ledgernote').textContent }))()`);
+  p.check('before the call the corners are named by place only, and the template is not shown', rest.labels.join('|') === 'Corner 1|Corner 2|Corner 3' && rest.tpl === 'none', rest.labels.join(', '));
   p.check('the next action is a link to the call', rest.next === 'A #call', rest.next);
   p.check('Next and Clear are the kit\u2019s keycap actions', rest.kact === 'kact:true kact:true', rest.kact);
   p.check('the empty ledger says what fills it', /^Harden the network to fill this table/.test(rest.ledgernote || ''), rest.ledgernote);
@@ -45,10 +48,13 @@ export default async function folded(p, { base }) {
   p.check('after the call every candidate shows what it was read as, and none can be pressed again', res.every((r) => r.off && /read as \d/.test(r.text)), res.map((r) => `${r.kind}: ${r.text}`).join('; '));
   const lab = await p.ev(`(() => { const a = document.getElementById('pl-from'), b = document.getElementById('pl-to'); return { a: parseFloat(getComputedStyle(a).fontSize), b: parseFloat(getComputedStyle(b).fontSize), text: b.textContent }; })()`);
   p.check('the plate’s labels are 12 px or more at this width', lab.a >= 12 && lab.b >= 12 && /read \d/.test(lab.text), `${lab.a} px and ${lab.b} px, "${lab.text}"`);
-  p.check('after the call the corners carry their names and the template is shown with its sentence', await p.ev(`[...document.querySelectorAll('#cands .cl')].some((x) => /template/.test(x.textContent)) && !document.getElementById('tplbox').hidden && /score for [0-9] against [0-9] is this picture/.test(document.getElementById('tplnote').textContent)`));
+  p.check('after the call the corners carry their names and the template is shown with its sentence', await p.ev(`[...document.querySelectorAll('#cands .cl')].some((x) => /template/.test(x.textContent)) && getComputedStyle(document.getElementById('tplbox')).display !== 'none' && /score for [0-9] against [0-9] is this picture/.test(document.getElementById('tplnote').textContent)`));
   const why = await p.ev(`({ v: document.getElementById('verdict').textContent, prov: document.getElementById('prov').textContent })`);
-  p.check('the verdict says why, from computed values', /^Right[.] This corner changes the answer to [0-9][.] It raised [0-9]'s score over [0-9]'s by -?[0-9]+[.][0-9] [(]the cell.s map predicted -?[0-9]+[.][0-9][)], the most of the three[.]$/.test(why.v), why.v);
-  p.check('the network names its source, its test accuracy and its file version', /^The network: 784, 64, 64, 10 neurons, ReLU, trained on MNIST [(]Yann LeCun, Corinna Cortes and Christopher J[.]C[.] Burges; yann[.]lecun[.]com.exdb.mnist[)][.] Test accuracy 96[.]71% on MNIST.s 10,000 test digits, as recorded in its file[.] File version [0-9a-f]{12}[.] .REAL.$/.test(why.prov), why.prov);
+  p.check('the verdict says why, from computed values, with the sign in words', /^Right[.] This corner changes the answer to [0-9][.] It (raised|lowered) [0-9]'s score against [0-9]'s by [0-9]+[.][0-9] [(]the cell.s map predicted -?[0-9]+[.][0-9][)], the most of the three[.]$/.test(why.v), why.v);
+  // The file's version is its own SHA-256, computed here in node from the served bytes, apart from the page's code.
+  const served = Buffer.from(await (await fetch(`${base}/labs/assets/data/dimensions/net.json`)).arrayBuffer());
+  const sha = createHash('sha256').update(served).digest('hex').slice(0, 12);
+  p.check('the network names its source with its venue, its test accuracy and the SHA-256 of its file', /^The network: 784, 64, 64, 10 neurons, ReLU, trained on MNIST [(]Yann LeCun, Corinna Cortes and Christopher J[.]C[.] Burges, yann[.]lecun[.]com.exdb.mnist; LeCun, Bottou, Bengio and Haffner, Proceedings of the IEEE 1998[)][.] Test accuracy 96[.]71% on MNIST.s 10,000 test digits, as recorded in its file[.] File SHA-256 ([0-9a-f]{12})[.] .REAL.$/.test(why.prov) && why.prov.includes(`SHA-256 ${sha}.`), `${why.prov} (node: ${sha})`);
   await p.shot('02-called-right');
 
   const nx = await centre('#next');
