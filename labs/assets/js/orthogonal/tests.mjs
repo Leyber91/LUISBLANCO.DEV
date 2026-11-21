@@ -329,9 +329,12 @@ for (const [what, text] of [['title', WORLD.title], ['driver', WORLD.driver], ['
 // the engine's verdict (worlds/fungi-early.js verdictOf): the markup holds each clause after its tag, in order, as the
 // script writes it, so a browser without scripts reads the engine's line too
 {
-  const marked = [...html.matchAll(/<span class="verdict-claim" data-claim><b class="t (real|ill)">\[(REAL|ILLUSTRATIVE)\]<\/b> <span class="verdict-text">([^<]*)<\/span><\/span>/g)];
+  const marked = [...html.match(/<p class="verdict" id="verdict">.*?<\/p>/)[0].matchAll(/<span class="verdict-claim" data-claim><b class="t (real|ill)">\[(REAL|ILLUSTRATIVE)\]<\/b> <span class="verdict-text">([^<]*)<\/span><\/span>/g)];
   ok("the markup's verdict is the data's: each clause after its tag, in order", marked.length === WORLD.verdict.clauses.length
     && WORLD.verdict.clauses.every((c, i) => marked[i][2] === c.tag && marked[i][1] === (c.tag === 'REAL' ? 'real' : 'ill') && marked[i][3] === c.text), JSON.stringify(marked.map((m) => m.slice(1))));
+  // the eras line (worlds/fungi-early.js erasOf): the markup holds the engine's line, tag and words
+  const era = html.match(/<p class="verdict" id="eras">.*?<b class="t (real|ill)">\[(REAL|ILLUSTRATIVE)\]<\/b> <span class="verdict-text">([^<]*)<\/span>/);
+  ok("the markup's eras line is the data's: its tag and its words", !!era && era[2] === WORLD.eras.tag && era[1] === (WORLD.eras.tag === 'REAL' ? 'real' : 'ill') && era[3] === WORLD.eras.text, JSON.stringify(era && era.slice(1)));
 }
 
 // ---------------------------------------------------------------- 8. the ignition clock

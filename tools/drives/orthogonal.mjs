@@ -195,6 +195,13 @@ export default async function orthogonal(p, { base, width, height }) {
         return { h: Math.round(r.height), lh, top: Math.round(r.top), bottom: Math.round(r.bottom), view: innerHeight, text, want, ok: text === 'The engine: ' + want }; })`);
     p.check('the engine\'s verdict is one line, in the frame, and the line the engine computes', verdict.h <= verdict.lh * 1.5 && verdict.bottom <= verdict.view && verdict.ok, JSON.stringify(verdict));
   }
+  // the eras line under it (worlds/fungi-early.js erasOf): the count, the misses and their figures are the engine's, computed from
+  // the table the page loaded; one line at 1440 x 900, in the frame
+  const erasLine = await p.ev(`Promise.all([import('${base}/labs/assets/js/orthogonal/worlds/fungi-early.js'), fetch('${base}/labs/assets/data/orthogonal/tech/light.json').then((r) => r.json())])
+    .then(([W, T]) => { const v = document.getElementById('eras'), r = v.getBoundingClientRect(), lh = parseFloat(getComputedStyle(v).lineHeight), want = W.erasOf(T).line;
+      const text = v.textContent.replace(/\\s+/g, ' ').trim(); return { h: Math.round(r.height), lh, bottom: Math.round(r.bottom), view: innerHeight, text, want, ok: text === "Earth's eras: " + want }; })`);
+  p.check('the eras line is the line the engine computes from the table', erasLine.ok, JSON.stringify(erasLine));
+  if (width >= 1200) p.check('the eras line is one line, in the frame', erasLine.h <= erasLine.lh * 1.5 && erasLine.bottom <= erasLine.view, JSON.stringify(erasLine));
   // at every width the verdict's box is as tall as its text: on a phone the header is a column, where a basis of 100%
   // once stretched it into a band of empty sky above the render (the first drive of 2026-11-21's second engine pass)
   const vbox = await p.ev(`(() => { const v = document.getElementById('verdict'), r = document.createRange(); r.selectNodeContents(v);

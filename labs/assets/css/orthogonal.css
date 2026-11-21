@@ -28,11 +28,11 @@ body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 21
 .sheet {
   /* the row of drawings takes what the viewport leaves after the header, the exercise's bar (34 px), the evidence
      footer and the margins, so the footer is in the frame at 1440 x 900 */
-  --cols-h: clamp(440px, calc(100vh - 329px), 760px);   /* 318 px, and 11 for the engine's verdict line under the header */
+  --cols-h: clamp(440px, calc(100vh - 329px), 760px);   /* 318 px, 11 for the engine's verdict line under the header; the eras line under it (17) is paid for by the sheet's margin (14 to 4, top and bottom) and bottom padding (10 to 2) and 3 more of the sheet's own height */
   --strip: 168px;   /* the caption strip: the render's note names all three of its departures (review H4); the drive checks it fits */
   --art-aspect: 0.75;   /* the render's width over its height (900 x 1200) */
   position: relative; z-index: 1;
-  margin: 14px 24px; padding: 2px 16px 10px; border: 1px solid var(--line);
+  margin: 4px 24px; padding: 2px 16px 2px; border: 1px solid var(--line);
   background-image: linear-gradient(rgba(159, 179, 214, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(159, 179, 214, .03) 1px, transparent 1px);
   background-size: 32px 32px; background-position: -1px -1px;
   display: grid; column-gap: 0; row-gap: 0;
@@ -274,6 +274,7 @@ svg.ord-right text.num { fill: var(--accretion); }
   /* a column: no wrap, and the verdict sized by its text (a basis of 100% would take the column's height) */
   .head { flex-wrap: nowrap; padding-bottom: 10px; }
   .verdict { order: -1; flex: none; }
+  #eras { order: -2; }   /* two lines in a reversed column: the lower order sits lower, so the engine's verdict stays above the eras line */
   .head-side { flex-direction: row; justify-content: space-between; align-items: center; align-self: stretch; }
   .title { font-size: 30px; }
   .back { min-height: 44px; display: inline-flex; align-items: center; }
