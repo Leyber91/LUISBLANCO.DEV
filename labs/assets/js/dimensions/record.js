@@ -26,7 +26,9 @@ export const NETWORKS = Object.freeze(['original', 'hardened']);
 export const ACTIONS = Object.freeze(['pick', 'next', 'clear']);
 
 /** @typedef {'example' | 'pad'} Mode */
-/** @typedef {{ t: number, mode: Mode, drawing: string, kind: string, answer: number, read: number, right: boolean, counted: boolean, network: 'original' | 'hardened' }} Call */
+/** A call. `right` is what the picked corner did; `counted` whether it enters the tally; `repeat` marks a call on a
+ *  drawing already called on that network (review 1, second reading, finding 5: a repeat kept its corner's truth).
+ *  @typedef {{ t: number, mode: Mode, drawing: string, kind: string, answer: number, read: number, right: boolean, counted: boolean, network: 'original' | 'hardened', repeat?: boolean }} Call */
 /** @typedef {{ t: number, mode: Mode, what: 'pick' | 'next' | 'clear', drawing: string }} Action */
 /** @typedef {{ t: number, mode: 'pad', id: string, pixels: string }} Drawing */
 /** @typedef {{ t: number, mode: Mode, drawing: string, before: number | null, after: number | null }} LedgerRow */
@@ -37,7 +39,15 @@ export const ACTIONS = Object.freeze(['pick', 'next', 'clear']);
 /** @typedef {{ kind: string, persistent?: boolean } | null} StorageInfo */
 
 const T_MIN = Date.UTC(2020, 0, 1);
-const DRAWING = /^(ex-\d{1,5}|pad-\d{1,6})$/;
+// A pad drawing's id is unique across tabs and erases (second reading, finding 3: a count from the page's copy put
+// one id on two drawings): base 36 of its time, then two random base-36 digits.
+const PAD_ID = /^pad-[0-9a-z]{1,12}$/;
+const DRAWING = /^(ex-\d{1,5}|pad-[0-9a-z]{1,12})$/;
+/** A new pad drawing's id. @param {number} t ms since 1970 @param {number} r a number in [0, 1) */
+export const padId = (t, r) => 'pad-' + Math.floor(t).toString(36) + Math.floor(r * 1296).toString(36).padStart(2, '0');
+/** Two drawings are one when their pixels differ by less than this, as a mean over the 784 in full ink: a tap on a
+ *  stroke changes 1 or 2 pixels by 1/255, about 0.00001; one more stroke changes 20 or more pixels by 1, over 0.025. */
+export const SAME_PX = 0.01;
 const B64_784 = /^[A-Za-z0-9+/]{1046}==$/;
 
 /** @returns {Rec} */
@@ -62,7 +72,9 @@ export function callProblem(c) {
   if (!KINDS.includes(c.kind)) return `unknown corner ${String(c.kind)}`;
   if (!isDigit(c.answer) || !isDigit(c.read)) return 'an answer is a digit from 0 to 9';
   if (typeof c.right !== 'boolean' || typeof c.counted !== 'boolean') return 'right and counted are true or false';
-  if (c.right && !c.counted) return 'a call that is not counted cannot be right';
+  if (c.repeat !== undefined && typeof c.repeat !== 'boolean') return 'repeat is true or false';
+  if (c.repeat && c.counted) return 'a repeat is not counted';
+  if (c.right && !c.counted && !c.repeat) return 'a call that is not counted cannot be right, unless it is a repeat';
   if (!NETWORKS.includes(c.network)) return `unknown network ${String(c.network)}`;
   return '';
 }
@@ -79,7 +91,7 @@ export function actionProblem(a) {
 export function drawingProblem(d) {
   if (!d || typeof d !== 'object') return 'a drawing must be an object';
   if (!isT(d.t)) return 'a drawing needs a time';
-  if (typeof d.id !== 'string' || !/^pad-\d{1,6}$/.test(d.id)) return 'a kept drawing is one of the pad’s';
+  if (typeof d.id !== 'string' || !PAD_ID.test(d.id)) return 'a kept drawing is one of the pad’s';
   if (d.mode !== 'pad') return 'a kept drawing has the mode pad';
   if (typeof d.pixels !== 'string' || !B64_784.test(d.pixels)) return 'a drawing is 784 bytes in base64';
   return '';
@@ -135,8 +147,14 @@ function add(rec, list, entry, problem) {
   const over = Math.max(0, items.length - MAX[list]);
   return { record: { ...rec, [list]: items.slice(over), dropped: { ...rec.dropped, [list]: rec.dropped[list] + over } }, refused: '' };
 }
-/** @param {Rec} rec @param {Call} c */
-export const addCall = (rec, c) => add(rec, 'calls', c, callProblem);
+/** A call on a pad drawing names a drawing the record holds (second reading, finding 3: a call on an erased drawing
+ *  was kept). @param {Rec} rec @param {Call} c @returns {Change} */
+export function addCall(rec, c) {
+  const p = callProblem(c);
+  if (p) return { record: rec, refused: p };
+  if (c.mode === 'pad' && !rec.drawings.some((d) => d.id === c.drawing)) return { record: rec, refused: 'a call on your drawing needs the drawing kept, and it is not' };
+  return add(rec, 'calls', c, callProblem);
+}
 /** @param {Rec} rec @param {Action} a */
 export const addAction = (rec, a) => add(rec, 'actions', a, actionProblem);
 /** @param {Rec} rec @param {LedgerRow} l */
@@ -159,14 +177,38 @@ export function tallyOf(rec) {
   return { made: counted.length, right: counted.filter((c) => c.right).length };
 }
 
-/** Whether a counted call on this drawing and network state is already kept: a later one is not counted.
- *  @param {{ calls: Call[] }} rec @param {string} drawing @param {'original' | 'hardened'} network */
-export function calledBefore(rec, drawing, network) {
-  return rec.calls.some((c) => c.counted && c.drawing === drawing && c.network === network);
+/** Whether two kept drawings are one drawing (SAME_PX). @param {string} a @param {string} b */
+export function sameDrawing(a, b) {
+  if (a === b) return true;
+  const x = atob(a), y = atob(b);
+  let d = 0;
+  for (let p = 0; p < 784; p++) d += Math.abs(x.charCodeAt(p) - y.charCodeAt(p));
+  return d / (784 * 255) < SAME_PX;
+}
+
+/** Whether a counted call on this drawing, or on a pad drawing with the same pixels, is already kept on this network:
+ *  then a later call is a repeat (second reading, finding 2: a tap made a new id with the same pixels).
+ *  @param {Rec} rec @param {{ drawing: string, network: 'original' | 'hardened' }} c */
+export function calledBefore(rec, c) {
+  const on = rec.calls.filter((k) => k.counted && k.network === c.network);
+  if (on.some((k) => k.drawing === c.drawing)) return true;
+  if (modeOf(c.drawing) !== 'pad') return false;
+  const mine = rec.drawings.find((d) => d.id === c.drawing);
+  if (!mine) return false;
+  return on.some((k) => { if (modeOf(k.drawing) !== 'pad') return false; const d = rec.drawings.find((e) => e.id === k.drawing); return !!d && sameDrawing(d.pixels, mine.pixels); });
+}
+
+/** The call as it is kept, decided on the record as the store holds it at the write (second reading, finding 4):
+ *  a repeat keeps what its corner did and is not counted. @param {Rec} rec @param {Call} c @returns {Call} */
+export function markRepeat(rec, c) {
+  return c.counted && calledBefore(rec, c) ? { ...c, counted: false, repeat: true } : c;
 }
 
 /** The health line (records 2.4): the contract's version, what is kept, and where. @param {Rec} rec @param {StorageInfo} storage @param {boolean} [readOnly] */
 export function health(rec, storage, readOnly = false) {
+  // A later version's record is not read here, so its contents are not counted as if they were none (second reading,
+  // finding 6).
+  if (readOnly && rec.v > RECORD_V) return `Record version ${rec.v} (read only), written by a later version of this page: not read here, and nothing is written to it.`;
   const where = !storage ? 'not kept: the store did not open'
     : storage.kind === 'memory' ? 'kept only until this tab closes'
     : `kept in this browser${storage.persistent ? '' : ', which may clear it'}`;

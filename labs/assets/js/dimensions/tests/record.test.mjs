@@ -1,6 +1,6 @@
 // record.test.mjs: the record's contract (record.js, version 2), each rule just inside and just outside its bound.
 // Run: node labs/assets/js/dimensions/tests/record.test.mjs (exit 1 on any failure).
-import { calledBefore, empty, read, addCall, addAction, addLedger, putDrawing, tallyOf, health, callProblem, actionProblem, drawingProblem, ledgerProblem, pixelsTo64, pixelsFrom64, modeOf, MAX, RECORD_V } from '../record.js';
+import { calledBefore, markRepeat, sameDrawing, padId, SAME_PX, empty, read, addCall, addAction, addLedger, putDrawing, tallyOf, health, callProblem, actionProblem, drawingProblem, ledgerProblem, pixelsTo64, pixelsFrom64, modeOf, MAX, RECORD_V } from '../record.js';
 
 let n = 0, fails = 0;
 const ok = (c, m) => { n++; if (!c) { fails++; console.log('FAIL ' + m); } };
@@ -86,14 +86,49 @@ ok(mixed.record.calls.length === 1 && mixed.record.actions.length === 1 && mixed
 {
   const odd = read({ v: 3, log: [1, 2], drawings: [{ id: 'pad-1' }] });
   ok(odd.readOnly && odd.record.calls.length === 0 && odd.record.drawings.length === 0 && odd.record.v === 3 && /later version of this page \(version 3\)/.test(odd.problems[0]), `a later version's record is not read into version 2's shape (${odd.problems[0]})`);
-  ok(/^Record version 3 \(read only\): 0 calls/.test(health(odd.record, { kind: 'indexeddb', persistent: true }, true)), 'its health line still draws');
+  ok(/^Record version 3 \(read only\), written by a later version/.test(health(odd.record, { kind: 'indexeddb', persistent: true }, true)), 'its health line still draws');
   let r2 = empty();
   for (let k = 0; k < 4; k++) r2 = addCall(r2, call({ t: T + k })).record;
   r2 = addCall(r2, call({ t: T + 9, network: 'hardened', right: false })).record;
   const t2 = tallyOf(r2);
   ok(t2.made === 2 && t2.right === 1, `four calls on one drawing and network count once, and the hardened state once more (${t2.right} of ${t2.made})`);
-  ok(calledBefore(r2, 'ex-4', 'original') && calledBefore(r2, 'ex-4', 'hardened') && !calledBefore(r2, 'ex-5', 'original'), 'calledBefore names a drawing and network already called');
-  ok(!calledBefore(addCall(empty(), call({ counted: false, right: false })).record, 'ex-4', 'original'), 'a call that was not counted does not block the next');
+  ok(calledBefore(r2, { drawing: 'ex-4', network: 'original' }) && calledBefore(r2, { drawing: 'ex-4', network: 'hardened' }) && !calledBefore(r2, { drawing: 'ex-5', network: 'original' }), 'calledBefore names a drawing and network already called');
+  ok(!calledBefore(addCall(empty(), call({ counted: false, right: false })).record, { drawing: 'ex-4', network: 'original' }), 'a call that was not counted does not block the next');
+}
+
+// 7c. Review 1, second reading: ids, near copies, the repeat field, a call on a drawing not kept, a later version.
+{
+  // Ids: unique per time and random draw, inside the contract.
+  const a = padId(T, 0), b = padId(T, 0.999), c = padId(T + 1, 0);
+  ok(a !== b && a !== c && /^pad-[0-9a-z]{1,12}$/.test(a) && /^pad-[0-9a-z]{1,12}$/.test(b), `a pad id is unique and inside the contract (${a}, ${b}, ${c})`);
+  ok(drawingProblem(drawing({ id: a })) === '' && drawingProblem(drawing({ id: 'pad-' + 'z'.repeat(13) })) !== '' && drawingProblem(drawing({ id: 'pad-A1' })) !== '', 'the id rule: up to 12 base-36 digits, lower case');
+  // Near copies: a tap (2 pixels by 1/255) is the same drawing; the bound itself, just inside and just outside.
+  const base = new Float64Array(784).fill(0); for (let k = 0; k < 120; k++) base[200 + k] = 1;
+  const tap = base.slice(); tap[10] = 1 / 255; tap[11] = 1 / 255;
+  const n0 = Math.ceil(SAME_PX * 784) - 1, n1 = Math.ceil(SAME_PX * 784) + 1; // pixels changed by full ink
+  const under = base.slice(); for (let k = 0; k < n0; k++) under[500 + k] = 1;
+  const over = base.slice(); for (let k = 0; k < n1; k++) over[500 + k] = 1;
+  ok(sameDrawing(pixelsTo64(base), pixelsTo64(tap)), 'a tap leaves one drawing');
+  ok(sameDrawing(pixelsTo64(base), pixelsTo64(under)) && !sameDrawing(pixelsTo64(base), pixelsTo64(over)), `the bound: ${n0} pixels changed is one drawing, ${n1} is another`);
+  // A counted call on pad-a, then a call on its near copy pad-b, is a repeat; on another drawing it is not.
+  let r3 = empty();
+  r3 = putDrawing(r3, drawing({ id: 'pad-a', pixels: pixelsTo64(base) })).record;
+  r3 = putDrawing(r3, drawing({ id: 'pad-b', pixels: pixelsTo64(tap) })).record;
+  r3 = putDrawing(r3, drawing({ id: 'pad-c', pixels: pixelsTo64(over) })).record;
+  r3 = addCall(r3, call({ mode: 'pad', drawing: 'pad-a' })).record;
+  const onCopy = markRepeat(r3, call({ mode: 'pad', drawing: 'pad-b' }));
+  ok(onCopy.repeat === true && onCopy.counted === false && onCopy.right === true, 'a call on a near copy is a repeat that keeps what its corner did');
+  ok(!markRepeat(r3, call({ mode: 'pad', drawing: 'pad-c' })).repeat && !markRepeat(r3, call({ mode: 'pad', drawing: 'pad-a', network: 'hardened' })).repeat, 'another drawing, or the hardened network, is not a repeat');
+  ok(!addCall(r3, onCopy).refused, 'a repeat that was right is kept');
+  ok(addCall(r3, call({ counted: false, right: true })).refused.includes('unless it is a repeat'), 'a call not counted and right, without repeat, is refused');
+  ok(addCall(r3, call({ repeat: true })).refused.includes('repeat is not counted') && addCall(r3, call({ repeat: 'yes', counted: false, right: false })).refused.includes('true or false'), 'a repeat is never counted, and repeat is true or false');
+  ok(addCall(r3, call({ mode: 'pad', drawing: 'pad-z' })).refused.includes('needs the drawing kept'), 'a call on a pad drawing the record does not hold is refused');
+  const t3 = tallyOf(addCall(r3, onCopy).record);
+  ok(t3.made === 1 && t3.right === 1, `the repeat leaves the tally at 1 of 1 (${t3.right} of ${t3.made})`);
+  // A later version: the health line does not count its contents as none.
+  const later3 = read({ v: 3, calls: [call()] });
+  const line = health(later3.record, { kind: 'indexeddb', persistent: true }, later3.readOnly);
+  ok(/read only/.test(line) && /not read here/.test(line) && !/0 calls/.test(line), `a later version's health line says it is not read (${line})`);
 }
 
 // 8. The health line names the version, what is kept and where.

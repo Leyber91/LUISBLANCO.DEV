@@ -81,14 +81,14 @@ ok(c4.list.filter((q) => q.kind !== 'template').every((q) => q.read === 4), 'and
   // The moved pixels add up, and the ink corner of the 4 moves fewer pixels by the full step than the template's.
   for (const q of c4.list) ok(q.moved.full + q.moved.part + q.moved.none === 784, `${q.kind}: the moved pixels add up (${q.moved.full}, ${q.moved.part}, ${q.moved.none})`);
   ok(c4.list.find((q) => q.kind === 'ink').moved.full < c4.list.find((q) => q.kind === 'template').moved.full, 'the ink corner moves fewer pixels by the full step');
-  // The network's state is in the seed: on some digit the order or the random corner differs between the two states.
+  // The network's state is in the seed: the order of the three is drawn afresh for the hardened state. A new seed
+  // always changes the random corner, so the order is checked on its own (second reading: a check that could not fail).
   let differs = 0;
   for (let k = 0; k < xs.length; k++) {
     const a = candidates(net, xs[k], eps, dj.items[k].index, 'original'), b = candidates(net, xs[k], eps, dj.items[k].index, 'hardened');
-    const ra = a.list.find((q) => q.kind === 'random').signs.join(''), rb = b.list.find((q) => q.kind === 'random').signs.join('');
-    if (a.list.map((q) => q.kind).join() !== b.list.map((q) => q.kind).join() || ra !== rb) differs++;
+    if (a.list.map((q) => q.kind).join() !== b.list.map((q) => q.kind).join()) differs++;
   }
-  ok(differs === xs.length, `the order or the random corner is drawn afresh for the hardened state on every digit (${differs} of ${xs.length})`);
+  ok(differs >= 5, `the order differs between the two states on most digits (${differs} of ${xs.length}; 5 of 6 orders differ, so about 8 are expected)`);
 }
 
 // 4. The verdict and the tally, on hand-made candidates.

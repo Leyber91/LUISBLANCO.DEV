@@ -15,7 +15,7 @@ import { el } from '../kit/dom.js';
 import { int, fixed } from '../kit/format.js';
 import { tallySvg } from '../kit/controls.js';
 import { startKeep } from './keep.js';
-import { tallyOf, pixelsTo64, pixelsFrom64, modeOf, calledBefore } from './record.js';
+import { tallyOf, pixelsTo64, pixelsFrom64, modeOf, markRepeat, padId } from './record.js';
 
 /** The record's id of drawing i: 'ex-<test index>' for an example, 'pad-<n>' for the visitor's. */
 const idOf = (i) => (S.digits[i].mine ? S.digits[i].index : 'ex-' + S.digits[i].index);
@@ -41,7 +41,7 @@ const paintInk = (canvas, x) => paint(canvas, (p) => mix(VOID, HI, x[p]));
 const paintSigned = (canvas, t) => { let m = 0; for (const v of t) m = Math.max(m, Math.abs(v)); paint(canvas, (p) => { const s = t[p] / (m || 1); return s >= 0 ? mix(MID, HI, s) : mix(MID, LO, -s); }); };
 const paintCorner = (canvas, signs) => paint(canvas, (p) => (signs[p] > 0 ? mix(MID, HI, 0.55) : mix(MID, LO, 0.55)));
 
-const S = { net: null, digits: [], xs: [], eps: 0.1, i: 0, cands: null, plate: null, picked: null, v: null, padMode: 'example', mine: 0, keep: null, ledgerNames: {} };
+const S = { net: null, digits: [], xs: [], eps: 0.1, i: 0, cands: null, plate: null, picked: null, v: null, padMode: 'example', mine: 0, keep: null, ledgerNames: {}, pending: new Set(), rec: { writable: true, later: false } };
 
 /* The pad: strokes of PAD_LINE px on a PAD px square (MNIST's strokes are about a tenth of a digit's height). Each
    stroke is read as it is drawn (the answer moves); on release the drawing joins the strip and gets its cells. */
@@ -161,7 +161,8 @@ function commitDrawing(x, a) {
   // The visitor's drawing: one entry in the strip, replaced while the same drawing grows stroke by stroke.
   const last = S.digits.length - 1;
   const growing = S.digits[last]?.mine && S.digits[last].open;
-  if (growing) { S.xs[last] = x; } else { S.mine += 1; S.xs.push(x); S.digits.push({ index: 'pad-' + S.mine, label: null, mine: true, open: true }); addStripButton(S.xs.length - 1); }
+  // A new drawing's id is unique across tabs and erases (second reading, finding 3); S.mine only numbers the labels.
+  if (growing) { S.xs[last] = x; } else { S.mine += 1; const id = padId(Date.now(), Math.random()); S.pending.add(id); S.xs.push(x); S.digits.push({ index: id, label: null, mine: true, open: true, n: S.mine }); addStripButton(S.xs.length - 1); }
   S.keep.drawing({ t: Date.now(), mode: 'pad', id: S.digits[S.xs.length - 1].index, pixels: pixelsTo64(x) });
   const j = S.xs.length - 1;
   paintInk($('strip').children[j].querySelector('canvas'), x);
@@ -172,7 +173,7 @@ function commitDrawing(x, a) {
 }
 function addStripButton(j) {
   const b = el('button', ''); b.type = 'button'; b.setAttribute('role', 'listitem');
-  b.setAttribute('aria-label', S.digits[j].mine ? `Your drawing ${S.mine}` : `Drawing ${j + 1}, a ${S.digits[j].label}`);
+  b.setAttribute('aria-label', S.digits[j].mine ? `Your drawing ${S.digits[j].n}` : `Drawing ${j + 1}, a ${S.digits[j].label}`);
   const cv = el('canvas', ''); cv.width = cv.height = 28; paintInk(cv, S.xs[j]); b.append(cv);
   b.addEventListener('click', () => { act('pick', j); show(j); });
   $('strip').append(b);
@@ -251,32 +252,37 @@ function drawCands() {
   });
 }
 
-function call(i) {
+async function call(i) {
   if (S.v) return;
   S.picked = i;
-  const network = S.hardened ? 'hardened' : 'original', id = idOf(S.i);
-  // A drawing counts once per network state (review 1, finding 3): a repeat is shown and kept, not counted.
-  const repeat = calledBefore(S.keep.current(), id, network);
+  const network = S.hardened ? 'hardened' : 'original', id = idOf(S.i), at = S.i;
   S.v = verdict(S.cands, i);
-  if (repeat) S.v = { ...S.v, counted: false, right: false, repeat: true };
+  [...$('cands').children].forEach((b) => { b.disabled = true; });
   const c = S.cands.list[i], d = S.digits[S.i];
   // A called drawing is closed (review 1, finding 5): a later stroke starts a new drawing, so the call keeps naming
   // the pixels it was made on.
   if (d.mine && d.open) { d.open = false; $('hint').textContent = 'Your drawing is kept as you called it. More strokes make a new drawing from it.'; }
-  S.keep.call({ t: Date.now(), mode: modeOf(id), drawing: id, kind: c.kind, answer: S.cands.answer, read: c.read,
-    right: S.v.right, counted: S.v.counted, network });
+  // Whether this is a repeat (a drawing, or one with the same pixels, already called on this network) is decided on
+  // the record as the store holds it at the write, across tabs (second reading, findings 2 and 4); the verdict is the
+  // call as kept. Where nothing can be kept, the page's copy decides.
+  const asked = { t: Date.now(), mode: modeOf(id), drawing: id, kind: c.kind, answer: S.cands.answer, read: c.read, right: S.v.right, counted: S.v.counted, network };
+  const kept = (await S.keep.call(asked)) || markRepeat(S.keep.current(), asked);
+  if (S.i !== at || !S.v) return; // another drawing was shown while the record was written
+  if (kept.repeat) S.v = { ...S.v, counted: false, repeat: true };
   $('verdict').textContent = !S.v.counted
-    ? (S.v.repeat ? `This drawing was already called on the ${network} network, so this call is not counted. The corner you picked was read as ${c.read}.`
+    ? (S.v.repeat ? `This drawing was already called on the ${network} network, so this call is not counted. ${c.changes ? `The corner you picked changes the answer to ${c.read}.` : `The corner you picked leaves it at ${S.cands.answer}.`}`
       : S.hardened ? `None of these three corners changes it now: on the hardened network each of them keeps the answer at ${S.cands.answer}. This call is not counted.`
       : 'None of the three changes the answer here, so this call is not counted.')
     : S.v.right ? `Right. This corner changes the answer to ${c.read}. ${reasonOf(S.cands, i, (v) => fixed(v, 1))}` : `Not this one. It leaves the answer at ${S.cands.answer}. ${reasonOf(S.cands, i, (v) => fixed(v, 1))}`;
-  drawCands(); drawPlate(true); showTemplate(true);
+  drawCands(); drawPlate(true); showTemplate(true); drawLedger(S.keep.current());
   $('verdict').focus(); // the pressed corner is gone from the list, so the focus goes to what it did (finding 12)
   nextAction(S.hardened ? 'Next: draw your own digit, or pick another, and call again.' : 'Next: harden the network, then call the same drawing again.');
 }
 
 function drawTally() {
-  // The tally is computed from the calls the store confirmed (the store is the truth).
+  // The tally is computed from the calls the store confirmed (the store is the truth). A later version's record is
+  // not read here, so it has no tally to show (second reading, finding 6).
+  if (S.rec.later) { $('tally').replaceChildren('Calls right: not read here, the record is a later version\u2019s'); document.body.dataset.called = ''; return; }
   const t = tallyOf(S.keep ? S.keep.current() : { calls: [] });
   $('tally').replaceChildren('Calls right: ', el('b', t.right > 0 ? '' : 'none', int(t.right)), ` of ${int(t.made)}`, tallySvg(t.made, t.right, 180).svg);
   document.body.dataset.called = String(t.made); document.body.dataset.right = String(t.right);
@@ -292,16 +298,34 @@ function showTemplate(on) {
 function drawLedger(rec) {
   const fmt = (v) => (v === null ? `none up to ${LEDGER_HI}` : fixed(v, 3));
   const name = (id) => S.ledgerNames[id] || (id.startsWith('pad-') ? 'Your drawing' : `The example ${S.digits.find((d) => 'ex-' + d.index === id)?.label ?? ''}`);
+  // The row's "after" says whether the hardened network's corner changes the drawing, which is the second call's key,
+  // so it is shown once a call on the hardened network has been made on that drawing (second reading, finding 1).
+  const called = (id) => rec.calls.some((c) => c.drawing === id && c.network === 'hardened');
   $('ledgernote').hidden = rec.ledger.length > 0;
-  $('ledger').replaceChildren(...rec.ledger.slice(-6).map((l) => { const row = el('tr', ''); row.append(el('td', '', name(l.drawing)), el('td', 'n', fmt(l.before)), el('td', 'n', fmt(l.after))); return row; }));
+  $('ledgernote').textContent = S.rec.later ? 'This record is a later version\u2019s: hardening runs here, and its row is not kept.' : 'Harden the network to fill this table: for the drawing on the pad, the smallest step along its template\u2019s corner that changes its answer, before and after [REAL].';
+  $('ledger').replaceChildren(...rec.ledger.slice(-6).map((l) => { const row = el('tr', ''); row.append(el('td', '', name(l.drawing)), el('td', 'n', fmt(l.before)), el('td', 'n', called(l.drawing) ? fmt(l.after) : 'after the second call')); return row; }));
 }
 function restoreDrawings(rec) {
-  // The visitor's drawings kept from an earlier visit join the strip once, as closed drawings.
+  // The strip's drawings of the visitor's follow the record (second reading, finding 3): kept ones join it once, as
+  // closed drawings, and where the record can be written, one it no longer holds (an erase, another tab) leaves it,
+  // unless its write is still on the way.
+  for (const d of rec.drawings) S.pending.delete(d.id);
   for (const d of rec.drawings) {
     if (S.digits.some((x) => x.index === d.id)) continue;
-    const n = Number(d.id.slice(4)); if (n > S.mine) S.mine = n;
-    S.xs.push(pixelsFrom64(d.pixels)); S.digits.push({ index: d.id, label: null, mine: true, open: false }); addStripButton(S.xs.length - 1);
+    S.mine += 1;
+    S.xs.push(pixelsFrom64(d.pixels)); S.digits.push({ index: d.id, label: null, mine: true, open: false, n: S.mine }); addStripButton(S.xs.length - 1);
   }
+  if (!S.rec.writable) return;
+  const held = new Set(rec.drawings.map((d) => d.id));
+  const gone = (d) => d.mine && !held.has(d.index) && !S.pending.has(d.index);
+  if (!S.digits.some(gone)) return;
+  const shown = S.digits[S.i];
+  const keep = S.digits.map((d) => !gone(d));
+  S.xs = S.xs.filter((_, k) => keep[k]); S.digits = S.digits.filter((_, k) => keep[k]);
+  $('strip').replaceChildren(); S.xs.forEach((_, j) => addStripButton(j));
+  const at = S.digits.indexOf(shown);
+  if (at >= 0) { S.i = at; [...$('strip').children].forEach((b, j) => b.setAttribute('aria-current', String(j === at))); }
+  else show(Math.max(0, S.digits.findIndex((d) => d.label === 4)));
 }
 
 function show(i, { keepPad = false } = {}) {
@@ -309,7 +333,10 @@ function show(i, { keepPad = false } = {}) {
   const x = S.xs[i];
   // A drawing of the visitor's stays on the pad as drawn; a later stroke on another drawing starts a new one.
   S.digits.forEach((d, k) => { if (d.mine && k !== i) d.open = false; });
-  if (!keepPad) { if (S.digits[i].mine) S.digits[i].open = false; paintPadFrom(x); S.padMode = 'example'; }
+  if (!keepPad) {
+    if (S.digits[i].mine) S.digits[i].open = false; paintPadFrom(x); S.padMode = 'example';
+    $('hint').textContent = S.digits[i].mine ? 'Your drawing, as kept. A stroke on the pad starts a new drawing.' : 'Draw a digit on the pad, or pick one below.';
+  }
   [...$('strip').children].forEach((b, j) => b.setAttribute('aria-current', String(j === i)));
   const z = Array.from(forward(S.net, x)), p = softmax(z), a = argmax(z);
   drawSimplex(p);
@@ -376,7 +403,7 @@ async function start() {
   });
   $('harden').addEventListener('click', harden);
   S.keep = startKeep({
-    onRecord: (rec, line) => { restoreDrawings(rec); drawTally(); drawLedger(rec); $('health').textContent = line; document.body.dataset.kept = String(rec.calls.length); },
+    onRecord: (rec, line, state) => { S.rec = state; restoreDrawings(rec); drawTally(); drawLedger(rec); $('health').textContent = line; document.body.dataset.kept = String(rec.calls.length); },
     onSay: (s) => { $('keepnote').textContent = s; },
   });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) S.keep.reread(); });
