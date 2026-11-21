@@ -8,6 +8,7 @@ import { forward, template, argmax } from './mlp.js';
 import { mosaic, certify } from './split.js';
 import { netFromFile, digitFrom, candidates, verdict, tally, softmax } from './call.js';
 import { frameAlong, run } from './plate.js';
+import { reduce } from './pad.js';
 import { el } from '../kit/dom.js';
 
 const $ = (id) => document.getElementById(id);
@@ -25,7 +26,79 @@ const paintInk = (canvas, x) => paint(canvas, (p) => mix(VOID, HI, x[p]));
 const paintSigned = (canvas, t) => { let m = 0; for (const v of t) m = Math.max(m, Math.abs(v)); paint(canvas, (p) => { const s = t[p] / (m || 1); return s >= 0 ? mix(MID, HI, s) : mix(MID, LO, -s); }); };
 const paintCorner = (canvas, signs) => paint(canvas, (p) => (signs[p] > 0 ? mix(MID, HI, 0.55) : mix(MID, LO, 0.55)));
 
-const S = { net: null, digits: [], xs: [], eps: 0.1, i: 0, cands: null, plate: null, picked: null, v: null, tally: { made: 0, right: 0 } };
+const S = { net: null, digits: [], xs: [], eps: 0.1, i: 0, cands: null, plate: null, picked: null, v: null, tally: { made: 0, right: 0 }, padMode: 'example', mine: 0 };
+
+/* The pad: strokes of PAD_LINE px on a PAD px square (MNIST's strokes are about a tenth of a digit's height). Each
+   stroke is read as it is drawn (the answer moves); on release the drawing joins the strip and gets its cells. */
+const PAD = 280, PAD_LINE = 20;
+function padGray() {
+  const d = $('pad').getContext('2d').getImageData(0, 0, PAD, PAD).data;
+  const g = new Float64Array(PAD * PAD);
+  for (let p = 0; p < g.length; p++) g[p] = d[4 * p] / 255;
+  return g;
+}
+function clearPad() {
+  const g = $('pad').getContext('2d'); g.fillStyle = 'rgb(' + VOID.join(',') + ')'; g.fillRect(0, 0, PAD, PAD);
+}
+function paintPadFrom(x) {
+  const small = document.createElement('canvas'); small.width = small.height = 28; paintInk(small, x);
+  clearPad();
+  const g = $('pad').getContext('2d'); g.imageSmoothingEnabled = true; g.drawImage(small, PAD * 0.12, PAD * 0.12, PAD * 0.76, PAD * 0.76);
+}
+function liveRead() {
+  const x = reduce(padGray(), PAD, PAD);
+  if (!x.some((v) => v > 0)) return null;
+  const z = Array.from(forward(S.net, x)), p = softmax(z), a = argmax(z);
+  drawSimplex(p);
+  $('readout').replaceChildren('Read as ', el('b', '', String(a)), ` at ${(100 * p[a]).toFixed(1)}%`);
+  return { x, a };
+}
+function setupPad() {
+  const cv = $('pad'), g = cv.getContext('2d');
+  let down = false, last = null, queued = false;
+  const at = (e) => { const r = cv.getBoundingClientRect(); return [((e.clientX - r.left) * PAD) / r.width, ((e.clientY - r.top) * PAD) / r.height]; };
+  const ink = () => { g.strokeStyle = 'rgb(' + HI.join(',') + ')'; g.lineWidth = PAD_LINE; g.lineCap = 'round'; g.lineJoin = 'round'; };
+  cv.addEventListener('pointerdown', (e) => {
+    if (S.padMode !== 'drawing') { clearPad(); S.padMode = 'drawing'; }
+    down = true; cv.setPointerCapture?.(e.pointerId); last = at(e);
+    ink(); g.beginPath(); g.arc(last[0], last[1], PAD_LINE / 2, 0, 2 * Math.PI); g.fillStyle = g.strokeStyle; g.fill();
+  });
+  cv.addEventListener('pointermove', (e) => {
+    if (!down) return;
+    const q = at(e); ink(); g.beginPath(); g.moveTo(last[0], last[1]); g.lineTo(q[0], q[1]); g.stroke(); last = q;
+    if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; liveRead(); }); }
+  });
+  const end = () => {
+    if (!down) return; down = false;
+    const r = liveRead();
+    if (r) commitDrawing(r.x, r.a);
+  };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  $('clear').addEventListener('click', () => {
+    clearPad(); S.padMode = 'drawing';
+    S.digits.forEach((d) => { if (d.mine) d.open = false; }); // the next stroke starts a new drawing
+    $('hint').textContent = 'The pad is clear. Draw a digit.';
+  });
+}
+function commitDrawing(x, a) {
+  // The visitor's drawing: one entry in the strip, replaced while the same drawing grows stroke by stroke.
+  const last = S.digits.length - 1;
+  const growing = S.digits[last]?.mine && S.digits[last].open;
+  if (growing) { S.xs[last] = x; } else { S.mine += 1; S.xs.push(x); S.digits.push({ index: 'mine-' + S.mine, label: null, mine: true, open: true }); addStripButton(S.xs.length - 1); }
+  const j = S.xs.length - 1;
+  paintInk($('strip').children[j].querySelector('canvas'), x);
+  $('hint').textContent = `Your drawing is read as ${a}. Add strokes, or clear the pad for a new one.`;
+  show(j, { keepPad: true });
+  document.body.dataset.drawn = String(S.mine);
+  document.body.dataset.read = String(a);
+}
+function addStripButton(j) {
+  const b = el('button', ''); b.type = 'button'; b.setAttribute('role', 'listitem');
+  b.setAttribute('aria-label', S.digits[j].mine ? `Your drawing ${S.mine}` : `Drawing ${j + 1}, a ${S.digits[j].label}`);
+  const cv = el('canvas', ''); cv.width = cv.height = 28; paintInk(cv, S.xs[j]); b.append(cv);
+  b.addEventListener('click', () => show(j));
+  $('strip').append(b);
+}
 
 function drawSimplex(p) {
   const root = $('simplex'); root.replaceChildren();
@@ -97,10 +170,12 @@ function drawTally() {
   const t = $('tally'); t.replaceChildren('Calls right: ', el('b', '', String(S.tally.right)), ` of ${S.tally.made}`);
 }
 
-function show(i) {
+function show(i, { keepPad = false } = {}) {
   S.i = i; S.picked = null; S.v = null;
   const x = S.xs[i];
-  paintInk($('pad'), x);
+  // A drawing of the visitor's stays on the pad as drawn; a later stroke on another drawing starts a new one.
+  S.digits.forEach((d, k) => { if (d.mine && k !== i) d.open = false; });
+  if (!keepPad) { if (S.digits[i].mine) S.digits[i].open = false; paintPadFrom(x); S.padMode = 'example'; }
   [...$('strip').children].forEach((b, j) => b.setAttribute('aria-current', String(j === i)));
   const z = Array.from(forward(S.net, x)), p = softmax(z), a = argmax(z);
   drawSimplex(p);
@@ -133,13 +208,8 @@ async function start() {
     document.body.dataset.state = 'error';
     return;
   }
-  const strip = $('strip');
-  S.xs.forEach((x, j) => {
-    const b = el('button', ''); b.type = 'button'; b.setAttribute('role', 'listitem'); b.setAttribute('aria-label', `Drawing ${j + 1}, a ${S.digits[j].label}`);
-    const cv = el('canvas', ''); cv.width = cv.height = 28; paintInk(cv, x); b.append(cv);
-    b.addEventListener('click', () => show(j));
-    strip.append(b);
-  });
+  S.xs.forEach((_, j) => addStripButton(j));
+  setupPad();
   $('next').addEventListener('click', () => show((S.i + 1) % S.xs.length));
   drawTally();
   show(Math.max(0, S.digits.findIndex((d) => d.label === 4)));

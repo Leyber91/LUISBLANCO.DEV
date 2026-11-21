@@ -16,12 +16,13 @@
   <header class="bar"><a href="index.html">Labs</a><span class="mark">THE LAB · L212</span></header>
   <div class="head">
     <h1>Folded Space</h1>
-    <p class="lede">A network trained on handwritten digits cuts the space of all drawings into flat-walled cells. Inside each cell it applies one picture. Pick a drawing, then call which corner of the cube around it changes the answer.</p>
+    <p class="lede">A network trained on handwritten digits cuts the space of all drawings into flat-walled cells. Inside each cell it applies one picture. Draw a digit, then call which corner of the cube around it changes the answer.</p>
   </div>
   <main class="grid">
     <section class="col-a" aria-labelledby="h-a">
       <h2 id="h-a"><span class="idx">A</span>Your drawing</h2>
-      <div class="pad"><canvas id="pad" width="28" height="28" aria-label="The drawing"></canvas></div>
+      <div class="pad"><canvas id="pad" width="280" height="280" aria-label="The drawing pad: draw a digit here"></canvas></div>
+      <div class="padrow"><span class="hint" id="hint">Draw a digit on the pad, or pick one below.</span><button class="clear" id="clear" type="button">Clear</button></div>
       <div class="strip" id="strip" role="list" aria-label="Drawings"></div>
       <svg id="simplex" class="simplex" viewBox="0 0 260 260" role="img" aria-label="The answer as a point among the ten digits"></svg>
       <p class="readout" id="readout">Loading the network.</p>
@@ -49,7 +50,7 @@
       <button class="next" id="next" type="button">Next drawing</button>
     </section>
   </main>
-  <footer class="foot">[REAL] Every number and mark is computed in this page by a network of 784, 64, 64 and 10 neurons trained on MNIST (LeCun, Cortes and Burges). The cells are exact, never sampled. [ILLUSTRATIVE] The drawings are MNIST test digits standing in for your hand until the pad arrives.</footer>
+  <footer class="foot">[REAL] Every number and mark is computed in this page by a network of 784, 64, 64 and 10 neurons trained on MNIST (LeCun, Cortes and Burges). The cells are exact, never sampled. The examples in the strip are MNIST test digits; your own drawing is reduced to 28 by 28 the way MNIST’s were (a 20 pixel box, centred by its centre of mass).</footer>
   <script type="module" src="assets/js/dimensions/folded.js"></script>
 </body>
 </html>
