@@ -28,6 +28,9 @@ export default async function folded(p, { base }) {
   p.check('the next action is a link to the call', rest.next === 'A #call', rest.next);
   p.check('Next and Clear are the kit\u2019s keycap actions', rest.kact === 'kact:true kact:true', rest.kact);
   p.check('the empty ledger says what fills it', /^Harden the network to fill this table/.test(rest.ledgernote || ''), rest.ledgernote);
+  const earlier = await p.ev(`(async () => { const a = document.querySelector('.earlier a'); if (!a) return null; a.scrollIntoView({ block: 'center' }); const r = a.getBoundingClientRect(); const res = await fetch(a.getAttribute('href'), { method: 'HEAD' }); return { href: a.getAttribute('href'), h: r.height, w: r.width, inView: r.top >= 0 && r.bottom <= window.innerHeight && r.left >= 0 && r.right <= window.innerWidth, status: res.status }; })()`);
+  p.check('the seed page stays one link away, in view and a 44 px target', !!earlier && earlier.href === 'md_animation_page.html' && earlier.status === 200 && earlier.inView && earlier.h >= 44, earlier ? `${earlier.href} ${earlier.status}, ${Math.round(earlier.w)} by ${Math.round(earlier.h)} px` : 'no link');
+  await p.ev('window.scrollTo(0, 0)');
   await p.shot('01-at-rest');
 
   const centre = (sel) => p.ev(`(() => { const b = document.querySelector(${JSON.stringify(sel)}); if (!b) return null; b.scrollIntoView({ block: 'center' }); const r = b.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, h: r.height }; })()`);

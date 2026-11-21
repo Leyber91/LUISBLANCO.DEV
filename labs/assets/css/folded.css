@@ -79,6 +79,8 @@ button:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2p
 .tally .tally-marks { vertical-align: middle; margin-left: 10px; }
 /* One global rule (atlas reach.2.2): under reduced motion every animation and transition collapses. */
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+.earlier { padding: 0 32px 14px; margin: 0; }
+.earlier a { color: var(--text); display: inline-block; min-height: 44px; line-height: 44px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--horizon); }
 .foot { padding: 14px 32px 28px; color: var(--text-dim); font-size: 12px; border-top: 1px solid var(--line); }
 @media (max-width: 760px) {
   .bar, .head, .grid, .foot { padding-left: 16px; padding-right: 16px; }
