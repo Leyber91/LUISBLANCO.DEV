@@ -73,8 +73,8 @@ export const CATEGORIES = [
       { id: 'last-witness', title: 'Time-Slip: The Last Witness', status: 'beta',
         blurb: 'Cross a singularity, return ten thousand years late, and speak with the last machine mind awake.' },
       { id: 'alt-reality', title: 'Alternate Reality Scenarios', status: 'beta',
-        href: 'altverse.html',
-        blurb: 'A what-if engine: change one constant and a deterministic pipeline weaves a complete, consistent world — premise, chronology, map and the causal record of how it differs from ours.' },
+        href: 'orthogonal.html',
+        blurb: 'One world where lignin-eating fungi came early and no coal formed: the technologies it grew, each with what it needs, drawn beside Earth's, ending in a street lamp of living light that Earth never built.' },
     ],
   },
   {

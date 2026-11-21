@@ -127,6 +127,8 @@ export const WORLD = Object.freeze({
         { tag: 'REAL', text: 'Real fungal light is dim: a culture of P. stipticus was photographed with an 8-minute exposure.', src: 'rabara2025' },
         // what render_artifact.py does (review H5: it holds no grammar), with the two sources its header gives
         { tag: 'ILLUSTRATIVE', text: 'The lamp, its brightness and its world are invented. Each cap of its culture is a profile swept round an axis, built from the seed in its parameter file.', src: ['desbenoit2004', 'raistrick2023'] },
+        // the lab's core claim is untested (Luis closed box 1 without the core test, 2026-11-21; CORE_TEST.md)
+        { tag: 'ILLUSTRATIVE', text: 'This lineage was written by hand. A test of whether lineages built by the method need their driver more than invented ones is designed and has not run.' },
       ],
     },
     {

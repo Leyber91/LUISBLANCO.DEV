@@ -55,6 +55,7 @@ body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 21
 .head-main { min-width: 0; }
 .head-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: none; }
 .kick-line { margin: 0; font-size: 11px; color: var(--text-dim); }
+.kick-line .earlier { color: var(--text-dim); text-decoration: underline; text-underline-offset: 2px; }
 .back { font-size: 11px; letter-spacing: .06em; text-transform: none; padding: 4px 10px; }
 .title { margin: 2px 0 0; font: italic 400 36px/1.1 'Fraunces', Georgia, serif; color: var(--text-bright); letter-spacing: -.01em; }
 .thesis { margin: 6px 0 0; font-size: 13px; color: var(--text); max-width: 140ch; }
@@ -265,6 +266,7 @@ svg.ord-right text.num { fill: var(--accretion); }
   .head-side { flex-direction: row; justify-content: space-between; align-items: center; align-self: stretch; }
   .title { font-size: 30px; }
   .back { min-height: 44px; display: inline-flex; align-items: center; }
+  .kick-line .earlier { min-height: 44px; display: inline-flex; align-items: center; }
   .drill-btn { min-height: 44px; padding: 6px 12px; }
   .thesis { font-size: 12px; }
   .art { border: 1px solid var(--line); grid-template-rows: auto auto; }
