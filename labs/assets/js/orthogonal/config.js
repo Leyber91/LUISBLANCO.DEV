@@ -28,6 +28,14 @@ export const SOURCES = Object.freeze({
   desbenoit2004: 'Desbenoit, Vanderhaghe, Galin and Grosjean, Eurographics 2004 short paper',
   // the two sources render_artifact.py's header gives for its cap: a profile swept round an axis
   raistrick2023: 'Raistrick et al., Infinigen, CVPR 2023',
+  // fungal light is green: opened 2026-11-21 (PMC6294908, through PubMed): the fungal luciferase "emitted green light
+  // with a maximum at 520 nm and spectrum identical to that of N. nambi mycelium". It is measured on Neonothopanus
+  // nambi. The page says "fungal light", not this culture's: P. stipticus carries the same pathway's genes (luz, hisps,
+  // h3h; Rabara and Xie 2025, full text opened), and Oliveira et al. 2012 (Photochem. Photobiol. Sci. 11, 848; abstract
+  // opened) find one luciferin and luciferase shared by every luminous lineage. uncertain: P. stipticus's own maximum
+  // (525 nm, Lingle, Porter and O'Kane 1992, Mycologia) is known here only through a secondary source, so no number
+  // for this species is printed.
+  kotlobay2018: 'Kotlobay et al., PNAS 115, 12728 (2018)',
 });
 
 /* The lineage's geometry, in CSS px. The lanes are placed as shares of the drawing's width (engine.js lanes): Earth's

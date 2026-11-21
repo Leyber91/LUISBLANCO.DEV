@@ -134,6 +134,12 @@ export default async function orthogonal(p, { base, width, height }) {
     const boxes = await p.ev(`(() => { const a = document.querySelector('.art-view').getBoundingClientRect(), e = document.querySelector('.earth-view').getBoundingClientRect();
       return { a: [Math.round(a.top), Math.round(a.bottom)], e: [Math.round(e.top), Math.round(e.bottom)] }; })()`);
     p.check("the render and Earth's ghost share one box, so the two lamps stand on one ground line", boxes.a[0] === boxes.e[0] && boxes.a[1] === boxes.e[1], JSON.stringify(boxes));
+    // the render's note names its three departures (review H4) and so takes more lines: every caption still ends inside
+    // its figure, the strip they share
+    const capFit = await p.ev(`(() => { const out = {}; for (const sel of ['.art', '.earth']) { const f = document.querySelector(sel), cap = f.querySelector('figcaption');
+      const kids = [...cap.querySelectorAll('*')].filter((c) => c.getClientRects().length);
+      out[sel] = { n: kids.length, content: Math.round(Math.max(...kids.map((c) => c.getBoundingClientRect().bottom))), box: Math.round(f.getBoundingClientRect().bottom), img: Math.round(f.querySelector('.art-view, .earth-view').getBoundingClientRect().width) }; } return out; })()`);
+    p.check("every line of the render's caption and of Earth's ends inside the strip they share", Object.values(capFit).every((c) => c.n >= 3 && c.content <= c.box), JSON.stringify(capFit));
     // the hub's ruling of 2026-11-21 10:49: the plate fits one 1440 x 900 frame with the evidence footer visible
     const fit = await p.ev(`(() => { const r = document.getElementById('reading').getBoundingClientRect(), s = document.querySelector('.sheet').getBoundingClientRect();
       return { reading: Math.round(r.bottom), sheet: Math.round(s.bottom), view: innerHeight, scroll: document.documentElement.scrollHeight }; })()`);

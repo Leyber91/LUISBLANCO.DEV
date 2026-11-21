@@ -99,6 +99,20 @@ export const RENDER_WORDS = Object.freeze([
     holds: ({ world, R }) => Math.abs(world.artifact.frame.ground - R.measure.frame.ground) <= 0.002, fact: "the world's frame.ground within 0.002 of the record's" },
 ]);
 
+/* Every way the render departs from what the culture would look like, as the pipeline declares it (render_artifact.py's
+   header), with the parameter that makes it so and the words that name it. The caption's [ILLUSTRATIVE] note names
+   each departure that holds (review H4: it named the exposure and the sky, and read as the full list, while the glow's
+   colour was stylised too). */
+export const DEPARTURES = Object.freeze([
+  { id: 'exposure', when: ({ P }) => P.exposure.stops > 0, names: (t) => /\blong exposure\b/i.test(t), says: 'exposed up, as a long exposure records a dim source' },
+  { id: 'sky', when: ({ P }) => P.air.sky_ambient > 0, names: (t) => /\bsky\b/i.test(t), says: "the night sky's faint light, which such an exposure records" },
+  { id: 'colour', when: ({ P }) => { const [r, g, b] = P.glow.rgb; return b >= g && g >= r; }, names: (t) => /\bblue-white\b/i.test(t) && /\bgreen\b/i.test(t),
+    says: 'the glow drawn blue-white for the plate where fungal light is green' },
+]);
+
+/* Every departure that holds and the caption's note does not name, as sentences. */
+export const departureFaults = (note, facts) => DEPARTURES.filter((d) => d.when(facts) && !d.names(note)).map((d) => `the caption does not say ${d.says}`);
+
 /* The words of the alt text that name nothing in the image: articles, prepositions, joins, and the verbs and places
    that say where a thing stands. A word that describes what is seen is not one of these: it is a word of
    RENDER_WORDS, with its fact. */

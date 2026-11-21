@@ -88,7 +88,7 @@ import {
   needPath, needsOf, needVerb, pairOf, reading, reasons, stateOf, step, stepBox, stepsOf, strandAt, strandGold, trunk, wrap,
 } from './engine.js';
 import { countLine, fresh, isSalt, Keeper, KINDS, newSalt, RECORD_V, restore, withChoice, withLeave, withPress, withStart, withUndo } from './record.js';
-import { ALT_PLAIN, fallbackLine, provenance, RENDER_WORDS, renderSentences, renderWordFaults, wordsOf } from './render-words.js';
+import { ALT_PLAIN, DEPARTURES, departureFaults, fallbackLine, provenance, RENDER_WORDS, renderSentences, renderWordFaults, wordsOf } from './render-words.js';
 import { WORLD } from './worlds/fungi-early.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -227,7 +227,7 @@ for (const n of WORLD.nodes) {
   for (const e of r.evidence) ok(`${n.id}: a REAL claim names its source or its gap`, e.tag !== 'REAL' || !!(e.source || e.gap));
   ok(`${n.id}: its note has no digit the data did not cite`, !/\d/.test(n.note) || n.evidence.some((e) => e.src));
 }
-ok('every source cited is used', Object.keys(SOURCES).every((k) => WORLD.nodes.some((n) => n.evidence.some((e) => srcsOf(e).includes(k)))));
+ok('every source cited is used', Object.keys(SOURCES).every((k) => WORLD.nodes.some((n) => n.evidence.some((e) => srcsOf(e).includes(k))) || (WORLD.artifact.exposureCites || []).includes(k)));
 ok('an item that cites two sources is read with both, in its order', reading(WORLD, 'lamp').evidence[1].source === `${SOURCES.desbenoit2004}; ${SOURCES.raistrick2023}`, reading(WORLD, 'lamp').evidence[1].source);
 
 // ---------------------------------------------------------------- 6. the pipeline
@@ -1073,6 +1073,19 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   for (const t of [0.2, 59.4, 59.5, 119.5, 179.6, 3599.5]) {
     const [m, s] = minSec(provenance({ ...record, render_s: t }));
     ok(`a render of ${t} s prints ${m} min ${s} s: its time to the second, the seconds under 60`, m * 60 + s === Math.round(t) && s >= 0 && s < 60);
+  }
+  // the caption's note names every way the render departs from the culture, as the pipeline declares them (review H4)
+  const noteFaults = departureFaults(WORLD.artifact.exposure, facts);
+  ok("the caption's note names every departure: the long exposure, the sky, the blue-white glow where fungal light is green", noteFaults.length === 0 && DEPARTURES.length === 3 && DEPARTURES.every((d) => d.when(facts)), noteFaults.join(' | '));
+  const oldNote = 'Drawn as a long exposure records it, sky included; to the eye it is dimmer.';
+  ok('the note the review found (H4) fails: it leaves out the colour', departureFaults(oldNote, facts).length === 1 && /green/.test(departureFaults(oldNote, facts)[0]));
+  const colour = DEPARTURES.find((d) => d.id === 'colour');
+  ok('the colour is a departure while the glow is drawn no greener than blue, and not once it is greener (a hair either side)',
+    colour.when({ ...facts, P: { ...params, glow: { ...params.glow, rgb: [0.7, 0.84, 0.84] } } }) && !colour.when({ ...facts, P: { ...params, glow: { ...params.glow, rgb: [0.7, 0.84, 0.8399] } } }));
+  for (const k of WORLD.artifact.exposureCites) {
+    const s = SOURCES[k] || '';
+    const author = s.split(',')[0], year = (s.match(/\((\d{4})\)/) || [])[1], venue = (s.split(',')[1] || '').trim().split(' ')[0];
+    ok(`the caption cites ${k} by its first author, year and venue`, !!SOURCES[k] && WORLD.artifact.exposure.includes(`(${author} ${year}, ${venue})`), `${author} ${year}, ${venue}`);
   }
   ok('the fallback names the parameter file it draws from, tagged, or says it did not load', fallbackLine('a.json', true).includes('a.json') && /\[ILLUSTRATIVE\]/.test(fallbackLine('a.json', true)) && /nor its parameters \(a\.json\)/.test(fallbackLine('a.json', false)));
 }

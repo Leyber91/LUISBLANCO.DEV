@@ -29,7 +29,7 @@ body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 21
   /* the row of drawings takes what the viewport leaves after the header, the exercise's bar (34 px), the evidence
      footer and the margins, so the footer is in the frame at 1440 x 900 */
   --cols-h: clamp(440px, calc(100vh - 318px), 760px);
-  --strip: 118px;
+  --strip: 168px;   /* the caption strip: the render's note names all three of its departures (review H4); the drive checks it fits */
   --art-aspect: 0.75;   /* the render's width over its height (900 x 1200) */
   position: relative; z-index: 1;
   margin: 14px 24px; padding: 2px 16px 10px; border: 1px solid var(--line);

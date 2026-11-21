@@ -41,9 +41,12 @@ export const WORLD = Object.freeze({
     record: 'assets/data/orthogonal/renders/mycelial-lamp.render.json',
     title: 'The mycelial street lamp',
     line: "This world's answer to light at night",
-    // [ILLUSTRATIVE] said beside the render: the scene is exposed up, as a long exposure records a dim source, and an
-    // exposure that long records the night sky's faint light too (air.sky_ambient in the parameter file)
-    exposure: 'Drawn as a long exposure records it, sky included; to the eye it is dimmer.',
+    // [ILLUSTRATIVE] said beside the render: every way it departs from what the culture would look like, as the
+    // pipeline declares them (render-words.js DEPARTURES, tests.mjs section 18). The scene is exposed up, as a long
+    // exposure records a dim source; an exposure that long records the night sky's faint light too (air.sky_ambient);
+    // and the glow is drawn blue-white for the plate's palette where fungal light is green (review H4)
+    exposure: "Drawn as a long exposure, sky included, in the plate's blue-white; to the eye fungal light is dimmer, and green (Kotlobay et al. 2018, PNAS).",
+    exposureCites: ['kotlobay2018'],
     // what the render shows, read from the image (renders/mycelial-lamp.webp, 900 x 1200) and held word by word to the
     // parameter file, the record and the pipeline (render-words.js, tests.mjs section 18): no word for a thing the
     // render does not draw, such as the ink lines an earlier alt text named (review C1)
