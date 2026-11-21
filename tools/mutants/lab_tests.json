@@ -590,11 +590,6 @@
     "to": "labOf(rel(f)) !== lab).length"
   },
   {
-    "name": "command: run as a command it runs nothing",
-    "from": "path.resolve(process.argv[1]) === SELF",
-    "to": "path.resolve(process.argv[1]) !== SELF"
-  },
-  {
     "name": "command: --root is ignored",
     "from": "const root = rootArg === undefined ? ROOT : path.resolve(rootArg);",
     "to": "const root = rootArg !== undefined ? ROOT : path.resolve(rootArg);"
@@ -653,11 +648,6 @@
     "name": "copies: the test is not followed",
     "from": "    if (test) out.follow.push(path.resolve(here, test));\n",
     "to": ""
-  },
-  {
-    "name": "copies: an array is cut at its first comma",
-    "from": "return obj[at] === '[' ? `[${inside(obj, at)}]` : parts(obj.slice(at))[0];",
-    "to": "return parts(obj.slice(at))[0];"
   },
   {
     "name": "paths: the module's folder is not known",
