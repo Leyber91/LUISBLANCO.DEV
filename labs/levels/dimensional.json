@@ -1,311 +1,344 @@
 {
   "id": "dimensional",
-  "title": "Dimensional Test",
-  "page": "md_animation_page.html",
-  "thesis": "The visitor is walked from a point to the tesseract, then turns, slices and projects every regular polytope up to 10D and the Hopf-fibred 3-sphere by hand, reads each rotation as an element of SO(n) with its generator in so(n), and hears the Witness name which hidden axis is bending the shadow and why.",
+  "title": "Folded Space",
+  "page": "folded.html",
+  "thesis": "At level 10 the visitor's own drawing goes into a real ReLU network running in their tab, and the lab shows what no sampled picture can: the exact flat-walled cells around the drawing, each one certified, with their count; the one picture the network applies inside the drawing's cell, which is also the attack; the corner of the cube of small changes that flips the answer, called by the visitor before the engine steps it; and a network the visitor hardens on their own corners until its walls move and that picture turns toward the strokes of the rival digit. Every claim is judged by exact geometry and by measured numbers set beside published results (Montufar et al., NeurIPS 2014; Hanin and Rolnick, ICML 2019; Goodfellow, Shlens and Szegedy, ICLR 2015; Tsipras et al., ICLR 2019), the visitor keeps their drawings, calls and flip ledger, and the page says plainly that exact cells belong to ReLU networks and blur into bands under smooth activations.",
+  "bindings_ref": "The bindings (canon, 12 units fs-u1 to fs-u12, 19 fiction entries fs-f1 to fs-f19, 5 known setup failures fs-k1 to fs-k5) are declared in the lab's private plan (its bindings.json of 2026-11-21). Each axis lists the units and fiction entries its rungs test; rung 5 of each axis is its share of the fiction inventory at the depicted detail.",
   "axes": [
     {
-      "id": "polytope-catalogue",
-      "name": "Polytope catalogue",
+      "id": "cell-geometry",
+      "name": "Exactness of the cell geometry",
       "frame": "model",
-      "metric": "Which regular polytopes the page builds, over which dimensions, with correct element counts: count of families and exceptional polytopes selectable on the page, read from the polytope picker and the face-count readout, and from the generator modules in the code.",
+      "units": ["fs-u1", "fs-u2", "fs-u8"],
+      "fiction": ["fs-f3", "fs-f16", "fs-f17"],
+      "metric": "Certificate failures per slice (target 0); the relative error of the cells' summed area against the slice's square; agreement of the first layer's count with the line-arrangement formula; the share of shared edges whose two cells differ in exactly one neuron (target 100%); the dimensions of slice computed exactly (segment, plane, 3-flat); and from rung 7 the census's agreement with published region counts.",
+      "how_checked": "Run node tools/lab_tests.mjs dimensions and read the tests of the mosaic; open the page on every example and on 3 drawings of your own and read the count and the certificate line; read the mosaic module for any sampled grid on the path to the drawn cells; from rung 7 run the committed census script and open each cited paper at the figure or theorem the page names.",
       "ladder": [
-        "No polytope is built; nothing geometric is generated.",
-        "One fixed figure is drawn from hard-coded vertex coordinates in a single dimension.",
-        "The n-cube is generated from the corners {-1,+1}^n, edges joining corners that differ in one coordinate, for 1D to 4D.",
-        "The n-cube runs from 1D to 10D, and the panel shows its vertex, edge, face, cell and facet counts computed from C(n,k)·2^(n−k).",
-        "The n-simplex is generated for 1D to 10D and selectable, with its counts C(n+1,k+1) shown.",
-        "The n-orthoplex (cross-polytope) is generated for 2D to 10D and selectable, so all three regular families of every dimension are selectable, each with its f-vector shown (orthoplex k-faces 2^(k+1)·C(n,k+1)).",
-        "The dodecahedron {5,3} (20, 30, 12) and the icosahedron {3,5} (12, 30, 20) are added: all five Platonic solids are present.",
-        "The 24-cell {3,4,3} (24, 96, 96, 24), the 120-cell {5,3,3} (600, 1200, 720, 120) and the 600-cell {3,3,5} (120, 720, 1200, 600) are added: all six regular convex 4-polytopes are present.",
-        "A unit test checks every f-vector shown against Coxeter, Regular Polytopes (3rd ed., Dover, 1973), and the page prints the alternating sum Σ(−1)^k f_k (k = 0…n−1) for the current figure beside 1 − (−1)^n, equal for every convex figure.",
-        "Duality: one control carries each polytope into its dual by continuous truncation over at least 1 s (cube through cuboctahedron to octahedron; 120-cell to 600-cell; 24-cell to itself), and the shown f-vector reverses.",
-        "The star polytopes complete the set: the 4 Kepler–Poinsot solids and the 10 Schläfli–Hess 4-polytopes, so every regular polytope, convex and star, from 3D to 10D is in the catalogue (5 + 4 in 3D, 6 + 10 in 4D, 3 in each dimension from 5D up): the regular set of Robert Webb's polytope program Stella4D, here in the browser and up to 10D."
+        "No cell is computed: the page shows the network's answer alone, or nothing.",
+        "At least sampled cells: points on a grid of a plane are coloured by their activation pattern or their answer, the method of TensorFlow Playground.",
+        "Exact cells on a segment: a segment between two inputs (two drawings, or a drawing and a stepped copy of it) is split at every point where a hidden neuron's pre-activation changes sign, found exactly (by solving each neuron's affine pre-activation along the segment, or by clipping the segment to exactly computed convex cells) with no sampling along it, and the number of walls crossed is printed.",
+        "Exact cells on a plane through three inputs: the square around them is subdivided neuron by neuron and layer by layer into convex polygons (Hanin and Rolnick, ICML 2019), every hidden layer is cut, the integer count of cells is printed, and no sampled grid lies on the path from the network to the drawn cells.",
+        "The mosaic proves itself: on every plane the page draws, a vertex certificate (each neuron's pre-activation has its cell's sign at every vertex of the cell) runs and its result is printed on the page beside the count, and a node test on at least 6 planes asserts 0 certificate failures, cell areas summing to the square within 1e-9 relative, unique activation patterns, and a first-layer count equal to 1 plus the walls crossing the square plus their crossings inside it.",
+        "Fiction made real (fs-f3, fs-f16, fs-f17): the plane runs through any three drawings the visitor chooses, their own or the examples; a node test asserts that every two cells sharing an edge of positive length differ in exactly one neuron, the one whose wall it is; the census prints the count per slice, per layer and per training step beside the published bounds for the network's sizes with the slice's dimension as the input dimension (the upper bound of Serra, Tjandraatmadja and Ramalingam, ICML 2018; the lower bound on the maximum of Montufar et al., NeurIPS 2014; each formula on the page) and the published observation (Hanin and Rolnick, ICML 2019); and a ray from a drawing outward is followed exactly, wall by wall, to its last unbounded cell, with the top confidence printed at each wall and at 10 and 100 times the last wall's distance (Hein, Andriushchenko and Bitterwolf, CVPR 2019).",
+        "Slices up to dimension 3: a 3-flat through four inputs is cut exactly into convex polyhedra with the same certificate, unique patterns, volumes summing to the cube within 1e-9 relative and a printed count, and a test shows that the 3-flat's cells met by the plate's plane are the plate's cells.",
+        "The census reproduces a published result: over at least 100 planes through MNIST test digits, for the shipped network and for networks of the same total neuron count at depths 1 to 4 trained by the committed script, the page plots cells per unit area against the number of neurons and the depth, quotes the growth Hanin and Rolnick (ICML 2019) predict for a 2D slice with its theorem or figure number, and the measured counts follow it within a tolerance committed before the counts were made (a census that only states that it misses does not hold this rung); the counts and the script are committed.",
+        "Exact in exact arithmetic: a second implementation in rational arithmetic (BigInt fractions, each weight read as its exact binary value) recomputes the mosaic of at least 3 planes of the shipped network and matches every cell's activation pattern and vertex count, in a node test.",
+        "Checked against an independent tool: SplineCam (Humayun et al., CVPR 2023), or another published exact-region tool, run offline on the shipped network and at least 3 of the page's planes, gives the same cell count and patterns; the comparison, the tool's version and the date are committed and linked from the page.",
+        "Reference grade: certified exact slices of dimension 1 to 3 through any inputs, for every network the page holds (shipped, hardened, the visitor's lineage, the dial's), compute in a worker in under 100 ms per plane at 1440 px on the stated machine with rungs 4 to 9 passing, and at least 5 independent pages (courses, papers or articles owned by neither Luis nor the builders) cite the lab for exact linear regions, each verified by the rater at its URL."
       ],
       "levels": {
         "G0": {
           "level": 3,
-          "evidence": "n_dimensional_cube.js HyperCube builds only the n-cube ({-1,+1}^n, edges by one-bit XOR) for CONFIG.minDim 1 to maxDim 10; Console._syncReadout shows vertices, edges, faces, cells, facets from faceCount = C(n,k)·2^(n−k) (screenshot at 4D: 16 / 32 / 24 / 8 / 8). No simplex, orthoplex or exceptional polytope exists, so rung 4 fails."
+          "evidence": "Read at 9942268 (local branch labs/folded, not live; no browser). Rung 2: plate.js run() clips the step from the drawing to its corner to each convex cell (Cyrus and Beck) and the title block prints Walls crossed. Rung 3: split.js mosaic() subdivides the square neuron by neuron through both hidden layers on the plane that plate.js frameAlong() lays through the drawing, its template corner and a third digit, and the title block prints the count with 'exact' (329 on the example 4 in the drives); no grid is on that path. Rung 4 fails: folded.js computes certify() into S.plate.certFailures and writes it only to document.body.dataset.cert, so the page never prints it; engine.test.mjs sections 5 and 6b check the formula, the areas, unique patterns and the certificate on random planes of random networks. Rung 5 would also fail: the visitor does not choose the three drawings (the third is the first example of the rival class, folded.js line 285), and there is no census and no ray."
         }
       }
     },
     {
-      "id": "rotation-planes",
-      "name": "so(n) rotation planes",
+      "id": "corner-truth",
+      "name": "The corner's truth against the network",
       "frame": "model",
-      "metric": "Which elements of SO(n) the visitor can produce and read: planes reachable by hand (of C(n,2)), rotation classes offered (simple, double, isoclinic, arbitrary), and whether the composed matrix and its invariant planes are computed and shown; checked in PlaneSet/Witness code and on the panel.",
+      "units": ["fs-u3", "fs-u4", "fs-u9", "fs-u10"],
+      "fiction": ["fs-f4", "fs-f6", "fs-f13", "fs-f14"],
+      "metric": "Agreement of the template with central finite differences (worst error, at most 1e-6); the share of statements on the page about a corner that a forward pass of the exact stepped input backs (target 100%); the threat shapes and input sizes the corner is computed for; and from rung 6 the gap between the one-step corner and stronger searches, in units of full ink.",
+      "how_checked": "Run the lab's tests; make 10 calls over the examples and 3 drawings of your own, and recompute each claimed reading in node from the stepped input; read the template and step code; set every sentence the page says about a corner beside what the code computes.",
       "ladder": [
-        "Nothing rotates through a hidden axis.",
-        "One fixed rotation in a single hidden plane (e.g. X–W) plays on a loop.",
-        "The figure is turned by Givens rotations in coordinate planes, and the planes pairing a visible axis with a hidden one can be spun.",
-        "All C(n,2) coordinate planes are built for each n with their count shown, and a dial sets one plane's angle in degrees.",
-        "Simple, double (two disjoint planes) and isoclinic presets are offered, the isoclinic one turning all ⌊n/2⌋ mutually disjoint planes at one angular speed (2 in 4D and 5D, 3 in 6D and 7D, 4 in 8D and 9D, 5 in 10D).",
-        "Every one of the C(n,2) planes, hidden-by-hidden planes such as W–V included, can be selected and turned by hand.",
-        "The composed n×n rotation matrix is shown live to 3 decimals, with on-page readouts of max|R·Rᵀ − I| and |det R − 1|, both under 1e-9.",
-        "The current rotation is decomposed into its ⌊n/2⌋ invariant planes and angles (the canonical block form of an element of SO(n)) and listed live; in 4D, starting from the identity, setting X–W to 30° and Y–Z to 50° under Hold lists exactly those two planes at 30° and 50° (to 0.1°).",
-        "Arbitrary planes, not only coordinate ones: a rotation is set by a bivector, computed by the exponential map, with its generator shown as an antisymmetric matrix in so(n).",
-        "In 4D, the Iso preset runs either left- or right-isoclinic, labelled as such, and the current rotation is shown live as the unit quaternion pair (q_L, q_R) acting by x ↦ q_L·x·q_R.",
-        "A rotation can be entered as a bivector, a matrix or (in 4D) a quaternion pair, the other two forms update in the same frame, and a test confirms round-trip error under 1e-9 over 1000 random rotations in every n up to 10."
+        "Nothing changes a drawing: no step, corner or attack is computed.",
+        "At least a fixed adversarial picture is shown, a perturbed digit stored as an image.",
+        "A step is computed in the page: the drawing moved by eps per pixel along a sign pattern, clipped to the pixel range 0 to 1, and the network's answer on the stepped drawing printed.",
+        "The template is the cell's map: for the answer a and its rival r, the gradient of z_r minus z_a inside the drawing's cell is computed in closed form from the cell's activation pattern, drawn as a 28 by 28 image in light and dark for its sign, and a node test matches it against central finite differences within 1e-6.",
+        "Every statement about what a corner does (it changes the answer, or keeps it) is the result of a forward pass on that exact stepped and clipped input; the page calls the template's sign the first-order corner of the drawing's cell and says a step can leave the cell; and the smallest step along that sign that flips the answer is printed with its unit and the search's resolution, and a node test over at least 20 drawings finds, by a scan of the same range at that resolution, no flipping step below the printed one (a bisection alone assumes the answer flips once along the ray).",
+        "Fiction made real (fs-f4, fs-f6, fs-f13, fs-f14): during the step the template shown is replaced at each wall crossed by the template of the cell entered, and a test checks each replacement against the closed form for that cell; the answer flips at the crossing the page marks, checked by a forward pass on each side; the visitor chooses the threat shape (the cube, the cross-polytope and the sphere, each at a radius the page states), each with its worst first-order direction computed (the template's sign for the cube, its single largest pixel for the cross-polytope, the normalised template for the sphere), each shape's first wall found exactly along its own direction with its distance printed, and drawn on a plane laid through the drawing and that direction (the three directions do not share one plane); and the dial runs the same network family trained on 16, 64, 256 and 784 pixels, printing for each the median smallest flipping step over its test digits.",
+        "Stronger than one step: projected gradient descent inside the cube (Madry et al., ICLR 2018), its step count and step size stated, runs beside the one-step corner, and over the examples and the visitor's drawings the page prints how many it flips that the one-step corner does not.",
+        "The linear account measured: across the dial's 4 input sizes, over at least 100 test digits each, the median smallest flipping step and the template's L1 norm are printed, and a test asserts that the step falls as the size grows, the relation Goodfellow, Shlens and Szegedy (ICLR 2015) give for a linear model (a change of eps per input moves the score by eps times the L1 norm of the weights).",
+        "The true worst corner on a small network: on the 16-pixel dial network, the maximum of z_r minus z_a over the whole cube is found exactly (by enumerating the cells the cube meets, or by a mixed-integer program), and for at least 20 drawings the page prints how far the template's corner falls below it.",
+        "A universal corner: one sign pattern computed in the page from the templates of many drawings (universal perturbations, Moosavi-Dezfooli et al., CVPR 2017) is applied at the page's eps to at least 1,000 test digits, and the share whose answer it changes is printed for the shipped and the hardened network.",
+        "Reference grade: a committed suite of at least 1,000 random drawings, eps values and threat shapes finds no mismatch between any corner claim the page makes and a forward pass or an exact search, on every network the page holds, and at least 5 independent pages cite the lab for adversarial corners, each verified by the rater at its URL."
       ],
       "levels": {
         "G0": {
           "level": 3,
-          "evidence": "PlaneSet.rebuild builds all C(n,2) planes and Console._syncReadout shows planes = binomial(n,2) (6 at 4D in the screenshot); HyperCube.project applies the Givens rotations; the Plane Dial and the ±180° scrub set one angle in degrees. Rung 4 fails: PRESETS.iso spins the selected plane and one disjointOf partner only, so at 6D–10D it turns 2 of the 3–5 disjoint planes and is not isoclinic, while the button reads Iso at every n. Rung 5 would also fail: selectorPlanes keeps only !p.hidden || p.i < PLANE.hiddenFrom, so W–V cannot be chosen."
+          "evidence": "Read at 9942268 (not live). Rung 2: call.js stepTo() moves every pixel by eps 0.1 and clips to 0 and 1, and candidates() reads each stepped input. Rung 3: mlp.js template() carries W_L[a] minus W_L[b] back through the cell's masks, folded.js paintSigned() draws it at 28 by 28, and engine.test.mjs section 2 matches it to central differences within 1e-6 (absolute, on synthetic networks). Rung 4 fails on its last clause: every 'read as' comes from argmax(forward()) on the stepped input, and the template note says the sign is the corner that changes the score most 'to first order; a step can cross walls', but call.js smallestFlip() bisects on 0 to 0.5 to a resolution of 0.5/4096 and the ledger prints its step ('Smallest step that changes it, in full ink') with no resolution."
         }
       }
     },
     {
-      "id": "flatland-slicing",
-      "name": "Flatland slicing",
-      "frame": "graphics",
-      "metric": "Whether a hyperplane cross-section of the figure is computed exactly and shown beside the projection: slicing normals offered, polytopes and dimensions covered, sweep and volume readout; checked by moving the slice control and reading the slice code and its tests.",
-      "ladder": [
-        "No slicing: only the projected shadow of the figure is shown.",
-        "A static picture or a sentence describes a cross-section of the tesseract.",
-        "One live slice: the tesseract cut by the hyperplane W = h, h on a slider, computed from the points where its edges cross the hyperplane and drawn as points.",
-        "The slice is drawn as a closed solid (convex hull of the crossing points, faces filled) and stays exact while the figure turns in any hidden plane.",
-        "The slice view sits beside the projection view, and the points where the hyperplane cuts the figure's edges are marked on the projected edges (the cross-section outlined inside the shadow), both views updating in the same frame.",
-        "Slicing works for every polytope in the catalogue and every n from 2 to 10 (an (n−1)-dimensional slice is itself projected to 3D), and the slice's vertex count is shown.",
-        "A sweep button moves h from first contact to last contact in one timed pass so the slice grows and shrinks (the sphere passing through Flatland, Abbott, Flatland, 1884), and under reduced motion the sweep steps through 7 fixed h values, one per click, instead of animating.",
-        "The slice's (n−1)-volume against h is plotted live with a numeric readout to 6 decimals, and a unit test asserts it to 1e-6 for n = 2…10 against two analytic profiles: the constant 2^(n−1) for an axis-aligned cut of the n-cube at |h| < 1, and 2^(n−1)·√n·f_n((n + h√n)/2) for the vertex-first cut, f_n being the Irwin–Hall density of a sum of n uniform [0,1] variables.",
-        "The cutting normal is free (any unit vector) with vertex-first, edge-first, face-first and cell-first presets; the vertex-first tesseract sweep shows tetrahedron, truncated tetrahedron, octahedron in that order, each shape named on screen.",
-        "A Flatland ladder view runs the same sweep one dimension down (a cube through a plane, as 2D slices) beside the 4D sweep with the same controls, so the analogy is literal.",
-        "Cuts by an affine flat of any codimension from 1 to n−2 (a 2-flat through the tesseract gives a polygon), each cut printing its own f-vector live: slicing breadth past the reference 4D slicer, 4D Toys (Marc ten Bosch, 2017), whose slices are 3D hyperplane cuts of 4D objects."
-      ],
-      "levels": {
-        "G0": {
-          "level": 0,
-          "evidence": "No slicing code anywhere in labs/assets/js/dimensional_mania/ (grep for slice finds only Array.slice); Renderer.buildCube draws the projected edges and vertex points and nothing else."
-        }
-      }
-    },
-    {
-      "id": "curved-fibred-spaces",
-      "name": "Curved and fibred spaces",
+      "id": "hardening-measured",
+      "name": "Hardening measured against published results",
       "frame": "model",
-      "metric": "Which curved manifolds beyond flat R^n are modelled: the 3-sphere, stereographic projection, the Hopf fibration and its tori, inside views of S^3; checked by the named modes on the page, fibre counts drawn, and tests in the code.",
+      "units": ["fs-u5", "fs-u6", "fs-u7"],
+      "fiction": ["fs-f7", "fs-f8", "fs-f9"],
+      "metric": "The rise of the drawing's cell template's cosine with the mean rival digit minus the mean answer digit, against a control run on clean digits only (the kill test's measure); clean accuracy and accuracy under the fast gradient sign step on a held set, before and after; the smallest flipping step before and after, in full ink; and from rung 7 each figure's distance from the published value it is set beside.",
+      "how_checked": "Press Harden on 3 drawings and read the numbers; read the worker and its objective; run the lab's tests; from rung 7 run the committed offline scripts and open each cited paper at the table or section the page names.",
       "ladder": [
-        "Only flat figures in R^n; no curved space or fibration appears.",
-        "A sentence or static figure on the page names the 3-sphere or the Hopf fibration and says what it is.",
-        "Under the isoclinic preset each 4-cube vertex trail closes into a full loop (trail length at least one period), and the page names the loops as great circles of the 3-sphere, fibres of the Hopf fibration (Hopf, 1931).",
-        "A 3-sphere mode maps points of S^3 to R^3 by stereographic projection with the pole marked; great circles through the pole render as straight lines, all others as circles.",
-        "The Hopf map is drawn: base points chosen with latitude and longitude sliders or from a preset list each draw their fibre circle in S^3 after stereographic projection, at least 8 fibres at once.",
-        "Fibres over a circle of latitude are drawn as a family of at least 24 forming a torus, and for any two fibres the visitor picks, the linking number is computed by the Gauss linking integral over their drawn polylines and printed to 2 decimals (reading 1.00 ± 0.01).",
-        "The base 2-sphere is its own linked view: dragging a point on it moves its fibre live, and each fibre takes the colour of its base point.",
-        "The vertices of the regular 4-polytopes on S^3 are split into Hopf fibres by code (the 24-cell into 4 great hexagons, the 600-cell into 12 great decagons), drawn, and checked by a test.",
-        "An inside view of S^3 (radius 1): the camera sits in the 3-sphere and a marker placed 1 rad behind it is visible straight ahead at geodesic distance 2π − 1, in the manner of Jeff Weeks' program Curved Spaces.",
-        "The orbits of the lab's isoclinic rotation in the polytope view are shown identical to the Hopf fibres of the matching base points, by a test to 1e-9 and a button that overlays one on the other.",
-        "Fibres over points, over circles and over the whole base sphere, and nested tori over a family of latitudes, as in the fibration chapters (7 and 8) of the film Dimensions (Leys, Ghys, Alvarez, 2008), all interactive, with at least 1000 fibres at 60 fps while the base is dragged, at 1440x900 in Chrome with DevTools CPU throttling at 4x slowdown."
-      ],
-      "levels": {
-        "G0": {
-          "level": 0,
-          "evidence": "Hopf appears only in code comments (constants.js ISO and TRAIL, TrailField.js, PlaneSet.js, Witness.js); no page text, meta description or hub blurb names S^3 or a fibration, and there is no stereographic projection. The vertex trails are credited under projection-views."
-        }
-      }
-    },
-    {
-      "id": "projection-views",
-      "name": "Shadow projection views",
-      "frame": "graphics",
-      "metric": "How the hidden dimensions become visible: projection methods available, number of linked views on screen at once, and what of the figure is drawn (edges, depth colour, axis star, cells, tubes); counted on the page at 1440 px and in Renderer/HyperCube.project.",
-      "ladder": [
-        "Nothing is drawn on the canvas.",
-        "A static image of a projected tesseract.",
-        "One live 3D view: the n-cube's edges drawn as lines after a perspective fold from nD to 3D, with camera orbit and zoom.",
-        "Perspective and orthographic folds are both available, and each vertex is coloured by its distance into the hidden axes (cold in our 3-space, warm deep in a hidden axis).",
-        "Vertex trails trace each vertex's shadow path for figures of 64 vertices or fewer, and an axis star draws where each of the n unit axes lands after rotation and projection, labelled X, Y, Z, W, V ...",
-        "Any facet can be picked (e.g. one of the 8 cubes of the tesseract) and stays highlighted in the shadow while the figure turns.",
-        "A 2D Coxeter-plane (Petrie polygon) orthogonal projection sits beside the 3D shadow, both updating in the same frame, showing the n-cube's 2n-fold symmetry at every n up to 10.",
-        "A Schlegel diagram (projection from just outside one facet) and a stereographic mode (edges on the circumsphere drawn as circular arcs) are offered.",
-        "Edges render as lit tubes and 2-faces as translucent fills, with tube thickness falling off with hidden-axis depth as a depth cue for the hidden axes.",
-        "Switching projection morphs the figure continuously over at least 0.8 s (perspective to Schlegel to stereographic) instead of cutting, and the camera reframes the figure at each step.",
-        "Five linked views on screen at once (perspective, orthographic, Schlegel, stereographic, Coxeter plane): picking a facet in any one highlights it in all five within the same frame."
+        "The network never changes on the page.",
+        "At least a hardened state is shown, for example by swapping in a second precomputed network file.",
+        "A copy of the network trains in the page: gradient steps on digits in the visitor's tab, with the step count shown while it runs.",
+        "Adversarial training in the tab: each step trains on the fast gradient sign corners of its batch with the objective of Goodfellow, Shlens and Szegedy (ICLR 2015, section 6), its weight alpha and its eps stated in the code, in a worker so the page keeps responding, and seeded so the same drawings give the same hardened network.",
+        "Measured before and after: after each hardening the page prints, for the drawing on the pad, the smallest flipping step before and after (the flip ledger row), and the network's clean accuracy and its accuracy under the fast gradient sign step at the page's eps, each before and after, on a held set of at least 1,000 MNIST test digits that hardening did not use.",
+        "Fiction made real (fs-f7, fs-f8, fs-f9): hardening trains on the visitor's own corners mixed with the shipped digits for a few hundred steps in the background; the mosaic of the current plane is redrawn at least every 50 steps while it trains, so the walls are seen to move; the template after hardening is measured by its cosine with the mean rival digit minus the mean answer digit, printed before and after beside a control run of the same steps on clean digits only, with the rise over the control printed, and over the rater's 3 hardened drawings the mean rise over the control is at least 0.05 (the kill test's condition A; a rise printed at or below it shows the template did not turn toward strokes, fs-f8); and the flip ledger keeps one row per drawing hardened, with its smallest flipping step before and after.",
+        "The cost of defence (Tsipras et al., ICLR 2019): the visitor's earlier drawings that the hardened network now reads differently are listed with both readings, and the change in clean accuracy on the held set is printed beside the change in robust accuracy, each with its sign.",
+        "Set beside Goodfellow, Shlens and Szegedy (ICLR 2015, section 6): a committed offline run of the page's adversarial training on the 60,000 MNIST training digits reports the error on fast gradient sign examples at the paper's eps, before and after, and the page prints both beside the values the paper reports for its own network, naming the difference in architecture.",
+        "Set beside Madry et al. (ICLR 2018): a committed offline run of projected-gradient adversarial training at eps 0.3 reports accuracy under that attack on the 10,000 MNIST test digits, printed beside the paper's MNIST value with its table number.",
+        "Robust templates across every pair: for the shipped and the hardened network, the mean cosine of the cell template with the class-mean difference is computed for all 45 digit pairs over at least 100 drawings each and drawn as a 10 by 10 matrix, testing on the whole set Tsipras et al.'s (ICLR 2019) observation that robust models' input gradients align with perceptible features.",
+        "Reference grade: the in-tab hardening and the committed offline runs agree (the in-tab rise of rung 5 within a stated tolerance of the offline run on the same data and seed), every hardening figure on the page carries its seed, data, step count and source, and at least 5 independent pages cite the lab for adversarial training, each verified by the rater at its URL."
       ],
       "levels": {
         "G0": {
           "level": 3,
-          "evidence": "HyperCube.project folds nD to 3D by perspective division axis by axis or orthographically (PROJECTION auto / perspective / orthographic); vertex colour ramps WIRE.cold to WIRE.warm with hidden-axis depth. Rung 4 fails: TrailField draws trails up to TRAIL.maxVerts 64, but no projected-axis star exists."
+          "evidence": "Read at 9942268 (not live). Rungs 2 and 3: harden.worker.js trains a copy in a module worker with Adam on 0.5 CE(x) + 0.5 CE(fgsm(x)) at the page's eps (Goodfellow, Shlens and Szegedy 2015, alpha 0.5, in its header and mlp.js), posts the weights every 50 steps (the note reads 'Step n of 300'), and is seeded by fnv1a of the drawing. Rung 4 fails: the ledger row before and after is printed (0.042 and over 0.5 on the example 4 in the drives), but no clean or robust accuracy on a held set is computed or printed. Rung 5 would also fail on the control run and the template's cosine, which exist only in the kill test."
         }
       }
     },
     {
-      "id": "instrument-style",
-      "name": "Instrument design language",
-      "frame": "style",
-      "metric": "The craft of the page's design language: tokens and faces used, colour discipline, layout without collisions, type floor, math typography, opening choreography and contrast; checked from screenshots at 400, 1440 and 2560 px, dimensions.css, computed styles in DevTools, and a contrast tool.",
-      "ladder": [
-        "Unstyled browser defaults.",
-        "A dark background and a canvas, with controls in browser-default style.",
-        "The site tokens (tokens.css) are consumed for colour, spacing and type (the token face IBM Plex Mono through --font-display, --font-body and --font-mono), and native control chrome (buttons, range inputs) is replaced.",
-        "In dimensions.css every colour is a tokens.css variable (black excepted): the horizon ink-grey for structure, gold (the --accretion family) only for active states, control handles and live values, and no other hue.",
-        "At 1440x900 the panel, Shadow Ledger, caption, title and hint each keep a fixed place with no overlap, and the panel scrolls to its last control.",
-        "Type floor: no text on the page renders below 11 px at 1440 px, read as computed font-size in DevTools (the 0.66rem .dx-gloss and every --t-micro label included).",
-        "Mathematical type: axis letters, plane labels and formulas are set in a math face (KaTeX or STIX) with true minus signs and subscripts, distinct from the UI mono.",
-        "A choreographed opening: on first load the figure grows from a point through 1D, 2D and 3D into 4D in under 4 s, skippable, with the element counts ticking in step.",
-        "All text meets a contrast ratio of at least 4.5:1 against its background, the faint labels included, checked with a contrast tool.",
-        "One mark per hidden axis (W, V, U … Q: its letter plus a dash pattern of its own) is used identically on the figure's axis star, the ledger rows, the plane chips and any matrix, so a rater can follow one axis across all four, with no hue outside tokens.css and gold no longer used for depth in the figure, only for active state.",
-        "A style lint in the repo (one command) fails on any colour, font family or font size in dimensions.css or the lab's modules that tokens.css does not declare, and it passes; every rung above holds at 400, 1440 and 2560 px. Reference finish: the film Dimensions (Leys, Ghys, Alvarez, 2008)."
-      ],
-      "levels": {
-        "G0": {
-          "level": 4,
-          "evidence": "dimensions.css takes every colour from tokens.css variables except black (#000, rgba(0,0,0,.55)); gold (--accretion family) marks .on states, slider and dial handles, readout values and the hot ledger row, --horizon the fold chain and ledger fills; all text is IBM Plex Mono through the --font-* tokens; button and range chrome are reset. The 1440 px screenshot shows panel right, ledger bottom-left, caption and hint bottom-centre, title top, none overlapping; .dx-panel-body scrolls. Rung 5 fails: .dx-gloss is 0.66rem (10.6 px). Noted for rungs 9 and 10: the canvas palette in constants.js (WIRE.cold #5BB0D6, WIRE.warm #F2A93B, RENDER.background #080A0C) does not match tokens.css (--horizon #9FB3D6, --accretion #D4A24C, --void #06080D), and the page loads Orbitron and Space Grotesk that no token uses."
-        }
-      }
-    },
-    {
-      "id": "hidden-axis-hands",
-      "name": "Hands on the hidden axis",
-      "frame": "interaction",
-      "metric": "The ways a visitor can drive the figure: input channels (panel, canvas drag, touch, picking), which hidden motions are reachable by direct manipulation, and open play beyond the presets; checked by using the page with mouse and touch and reading Console.js.",
-      "ladder": [
-        "No input: the figure plays on its own or not at all.",
-        "One control (play/pause or a single button) changes the figure.",
-        "A dimension stepper from 1D to 10D plus camera orbit and zoom on the canvas.",
-        "One rotation plane is chosen from chips and turned by hand with a dial and a ±180° slider, plus five rotation presets (Hold, Single, Double, Iso, All).",
-        "Fold distance, speed and scale sliders and an Auto/Perspective/Orthographic toggle change the figure on the next frame, each value printed beside its control.",
-        "Hidden rotation on the canvas itself: Shift+drag with the mouse, and a one-finger drag while a Hidden toggle is on for touch, turn the selected hidden plane without the panel, while a plain drag still orbits.",
-        "Picking: clicking a vertex selects it, shows its n coordinates, and keeps it highlighted while the figure turns.",
-        "A 2D pad drives two hidden planes at once (e.g. X–W on one axis, Y–W on the other), so the shadow can be pushed in any direction of the hidden axis.",
-        "Open play: the visitor pastes their own vertex list (and optional edges) in any dimension up to 10, and rotation, projection and slicing all apply to it.",
-        "A sequence of dial moves and dimension changes can be recorded, replayed, looped and shared as a URL.",
-        "A grabbed vertex can be dragged with mouse, touch and keyboard (arrow keys), and each frame the page solves a rotation in planes that include a hidden axis so the vertex's shadow stays within 5 px of the pointer wherever reachable, the dial readout naming the planes used: direct 4D manipulation as in 4D Toys (Marc ten Bosch, 2017), extended to 10D."
-      ],
-      "levels": {
-        "G0": {
-          "level": 4,
-          "evidence": "Console.js builds the −/+ stepper (1D–10D), plane chips, the Plane Dial (pointerdown/move) and ±180° .dx-scrub, five PRESETS buttons, Auto/Perspect/Ortho toggles, Fold distance / Speed / Scale sliders with printed values (3.20, 0.60, 1.50 in the screenshot), Vertices / Trails / Reset view and Pause; OrbitControls gives orbit and zoom. Rung 5 fails: canvas drag only orbits the 3D camera; a hidden plane turns only through the panel."
-        }
-      }
-    },
-    {
-      "id": "reference-data",
-      "name": "Reference values and state",
+      "id": "calls-and-record",
+      "name": "The visitor's calls and their record",
       "frame": "data",
-      "metric": "Where the page's mathematical facts come from and what leaves the page: facts computed versus typed, facts carrying a citation, how much state the URL holds, and export formats; checked by reading the panel, editing the URL, and using any export.",
+      "units": ["fs-u4", "fs-u5"],
+      "fiction": ["fs-f9", "fs-f18"],
+      "metric": "The share of calls whose key the engine computed before the reveal (target 100%); the best share of counted calls any fixed strategy wins (target at most 60%); what of the visitor's work survives a reload and a later visit; and what leaves the page by export and by URL.",
+      "how_checked": "Make at least 10 calls on examples and on drawings of your own, reload, and compare the tally and the record; use the privacy page's export and erase; run the committed strategy script over the item generator; open a call's URL in a fresh profile.",
       "ladder": [
-        "No facts about the figure are shown.",
-        "Facts typed in by hand (names or counts) with no formula behind them.",
-        "Element counts come from formulas in code (2^n vertices, C(n,k)·2^(n−k) k-faces, C(n,2) planes) and every polytope carries its correct name (tesseract, penteract … dekeract).",
-        "A ?d=n link opens the page at dimension n.",
-        "The URL carries the full state (polytope, dimension, every plane angle, preset, projection mode, fold distance, speed), and a copied link reopens the same frame.",
-        "Each catalogue polytope shows its Schläfli symbol and symmetry group with its order (e.g. B4, order 384), with a citation on the page to Coxeter, Regular Polytopes (3rd ed., Dover, 1973).",
-        "Export: a PNG still at 2x and the current n-dimensional vertex coordinates and edges as JSON.",
-        "Export of the 3D shadow or slice as an OBJ mesh and of the projected wireframe as SVG.",
-        "Metric data for every catalogue polytope (circumradius to edge ratio, dihedral angle) computed in code and checked by a unit test against values in Coxeter (1973).",
-        "The whole catalogue (coordinates, edges, faces, cells for every polytope 2D–10D) downloads as one versioned JSON whose schema is documented in the repo.",
-        "Every number on the page opens its derivation: the formula, the values substituted, and the source file and function that computed it."
+        "Nothing the visitor does is scored or kept.",
+        "At least one call: before a step the visitor picks one of several corners, and the page then shows which changed the answer.",
+        "The call is keyed by the engine: every candidate is stepped and read by a forward pass before the reveal, a call is right when its corner changes the answer, a call where no corner changes it is voided in words and not counted, and the tally of right of counted calls is computed from the calls.",
+        "Kept across reloads: the calls (the pick, its key, its verdict, the time and the mode), the visitor's drawings as 28 by 28 grids and the flip ledger rows come back after a reload, and the privacy page's export contains them and its erase removes them, both driven.",
+        "No fixed strategy wins: a committed script over the call's item generator, on the shipped and on the hardened network, shows that always picking one candidate kind or one position is right in at most 60% of counted calls, and no candidate's label before the call names the key.",
+        "Fiction made real (fs-f9, fs-f18): the record's share of the flip ledger (its rows, which hardening-measured rung 5 computes) is kept across visits, one row per hardening in the order made, each tied to the lineage step that produced it; the visitor's hardened network is kept across visits as a lineage, with the drawings and corners that made it; a reference network that never sees the visitor is kept beside it; and a corner from an earlier visit can be replayed on today's network and on the reference, both readings shown.",
+        "A call round-trips through a URL: the drawing, eps, the network state and the candidates reopen in a fresh profile with the same plate, the same candidates and the same verdict.",
+        "The record leaves as data: it downloads as JSON with a documented schema (a version, every unit named, eps in full ink), and a downloaded hardened network loads back into the page and gives the same answers on the visitor's drawings.",
+        "Calibration from the record: the visitor's hit rate is shown by corner kind, by eps and by network, each with a Wilson 95% interval (Wilson, JASA 1927), beside the rate a fixed strategy would score on the same items.",
+        "Adaptive items: the next call's eps is set from the visitor's record by a transformed up-down rule (two right steps down, one wrong steps up, which tracks 70.7% right; Levitt, JASA 1971), and the page shows the eps the visitor's calls converge to.",
+        "Reference grade: an exported record replays in a fresh profile to the same verdicts, tallies, ledger rows and lineage weights, bit for bit, in a committed test, its schema is used unchanged by a second lab's scored act, and at least 5 independent pages cite the lab's flip-calling game or its record of calls, each verified by the rater at its URL."
       ],
       "levels": {
         "G0": {
-          "level": 3,
-          "evidence": "Counts come from binomial and faceCount in n_dimensional_cube.js, names from POLY_NAMES (segment … dekeract); main.js reads ?d=n (PARAMS.dim) and calls setDim on load. Rung 4 fails: nothing writes the URL, and plane angles, preset, projection and slider values never reach it; no Schläfli symbol, citation or export exists."
+          "level": 2,
+          "evidence": "Read at 9942268 (not live). Rungs 1 and 2: call.js candidates() steps and reads all three corners before the pick, verdict() counts a call only when some corner changes the answer, the void is said in words ('This call is not counted.'), and record.js tallyOf() computes the tally from the kept calls. Rung 3 is not shown, so taken lower: keep.js writes calls, actions, drawings and ledger rows through Labs OS (lab 'dimensional') and the drives read them back after a reload, but the privacy page's export and erase of that record were driven neither by this reading nor by the pre-grade of c268995. Rung 4 would fail: the kill test measured the template corner at eps 0.1 moving 96 of 98 test 4s off 4 on the baseline network (kill_test RESULT.md), and the corners are drawn as pictures before the call, so picking the structured one wins near that share; no strategy script exists."
         }
       }
     },
     {
-      "id": "witness-narration",
-      "name": "Witness narration",
+      "id": "plate-and-scene",
+      "name": "The plate and the central scene",
+      "frame": "graphics",
+      "units": ["fs-u1", "fs-u2", "fs-u3", "fs-u4", "fs-u12"],
+      "fiction": ["fs-f2", "fs-f3", "fs-f4", "fs-f5", "fs-f6", "fs-f11", "fs-f12", "fs-f19"],
+      "metric": "Count of the central scene's parts drawn from computed state (the answer on the 9-simplex, the plate, the run, the template, the 784-hairline cube, the hardening redraw, the fold, the unfold, the smooth scene); count of linked views; and the share of marks that encode a computed value (target 100%).",
+      "how_checked": "Shoot the page at 1440 and 390 px in every state with node tools/labs-wt.mjs shoot and read the frames through the labs-design skill; inspect the plate's SVG or canvas source for marks bound to no computed value; hover, tap and select in each view and note which others answer.",
+      "ladder": [
+        "Nothing is drawn.",
+        "At least a static image: a picture of cells or of a digit.",
+        "One live view drawn from computed state: the answer, or the cells drawn from the computed mosaic.",
+        "The plate and its companions encode values: the cells drawn as hairline polygons on a graticule labelled with its scale in units of full ink, the drawing and its corner marked, the template drawn as a 28 by 28 image in light and dark for its sign, and the answer drawn as a point inside the 9-simplex's projection at the probability-weighted place.",
+        "Linked marks: hovering, tapping or focusing a wall names its neuron and layer, tapping a cell lifts its template, the run from the drawing to its corner draws one tick per wall crossed and the tick count equals the walls-crossed figure, and gold falls only on what fired.",
+        "Fiction made real (fs-f2, fs-f3, fs-f4, fs-f5, fs-f6, fs-f11, fs-f12, fs-f19): the 784-cube is drawn as a starburst of 784 hairlines, one toward each pixel; the step animates the drawing changing by a shade per pixel while the dot crosses the walls one at a time and the template swaps at each crossing; during hardening the walls move continuously (fs-f7, and Luis's rule of 2026-11-21 that transitions are organic, not a disappearing and appearing): between two posted weight sets the plate draws the exact mosaic of weights interpolated between them, so every frame is a true mosaic, and a fading trail of earlier places may stay behind as persistence (BAR_L1.md); the fold is drawn in 3D, the plane folding along the first layer's walls with the count climbing; the unfold player shows the plane's image after each hidden layer of a network of at least 4 hidden layers, projected to 3D, and steps it back layer by layer to the flat input plane and its exact cells; and the smooth-activation scene draws its walls as bands; the scene reveals by ignition (the drawing, the answer, the first layer's walls, the second layer's, then the run) before its material moves (atlas graphics.5.4); each from computed state, and under reduced motion each as its finished frame.",
+        "Several linked views share one selection: selecting a cell on the plate lights its point on the simplex, its template and its pixels on the starburst, and selecting in any of those lights the plate.",
+        "Choreography, timed and true: the ignition finishes in under 4 s and is skippable, and 10 frames sampled from a recording of the step and 10 from a recording of hardening each match the engine's state at that moment (the drawing at that fraction of the step, the exact mosaic of those interpolated weights), checked in node.",
+        "Exact at any zoom: zooming the plate up to 1,000 times recomputes the cells of the zoomed square, walls stay one device pixel wide, cells too small for the wider view appear, and the count updates.",
+        "A 3-flat view: the cells of a 3D slice through four drawings are drawn as convex polyhedra, rotatable and cut by a movable plane, and the cut shows the same cells as the plate computed on that plane.",
+        "Reference grade: every view of the scene, at 390 to 2560 px, is drawn from computed state with no region tagged illustrative, and at least 5 independent pages use the lab's plates to explain linear regions or adversarial corners, each verified by the rater at its URL."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "Read at 9942268 (not live). Rung 2: folded.js drawPlate() draws the computed mosaic's polygons, drawSimplex() the softmax point and paintSigned() the template. Rung 3 fails: the plate's 10 by 10 graticule and its 50 minor ticks carry no scale or label (drawPlate). Above the break: the run and one tick per crossing are drawn from plate.js run(), gold only when the template's corner changed the answer (the 'quiet' class otherwise); there is no wall hover, no cell tap and no starburst, and the run is drawn whole with no sweep."
+        }
+      }
+    },
+    {
+      "id": "machine-material",
+      "name": "The Machine's material",
+      "frame": "style",
+      "metric": "Defects against the Machine's material: gold marks outside what fired (target 0, from a grep of the lab's styles and scripts for the --accretion family and its hex values); controls not from the shared kit; text under 12 px or fainter than --text-dim; the anti_tells count; overlaps at 390 and 1440 px; and from rung 5 the bar sheet's parts and states present. The world is the road's default, Inside the Machine, which Luis has not decided (asked 2026-11-19): if he places the lab in another world, rungs 5 to 7 and 10 are rewritten for that world's material before the next grade (LABS_LEVELS.md rule 3), and rungs 0 to 4, 8 and 9, which name no world, stand.",
+      "how_checked": "Shoot every state at 390x844 and 1440x900 and read the frames through the labs-design skill; grep the lab's CSS and scripts for accretion and its hex values and place each hit; read computed font sizes and colours in DevTools; run node tools/anti_tells.mjs scan on the lab's files; measure the gold share of a resting screenshot.",
+      "ladder": [
+        "Browser defaults: unstyled text and controls.",
+        "At least a dark ground and a styled canvas.",
+        "The site's tokens: colours only from tokens.css, data and interface text in IBM Plex Mono through tokens.css's font tokens (var(--font-mono) and its siblings, never the family named in the lab's styles), prose in Fraunces named in one place (tokens.css declares no Fraunces token), fonts loaded without blocking first paint, and no browser-default control chrome.",
+        "Gold only for what fired, and one control language: every gold mark sits on a computed answer, a run made, a corner that changed the answer or a right call, and nothing else is gold (a zero tally, an unpicked or unchanged corner, the graticule and the walls included), and every button and toggle uses the shared controls of labs/assets/css/controls.css.",
+        "Legible and clean: no text under 12 px at 390 or 1440 px, no text a visitor must read fainter than --text-dim, labels over the plate set in HTML so they keep their size at 390 px, no overlap or clipped panel at 390x844 or 1440x900, and node tools/anti_tells.mjs scan reports 0 on the lab's files.",
+        "Fiction made real in the Machine's material: the plate reads as an oscilloscope screen (a graticule with minor ticks on both axes, walls as hairlines at half strength); the run sweeps over about half a second and leaves a trigger tick at each wall; cells the run passed keep a persistence fill of at most 13% opacity (BAR_L1.md's effects budget) that decays over seconds; walls migrating during hardening are drawn as persistence; gold covers under 1% of a resting screenshot; the lab differs from the other worlds on at least 4 of geometry, texture, ornament, motion and ink tint; and every part of the lab's level-1 bar sheet is present in each of its listed states, shot at 390 and 1440 px.",
+        "Motion grammar: the sweep, the persistence decay and the wall migration use the site's easing and duration tokens, and under reduced motion each is replaced by its finished frame (the run whole with its ticks, the hardened mosaic with no migration).",
+        "Phosphor precision: each trigger tick sits within 0.5 px of its computed crossing at 390 and 1440 px, persistence decays by one exponential whose time constant is a named constant, and hairlines stay one device pixel wide at every zoom.",
+        "A style lint, one command, fails on any colour, font family or font size in the lab's styles and scripts that tokens.css does not declare, and it passes.",
+        "At 390, 768, 1024, 1440 and 2560 px, in every state: no overlap or clipped panel, and every text at least 4.5:1 against what is behind it, sampled with a contrast tool.",
+        "The Machine's material as shared kit: the graticule, the trigger ticks, the sweep and the persistence are lifted into labs/assets and used unchanged by at least one other lab of Inside the Machine."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Corrected by the second pass from 2 to 1. Read at 9942268 (not live). Rung 1: a dark ground (--void) and styled canvases and SVG. Rung 2 fails on its font clause: folded.css names 'IBM Plex Mono' literally (html, body; .idx; .simplex .vlabel) instead of tokens.css's var(--font-mono), and Fraunces literally in four rules; the rest of rung 2 holds (colours only through tokens: --accretion, --horizon, --text, --text-dim, --text-bright, --line; Fraunces and IBM Plex Mono load by the media=print swap with a noscript copy; the buttons are reset). Recorded for rung 3, which would also fail on its second clause: the three candidates are page-local buttons built in folded.js drawCands() and styled by .cands button in folded.css; Harden the network (.fill) and Next and Clear (.kact) use controls.css. The gold clause holds as far as read: the run, ticks, end point and its label are gold only when the template's corner changed the answer, and .tally b.none keeps a zero tally out of gold."
+        }
+      }
+    },
+    {
+      "id": "hands-on-the-network",
+      "name": "The visitor's hand on the network",
+      "frame": "interaction",
+      "units": ["fs-u1", "fs-u2", "fs-u4"],
+      "fiction": ["fs-f1", "fs-f10"],
+      "metric": "Count of the visitor's verbs on the network (draw, choose drawings, call, harden, select a wall or a cell, drag the drawing's point, drag a wall, scrub a player), each checked by mouse, by touch at 390 px and by keyboard; the pad's reading accuracy on digits drawn by people; and whether state restores from a link.",
+      "how_checked": "Perform each verb by mouse, by touch in DevTools emulation at 390 px and by keyboard; run the pointer probe drive and the pad's node test; read the committed log of people's drawings; open a copied URL in a fresh profile.",
+      "ladder": [
+        "Nothing to touch.",
+        "At least presets: example digits choose what the network reads.",
+        "A pad: the visitor draws by mouse or touch, the drawing is reduced as MNIST's were (cropped to its ink, the longer side scaled to 20 px with anti-aliasing, the centre of mass placed at the middle of 28 by 28), and the answer updates while the stroke is drawn.",
+        "The pad reads what it is given: a node test reduces at least 100 MNIST test digits over all 10 classes, each drawn large on the pad at 4 places and scales, and reads at least 97% as their label, and a drive drawing 20 digits through pointer events reads at least 18 as written at 1440 and at 390 px.",
+        "Direct manipulation: the visitor chooses the drawings that lay the plane, selects a wall or a cell by pointer and by keyboard focus, and drags the drawing's point across the plate while the pad shows the input at that point of the plane and the answer updates, the inverse of drawing.",
+        "Fiction made real (fs-f1, fs-f10): the network reads people's drawings, at least 90% of at least 100 digits drawn on the page by at least 5 people who did not build it, with the log committed; walls by hand runs, two clouds of points in a plane and an empty network, each first-layer neuron a wall the visitor drags, the second layer's walls drawn bending where they meet the first's, with the count and the training loss updating; and every verb of the scene (draw, choose, call, harden, select, drag the point, drag a wall, scrub the fold and the unfold player) works by mouse, by touch at 390 px and by keyboard, drawing included through a keyboard pen.",
+        "State in the URL: the drawings, eps, the plane and the network state (shipped, or hardened with its seed) round-trip through a link opened in a fresh profile.",
+        "Open play: the visitor loads a ReLU network of their own in a documented weights format (784 inputs, or 2 for the walls-by-hand toy, up to a stated size), and every view applies to it.",
+        "Compare: two networks (before and after hardening, or the visitor's and the reference) side by side on the same plane, one selection shared by both and the walls that moved marked.",
+        "A path through the plane: a path the visitor draws on the plate plays as a morph of the drawing on the pad, read at every step, with each wall crossing marked on both.",
+        "Every view works both ways (pad to plate and plate to pad, wall to weights and weights to wall) by mouse, touch and keyboard, and a test checks each inverse to 1e-9."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "Read at 9942268 (not live). Rungs 1 and 2: the strip's ten examples choose the drawing; folded.js reads the pad on each animation frame while the stroke is drawn (the pre-grade of c268995 saw 'Read as 4 at 100.0%' become 'Read as 7 at 99.2%' before release), and pad.js reduces as MNIST did (crop to the ink, the longer side to 20 with anti-aliasing, the centre of mass at 14, 14). Rung 3 fails on its first clause: pad.test.mjs reduces the 10 digits of digits.json at 4 places and scales (40 reductions), not 100 digits; the pointer probe read 20 of 20 at both widths (drive folded-probe, in the road's record and the pre-grade)."
+        }
+      }
+    },
+    {
+      "id": "network-provenance",
+      "name": "The network and its data, sourced",
+      "frame": "data",
+      "units": ["fs-u8"],
+      "fiction": ["fs-f16"],
+      "metric": "Whether each data file the page uses (the network, the example digits, the hardening subset, later the dial's, the smooth and the reference networks) names its source, rebuilds byte for byte from a committed script, shows its version on the page and has its figures recomputed by a test; what the visitor can download; and the share of numbers on the page that open their derivation.",
+      "how_checked": "Run the committed training and export scripts and compare hashes; run the accuracy test; read the page's source line and the data files' headers; use each export.",
+      "ladder": [
+        "Values are invented: no network or data file stands behind the page.",
+        "The network and the digits exist as data files the page loads.",
+        "The source is named on the page: MNIST (LeCun, Cortes and Burges, with its year and address), the network's sizes, and its test accuracy as recorded in its file.",
+        "Rebuildable: the training script and the export script are in the site's repository, running them rebuilds the network file byte for byte (hashes compared by a test or a committed log), and the hardening subset is selected by the same scripts with its seed.",
+        "Figures recomputed: a node test recomputes the network's accuracy over the 10,000 MNIST test digits (or a stated shipped subset, its size printed) and matches the file's figure to 0.01 percentage points, and the page states the dataset's terms as read at a named source, with the date read.",
+        "Fiction made real for the data (fs-f16): the census's reference values carry their sources on the page (the bound's formula with its paper, computed for the network's sizes; the observation with its paper and figure number), and each network file shows on the page its version (training data hash, seed, script hash and date).",
+        "Exports: the current plane's mosaic (cells, vertices, patterns and the plane's frame) downloads as JSON with a documented schema, and the template as a 28 by 28 CSV and a PNG.",
+        "Every network the lab adds (the dial's four, the smooth-activation network, the reference network) rebuilds byte for byte from the committed scripts, with the same provenance shown on the page.",
+        "The census as a dataset: counts over at least 100 planes per network, per depth and per training step are committed with the script that made them, and download from the page.",
+        "Every number opens its derivation: any figure on the page (a count, a step, a time, an accuracy) shows on demand its formula, the values substituted, and the module and function that computed it.",
+        "Reference dataset: a versioned, documented download of networks, planes and their certified mosaics, with a changelog, against which a region counter can be tested, used by at least 2 independent projects or papers, each verified by the rater at its URL."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Read at 9942268 (not live). Rung 1: net.json, digits.json and subset.json load from labs/assets/data/dimensions. Rung 2 fails: the footer names MNIST (LeCun, Cortes and Burges) and the sizes 784, 64, 64 and 10 with no year and no address, and the page prints no test accuracy (net.json records 0.9671, per the pre-grade of c268995). For later rungs: the training and export scripts are still in the private kill test (ROAD.md), so the weights do not rebuild from the site's repository."
+        }
+      }
+    },
+    {
+      "id": "engine-judgement",
+      "name": "The engine's verdicts and the verifier",
       "frame": "intelligence",
-      "metric": "What the page detects and says about the live figure on its own: number of narrated quantities and named geometric events, numeric accuracy against the computed state and the drawn shadow, and model calls with a deterministic fallback; checked by watching the ledger and caption in each projection mode and reading Console.js.",
+      "units": ["fs-u4", "fs-u11"],
+      "fiction": ["fs-f15"],
+      "metric": "What the engine does on its own: whether each verdict carries its reason from computed values; whether the next item is chosen from the record by a stated rule; the verifier's coverage (the share of drawings and eps it settles with a proof or a confirmed counterexample) and its agreement with a published verifier; and, where a model narrates, the share of its numbers that resolve to engine values (target 100%).",
+      "how_checked": "Make calls and read each verdict's reason against the numbers the engine computed; read the rule that picks the next item; run the verifier on 10 drawings at 2 eps values and confirm each counterexample by a forward pass in node; feed the narration validator a reply with a planted number; run the committed comparison with the published verifier.",
       "ladder": [
-        "The page says nothing about the live state of the figure.",
-        "A caption names the current action (e.g. rotating X–W · 36°).",
-        "A Shadow Ledger shows, per hidden axis, a live bar of the projective distortion |D/(D−w) − 1|, for up to 6 hidden axes.",
-        "The axis with the largest distortion is flagged in gold as it changes, the caption switches between extruding, legibility-wall and rotating states on its own, and in orthographic mode, where no axis is divided, the ledger says the hidden axes are dropped instead of showing distortion bars.",
-        "In perspective mode the ledger prints each axis's distortion as a number with 2 decimals plus one sentence naming the axis that bends the shadow most, chosen over all n−3 hidden axes (Q at 10D included even when no bar is drawn for it), and by what factor (e.g. W stretches the near cell 1.78x).",
-        "Event detection: at least 3 named geometric events are announced as they happen: a cell turning inside out (its signed volume in the shadow changes sign), a vertex crossing w = 0, and two vertices coinciding in the shadow (projected distance under 1% of the figure's projected circumradius).",
-        "Ask the Witness: a typed question about the current view goes with the live state (dimension, angles, ledger values) in one call through labs/assets/js/ai/llm.js; the answering route is shown, and with no route a deterministic engine answers at least 6 listed question types from the state (hottest axis and its factor, current plane and angle, k-face counts, rotation class, polytope name, dimension) and lists them when a question falls outside.",
-        "Every number in a model reply is checked against the live state; a reply with a number off by more than 1% is replaced by the deterministic answer, and the page says so; a test feeding a stubbed reply with one number off by 5% shows the replacement and the notice.",
-        "The Witness proposes the next experiment from what the visitor has not tried yet (rule table: never turned a hidden-by-hidden plane, never sliced, never passed 6D), one suggestion at a time.",
-        "The visitor's session is narrated back as a written log (dimensions visited, events seen, values at each), copyable as text.",
-        "Predictive narration: under the current rotation the Witness announces the next event before it happens (which cell inverts, which vertex crosses w = 0) and in how many degrees, and a test over 10,000 random frames in every dimension from 4 to 10 finds the forecast angle within 1° of the computed event angle in at least 99% of frames."
+        "No engine: nothing is computed by the page itself.",
+        "A deterministic engine produces the main output (the answer, the cells, the template and the verdict) with no language model.",
+        "Each verdict carries its reason from computed values: for each corner, the change in z_rival minus z_answer the template predicts, beside the change the forward pass found, and the walls crossed; a voided call says that no corner changed the answer and how close each came.",
+        "The engine chooses what to try next from the record by a stated rule (a drawing the network misreads before any attack, a drawing the hardened network still flips, an eps the visitor has not tried), one suggestion at a time with its reason.",
+        "A model narrates under the narration contract: at most one call per visitor action through LLM.complete() in labs/assets/js/ai/llm.js with the route panel mounted, every number in its reply resolving to an engine value or the reply replaced by the engine's own text with the reason shown, and a test planting a wrong number proves the check catches it.",
+        "Fiction made real (fs-f15), inside the central scene: for the visitor's drawing and an eps they choose, on the shipped network, the verifier returns within a time limit the page states either a proof that the whole cube lies in one answer, or a point of the cube read as another answer and confirmed by a forward pass, or 'not settled in the limit' with the bounds it reached; and on a smaller network the page names (a dial network reading the same drawing at its size) it always returns a proof or a confirmed point; each verdict with the network's size and the time taken printed.",
+        "Proofs are certificates: each proof the verifier gives is re-checked by a separate checker in a node test (for example the cells the cube meets with each cell's margin, or the bounds propagated layer by layer), and planted wrong certificates are rejected.",
+        "The verified radius: the largest eps for which the cube is proved, found by bisection to a stated resolution, is printed beside the smallest flipping step found, and the band between them is named as unknown.",
+        "Agreement with a published verifier: on a committed set of at least 20 drawings and eps values, the verdicts match an offline run of a published complete verifier (Reluplex, Katz et al., CAV 2017, or Marabou, Katz et al., CAV 2019), with the tool's version and the date committed.",
+        "Complete in a tab: the verifier settles the shipped 784, 64, 64, 10 network and the hardened one, each at an eps the page states, within 10 s per digit in a worker, for at least 90 of 100 test digits each on the stated machine, and at least 30 of each network's settled verdicts are proofs (an attack alone settles most digits of an unhardened network at eps 0.1: the kill test's template corner moved 96 of 98 test 4s).",
+        "Reference grade: the visitor's hardened network gets a verified robust accuracy over at least 1,000 test digits computed in the tab, matching the offline published verifier on every digit."
       ],
       "levels": {
         "G0": {
-          "level": 2,
-          "evidence": "Console._buildLedger and _tickLedger draw one bar per hidden axis (LEDGER.maxRows 6) from the stress array that HyperCube.project fills with max |D/(D−w) − 1|, toggle .hot (gold) on the largest above 0.02, and _tickCaption switches between extruding, legibility-wall and rotating states. Rung 3 fails: in Auto at 6D and above and in Ortho at any n, HyperCube.project skips the divide while still filling stress, so the bars and the gold flag describe a distortion the drawn shadow does not have. No numbers, sentence or model call exist."
+          "level": 1,
+          "evidence": "Read at 9942268 (not live). Rung 1: the answer, the cells, the template and the verdict come from mlp.js, split.js and call.js with no model. Rung 2 fails: the verdicts ('Right. This corner changes the answer to 9.', 'Not this one. It leaves the answer at 5.') state the result and no reason from computed values, and nothing sets the template's predicted change beside the forward pass. No suggestion rule, no model call and no verifier exist."
         }
       }
     },
     {
-      "id": "guided-ascent",
-      "name": "Guided ascent 1D to 10D",
+      "id": "honest-explanation",
+      "name": "What the visitor understands, said honestly",
       "frame": "explanation",
-      "metric": "What a first-time visitor understands after five minutes: presence and length of a guided path from 1D to 4D, Flatland analogues, in-place explanation of controls and formulas, and real-versus-illustrative tags; checked by walking the page from a fresh load.",
+      "units": ["fs-u1", "fs-u2", "fs-u3", "fs-u4", "fs-u5", "fs-u6", "fs-u7", "fs-u8", "fs-u9", "fs-u10", "fs-u11", "fs-u12"],
+      "fiction": ["fs-f19"],
+      "metric": "Count of false statements about the code or the subject (target 0); the share of on-page claims tagged [REAL] with author, year and venue, or [ILLUSTRATIVE] (target 100%); the units of the bindings explained on the instrument (of 12); and what first-time visitors can explain after five minutes, from the insight check and a people test.",
+      "how_checked": "Read every sentence of the page against the code it describes; check each [REAL] citation at its source; walk the guided path from a fresh profile; take the insight check; read the committed people-test log.",
       "ladder": [
-        "No text explains the figure.",
-        "A title and a one-line hint on how to drag and zoom.",
-        "One gloss line per dimension from 1D to 6D (e.g. a tesseract, a cube dragged through an axis you cannot point at) and the fold chain shown (e.g. 5D → 4D → 3D).",
-        "The caption names the live plane and angle, and past 6D the page states in words why one shadow can no longer separate the corners (the legibility wall).",
-        "A guided path from 1D to 4D in at least 6 steps drives the figure itself (segment dragged into a square, square into a cube, cube into a tesseract), one sentence per step with Back/Next, then hands over to free play up to 10D.",
-        "The Flatland analogy is built into the path: at the 3D-to-4D step the page shows the one-down analogue (a cube's shadow on a plane) beside the tesseract's shadow, citing Abbott, Flatland (1884).",
-        "Every control has a one-sentence explanation in place of what it does mathematically (e.g. Fold distance: the distance D of the projection centre; each vertex scales by D/(D−w)).",
-        "The page shows its mechanism while running: an open panel prints the rotation and projection formulas with the live numbers substituted, updating each frame.",
-        "Every claim and visual choice on the page carries a visible tag, real mathematics or illustrative (colour ramp, bloom, trail length, the 0.3 denominator clamp in HyperCube.project).",
-        "After the path, three questions about the figure (e.g. how many cubes bound a penteract?) take the visitor's answer, check it against the live f-vector, and explain any miss.",
-        "The path continues one step per dimension from 4D to 10D, after interactive steps on projection, slicing and the six regular 4-polytopes (the subject of the fourth-dimension chapters, 3 and 4, of the film Dimensions, Leys, Ghys, Alvarez, 2008), and a 5-person test log in the repo shows at least 4 of 5 first-time visitors explaining unaided why the tesseract's shadow turns inside out."
+        "No text explains the page.",
+        "At least a title and a one-line caption.",
+        "An intro explains the mechanism, every sentence that states a fact about the network, the data or the subject carries [REAL] with its source or [ILLUSTRATIVE], and no statement is false about the code or the subject (the template's sign is called the first-order corner, the cell's map is called affine or a picture plus a constant, a claim about a step names the corners it was tested on).",
+        "A page of text with a worked example on the instrument: inside a cell the network applies one picture, that picture's sign is the first-order corner, and where both stop holding; every sentence written from the line of code it describes, and every [REAL] claim with its author, year and venue.",
+        "A guided path of at least 5 steps builds the central scene one concept at a time (the drawing and its answer, the cells, the template, the corner, hardening), each step grounded in the current numbers, and selecting any element explains it from its live values.",
+        "Fiction made real (fs-f19), with the mechanism explained whole: the honest limit is shown, the same scene run on a network with a smooth activation (softplus or GELU) whose walls blur into bands, with the band's measured width printed; each of the 12 units of the lab's bindings is explained on the instrument; an insight check of at least 5 questions on the instrument explains every answer; every element of the page opens an overlay saying what it is, what the visitor is looking at, why it matters and its source; and every other clause of the atlas's explanation rung 5 holds for this lab (explanation.5.3 a staged how-it-works ending in a validation footer, 5.4 a diagram of the flow from drawing to answer, 5.5 views from story to instrument to data table to raw record, 5.6 a traps catalogue with a numeric counterexample each, 5.8 a comparison view among real systems), since the atlas holds where it and a lab's ladder disagree.",
+        "Adaptive: the depth of the explanation follows the visitor's insight-check results, explanations already read are not repeated, and the visitor sees their score before and after.",
+        "The page shows its own arithmetic while it runs: an open panel prints, for the current step, z_rival minus z_answer before, the template's predicted change, the forward pass's actual change and the walls crossed, updating at each step.",
+        "A people test: a committed log of at least 5 first-time visitors shows at least 4 of them explaining unaided why the template's sign changes the answer and why hardening moves the walls, each answer scored against a rubric committed before the first session (the first answer passes when it names one fixed map inside the cell and the step along its sign; the second when it names training on the corners), with the scorer named.",
+        "Placed among the field's tools: a comparison view sets what the lab shows beside what TensorFlow Playground (sampled regions), Harley's visualisation (activations, ISVC 2015), Adversarial-Playground (Norton and Qi, VizSec 2017) and SplineCam (exact regions offline, CVPR 2023) show of the same idea, each cited and each difference stated.",
+        "Reference grade: at least 5 independent course or article pages link the lab to teach linear regions or adversarial examples, each verified by the rater at its URL, and the people test of rung 8 has been repeated with at least 20 visitors at the same pass rate."
       ],
       "levels": {
         "G0": {
-          "level": 2,
-          "evidence": "constants.js GLOSS has one line per dimension 1D–6D (glossFor); Console._syncReadout prints the fold chain (4D → 3D in the screenshot); .dx-hint gives drag / scroll / dial; _tickCaption names plane and angle. Rung 3 fails: past 6D, GLOSS[6] ('past here one 3D shadow cannot separate the corners. read the rule, not the shape.') and the legibility-wall caption ('one shadow can't hold 1,024 corners apart') assert that the corners cannot be separated but give no reason."
+          "level": 1,
+          "evidence": "Read at 9942268 (not live). Rung 1: the title Folded Space and the lede. Rung 2 fails on its tag clause, taken lower where uncertain: the lede ('[REAL: Montufar et al. 2014; Hanin and Rolnick 2019]'), the template note and the footer carry [REAL], but the sentence under Harden, '300 steps on 2,000 digits and your drawings, in this tab.', states a fact about the code with no tag; and the question 'Each corner moves every pixel by 0.1 of full ink.' is false about the code, since call.js stepTo() clips to 0 and 1, so a blank pixel stepped down does not move (added by the second pass; the level stands). The three overclaims of the pre-grade of c268995 are rewritten ('to first order; a step can cross walls'; 'each of these steps of 0.1 of full ink keeps the answer'; 'this picture times the drawing, plus a constant'). No page of text exists (ticket 1.10)."
         }
       }
     },
     {
-      "id": "reach-and-frame",
-      "name": "Reach and frame time",
+      "id": "reach-and-budget",
+      "name": "Reach and compute budget",
       "frame": "performance",
-      "metric": "Who can run it and how fast: WebGL fallback, reduced motion, layout at 400 px, keyboard and screen-reader reach, frames per second at 10D and on the heaviest polytope under a named throttling profile, transfer size; measured with a 400 px viewport, keyboard only, an fps meter or DevTools, and Lighthouse.",
+      "metric": "Mosaic time per plane and hardening time on a stated desktop machine and on a phone profile (390x844, 4x CPU slowdown); main-thread long tasks during a recompute; the 390 px layout; reduced motion; keyboard and screen-reader reach; the 5 known setup failures of the bindings, each with its diagnosis; Lighthouse mobile scores and the first plate's time.",
+      "how_checked": "Record DevTools performance traces at 1440x900 and at 390x844 with 4x CPU slowdown; read the page's printed compute times; drive each known setup failure by blocking its file, the worker or the store; Tab through the page; run Lighthouse mobile.",
       "ladder": [
         "The page does not run.",
-        "Runs in a desktop browser with WebGL; nothing happens without it.",
-        "A no-WebGL message replaces the canvas when WebGL is missing; device pixel ratio is capped at 1.5 and the per-frame time step clamped.",
-        "Reduced motion: prefers-reduced-motion and ?still freeze rotation, extrusion and trails, with a ?motion override.",
-        "At 400x800 the panel becomes a bottom sheet and the figure, Shadow Ledger and caption all stay visible with no overlap; touch orbit and pinch zoom work.",
-        "Keyboard: every control is reachable by Tab with a visible focus ring (sliders included), and the Plane Dial turns with arrow keys (1°) and Shift+arrow (15°).",
-        "Frame budget: an on-page meter (?fps) shows at least 50 fps in 10D (1024 vertices, 5120 edges) at 1440x900 in Chrome with DevTools CPU throttling at 4x slowdown, and a DevTools allocation timeline over 5 s of rotation shows no per-frame allocation from the render loop.",
-        "Tiers: the page measures frame time for 2 s after load and drops bloom, then trails, then pixel ratio while under 45 fps, naming the active tier.",
-        "Screen reader: an aria-live region describes the figure (polytope, dimension, plane, angle, hottest axis) at most once per second, and the guided path can be completed with NVDA.",
-        "Projection runs on the GPU (vertex shader) or in a Web Worker, so the 120-cell (600 vertices, 1200 edges) and the 10-cube hold 60 fps at 400x800 in Chrome DevTools device emulation with 6x CPU slowdown.",
-        "Lighthouse mobile scores of at least 95 for performance and accessibility, under 500 kB transferred on first load, and the page works offline after the first visit."
+        "It runs at 1440 px in desktop Chrome.",
+        "Phone and motion basics: at 390 px the columns stack with no sideways scroll, one global prefers-reduced-motion rule stops animations and transitions, focus rings are visible, and a skip link is the first Tab stop.",
+        "Heavy work off the main thread: the mosaic and hardening run in workers, and a performance trace at 1440 px shows no main-thread task over 50 ms while the plate recomputes or the network hardens.",
+        "Budgets shown and failures diagnosed: the plate prints its compute time; on the stated desktop machine each example's plane computes in under 100 ms and 300 hardening steps finish in under 30 s; and each of the 5 known setup failures (the network's file, the example digits, the hardening digits, the worker, the record's store) shows its diagnosis and its recovery, each driven.",
+        "Fiction made real at phone scale: the whole central scene and every fiction entry but the verifier (fs-f1 to fs-f14 and fs-f16 to fs-f19; fs-f15 is rung 9's) runs at 390x844 with 4x CPU slowdown, each plane in under 500 ms, hardening in under 60 s and every other entry within a budget the page prints, measured and printed; every control is reachable by keyboard, with arrow keys moving among walls and cells; and an aria-live region announces the answer, the count and each verdict at most once per second.",
+        "Tiers: in the first 2 s the page measures compute time and chooses the square's detail or the hardening step count by tier, naming the active tier.",
+        "Lighthouse mobile scores at least 90 for performance and 95 for accessibility, and a performance mark set when the first plate is drawn reads under 3 s with Slow 4G and 4x CPU slowdown.",
+        "Offline and light: the page works offline after the first visit, and its first load transfers under a byte budget the page prints, the network, digits and subset included.",
+        "The heavy rooms fit a phone: the 3-flat slice (cell-geometry rung 6) and the verifier (engine-judgement rung 5) run at 390x844 with 4x CPU slowdown within 2 s and 30 s.",
+        "Measured on real devices and conformant: two named physical phones and a low-end laptop run every scene within the rung-5 budgets, logged with model, browser and date, and every view conforms to WCAG 2.2 AA, shown by an axe-core run with 0 violations in every state and a logged keyboard and screen-reader pass (NVDA or VoiceOver) through the whole scene."
       ],
       "levels": {
         "G0": {
-          "level": 3,
-          "evidence": "main.js shows .dx-nowebgl when Renderer init fails; RENDER.pixelRatioMax 1.5 and LOOP.maxDt 0.05; dom.js resolveMotion freezes on prefers-reduced-motion or ?still (paused, unfold 1, trails off) with a ?motion override, and the CSS drops transitions. Rung 4 fails: at 600 px and below the bottom-sheet panel covers the fixed #dx-ledger and caption. Rung 5 would also fail: .dx-slider and .dx-scrub set outline: none and the dial div takes no focus."
+          "level": 2,
+          "evidence": "Read at 9942268 (not live). Rung 2 as the pre-grade of c268995 drove it (the columns stack below 760 px, scrollWidth 390 of 390, one reduced-motion rule, a solid focus ring, the skip link as the first Tab stop), and folded.css keeps those rules. Rung 3 fails: folded.js runs mosaic() and certify() on the main thread when a drawing is shown (lines 288 to 290) and again on every message while the network hardens (line 78); only the training runs in a worker."
         }
       }
     },
     {
-      "id": "core-shape",
-      "name": "Polytope-agnostic core",
+      "id": "proof-in-the-code",
+      "name": "The proof in the code",
       "frame": "architecture",
-      "metric": "Code shape: module separation, which additions (polytope, view, preset, narration rule) are a data row versus a core edit, test coverage of the maths, and one serialisable state; checked by reading labs/assets/js/dimensional_mania/, grepping it, and running the tests.",
+      "metric": "Code shape: pure engine modules with no DOM, no clock and no Math.random; node tests run by the gates; broken-rule lists caught by mutation; record contracts typed and checked by tsc; domain rules outside the page script; the number of engine files edited to add a network or a view (target 0).",
+      "how_checked": "Read labs/assets/js/dimensions; grep the engine modules for document, window, Date and Math.random; run node tools/lab_tests.mjs dimensions and node tools/mutate.mjs; run tsc on the labs tsconfig; add a test network as a data row and count the files touched.",
       "ladder": [
         "No code exists for the lab.",
-        "One inline script in the page.",
-        "External script files, but geometry, rendering and UI share one file or one class.",
-        "Geometry, rendering, controller and UI are separate ES modules, with a constants module for tuning.",
-        "Presets, projection modes and sliders are data tables dispatched without switch chains (a new preset is one row), every export has an importer (grep finds one), and no threshold, opacity, clamp or axis index sits as a bare literal outside the constants module.",
-        "The controller accepts any polytope through one interface ({vertices, edges, faces, cells}) from a registry; adding the n-simplex touches only a new module and one registry row.",
-        "Node unit tests, run by one command with no browser, cover the f-vectors of every catalogue polytope, orthogonality of composed rotations (R·Rᵀ = I) and the projection of known points.",
-        "Views (projection, slice, fibration, ledger) implement one view interface and subscribe to one state store; adding a view edits no existing view.",
-        "The whole state is one serialisable object driving URL, export and replay, and a test round-trips it.",
-        "The maths core imports no DOM and no THREE, ships typed (JSDoc checked by tsc, or TypeScript), and has at least 90% line coverage.",
-        "A documented plugin interface lets a third party add a polytope, view or narration rule without reading the core, and a sample plugin in the repo proves it."
+        "At least one script runs the page, inline in it or not.",
+        "Separate modules for the engine (the network, the cells, the call) and for the page.",
+        "A pure engine with tests in the gates: the network, mosaic, call and record modules use no DOM, no clock and no Math.random (randomness from a seeded generator), the worker imports them unchanged, and their node tests run with no browser through tools/lab_tests.mjs in the gates workflow.",
+        "Broken rules caught and contracts typed: each engine module's rules are listed as mutants that node tools/mutate.mjs shows its tests catch, of both kinds (one silencing each report, one loosening each condition), the records crossing module boundaries are typed and checked by tsc, and no domain rule (which drawing lays the plane, how a drawing is labelled for training, the hardening settings) sits in the page script.",
+        "Fiction made real as organs: each fiction inventory entry the lab runs maps to a pure module and a test named for it in one committed map, and adding a network (the smooth one, a dial size, the reference) is a data file and one registry row, with no edit to the engine.",
+        "One serialisable state drives the URL, the export and the replay, and a test round-trips it.",
+        "Views implement one view interface and subscribe to the one state, so adding a view edits no existing view.",
+        "At least 90% line coverage of the engine modules, every engine module typed and checked by tsc.",
+        "The engine is a documented module that a second lab imports unchanged.",
+        "Reference grade: the exact-region engine is published as a versioned library with API documentation and a changelog, and at least one project by neither Luis nor the builders uses it, verified by the rater."
       ],
       "levels": {
         "G0": {
           "level": 3,
-          "evidence": "Nine ES module files (main, constants, dom, n_dimensional_cube, PlaneSet, Renderer, TrailField, Witness, Console) with constants.js for tuning meet rung 3; PRESETS, PROJECTION and SLIDERS are row tables. Rung 4 fails: the 0.3 denominator clamp in HyperCube.project, PointsMaterial opacity 0.9 in Renderer.buildCube, unfold < 0.98 in Console._tickCaption, and the literal 3 for the first hidden axis in HyperCube.project instead of PLANE.hiddenFrom; foldPlanes and SPATIAL_PLANES in n_dimensional_cube.js are exported and imported nowhere. No tests exist."
+          "evidence": "Read at 9942268 (not live). Rungs 2 and 3: mlp.js, split.js, call.js, plate.js, pad.js and record.js use no DOM, no clock and no Math.random (record.js reads Date.UTC only as a constant bound); harden.worker.js imports mlp.js unchanged; tools/lab_tests.mjs finds the 4 test files under dimensions/tests and the gates run it (4 files, 0 failed, in the pre-grade of c268995). Rung 4 fails: no mutant list for the lab's modules is in tools/mutants (the kill test's broken rules stay in the private plan), and folded.js keeps domain rules: the choice of the plane's third drawing (line 285), the labels of the visitor's drawings for training (line 67) and HARDEN (line 51)."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
+    { "gen": "G0", "date": "2026-11-21", "by": "v2 ladder for Folded Space by an independent rater who built none of it; G0 is the ladder's baseline, read from the code of folded.html at 9942268 (local branch labs/folded, not live) with no browser, the drive results taken from the road's record and the pre-grade of c268995; the lab's first grade is still to come, by a rater after the merge", "commit": "9942268", "reason": "The concept changed on 2026-11-18 from the tesseract course of md_animation_page.html (a point walked to the tesseract, polytopes turned, sliced and projected to 10D) to Folded Space (a trained ReLU network's exact cells around the visitor's drawing, the corner that flips it, and hardening), so the axes of 2026-11-11 rate a different page and concept and are replaced, as LABS_LEVELS.md rule 3 allows between generations." },
+    { "gen": "G0", "date": "2026-11-21", "by": "second pass (LABS_LEVELS.md rule 1) by a reviewer who wrote none of the ladder and built none of the lab, before any grade on it", "commit": "9942268", "reason": "Rule 1's review, before the lab's first grade, so no result was fitted. Tightened: cell-geometry 7 (the census must fall within a tolerance set before the run), corner-truth 4 (the smallest step checked by a scan) and 5 (each threat shape on its own plane), hardening-measured 5 (the kill test's 0.05 over the control), plate-and-scene 5 (walls move by exact interpolated mosaics, the unfold player defined, the atlas's ignition) and 7, engine-judgement 5 (the verifier stays on the scene's network) and 9 (proofs counted, since an attack alone settles an unhardened network), honest-explanation 5 (the atlas's explanation rung 5 clauses) and 8 (a rubric set before the test), reach-and-budget 5 (every fiction entry but the verifier at phone scale) and 10 (WCAG 2.2 AA), calls-and-record 10 (an outside standard). Made checkable without changing the bar: cell-geometry 2 (exact by either method), calls-and-record 5 (the ledger counted once, its record share here), machine-material 2 (tokens.css has no Fraunces token) and 3 (a computed answer is gold at rest). machine-material G0 corrected from 2 to 1: folded.css names IBM Plex Mono and Fraunces literally. The lab's G0 stays 2." }
   ]
 }
