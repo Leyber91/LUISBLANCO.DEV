@@ -6,17 +6,25 @@
 
 import { forward, template, argmax } from './mlp.js';
 import { mosaic, certify } from './split.js';
-import { netFromFile, digitFrom, candidates, verdict, tally, softmax, smallestFlip } from './call.js';
+import { netFromFile, digitFrom, candidates, verdict, softmax, smallestFlip } from './call.js';
 import { fnv1a } from '../kit/rng.js';
 import { frameAlong, run } from './plate.js';
 import { reduce } from './pad.js';
 import { el } from '../kit/dom.js';
+import { int, fixed } from '../kit/format.js';
+import { tallySvg } from '../kit/controls.js';
+import { startKeep } from './keep.js';
+import { tallyOf, pixelsTo64, pixelsFrom64 } from './record.js';
 
 const $ = (id) => document.getElementById(id);
 const SVGNS = 'http://www.w3.org/2000/svg';
 const svg = (tag, attrs) => { const n = document.createElementNS(SVGNS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); return n; };
 
-const MID = [40, 48, 62], HI = [234, 240, 251], LO = [2, 3, 5], VOID = [6, 8, 13];
+// Canvas colours from the site's tokens (atlas interface.2.2): the ground, the brightest ink, and the horizon blue.
+const tok = (name, fallback) => { const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim(); const m = /^#([0-9a-f]{6})$/i.exec(v);
+  return m ? [0, 2, 4].map((k) => parseInt(m[1].slice(k, k + 2), 16)) : fallback; };
+const VOID = tok('--void', [6, 8, 13]), HI = tok('--text-bright', [234, 240, 251]), HORIZON = tok('--horizon', [159, 179, 214]);
+const MID = VOID.map((v, i) => Math.round(v + (HORIZON[i] - v) * 0.16)), LO = VOID.map((v) => Math.round(v * 0.35));
 const mix = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
 function paint(canvas, colourAt) {
   const g = canvas.getContext('2d'), im = g.createImageData(28, 28);
@@ -27,7 +35,7 @@ const paintInk = (canvas, x) => paint(canvas, (p) => mix(VOID, HI, x[p]));
 const paintSigned = (canvas, t) => { let m = 0; for (const v of t) m = Math.max(m, Math.abs(v)); paint(canvas, (p) => { const s = t[p] / (m || 1); return s >= 0 ? mix(MID, HI, s) : mix(MID, LO, -s); }); };
 const paintCorner = (canvas, signs) => paint(canvas, (p) => (signs[p] > 0 ? mix(MID, HI, 0.55) : mix(MID, LO, 0.55)));
 
-const S = { net: null, digits: [], xs: [], eps: 0.1, i: 0, cands: null, plate: null, picked: null, v: null, tally: { made: 0, right: 0 }, padMode: 'example', mine: 0 };
+const S = { net: null, digits: [], xs: [], eps: 0.1, i: 0, cands: null, plate: null, picked: null, v: null, padMode: 'example', mine: 0, keep: null, ledgerNames: {} };
 
 /* The pad: strokes of PAD_LINE px on a PAD px square (MNIST's strokes are about a tenth of a digit's height). Each
    stroke is read as it is drawn (the answer moves); on release the drawing joins the strip and gets its cells. */
@@ -52,22 +60,21 @@ async function harden() {
   const worker = new Worker(new URL('./harden.worker.js', import.meta.url), { type: 'module' });
   worker.onmessage = (e) => {
     const m = e.data, tmp = { sizes: S.net.sizes, W: m.W, b: m.b };
-    $('hardnote').textContent = `Step ${m.step} of ${m.steps}, ${(m.ms / 1000).toFixed(1)} s.`;
+    $('hardnote').textContent = `Step ${int(m.step)} of ${int(m.steps)}, ${fixed(m.ms / 1000, 1)} s.`;
     document.body.dataset.hardenStep = String(m.step);
     if (!m.done && !reducedMotion()) {
       const M = mosaic(tmp, S.plate.fr);
       S.plate = { ...S.plate, M, R: run(M.cells, S.plate.fr.L) };
-      drawPlate(false); $('t-cells').textContent = `${M.cells.length.toLocaleString('en-US')}, exact`;
+      drawPlate(false); $('t-cells').textContent = `${int(M.cells.length)}, exact`;
     }
     if (m.done) {
       worker.terminate();
       S.net = tmp; S.hardening = false; S.hardened = true;
       const after = smallestFlip(S.net, x0);
-      const fmt = (v) => (v === null ? 'over 0.5' : v.toFixed(3));
-      const row = el('tr', ''); row.append(el('td', '', name), el('td', 'n', fmt(before)), el('td', 'n', fmt(after)));
-      $('ledger').append(row);
+      S.ledgerNames[S.digits[S.i].index] = name;
+      S.keep.ledger({ t: Date.now(), drawing: String(S.digits[S.i].index).startsWith('pad-') ? S.digits[S.i].index : 'ex-' + S.digits[S.i].index, before, after });
       btn.textContent = 'Hardened';
-      $('hardnote').textContent = `Hardened in ${(m.ms / 1000).toFixed(1)} s. Call again: the corners are the hardened network's own.`;
+      $('hardnote').textContent = `Hardened in ${fixed(m.ms / 1000, 1)} s. Call again: the corners are the hardened network's own.`;
       show(S.i, { keepPad: S.digits[S.i].mine });
       Object.assign(document.body.dataset, { hardened: '1', ledgerBefore: String(before), ledgerAfter: String(after) });
     }
@@ -95,7 +102,7 @@ function liveRead() {
   if (!x.some((v) => v > 0)) return null;
   const z = Array.from(forward(S.net, x)), p = softmax(z), a = argmax(z);
   drawSimplex(p);
-  $('readout').replaceChildren('Read as ', el('b', '', String(a)), ` at ${(100 * p[a]).toFixed(1)}%`);
+  $('readout').replaceChildren('Read as ', el('b', '', String(a)), ` at ${fixed(100 * p[a], 1)}%`);
   return { x, a };
 }
 function setupPad() {
@@ -129,7 +136,8 @@ function commitDrawing(x, a) {
   // The visitor's drawing: one entry in the strip, replaced while the same drawing grows stroke by stroke.
   const last = S.digits.length - 1;
   const growing = S.digits[last]?.mine && S.digits[last].open;
-  if (growing) { S.xs[last] = x; } else { S.mine += 1; S.xs.push(x); S.digits.push({ index: 'mine-' + S.mine, label: null, mine: true, open: true }); addStripButton(S.xs.length - 1); }
+  if (growing) { S.xs[last] = x; } else { S.mine += 1; S.xs.push(x); S.digits.push({ index: 'pad-' + S.mine, label: null, mine: true, open: true }); addStripButton(S.xs.length - 1); }
+  S.keep.drawing({ t: Date.now(), id: S.digits[S.xs.length - 1].index, pixels: pixelsTo64(x) });
   const j = S.xs.length - 1;
   paintInk($('strip').children[j].querySelector('canvas'), x);
   $('hint').textContent = `Your drawing is read as ${a}. Add strokes, or clear the pad for a new one.`;
@@ -203,18 +211,36 @@ function call(i) {
   if (S.v) return;
   S.picked = i;
   S.v = verdict(S.cands, i);
-  S.tally = tally(S.tally, S.v);
-  const c = S.cands.list[i];
+  const c = S.cands.list[i], d = S.digits[S.i];
+  S.keep.call({ t: Date.now(), mode: d.mine ? 'pad' : 'example', drawing: d.mine ? d.index : 'ex-' + d.index, kind: c.kind, answer: S.cands.answer, read: c.read,
+    right: S.v.right, counted: S.v.counted, network: S.hardened ? 'hardened' : 'original' });
   $('verdict').textContent = !S.v.counted
     ? (S.hardened ? `None of the three changes it now: after hardening, a step of ${S.eps} keeps the answer at ${S.cands.answer}. This call is not counted.`
       : 'None of the three changes the answer here, so this call is not counted.')
     : S.v.right ? `Right. This corner changes the answer to ${c.read}.` : `Not this one. It leaves the answer at ${S.cands.answer}.`;
-  drawTally(); drawCands(); drawPlate(true);
-  document.body.dataset.called = String(S.tally.made);
+  drawCands(); drawPlate(true);
+  nextAction(S.hardened ? 'Next: draw your own digit, or pick another, and call again.' : 'Next: harden the network, then call the same drawing again.');
 }
 
 function drawTally() {
-  const t = $('tally'); t.replaceChildren('Calls right: ', el('b', '', String(S.tally.right)), ` of ${S.tally.made}`);
+  // The tally is computed from the calls the store confirmed (the store is the truth).
+  const t = tallyOf(S.keep ? S.keep.current() : { calls: [] });
+  $('tally').replaceChildren('Calls right: ', el('b', '', int(t.right)), ` of ${int(t.made)}`, tallySvg(t.made, t.right, 180).svg);
+  document.body.dataset.called = String(t.made); document.body.dataset.right = String(t.right);
+}
+function nextAction(s) { $('nextline').textContent = s; }
+function drawLedger(rec) {
+  const fmt = (v) => (v === null ? 'over 0.5' : fixed(v, 3));
+  const name = (id) => S.ledgerNames[id] || (id.startsWith('pad-') ? 'Your drawing' : `The example ${S.digits.find((d) => 'ex-' + d.index === id)?.label ?? ''}`);
+  $('ledger').replaceChildren(...rec.ledger.slice(-6).map((l) => { const row = el('tr', ''); row.append(el('td', '', name(l.drawing)), el('td', 'n', fmt(l.before)), el('td', 'n', fmt(l.after))); return row; }));
+}
+function restoreDrawings(rec) {
+  // The visitor's drawings kept from an earlier visit join the strip once, as closed drawings.
+  for (const d of rec.drawings) {
+    if (S.digits.some((x) => x.index === d.id)) continue;
+    const n = Number(d.id.slice(4)); if (n > S.mine) S.mine = n;
+    S.xs.push(pixelsFrom64(d.pixels)); S.digits.push({ index: d.id, label: null, mine: true, open: false }); addStripButton(S.xs.length - 1);
+  }
 }
 
 function show(i, { keepPad = false } = {}) {
@@ -226,7 +252,7 @@ function show(i, { keepPad = false } = {}) {
   [...$('strip').children].forEach((b, j) => b.setAttribute('aria-current', String(j === i)));
   const z = Array.from(forward(S.net, x)), p = softmax(z), a = argmax(z);
   drawSimplex(p);
-  $('readout').replaceChildren('Read as ', el('b', '', String(a)), ` at ${(100 * p[a]).toFixed(1)}%`);
+  $('readout').replaceChildren('Read as ', el('b', '', String(a)), ` at ${fixed(100 * p[a], 1)}%`);
   S.cands = candidates(S.net, x, S.eps, S.digits[i].index);
   const { rival, answer } = S.cands;
   paintSigned($('tpl'), template(S.net, x, rival, answer));
@@ -237,9 +263,10 @@ function show(i, { keepPad = false } = {}) {
   const M = mosaic(S.net, fr);
   const ms = performance.now() - t0;
   S.plate = { fr, M, R: run(M.cells, fr.L), ms, certFailures: certify(S.net, fr, M.cells) };
-  $('t-cells').textContent = `${M.cells.length.toLocaleString('en-US')}, exact`;
+  $('t-cells').textContent = `${int(M.cells.length)}, exact`;
   $('t-eps').textContent = `${S.eps} of full ink`;
-  $('t-ms').textContent = `${Math.round(ms)} ms`;
+  $('t-ms').textContent = `${int(Math.round(ms))} ms`;
+  nextAction(`Next: call which corner changes the ${answer}.`);
   $('question').textContent = `${S.hardened ? 'The network is hardened. ' : ''}Each corner moves every pixel by ${S.eps}. Which one changes the answer from ${answer}?`;
   $('verdict').textContent = '';
   drawCands(); drawPlate(false);
@@ -259,6 +286,10 @@ async function start() {
   setupPad();
   $('next').addEventListener('click', () => show((S.i + 1) % S.xs.length));
   $('harden').addEventListener('click', harden);
+  S.keep = startKeep({
+    onRecord: (rec, line) => { restoreDrawings(rec); drawTally(); drawLedger(rec); $('health').textContent = line; document.body.dataset.kept = String(rec.calls.length); },
+    onSay: (s) => { $('keepnote').textContent = s; },
+  });
   drawTally();
   show(Math.max(0, S.digits.findIndex((d) => d.label === 4)));
   document.body.dataset.state = 'ready';

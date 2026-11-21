@@ -7,8 +7,10 @@
   <meta name="description" content="A network trained on handwritten digits cuts the space of all drawings into flat-walled cells. Call which corner of the cube around a drawing changes its answer." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" /></noscript>
   <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/controls.css" />
   <link rel="stylesheet" href="assets/css/folded.css" />
 </head>
 <body data-state="loading">
@@ -17,6 +19,7 @@
   <div class="head">
     <h1>Folded Space</h1>
     <p class="lede">A network trained on handwritten digits cuts the space of all drawings into flat-walled cells. Inside each cell it applies one picture. Draw a digit, then call which corner of the cube around it changes the answer.</p>
+    <p class="nextline" id="nextline" aria-live="polite">Next: call which corner changes the 4.</p>
   </div>
   <main class="grid">
     <section class="col-a" aria-labelledby="h-a">
@@ -46,8 +49,10 @@
       <div id="cands" class="cands"></div>
       <p class="verdict" id="verdict" aria-live="polite">&nbsp;</p>
       <p class="tally" id="tally">Calls right: <b>0</b> of 0</p>
+      <p class="health" id="health">Reading the record.</p>
+      <p class="keepnote" id="keepnote" aria-live="polite"></p>
       <div class="tpl"><canvas id="tpl" width="28" height="28" aria-label="The template of the cell the drawing is in"></canvas><p>Inside this cell the network applies this one picture. Its sign is the sharpest corner of the cube.</p></div>
-      <button class="act" id="harden" type="button">Harden the network</button>
+      <button class="fill" id="harden" type="button">Harden the network</button>
       <p class="actnote" id="hardnote" aria-live="polite">300 steps on 2,000 digits and your drawings, in this tab.</p>
       <table class="ledger"><thead><tr><th>Smallest step that changes it</th><th class="n">before</th><th class="n">after</th></tr></thead><tbody id="ledger"></tbody></table>
       <button class="next" id="next" type="button">Next drawing</button>

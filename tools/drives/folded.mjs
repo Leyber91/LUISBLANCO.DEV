@@ -19,7 +19,7 @@ export default async function folded(p, { base }) {
     verdict: document.getElementById('verdict').textContent, cands: document.querySelectorAll('#cands button').length }; })()`);
   const s0 = await at();
   p.check('at rest the plate shows its exact cells, certified, with no run yet', s0.cells > 0 && s0.polys === s0.cells && s0.cert === 0 && s0.runs === 0, `${s0.cells} cells, ${s0.polys} drawn, certificate failures ${s0.cert}, runs ${s0.runs}`);
-  p.check('three candidates wait for a call, and the tally is empty', s0.cands === 3 && /Calls right: 0 of 0/.test(s0.tally), `${s0.cands} candidates, "${s0.tally}"`);
+  p.check('three candidates wait for a call, and the tally is empty', s0.cands === 3 && /^Calls right: 0 of 0$/.test(s0.tally), `${s0.cands} candidates, "${s0.tally}"`);
   await p.shot('01-at-rest');
 
   const centre = (sel) => p.ev(`(() => { const b = document.querySelector(${JSON.stringify(sel)}); if (!b) return null; b.scrollIntoView({ block: 'center' }); const r = b.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, h: r.height }; })()`);
@@ -29,7 +29,7 @@ export default async function folded(p, { base }) {
   const s1 = await at();
   const res = await p.ev(`[...document.querySelectorAll('#cands button')].map((b) => ({ kind: b.dataset.kind, text: b.querySelector('.cr').textContent, fired: b.querySelector('.cr').classList.contains('fired'), off: b.disabled }))`);
   const tRes = res.find((r) => r.kind === 'template');
-  p.check('the call on the sharpest corner is marked right, and the tally counts it', /^Right\./.test(s1.verdict) && /Calls right: 1 of 1/.test(s1.tally) && tRes.fired, `"${s1.verdict}" "${s1.tally}" ${tRes.text}`);
+  p.check('the call on the sharpest corner is marked right, and the tally counts it', /^Right\./.test(s1.verdict) && /^Calls right: 1 of 1$/.test(s1.tally) && tRes.fired, `"${s1.verdict}" "${s1.tally}" ${tRes.text}`);
   p.check('the run is drawn with one tick per wall the title block counts', s1.runs === 1 && s1.ticks === s1.walls && s1.walls > 0, `${s1.ticks} ticks, ${s1.walls} walls`);
   p.check('after the call every candidate shows what it was read as, and none can be pressed again', res.every((r) => r.off && /read as \d/.test(r.text)), res.map((r) => `${r.kind}: ${r.text}`).join('; '));
   const lab = await p.ev(`(() => { const a = document.getElementById('pl-from'), b = document.getElementById('pl-to'); return { a: parseFloat(getComputedStyle(a).fontSize), b: parseFloat(getComputedStyle(b).fontSize), text: b.textContent }; })()`);
@@ -48,4 +48,24 @@ export default async function folded(p, { base }) {
   const expect = !anyChanged ? /not counted/ : changed ? /^Right\./ : /^Not this one\./;
   p.check('the second call is marked by what its corner was read as', expect.test(s2.verdict), `random corner: ${res2}; verdict "${s2.verdict}"; tally "${s2.tally}"`);
   await p.shot('03-second-call');
+
+  // The product rungs of level 1 and 2 the page carries (atlas reach.2, interface.2.1, orientation.2, records.1 and 2.4).
+  p.check('both calls are kept by the store', await p.until('document.body.dataset.kept === "2"', 10000), await p.ev('document.getElementById("health").textContent'));
+  const rungs = await p.ev(`(() => {
+    const rm = [...document.styleSheets].some((s) => { try { return [...s.cssRules].some((r) => r.media && /prefers-reduced-motion: reduce/.test(r.media.mediaText) && /\\*/.test(r.cssText) && /animation-duration/.test(r.cssText)); } catch { return false; } });
+    const font = document.querySelector('link[href*="fonts.googleapis.com/css2"]');
+    const skip = document.querySelector('a.skip');
+    return { rm, fontMedia: font && font.getAttribute('media'), skip: skip && skip.getAttribute('href'), next: document.getElementById('nextline').textContent, health: document.getElementById('health').textContent };
+  })()`);
+  p.check('one global rule collapses animations and transitions under reduced motion', rungs.rm);
+  p.check('the fonts load without blocking first paint', rungs.fontMedia === 'print' || rungs.fontMedia === 'all', `media ${rungs.fontMedia}`);
+  p.check('a skip link jumps to the call', rungs.skip === '#call', rungs.skip);
+  p.check('the page names one next action', /^Next: [^.]+\.$/.test(rungs.next), rungs.next);
+  p.check('the health line names the record version, what is kept and where', /^Record version 1: 2 calls, \d+ drawings?, \d+ ledger rows?, (kept in this browser|kept only until this tab closes)/.test(rungs.health), rungs.health);
+
+  await p.go(`${base}/labs/folded.html`);
+  p.check('after a reload the calls are read back from the store', await p.until('document.body.dataset.state === "ready" && document.body.dataset.kept === "2"', 20000), await p.ev('document.getElementById("health").textContent'));
+  const t3 = await p.ev('document.getElementById("tally").textContent');
+  p.check('and the tally is drawn from them, its words whole', /^Calls right: 1 of [12]$/.test(t3), t3);
+  await p.shot('04-after-reload');
 }

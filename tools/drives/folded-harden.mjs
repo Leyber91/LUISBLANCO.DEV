@@ -23,6 +23,7 @@ export default async function harden(p, { base }) {
   p.check('hardening posts its steps while it runs', await p.until('+(document.body.dataset.hardenStep || 0) >= 50', 60000), await p.ev('document.getElementById("hardnote").textContent'));
   await p.shot('01-hardening');
   p.check('hardening reaches its last step', await p.until('document.body.dataset.hardened === "1"', 180000), await p.ev('document.getElementById("hardnote").textContent'));
+  await p.until('document.querySelectorAll("#ledger tr").length >= 1', 10000); // the row is drawn from the record the store returns
   const led = await p.ev(`(() => ({ b: document.body.dataset.ledgerBefore, a: document.body.dataset.ledgerAfter, rows: document.querySelectorAll('#ledger tr').length, text: document.querySelector('#ledger tr')?.textContent }))()`);
   const before = Number(led.b), after = led.a === 'null' ? Infinity : Number(led.a);
   p.check('the ledger has one row, and the smallest step that changes the 4 grew', led.rows === 1 && Number.isFinite(before) && after > before, `${led.text} (before ${led.b}, after ${led.a})`);
