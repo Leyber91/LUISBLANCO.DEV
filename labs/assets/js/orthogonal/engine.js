@@ -16,10 +16,14 @@
    - fogField(world, lay)      each cell's distance to each line, once per layout
    - fogDensity(field, prog)   the fog's density in every cell, for the strand's progress
    - needsOf, needPath         what a step needs, and the links from a step up to one it needs
-   - itemSets, item            the exercise's sets of steps, and item n: its steps, shuffled
+   - needVerb(node)            "needs", or "grows from" for a seed of trouble: the one verb of every needs sentence
+   - itemSets, item            the exercise's sets of steps, and a draw: item n's steps, shuffled by an attempt's seed
+   - stepsOf, judge            an order in progress drawn again from its seed; the check as the record keeps it
    - checkOrder(world, order)  the check: right, or the first pair out of order and the links that order them
    - needLine(world, path)     those links in words
+   - reasons(world)            every reason a wrong order of an item can be given: the footer is reserved for the longest
    - drillPlaces, drillFog     where an item's steps stand while they are ordered, and the fog around them
+   - strandGold(state)         whether the strand is gold in a page state: the drawing and the legend both ask it
    ============================================================ */
 import { mulberry32, seedOf, shuffle } from '../kit/rng.js';
 import { EXERCISE, FOG, LAYOUT, ROLES, SOURCES, TIMING } from './config.js';
@@ -53,6 +57,7 @@ export function check(world) {
     } else if (n.pair !== undefined) out.push(`${n.id}: only an Earth node names a pair`);
     if (!String(n.label || '').trim()) out.push(`${n.id}: no label`);
     if (!String(n.note || '').trim()) out.push(`${n.id}: no note`);
+    if (!String(n.needs || '').trim()) out.push(`${n.id}: no line saying what it needs`);
     if (!Array.isArray(n.evidence) || !n.evidence.length) out.push(`${n.id}: no evidence`);
     for (const e of n.evidence || []) {
       if (e.tag !== 'REAL' && e.tag !== 'ILLUSTRATIVE') out.push(`${n.id}: evidence tagged "${e.tag}"`);
@@ -196,7 +201,10 @@ export function layout(world, { width, height = 0, leader = false } = {}) {
     else { left = E + L.labelGap; right = x - L.labelGap + 1; anchor = 'end'; }   // a side thread's label sits left of its lane
     const lines = wrap(n.label, chars(right - left));
     const role = n.branch === 'earth' ? '' : ROLES[n.role];
-    boxes.set(n.id, { x, left, right, anchor, lines, role });
+    // while an order is given the role line gives way to what the step needs. Only the four steps are on the drawing
+    // then, each in a band of its own, so the line wraps across the whole width on its side of the step's lane
+    const needs = wrap(`${needVerb(n)} ${n.needs}`, anchor === 'start' ? chars(width - left) : chars(right - 4));
+    boxes.set(n.id, { x, left, right, anchor, lines, role, needs });
   }
   const rowCount = order.length;
   const blockH = new Array(rowCount).fill(0);
@@ -223,10 +231,15 @@ export function layout(world, { width, height = 0, leader = false } = {}) {
     const hitL = b.anchor === 'start' ? b.x - L.node : b.x - L.labelGap - textW - 4;
     const hitR = b.anchor === 'start' ? b.left + textW + 4 : b.x + L.node;
     const hitH = Math.max(44, (b.lines.length + (b.role ? 1 : 0)) * L.lineH + 8);
+    // the target while an order is given covers the step's words and what it needs
+    const drillW = Math.max(...b.lines.map((s) => s.length), ...b.needs.map((s) => s.length)) * L.charW;
+    const dL = b.anchor === 'start' ? b.x - L.node : b.x - L.labelGap - drillW - 4;
+    const dR = b.anchor === 'start' ? b.left + drillW + 4 : b.x + L.node;
     return {
       id: n.id, row: r, state: stateOf(world, n.id), role: n.role, x: b.x, y: top + L.node / 2,
-      label: { x: b.anchor === 'start' ? b.left : b.x - L.labelGap, y: top + 9, anchor: b.anchor, lines: b.lines, role: b.role },
+      label: { x: b.anchor === 'start' ? b.left : b.x - L.labelGap, y: top + 9, anchor: b.anchor, lines: b.lines, role: b.role, needs: b.needs },
       hit: { x: Math.max(0, hitL), y: top - 6, w: Math.min(width, hitR) - Math.max(0, hitL), h: hitH },
+      drillHit: { x: Math.max(0, dL), y: top - 6, w: Math.min(width, dR) - Math.max(0, dL), h: Math.max(44, (b.lines.length + b.needs.length) * L.lineH + 8) },
     };
   });
   const pos = new Map(nodes.map((n) => [n.id, n]));
@@ -554,17 +567,42 @@ export function itemSets(world, size = EXERCISE.size, free = EXERCISE.free) {
   return out;
 }
 
-/* Item `index` (a whole number from 0): its steps, in the order they are first shown. The sets are dealt in an order
-   seeded by the world, so no set comes back before every set has come once; the steps are shuffled by a generator
-   seeded by the item's index, and a shuffle the check would already call right is shuffled again. */
-export function item(world, index) {
-  const sets = itemSets(world);
-  if (!sets.length || !Number.isInteger(index) || index < 0) return null;
-  const deal = shuffle(sets.map((_, i) => i), mulberry32(seedOf('orthogonal', world.id, 'deal')));
-  const rng = mulberry32(seedOf('orthogonal', world.id, 'item', index));
-  let steps = shuffle(sets[deal[index % sets.length]], rng);
-  for (let k = 0; k < 64 && checkOrder(world, steps).right; k++) steps = shuffle(steps, rng);
-  return { index, steps };
+/* The sets, once per world: a draw is made again on every press. */
+const setsMemo = new WeakMap();
+function setsOf(world) {
+  let s = setsMemo.get(world);
+  if (!s) {
+    const sets = itemSets(world);
+    s = { sets, deal: shuffle(sets.map((_, i) => i), mulberry32(seedOf('orthogonal', world.id, 'deal'))) };
+    setsMemo.set(world, s);
+  }
+  return s;
+}
+
+/* A draw of item `index` (a whole number from 0) for an attempt's `seed`: its steps, in the order they are shown. The
+   sets are dealt in an order seeded by the world, so no set comes back before every set has come once. The steps are
+   shuffled by a generator seeded by the item and the seed, and the seed is the record's attempt counter (record.js
+   withStart), one more for every order started: the same four steps come in new places on each attempt, and an order
+   in progress, which keeps its seed, is drawn again as it was after a reload. Every order of the four is as likely,
+   the right ones included, so no fixed way of pressing (top to bottom, any one pattern of places, the last answer's)
+   is right more often than pressing at random: tests.mjs measures each (hub lesson L17). */
+export function item(world, index, seed) {
+  const { sets, deal } = setsOf(world);
+  if (!sets.length || !Number.isInteger(index) || index < 0 || !Number.isInteger(seed) || seed < 0) return null;
+  const rng = mulberry32(seedOf('orthogonal', world.id, 'draw', index, seed));
+  return { index, seed, steps: shuffle(sets[deal[index % sets.length]], rng) };
+}
+
+/* The steps of an order in progress (the record's open: its item and its seed), drawn again; null when it is none. */
+export function stepsOf(world, open) {
+  const it = open ? item(world, open.item, open.seed) : null;
+  return it ? it.steps : null;
+}
+
+/* The check as the record keeps it: right or not, and when not, the pair out of order (the step, what it needs). */
+export function judge(world, order) {
+  const r = checkOrder(world, order);
+  return { right: r.right, needs: r.pair ? [r.pair.step, r.pair.needs] : null };
 }
 
 /* The check, against the parent links. Right when no step comes before a step it needs. When wrong: the first step,
@@ -587,38 +625,61 @@ export function checkOrder(world, order) {
   return { right: true, pair: null };
 }
 
+/* The verb of every sentence that says what a step needs. A seed of trouble does not need the success that plants it;
+   it grows from it, and is said so. */
+export const needVerb = (n) => (n.role === 'trouble' ? 'grows from' : 'needs');
+
 /* The links that order a pair, in words: "Fungi farmed needs Fungi eat lignin", then ", which needs ..." for each step
-   between them. A seed of trouble does not need the success that plants it; it grows from it, and is said so. */
+   between them. */
 export function needLine(world, path) {
   const ids = byId(world);
   const label = (id) => ids.get(id).label;
-  const verb = (id) => (ids.get(id).role === 'trouble' ? 'grows from' : 'needs');
+  const verb = (id) => needVerb(ids.get(id));
   let s = `${label(path[0])} ${verb(path[0])} ${label(path[1])}`;
   for (let k = 2; k < path.length; k++) s += `, which ${verb(path[k - 1])} ${label(path[k])}`;
   return s;
 }
 
+/* Every reason a wrong order of an item can be given in this world, once each: the links checkOrder names for every
+   order of every set. The page reserves the footer's height for the tallest of these, not for the longest chain of
+   the lineage, which no item of four steps can show. */
+export function reasons(world) {
+  const perms = (a) => (a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map((p) => [x, ...p])));
+  const out = new Set();
+  for (const set of setsOf(world).sets) for (const o of perms(set)) {
+    const r = checkOrder(world, o);
+    if (!r.right) out.add(needLine(world, r.pair.path));
+  }
+  return [...out];
+}
+
 /* Where the steps of an item stand while they are ordered: out of their rows, one to a slot down the drawing in the
-   order the item shows them, each on its own lane with its words as the lineage set them, so the rows give nothing
-   away. Each step's shift down the drawing (dy) and its slot. */
+   order the item shows them, each on its own lane with its words as the lineage set them and what it needs under them
+   in place of its role, so the rows give nothing away and the words give the reasons. Each step's shift down the
+   drawing (dy) and its slot. */
 export function drillPlaces(lay, steps) {
   const top0 = LAYOUT.topPad + LAYOUT.headH;
-  const pitch = (lay.height - top0 - 4) / steps.length;
+  const nodes = steps.map((id) => lay.nodes.find((x) => x.id === id));
+  // each step takes the height of its words and what it needs (never less than its 44 px target less the 8 px the
+  // target reaches past the words), and the room left over is shared as equal gaps, half a gap above the first and
+  // below the last: a step that says more takes more of the drawing, and none runs into the next
+  const block = nodes.map((n) => Math.max(36, (n.label.lines.length + n.label.needs.length) * LAYOUT.lineH));
+  const gap = Math.max(0, (lay.height - top0 - 4 - block.reduce((a, b) => a + b, 0)) / steps.length);
   const out = new Map();
-  steps.forEach((id, k) => {
-    const n = lay.nodes.find((x) => x.id === id);
-    const blockH = (n.label.lines.length + (n.label.role ? 1 : 0)) * LAYOUT.lineH;
-    const was = n.y - LAYOUT.node / 2;
-    const top = top0 + k * pitch + Math.max(8, (pitch - blockH) / 2);
-    out.set(id, { dy: top - was, slot: k });
+  let top = top0 + gap / 2;
+  nodes.forEach((n, k) => {
+    out.set(n.id, { dy: top - (n.y - LAYOUT.node / 2), slot: k });
+    top += block[k] + gap;
   });
   return out;
 }
 
-/* A step's square and words as one box, moved down by dy. */
-export function stepBox(n, dy = 0) {
-  const w = Math.max(...n.label.lines.map((s) => s.length), n.label.role.length) * LAYOUT.charW;
-  const h = (n.label.lines.length + (n.label.role ? 1 : 0)) * LAYOUT.lineH;
+/* A step's square and words as one box, moved down by dy: its label and role line, or with `drill`, its label and what
+   it needs, as it stands while an order is given. */
+export function stepBox(n, dy = 0, drill = false) {
+  const under = drill ? n.label.needs : (n.label.role ? [n.label.role] : []);
+  const w = Math.max(...n.label.lines.map((s) => s.length), ...under.map((s) => s.length)) * LAYOUT.charW;
+  const h = (n.label.lines.length + under.length) * LAYOUT.lineH;
   const lx0 = n.label.anchor === 'start' ? n.label.x : n.label.x - w;
   return {
     x0: Math.min(n.x - LAYOUT.node / 2, lx0), x1: Math.max(n.x + LAYOUT.node / 2, lx0 + w),
@@ -632,7 +693,7 @@ export function stepBox(n, dy = 0) {
 export function drillFog(world, lay, places, field) {
   const N = field.cols * field.rows;
   const out = fogDensity(field, strandAt(world, lay, 0).edges);
-  const boxes = [...places].map(([id, p]) => stepBox(lay.nodes.find((x) => x.id === id), p.dy));
+  const boxes = [...places].map(([id, p]) => stepBox(lay.nodes.find((x) => x.id === id), p.dy, true));
   for (let i = 0; i < N; i++) {
     if (!out[i]) continue;
     const x = ((i % field.cols) + 0.5) * field.cell, y = (Math.floor(i / field.cols) + 0.5) * field.cell;
@@ -645,3 +706,12 @@ export function drillFog(world, lay, places, field) {
   }
   return out;
 }
+
+/* ---------------------------------------------------------------- gold, for a page state
+
+   Whether the strand (the branch this world took, its steps and the leader to the render) is drawn gold, for a page
+   state ({ mode }: 'read', 'order' or 'checked'). Gold marks what fired, so it is gold in the reading. While an order
+   is given its lines are in fog, and gold on the steps would say which are on the branch; once an order is checked the
+   verdict is the one decision on the drawing, so the strand is ink. The drawing and the legend's sample both read this
+   one function (main.js paintGold), so the legend never shows a gold the drawing does not. */
+export const strandGold = (state) => !!state && state.mode === 'read';

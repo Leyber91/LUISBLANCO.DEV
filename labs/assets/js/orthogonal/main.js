@@ -3,7 +3,9 @@
 
    ?node=<id>  opens the plate with that node chosen (an unknown id
                opens the artifact)
-   ?order=<n>  opens item n of the exercise (a whole number from 0)
+   ?order=<n>  opens item n of the exercise (a whole number from 0):
+               the order in progress when it is that item, else a
+               new draw of it
    ?still      the finished frame, no ignition and no drift (as
                under prefers-reduced-motion)
 
@@ -17,13 +19,20 @@
    evidence in the footer), an order being given (the exercise, on
    the drawing), and an order checked (the verdict on the drawing).
    The visitor's record is read from Labs OS once it starts
-   (record.js); the exercise works before that and without it.
+   (record.js). The store is the truth: every start, press, undo,
+   leave and choice is one change the Keeper applies to what the
+   store holds, and the page shows the record that came back. An
+   order in progress is in the record, so a reload opens it again
+   with its presses.
    ============================================================ */
 import { mountScene } from '../os/scene.js';
 import { EVENTS, EXERCISE, FOG, STORAGE_OFF, TIMING } from './config.js';
-import { arrival, check, checkOrder, drillFog, drillPlaces, fogField, ignitionEnd, item, needLine, needPath, step, strandAt } from './engine.js';
+import {
+  arrival, check, checkOrder, drillFog, drillPlaces, fogField, ignitionEnd, item, judge, needLine, reasons, step, stepsOf,
+  strandAt, strandGold,
+} from './engine.js';
 import { FogPainter } from './fogview.js';
-import { countLine, fresh, Keeper, withAction, withAnswer, withChoice } from './record.js';
+import { countLine, fresh, Keeper, withChoice, withLeave, withPress, withStart, withUndo } from './record.js';
 import { applyStrand, drawArtifactInk, drawEarthLamp, drawLineage, markChosen, markPicks, markWhy, placeDrill, writeDrill, writeReading } from './view.js';
 import { WORLD } from './worlds/fungi-early.js';
 
@@ -56,10 +65,14 @@ let reached = still;                // the strand has reached the artifact (on t
 let onReach = null;                 // what the render does then (art)
 
 let mode = 'read';                  // 'read', 'order' (an order being given) or 'checked'
-let drill = null;                   // { item: { index, steps }, picks, result: null | { right, pair, line } }
-let rec = fresh();                  // the visitor's record (record.js), kept in Labs OS once it has started
+let drill = null;                   // { item: { index, seed, steps }, picks, result: null | { right, pair, line } }
+let rec = fresh();                  // the record as the store last gave it back (record.js)
 let keeper = null;                  // record.js Keeper, once Labs OS has answered; null before
 let recordRead = false;             // the stored record has been read (or found missing)
+const early = [];                   // choices made before the record was read, applied to it once it is
+
+const drawOf = (o) => stepsOf(WORLD, o);
+const judgeOf = (order) => judge(WORLD, order);
 
 function draw() {
   const isWide = wide.matches;
@@ -76,6 +89,7 @@ function draw() {
   aimReveal();
   frame();
   if (mode !== 'read') showDrill({ instant: true });   // a redraw keeps the exercise where it was
+  else paintGold();
 }
 
 /* Draw the strand, the steps and the fog at the clock's moment; at rest, only move the fog. While an order is given
@@ -93,12 +107,19 @@ function frame() {
   return f;
 }
 
+/* The strand's gold, from the one rule (engine.js strandGold), on the drawing and on the legend's sample alike. */
+function paintGold() {
+  const gold = strandGold({ mode });
+  svg.classList.toggle('gold', gold);
+  $('lg-branch').classList.toggle('gold', gold);
+}
+
 /* ---------------------------------------------------------------- the exercise
 
-   Order these steps by what each needs (engine.js item, checkOrder). The steps leave their rows into the fog, the
-   visitor presses them in order, the engine checks the fourth press against the links, and the steps settle back with
-   the verdict on them. Each answer and each step chosen in the reading goes into the record (record.js), with its time
-   and its mode. */
+   Order these steps by what each needs (engine.js item, checkOrder). The steps leave their rows into the fog with what
+   each needs under it, the visitor presses them in order, the engine checks the fourth press against the links, and
+   the steps settle back with the verdict on them. Each start, press, undo and leave is one change to the record
+   (record.js), applied by the Keeper to what the store holds; the drawing shows the record that came back. */
 
 /* The fog for the mode: the exercise's while an order is given, the reading's otherwise; blended unless still. */
 function fogFor(instant) {
@@ -133,14 +154,20 @@ function showDrill({ instant = false } = {}) {
     const has = drill.item.steps.find((id) => g.get(id).getAttribute('data-roving') === '1') || drill.item.steps[0];
     for (const id of drill.item.steps) { g.get(id).setAttribute('tabindex', id === has ? '0' : '-1'); g.get(id).setAttribute('data-roving', id === has ? '1' : '0'); }
   }
+  paintGold();
   fogFor(instant);
   applyReadingHeight();
-  if (mode === 'read') writeReading($('reading'), WORLD, chosen);
-  else writeDrill($('reading'), WORLD, { steps: drill.item.steps, picks: drill.picks, result: drill.result, size: EXERCISE.size });
+  writeFooter();
   controls();
 }
 
-/* The bar under the drawing: its buttons for the mode, the count, and the storage-off diagnosis when nothing is kept. */
+function writeFooter() {
+  if (mode === 'read') writeReading($('reading'), WORLD, chosen);
+  else writeDrill($('reading'), WORLD, { steps: drill.item.steps, picks: drill.picks, result: drill.result, size: EXERCISE.size });
+}
+
+/* The bar under the drawing: its buttons for the mode, the count, and the storage-off diagnosis beside the count when
+   nothing is kept (on a wide plate the bar runs the sheet's width, so the diagnosis takes the same one line). */
 function controls() {
   const show = (id, on) => { $(id).hidden = !on; };
   show('drill-start', mode === 'read');
@@ -149,6 +176,7 @@ function controls() {
   show('drill-next', mode === 'checked');
   show('drill-back', mode === 'checked');
   $('drill-start').disabled = !recordRead;
+  $('drill-start').textContent = rec.open ? 'Go on with the four steps' : 'Order four steps by what each needs';
   $('drill-undo').disabled = !(drill && drill.picks.length);
   $('drill-count').textContent = recordRead ? countLine(rec) : '';
   const off = recordRead && !(keeper && keeper.kept);
@@ -163,56 +191,75 @@ function setOrderParam(index) {
   history.replaceState(null, '', url);
 }
 
-function startOrder(index) {
-  const it = item(WORLD, index);
-  if (!it || !drawn) return;
+/* One change to the record, through the Keeper; the record that comes back is the page's. */
+async function change(fn) {
+  const out = await keeper.apply(fn);
+  rec = out.state;
+  return out;
+}
+
+/* Start item `index` (null: the order in progress, else the next item). An order in progress on that item goes on as
+   it was; any other start is a new draw, seeded by the record's attempt counter. */
+async function startOrder(index = null, { focus = true } = {}) {
+  if (!drawn || !keeper) return;
   clock = Infinity;   // an order asked during the ignition finishes it first
   frame();
-  drill = { item: it, picks: [], result: null };
+  const t = Date.now();
+  const { state } = await change((r) => {
+    const want = index === null ? (r.open ? r.open.item : r.next) : index;
+    return r.open && r.open.item === want ? r : withStart(r, { t, item: want });
+  });
+  if (state.open) openOrder(state.open, { focus });
+  else controls();
+}
+
+/* Show the order in progress as the record holds it: its draw, and the steps pressed so far. */
+function openOrder(o, { focus = false } = {}) {
+  drill = { item: item(WORLD, o.item, o.seed), picks: o.picks.slice(), result: null };
   mode = 'order';
-  rec = withAction(rec, { t: Date.now(), kind: 'start', item: index });
-  persist();
-  setOrderParam(index);
+  setOrderParam(o.item);
   showDrill();
-  const first = drawn.groups.get(it.steps[0]);
-  first.focus({ preventScroll: true });
+  if (!focus) return;
+  const next = drill.item.steps.find((id) => !drill.picks.includes(id)) || drill.item.steps[0];
+  drawn.groups.get(next).focus({ preventScroll: true });
   if (!wide.matches) {
     const r = holder.getBoundingClientRect();
     if (r.top < 0 || r.top > innerHeight * 0.4) scrollBy({ top: r.top - 12, behavior: still ? 'auto' : 'smooth' });
   }
 }
 
-function pickStep(id) {
-  if (mode !== 'order' || !drill.item.steps.includes(id) || drill.picks.includes(id)) return;
-  drill.picks.push(id);
-  rec = withAction(rec, { t: Date.now(), kind: 'press', item: drill.item.index, node: id });
-  if (drill.picks.length === drill.item.steps.length) { finishOrder(); return; }
-  persist();
+async function pickStep(id) {
+  if (mode !== 'order' || !drill.item.steps.includes(id)) return;
+  const t = Date.now();
+  const { state, changed } = await change((r) => withPress(r, { t, node: id, stepsOf: drawOf, judge: judgeOf }));
+  if (!changed) return;
+  if (state.open) { showPresses(state.open); return; }
+  showChecked(state.log[state.log.length - 1]);
+}
+
+async function undoPick() {
+  if (mode !== 'order') return;
+  const { state, changed } = await change((r) => withUndo(r, { t: Date.now() }));
+  if (changed && state.open) showPresses(state.open);
+}
+
+/* The presses of the order in progress, as the record gave them back. */
+function showPresses(o) {
+  if (mode !== 'order' || !drill || drill.item.index !== o.item || drill.item.seed !== o.seed) { openOrder(o); return; }
+  drill.picks = o.picks.slice();
   markPicks(svg, drawn.groups, drill.picks);
-  writeDrill($('reading'), WORLD, { steps: drill.item.steps, picks: drill.picks, result: null, size: EXERCISE.size });
+  writeFooter();
   controls();
 }
 
-function undoPick() {
-  if (mode !== 'order' || !drill.picks.length) return;
-  const undone = drill.picks.pop();
-  rec = withAction(rec, { t: Date.now(), kind: 'undo', item: drill.item.index, node: undone });
-  persist();
-  markPicks(svg, drawn.groups, drill.picks);
-  writeDrill($('reading'), WORLD, { steps: drill.item.steps, picks: drill.picks, result: null, size: EXERCISE.size });
-  controls();
-}
-
-/* The fourth press: the engine checks the order, the steps settle back with the verdict, and the answer is kept with its
-   time and its mode. */
-function finishOrder() {
-  const res = checkOrder(WORLD, drill.picks);
-  drill.result = { right: res.right, pair: res.pair, line: res.pair ? needLine(WORLD, res.pair.path) : '' };
+/* The fourth press came back as an answer: the steps settle back with the verdict on them. The verdict is the record's;
+   the pair and the links that decide a wrong one are the engine's, from the same order. */
+function showChecked(answer) {
+  const res = checkOrder(WORLD, answer.order);
+  drill = { item: drill.item, picks: answer.order.slice(), result: { right: answer.right, pair: res.pair, line: res.pair ? needLine(WORLD, res.pair.path) : '' } };
   mode = 'checked';
   setOrderParam(null);
-  rec = withAnswer(rec, { t: Date.now(), item: drill.item.index, order: drill.picks, right: res.right, needs: res.pair ? [res.pair.step, res.pair.needs] : null });
-  persist();
-  if (os) { try { os.track(EVENTS.order, { item: drill.item.index, right: res.right }); } catch { /* usage is never in the way */ } }
+  if (os) { try { os.track(EVENTS.order, { item: answer.item, right: answer.right }); } catch { /* usage is never in the way */ } }
   showDrill();
   $('drill-next').focus({ preventScroll: true });
   if (!wide.matches) {
@@ -222,19 +269,14 @@ function finishOrder() {
   }
 }
 
-function leaveOrder() {
+async function leaveOrder() {
   if (mode === 'read') return;
-  if (mode === 'order') { rec = withAction(rec, { t: Date.now(), kind: 'leave', item: drill.item.index }); persist(); }
+  const was = mode;
   mode = 'read';
   drill = null;
   setOrderParam(null);
   showDrill();
-}
-
-/* Write the record through Labs OS; when a write fails the bar says nothing is kept. */
-function persist() {
-  if (!keeper) return;
-  keeper.save(rec).then(() => controls(), () => controls());
+  if (was === 'order') { await change((r) => withLeave(r, { t: Date.now() })); controls(); }
 }
 
 function focusSlot(k) {
@@ -301,7 +343,11 @@ function choose(id, { focus = false, track = true, reveal = false } = {}) {
   markChosen(svg, WORLD, drawn.groups, id);
   writeReading($('reading'), WORLD, id);
   // a choice made by an arrow key (focus) is part of a walk down the drawing: logged as the step it ends on
-  if (track) { rec = withChoice(rec, { t: Date.now(), node: id, walk: focus }); persist(); }
+  if (track) {
+    const t = Date.now();
+    const fn = (r) => withChoice(r, { t, node: id, walk: focus });
+    if (recordRead) change(fn).then(controls, controls); else early.push(fn);
+  }
   if (focus) drawn.groups.get(id).focus({ preventScroll: false });
   // on a narrow plate the reading is below the drawing: a press brings its head and first claims into view
   if (reveal && !wide.matches) {
@@ -316,8 +362,9 @@ function choose(id, { focus = false, track = true, reveal = false } = {}) {
 }
 
 /* The footer's reserved height: on a wide plate the tallest of everything it can hold, so nothing below it jumps; on a
-   narrow one the tallest of the mode it is in, so a short exercise leaves no empty band (a change of mode is the
-   visitor's own act, and the footer may change height with it). */
+   narrow one the tallest of the mode it is in (a change of mode is the visitor's own act, and the footer may change
+   height with it). Every state of the exercise is one height on its own: its pressed list always has its four places
+   (view.js writeDrill), so a state with fewer presses has no empty band. */
 let heights = { read: 0, drill: 0 };
 function applyReadingHeight() {
   const h = wide.matches ? Math.max(heights.read, heights.drill) : mode === 'read' ? heights.read : heights.drill;
@@ -330,18 +377,16 @@ function fixReadingHeight() {
   box.style.minHeight = '';
   let max = 0;
   for (const n of WORLD.nodes) { writeReading(box, WORLD, n.id); max = Math.max(max, box.offsetHeight); }
-  // the exercise at its fullest: every step pressed, and the longest reason a wrong order can be given in this world
-  const it = item(WORLD, 0);
-  let line = '';
-  for (const a of WORLD.nodes) for (const b of WORLD.nodes) {
-    const p = needPath(WORLD, a.id, b.id);
-    if (p) { const s = needLine(WORLD, p); if (s.length > line.length) line = s; }
+  // the exercise at its fullest: every step pressed, and the tallest reason a wrong order of an item can be given
+  const it = item(WORLD, 0, 0);
+  let drillH = 0;
+  for (const line of reasons(WORLD)) {
+    writeDrill(box, WORLD, { steps: it.steps, picks: it.steps, size: EXERCISE.size, result: { right: false, line } });
+    drillH = Math.max(drillH, box.offsetHeight);
   }
-  writeDrill(box, WORLD, { steps: it.steps, picks: it.steps, size: EXERCISE.size, result: { right: false, line } });
-  heights = { read: max, drill: box.offsetHeight };
+  heights = { read: max, drill: drillH };
   applyReadingHeight();
-  if (mode === 'read') writeReading(box, WORLD, chosen);
-  else writeDrill(box, WORLD, { steps: drill.item.steps, picks: drill.picks, result: drill.result, size: EXERCISE.size });
+  writeFooter();
 }
 
 async function readParams() {
@@ -406,12 +451,12 @@ async function provenance() {
     return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
   };
   try {
-    const [rec, ptext] = await Promise.all([
+    const [record, ptext] = await Promise.all([
       fetch(WORLD.artifact.record).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); }),
       readParams(),
     ]);
-    const same = crypto.subtle ? (await sha(ptext)) === rec.params_sha256 : null;
-    const mins = Math.floor(rec.render_s / 60), secs = Math.round(rec.render_s % 60);
+    const same = crypto.subtle ? (await sha(ptext)) === record.params_sha256 : null;
+    const mins = Math.floor(record.render_s / 60), secs = Math.round(record.render_s % 60);
     const nb = ' ', dot = ' · ';
     const a = document.createElement('a');
     a.href = WORLD.artifact.params;
@@ -424,7 +469,7 @@ async function provenance() {
       s.textContent = ', changed since this render';
       from.append(s);
     }
-    strip.replaceChildren(line(`Seed${nb}${rec.seed}${dot}Blender${nb}${rec.blender}${dot}${rec.samples}${nb}samples`), from);
+    strip.replaceChildren(line(`Seed${nb}${record.seed}${dot}Blender${nb}${record.blender}${dot}${record.samples}${nb}samples`), from);
     strip.dataset.state = same === false ? 'stale' : same === null ? 'unchecked' : 'ok';
   } catch {
     strip.textContent = `The render's record did not load; its parameters are in ${WORLD.artifact.params.split('/').pop()}.`;
@@ -433,8 +478,9 @@ async function provenance() {
 }
 
 /* Labs OS, then the visitor's record from its progress store: the count, the step last chosen (unless the link names
-   one) and the next item. When Labs OS does not start, or its store keeps nothing, the record lives for the visit and
-   the bar says so. A link that names an item opens it once the record is read. */
+   one), the next item, and an order in progress with its presses. When Labs OS does not start, or its store keeps
+   nothing, the record lives for the visit and the bar says so. A link that names an item opens it once the record is
+   read; without one, an order in progress opens again, unless the link names a step to read. */
 async function labsOS() {
   try {
     const { LabsOS } = await import('../os/index.js');
@@ -444,16 +490,15 @@ async function labsOS() {
     }
   } catch { os = null; }
   keeper = new Keeper(os ? os.progress : null, { persistent: !!(os && os.storage.persistent) });
-  const stored = await keeper.load(WORLD.nodes.map((n) => n.id));
-  // what the visitor did before the record was read (steps chosen; the exercise waits for the record) goes on top of it
-  const before = rec;
-  rec = { ...stored, answered: stored.answered + before.answered, right: stored.right + before.right,
-    next: Math.max(stored.next, before.next), chosen: before.chosen || stored.chosen, log: [...stored.log, ...before.log].slice(-EXERCISE.logCap) };
+  rec = await keeper.load(WORLD.nodes.map((n) => n.id), drawOf);
+  // what the visitor chose before the record was read goes on top of it, one change each
+  const before = early.splice(0);
+  for (const fn of before) await change(fn);
   recordRead = true;
-  if (before.log.length) persist();
-  if (!params.has('node') && !before.chosen && stored.chosen && mode === 'read') choose(stored.chosen, { track: false });
+  if (!params.has('node') && !before.length && rec.chosen && mode === 'read') choose(rec.chosen, { track: false });
   const want = Number(params.get('order'));
-  if (params.has('order') && Number.isInteger(want) && want >= 0 && mode === 'read') startOrder(want);
+  if (params.has('order') && Number.isInteger(want) && want >= 0 && mode === 'read') await startOrder(want, { focus: false });
+  else if (rec.open && !params.has('node') && mode === 'read') openOrder(rec.open);
   controls();
   window.__orthogonal.record = () => ({ ...rec, kept: keeper.kept, store: os ? os.storage.kind : 'none' });
 }
@@ -516,8 +561,8 @@ function boot() {
     if (ev.key === 'Backspace' && mode === 'order') { ev.preventDefault(); undoPick(); }
     else if (ev.key === 'Escape') { ev.preventDefault(); leaveOrder(); }
   });
-  $('drill-start').addEventListener('click', () => startOrder(rec.next));
-  $('drill-next').addEventListener('click', () => startOrder(rec.next));
+  $('drill-start').addEventListener('click', () => startOrder(null));
+  $('drill-next').addEventListener('click', () => startOrder(null));
   $('drill-undo').addEventListener('click', () => undoPick());
   $('drill-leave').addEventListener('click', () => leaveOrder());
   $('drill-back').addEventListener('click', () => { leaveOrder(); drawn.groups.get(chosen).focus({ preventScroll: true }); });
@@ -533,8 +578,9 @@ function boot() {
   wide.addEventListener('change', () => { draw(); fixReadingHeight(); });
   window.__orthogonal = {
     world: WORLD, chosen: () => chosen, layout: () => drawn && drawn.lay, timing: TIMING, startedAt, revealAt,
-    // the exercise as the page holds it, for the drive: the mode, the item, the presses and the verdict
+    // the exercise as the page holds it, for the drive: the mode, the draw, the presses and the verdict
     drill: () => ({ mode, item: drill && drill.item, picks: drill ? drill.picks.slice() : [], result: drill && drill.result }),
+    gold: () => strandGold({ mode }),
     record: () => null,
   };
   if (still) document.body.classList.add('still');

@@ -47,14 +47,19 @@
    by what each needs, the lineage's lines go into fog, since they
    would give the answer, and its other steps leave; the four steps
    lift out of their rows to four places down the drawing, in the
-   item's shuffled order, each on its own lane with its own words,
-   in clearings of the fog. Each press numbers a step in a ring.
+   draw's shuffled order, each on its own lane with its own words,
+   in clearings of the fog. Under each, in place of its role, is
+   what it needs, from the world's data, so the order can be
+   reasoned out by a visitor who never read the lineage. Each press
+   numbers a step in a ring.
    When the fourth is pressed the engine checks the order against
    the links, the steps settle back into their rows and the lines
    come back, so the visitor's numbers stand on the true order. A
    right answer is a decision, and its numbers are gold; a wrong one
    is drawn in ink: the pair out of order is ringed, and the links
-   that order them are traced in bright ink over the lineage.
+   that order them are traced in bright ink over the lineage. The
+   strand is gold only in the reading (engine.js strandGold), and the
+   legend's sample follows the same rule.
    ============================================================ */
 import { brushStroke } from '../kit/brush.js';
 import { seedOf } from '../kit/rng.js';
@@ -121,6 +126,8 @@ export function drawLineage(svg, world, { width, height, leader }) {
       'aria-pressed': 'false', 'aria-label': `${r.role}: ${r.label}`,
     }, gNodes);
     svgEl('rect', { class: 'hit', x: r1(n.hit.x), y: r1(n.hit.y), width: r1(n.hit.w), height: r1(n.hit.h) }, g);
+    // while an order is given, the target covers the step's words and what it needs (orthogonal.css .drill)
+    svgEl('rect', { class: 'hit-drill', x: r1(n.drillHit.x), y: r1(n.drillHit.y), width: r1(n.drillHit.w), height: r1(n.drillHit.h) }, g);
     svgEl('rect', { class: 'ring', x: n.x - h - 4, y: r1(n.y - h - 4), width: LAYOUT.node + 8, height: LAYOUT.node + 8 }, g);
     svgEl('rect', { class: 'sq', x: n.x - h, y: r1(n.y - h), width: LAYOUT.node, height: LAYOUT.node }, g);
     const t = svgEl('text', { x: r1(n.label.x), y: r1(n.label.y), 'text-anchor': n.label.anchor, class: 'lbl' }, g);
@@ -132,6 +139,12 @@ export function drawLineage(svg, world, { width, height, leader }) {
       const s = svgEl('tspan', { x: r1(n.label.x), dy: LAYOUT.lineH, class: 'role' }, t);
       s.textContent = n.label.role;
     }
+    // what the step needs, on the role's line and below it; shown only while an order is given
+    const need = svgEl('text', { x: r1(n.label.x), y: r1(n.label.y + n.label.lines.length * LAYOUT.lineH), 'text-anchor': n.label.anchor, class: 'need' }, g);
+    n.label.needs.forEach((line, i) => {
+      const s = svgEl('tspan', { x: r1(n.label.x), dy: i ? LAYOUT.lineH : 0 }, need);
+      s.textContent = line;
+    });
     groups.set(n.id, g);
   }
   svg.__lay = lay;
@@ -254,17 +267,19 @@ const make = (tag, cls, text) => {
 };
 
 /* The exercise in the footer, as text: what to do, how far the visitor has come, and once checked, the verdict and the
-   links that decide it. `d` is { steps, picks, result: null | { right, line } , size }. */
+   links that decide it. `d` is { steps, picks, result: null | { right, line } , size }. The pressed list always has
+   its `size` places, the ones not pressed yet kept as empty rules, so every state of the exercise is one height and
+   none of it is an empty band. */
 export function writeDrill(root, world, d) {
   const label = (id) => world.nodes.find((n) => n.id === id).label;
   const head = make('p', 'rd-head');
   head.append(make('b', 'rd-label', 'Order these steps by what each needs'), make('span', 'rd-sep', ' · '), make('span', 'rd-role', 'Practice'));
   let note, beside;
   if (!d.result) {
-    note = make('p', 'rd-note', 'Press first the step that needs none of the others, then each one after the steps it needs.');
+    note = make('p', 'rd-note', 'Press first the step that needs none of the others, then each one after the steps it needs. Under each step is what it needs.');
     beside = make('p', 'rd-beside', `${d.picks.length} of ${d.size} pressed. With keys: the arrows move, Enter picks, Backspace undoes, Escape leaves.`);
   } else if (d.result.right) {
-    note = make('p', 'rd-note', 'Right: each step comes after every step it needs.');
+    note = make('p', 'rd-note', 'Right: each step comes after every step it needs. The lineage is back with its links, and your order is numbered on it.');
     beside = make('p', 'rd-beside', "Checked against the links of this world's data, the lines of the lineage.");
   } else {
     note = make('p', 'rd-note', `Not in order: ${d.result.line}.`);
@@ -272,11 +287,14 @@ export function writeDrill(root, world, d) {
   }
   note.classList.add('dr-verdict');
   const list = make('ol', 'rd-evidence rd-order');
-  d.picks.forEach((id, k) => {
+  for (let k = 0; k < d.size; k++) {
+    const id = d.picks[k];
     const li = make('li');
-    li.append(make('b', 't', String(k + 1)), document.createTextNode(` ${label(id)}`));
+    li.append(make('b', 't', String(k + 1)));
+    if (id) li.append(document.createTextNode(` ${label(id)}`));
+    else { li.className = 'open'; li.append(make('span', 'slot')); }
     list.append(li);
-  });
+  }
   root.replaceChildren(head, note, beside, list);
   root.dataset.node = '';
   root.dataset.drill = d.result ? (d.result.right ? 'right' : 'wrong') : 'order';

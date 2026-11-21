@@ -10,7 +10,10 @@
    The render and Earth's ghost share one box height and one
    caption strip, so the two lamps stand on one ground line; the
    evidence footer is a subgrid of the sheet, so its claims start
-   at the render's left edge.
+   at the render's left edge. The exercise's bar is a row of its
+   own under the three, the sheet's full width on a wide plate, so
+   the storage-off diagnosis takes the one line the count is on and
+   nothing in the drawing above it moves.
 
    Labels are in sentence case on purpose: small uppercase widely
    tracked labels are listed as a tell in Exomania's approved bar
@@ -23,9 +26,9 @@ body { font-size: 12px; line-height: 1.5; }
 body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 214, .05), transparent 72%); }
 
 .sheet {
-  /* the row of drawings takes what the viewport leaves after the header, the evidence footer and the margins, so the
-     footer is in the frame at 1440 x 900 */
-  --cols-h: clamp(440px, calc(100vh - 284px), 760px);
+  /* the row of drawings takes what the viewport leaves after the header, the exercise's bar (34 px), the evidence
+     footer and the margins, so the footer is in the frame at 1440 x 900 */
+  --cols-h: clamp(440px, calc(100vh - 318px), 760px);
   --strip: 118px;
   --art-aspect: 0.75;   /* the render's width over its height (900 x 1200) */
   position: relative; z-index: 1;
@@ -34,10 +37,11 @@ body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 21
   background-size: 32px 32px; background-position: -1px -1px;
   display: grid; column-gap: 0; row-gap: 0;
   grid-template-columns: minmax(380px, 1fr) calc((var(--cols-h) - var(--strip)) * var(--art-aspect)) minmax(260px, 330px);
-  grid-template-rows: auto var(--cols-h) auto;
+  grid-template-rows: auto var(--cols-h) auto auto;
   grid-template-areas:
     "head head head"
     "lin  art  earth"
+    "bar  bar  bar"
     "read read read";
 }
 .corner { position: absolute; width: 18px; height: 18px; border: 1px solid var(--text-dim); pointer-events: none; }
@@ -73,15 +77,20 @@ body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 21
 .lineage text { paint-order: stroke; stroke: var(--void); stroke-width: 3px; stroke-linejoin: round; }
 .lineage .role { fill: var(--text-dim); }
 .lineage .head-t { fill: var(--text-dim); }
-/* the lineage's lines are brush strokes (kit/brush.js): filled outlines, wide at the cause, a point at the effect */
+/* the lineage's lines are brush strokes (kit/brush.js): filled outlines, wide at the cause, a point at the effect. The
+   strand (this world's branch, the threads that met in it, the leader to the render and its steps) is gold only when
+   the drawing carries the class gold, which main.js sets from engine.js strandGold, as it does the legend's sample */
 .edge path { stroke: none; }
 .edge .blot { fill-opacity: .9; }
-.edge.fired path { fill: var(--accretion); }
-.edge.thread path { fill: var(--accretion); fill-opacity: .72; }
+.edge.fired path { fill: var(--text-dim); }
+.edge.thread path { fill: var(--text-dim); fill-opacity: .72; }
+svg.gold .edge.fired path { fill: var(--accretion); }
+svg.gold .edge.thread path { fill: var(--accretion); }
 .edge.earth path { fill: var(--text-dim); }
 .edge.pending path { fill: var(--text-dim); fill-opacity: .7; }
-.leader { stroke: var(--accretion); stroke-width: 1; stroke-opacity: .7; }
-.no-art .leader { stroke: var(--text-faint); stroke-opacity: 1; }
+.leader { stroke: var(--text-faint); stroke-width: 1; }
+svg.gold .leader { stroke: var(--accretion); stroke-opacity: .7; }
+.no-art svg.gold .leader { stroke: var(--text-faint); stroke-opacity: 1; }
 .pair-rule { stroke: var(--horizon); stroke-width: 1; stroke-dasharray: 1 3; opacity: 0; transition: opacity var(--t-mid) var(--ease); }
 .pair-rule.on { opacity: .8; }
 .pair-rule.held { opacity: 0; transition: none; }
@@ -91,8 +100,9 @@ body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 21
 .node .sq { fill: var(--void); stroke-width: 1; }
 .node .ring { fill: none; stroke: var(--horizon); stroke-width: 1; opacity: 0; transition: opacity var(--t-fast) var(--ease); }
 .node.root .sq { stroke: var(--horizon); }
-.node.fired .sq { stroke: var(--accretion); }
-.node.fired.role-driver .sq, .node.fired.role-artifact .sq { fill: var(--accretion); }
+.node.fired .sq { stroke: var(--text-dim); }
+svg.gold .node.fired .sq { stroke: var(--accretion); }
+svg.gold .node.fired.role-driver .sq, svg.gold .node.fired.role-artifact .sq { fill: var(--accretion); }
 .node.fired.role-driver .lbl, .node.fired.role-artifact .lbl { fill: var(--text-bright); }
 .node.earth .sq { stroke: var(--text-faint); }
 .node.earth .lbl { fill: var(--text-dim); }
@@ -121,15 +131,18 @@ body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 21
 .drill .node.step .sq { stroke: var(--text-dim); fill: var(--void); }
 .drill .node.step .lbl { fill: var(--text-bright); }
 .drill .role { visibility: hidden; }
+/* in place of the role, what each step needs (engine.js layout, label.needs); its target covers those words too */
+.lineage text.need { display: none; fill: var(--text-dim); }
+.drill .node.step text.need { display: inline; }
+.node .hit-drill { fill: transparent; display: none; }
+.drill .node.step .hit-drill { display: inline; }
 /* a pressed step: its square gives way to a ring with its number in it, on the ground, over the line's blot */
 .node.picked .sq { opacity: 0; }
 .node.picked .ring { opacity: 1; stroke: var(--text-bright); fill: var(--void); }
 .lineage text.num { font-size: 10px; font-weight: 500; fill: var(--text-bright); }
-/* checked: the verdict is what the drawing shows, so the lineage drops to ink. Right is a decision, and its rings and
-   numbers are the only gold on the drawing; wrong is ink, the pair out of order bright and every other ring dim */
-:is(.ord-right, .ord-wrong) .edge.fired path, :is(.ord-right, .ord-wrong) .edge.thread path { fill: var(--text-dim); }
-:is(.ord-right, .ord-wrong) .leader { stroke: var(--text-faint); }
-:is(.ord-right, .ord-wrong) .node.fired .sq { stroke: var(--text-dim); fill: var(--void); }
+/* checked: the verdict is what the drawing shows, so the lineage is in ink (no class gold, engine.js strandGold). Right
+   is a decision, and its rings and numbers are the only gold on the drawing; wrong is ink, the pair out of order bright
+   and every other ring dim */
 .ord-right .node.picked .ring { stroke: var(--accretion); }
 svg.ord-right text.num { fill: var(--accretion); }
 .ord-wrong .node.picked:not(.why) .ring { stroke: var(--text-dim); }
@@ -138,25 +151,28 @@ svg.ord-right text.num { fill: var(--accretion); }
 .why-line { fill: none; stroke: var(--text-bright); stroke-width: 1.4; stroke-dasharray: 3 3; stroke-linecap: round; }
 .still .node, .still .drill .node.off, .still .edges, .still .leader { transition: none; }
 
-.drill-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 0; min-height: 28px; }
+.drill-bar { grid-area: bar; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0; padding: 6px 0 0; min-height: 28px; }
 .drill-acts { display: flex; flex-wrap: wrap; gap: 6px 8px; }
 .drill-btn { font: 400 11px/1.3 var(--font-mono); color: var(--text); background: transparent; border: 1px solid var(--line-bright);
   padding: 5px 10px; cursor: pointer; border-radius: 0; transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease); }
 .drill-btn:hover:not(:disabled), .drill-btn:focus-visible { border-color: var(--horizon); color: var(--text-bright); outline: none; }
 .drill-btn:disabled { color: var(--text-dim); cursor: default; }
 .drill-btn[hidden] { display: none; }
-.drill-count { margin-left: auto; font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
-.drill-kept { flex: 1 0 100%; font-size: 11px; color: var(--text-dim); }
+.drill-count { font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+/* the storage-off diagnosis, on the count's line: one line beside it on a wide plate */
+.drill-kept { flex: 0 1 auto; font-size: 11px; color: var(--text-dim); }
 .drill-kept[hidden] { display: none; }
 
-/* the exercise in the footer: the pressed order, numbered */
+/* the exercise in the footer: the pressed order, numbered, its places not pressed yet kept as dotted rules */
 .rd-order .t { color: var(--text-dim); margin-right: 6px; font-variant-numeric: tabular-nums; }
+.rd-order .slot { display: inline-block; width: 18ch; vertical-align: middle; border-bottom: 1px dotted var(--line-bright); }
 .reading[data-drill] .dr-verdict { color: var(--text-bright); }
 
 .legend { margin: 6px 0 0; font-size: 11px; color: var(--text-dim); line-height: 1.7; }
 .legend > span { white-space: nowrap; margin-right: 12px; }
 .lg { display: inline-block; width: 26px; height: 8px; vertical-align: middle; margin: 0 6px 0 0; }
-.lg-gold { fill: var(--accretion); }
+.lg-branch { fill: var(--text-dim); }
+.lg-branch.gold { fill: var(--accretion); }
 .lg-ink { fill: var(--text-dim); }
 /* the fog's swatch: the fog's own colour and alpha (config.js FOG.alpha), a soft patch */
 .lg-fog { display: inline-block; width: 26px; height: 12px; vertical-align: middle; margin: 0 6px 0 0;
@@ -236,14 +252,13 @@ svg.ord-right text.num { fill: var(--accretion); }
     margin: 8px; padding: 4px 12px 14px;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: none;
-    grid-template-areas: "head" "art" "lin" "read" "earth";
+    grid-template-areas: "head" "art" "lin" "bar" "read" "earth";
   }
   .head { flex-direction: column-reverse; gap: 8px; }
   .head-side { flex-direction: row; justify-content: space-between; align-items: center; align-self: stretch; }
   .title { font-size: 30px; }
   .back { min-height: 44px; display: inline-flex; align-items: center; }
   .drill-btn { min-height: 44px; padding: 6px 12px; }
-  .drill-count { margin-left: 0; }
   .thesis { font-size: 12px; }
   .art { border: 1px solid var(--line); grid-template-rows: auto auto; }
   .art-view { aspect-ratio: 900 / 1200; }

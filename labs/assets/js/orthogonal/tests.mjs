@@ -39,13 +39,25 @@
       one unordered pair); the check on all 960 orders of every set,
       on the 420 orders of the whole lineage its links allow, and on
       every swap of a step with the step it grows from; the items
-      (each set dealt once a round, seeded, never already in order);
-      where the steps stand while ordered, at every width; the fog
-      around them.
+      (each set dealt once a round, a draw seeded by its attempt);
+      where the steps stand while ordered, with what each needs
+      under them, at every width; the fog around them.
   14. The record in Labs OS's progress store: each answer and choice
-      with its time and mode, the count, the log's cap, a reload
-      that reads it all back, storage refused three ways, and a
-      record that does not hold together read as fresh.
+      with its time and mode, the count, the log's cap; an order in
+      progress (its seed and its presses) read back after a reload
+      through Progress over a memory store, each press one change
+      to what the store holds; storage refused three ways; a record
+      that does not hold together read as fresh.
+  15. Hub lesson L17: over 24,000 draws on each of two paths, no
+      non-answer (the order shown given back, each of the 24 fixed
+      patterns of places, the last draw's right places) is right
+      more often than random pressing, computed exactly from the
+      links, plus a stated margin. The table is printed.
+  16. The needs lines: each names a word of every step its node
+      needs, never one of a step that needs it, and a reader given
+      only the four steps' words orders every item right.
+  17. One rule decides gold: the strand is gold in the reading only,
+      and the drawing and the legend are painted from one call.
    ============================================================ */
 import { spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
@@ -56,10 +68,10 @@ import { brushStroke } from '../kit/brush.js';
 import { seedOf } from '../kit/rng.js';
 import { EXERCISE, FOG, INK, LAYOUT, ROLES, SOURCES, STORAGE_OFF, TIMING } from './config.js';
 import {
-  arrival, check, checkOrder, drillFog, drillPlaces, fogAt, fogDensity, fogField, ignitionEnd, item, itemSets, layout, needLine,
-  needPath, needsOf, pairOf, reading, stateOf, step, stepBox, strandAt, trunk, wrap,
+  arrival, check, checkOrder, drillFog, drillPlaces, fogAt, fogDensity, fogField, ignitionEnd, item, itemSets, judge, layout, needLine,
+  needPath, needsOf, needVerb, pairOf, reading, reasons, stateOf, step, stepBox, stepsOf, strandAt, strandGold, trunk, wrap,
 } from './engine.js';
-import { countLine, fresh, Keeper, KINDS, RECORD_V, restore, withAction, withAnswer, withChoice } from './record.js';
+import { countLine, fresh, Keeper, KINDS, RECORD_V, restore, withChoice, withLeave, withPress, withStart, withUndo } from './record.js';
 import { WORLD } from './worlds/fungi-early.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -92,6 +104,7 @@ const broken = [
   ['a source that does not exist', (w) => { node(w, 'fungi').evidence[0].src = 'nobody2099'; }],
   ['a tag other than REAL or ILLUSTRATIVE', (w) => { node(w, 'fungi').evidence[0].tag = 'LIKELY'; }],
   ['no evidence', (w) => { node(w, 'farmed').evidence = []; }],
+  ['a step with no line saying what it needs', (w) => { node(w, 'nocoal').needs = ' '; }],
   ['an artifact that is not one', (w) => { w.artifact.node = 'luminous'; }],
   ["Earth's artifact not paired with this world's", (w) => { w.earthArtifact.node = 'coalgas'; }],
   ['no path from the driver through first parents', (w) => { node(w, 'luminous').after = ['farmed', 'nocoal']; node(w, 'farmed').after = ['lignin']; }],
@@ -479,39 +492,62 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   ok(`each of the ${swaps} swaps of a step with the step it grows from is wrong, and named by that one link`, swaps > 0 && caught === swaps, `${caught} of ${swaps}`);
   ok('an order of repeated, unknown or no steps is refused, never marked', ['', ['lamp', 'lamp'], ['lamp', 'nowhere'], []].every((o) => { const r = checkOrder(WORLD, o); return !r.right && r.pair === null && !!r.refused; }));
 
-  // the items
+  // the items: a draw is a set's steps in an order seeded by the attempt
   const firstRound = new Set();
   for (let i = 0; i < 120; i++) {
-    const it = item(WORLD, i);
+    const it = item(WORLD, i, 1000 + i);
     const set = it.steps.slice().sort().join();
     if (i < sets.length) firstRound.add(set);
-    if (!sets.some((s) => s.slice().sort().join() === set) || it.steps.length !== EXERCISE.size || checkOrder(WORLD, it.steps).right) {
-      ok(`item ${i} is a set's steps, shuffled, and not already in order`, false, it.steps.join(' '));
+    if (!sets.some((s) => s.slice().sort().join() === set) || it.steps.length !== EXERCISE.size || it.index !== i || it.seed !== 1000 + i) {
+      ok(`draw ${i} is a set's steps, shuffled`, false, it.steps.join(' '));
     }
   }
   ok('the first 40 items deal every set once', firstRound.size === sets.length);
-  ok('an item is the same on every call (seeded by its index)', JSON.stringify(item(WORLD, 7)) === JSON.stringify(item(WORLD, 7)) && JSON.stringify(item(WORLD, 7)) !== JSON.stringify(item(WORLD, 8)));
-  ok('item 40 deals item 0\'s set again', item(WORLD, 40).steps.slice().sort().join() === item(WORLD, 0).steps.slice().sort().join());
-  ok('an item index that is not a whole number from 0 gives no item', item(WORLD, -1) === null && item(WORLD, 1.5) === null);
+  ok('a draw is the same on every call with its seed (a reload draws an order in progress again as it was)', JSON.stringify(item(WORLD, 7, 3)) === JSON.stringify(item(WORLD, 7, 3)));
+  const places7 = new Set();
+  for (let seed = 0; seed < 100; seed++) places7.add(item(WORLD, 7, seed).steps.join());
+  ok('a new seed brings the same four steps in new places: 100 attempts at one item show at least 20 of its 24 orders', places7.size >= 20 && [...places7].every((o) => o.split(',').sort().join() === item(WORLD, 7, 0).steps.slice().sort().join()), String(places7.size));
+  ok('item 40 deals item 0\'s set again', item(WORLD, 40, 5).steps.slice().sort().join() === item(WORLD, 0, 9).steps.slice().sort().join());
+  ok('an item or a seed that is not a whole number from 0 gives no draw', item(WORLD, -1, 0) === null && item(WORLD, 1.5, 0) === null && item(WORLD, 1, -1) === null && item(WORLD, 1, 0.5) === null && item(WORLD, 1) === null);
+  ok('stepsOf draws an order in progress again from its item and seed, and gives none for none', stepsOf(WORLD, { item: 7, seed: 3 }).join() === item(WORLD, 7, 3).steps.join() && stepsOf(WORLD, null) === null);
+  ok('judge keeps the check as the record does: right, or the step and the nearest step it needs that came after it',
+    judge(WORLD, ['lignin', 'fungi', 'farmed', 'lamp']).right === true && judge(WORLD, ['lignin', 'fungi', 'farmed', 'lamp']).needs === null
+    && judge(WORLD, ['lamp', 'lignin', 'fungi', 'farmed']).right === false && judge(WORLD, ['lamp', 'lignin', 'fungi', 'farmed']).needs.join() === 'lamp,farmed');
 
-  // where the steps stand while they are ordered: apart, on the drawing, every target tall enough
+  // the reasons the footer is reserved for: every one a wrong order of an item gives, and only those
+  const given = new Set();
+  for (const s of sets) for (const o of perms(s)) { const r = checkOrder(WORLD, o); if (!r.right) given.add(needLine(WORLD, r.pair.path)); }
+  const rs = reasons(WORLD);
+  let longest = '';
+  for (const a of ids) for (const b of ids) { const pth = needPath(WORLD, a, b); if (pth && needLine(WORLD, pth).length > longest.length) longest = needLine(WORLD, pth); }
+  ok(`reasons() is every reason a wrong order of an item gives, once each (${rs.length})`, rs.length === given.size && rs.every((x) => given.has(x)) && new Set(rs).size === rs.length);
+  ok('and not the longest chain of the lineage, which no item of four steps can show', !rs.includes(longest) && Math.max(...rs.map((x) => x.length)) < longest.length, `${Math.max(...rs.map((x) => x.length))} against ${longest.length}`);
+
+  // where the steps stand while they are ordered: apart, on the drawing, every target tall enough, each with what it
+  // needs under its words
   let bad = 0, checked = 0;
   for (let width = 300; width <= 640; width += 20) for (const height of [0, 560]) {
     const lay = layout(WORLD, { width, height, leader: height > 0 });
+    for (const n of lay.nodes) {
+      const want = `${needVerb(node(WORLD, n.id))} ${node(WORLD, n.id).needs}`;
+      if (n.label.needs.join(' ') !== want) ok(`${width}: ${n.id}'s needs line is the data's, wrapped`, false, n.label.needs.join('|'));
+    }
     for (let i = 0; i < sets.length; i++) {
-      const it = item(WORLD, i);
+      const it = item(WORLD, i, i);
       const places = drillPlaces(lay, it.steps);
-      const boxes = it.steps.map((id) => { const n = lay.nodes.find((x) => x.id === id), p = places.get(id); return { b: stepBox(n, p.dy), hit: { x0: n.hit.x, x1: n.hit.x + n.hit.w, y0: n.hit.y + p.dy, y1: n.hit.y + n.hit.h + p.dy }, h: n.hit.h }; });
+      const boxes = it.steps.map((id) => { const n = lay.nodes.find((x) => x.id === id), p = places.get(id); return { b: stepBox(n, p.dy, true), hit: { x0: n.drillHit.x, x1: n.drillHit.x + n.drillHit.w, y0: n.drillHit.y + p.dy, y1: n.drillHit.y + n.drillHit.h + p.dy }, h: n.drillHit.h }; });
       checked++;
       const slotsInOrder = it.steps.every((id, j) => j === 0 || places.get(id).slot === j);
       const apart = boxes.every((x, a) => boxes.every((y, b) => a >= b || (!hits(x.b, y.b) && !hits(x.hit, y.hit))));
       const onDrawing = boxes.every((x) => x.b.x0 >= -0.5 && x.b.x1 <= width + 0.5 && x.b.y0 >= LAYOUT.topPad + LAYOUT.headH && x.hit.y1 <= lay.height + 6);
       const tall = boxes.every((x) => x.h >= 44);
-      const down = it.steps.every((id, j) => j === 0 || stepBox(lay.nodes.find((x) => x.id === id), places.get(id).dy).y0 > stepBox(lay.nodes.find((x) => x.id === it.steps[j - 1]), places.get(it.steps[j - 1]).dy).y0);
-      if (!(slotsInOrder && apart && onDrawing && tall && down)) { bad++; if (bad <= 4) ok(`${width} x ${height}, item ${i}: the steps stand apart, in the item's order down the drawing, on it, 44 px tall`, false, JSON.stringify({ slotsInOrder, apart, onDrawing, tall, down })); }
+      // the target covers the step's words and what it needs
+      const covers = boxes.every((x) => x.hit.x0 <= Math.max(0, x.b.x0) + 0.5 && x.hit.x1 >= Math.min(width, x.b.x1) - 0.5 && x.hit.y1 >= x.b.y1);
+      const down = it.steps.every((id, j) => j === 0 || stepBox(lay.nodes.find((x) => x.id === id), places.get(id).dy, true).y0 > stepBox(lay.nodes.find((x) => x.id === it.steps[j - 1]), places.get(it.steps[j - 1]).dy, true).y0);
+      if (!(slotsInOrder && apart && onDrawing && tall && down && covers)) { bad++; if (bad <= 4) ok(`${width} x ${height}, item ${i}: the steps stand apart, in the draw's order down the drawing, on it, 44 px tall, their targets over their words`, false, JSON.stringify({ slotsInOrder, apart, onDrawing, tall, down, covers })); }
     }
   }
-  ok(`in all ${checked} layouts of an item the steps stand apart, in order, on the drawing, every target 44 px tall`, bad === 0, `${bad} bad`);
+  ok(`in all ${checked} layouts of an item the steps stand apart with what each needs, in order, on the drawing, every target 44 px tall and over its words`, bad === 0, `${bad} bad`);
 
   // the fog while ordering: the lineage's fog before the strand drew it, clear about each step
   for (const [width, height] of [[390, 0], [640, 560]]) {
@@ -519,15 +555,17 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
     const field = fogField(WORLD, lay);
     const before = fogDensity(field, strandAt(WORLD, lay, 0).edges);
     for (const i of [0, 3, 5, 11]) {
-      const it = item(WORLD, i);
+      const it = item(WORLD, i, i);
       const places = drillPlaces(lay, it.steps);
       const d = drillFog(WORLD, lay, places, field);
       for (const id of it.steps) {
         const n = lay.nodes.find((x) => x.id === id), p = places.get(id);
-        ok(`${width}: while ordering item ${i}, ${id} stands clear of the fog`, fogAt(field, d, n.x, n.y + p.dy) === 0 && fogAt(field, d, n.label.anchor === 'start' ? n.label.x + 12 : n.label.x - 12, n.label.y - 4 + p.dy) === 0);
+        const lastNeed = n.label.y - 4 + p.dy + (n.label.lines.length + n.label.needs.length - 1) * LAYOUT.lineH;
+        const lx = n.label.anchor === 'start' ? n.label.x + 12 : n.label.x - 12;
+        ok(`${width}: while ordering item ${i}, ${id} and what it needs stand clear of the fog`, fogAt(field, d, n.x, n.y + p.dy) === 0 && fogAt(field, d, lx, n.label.y - 4 + p.dy) === 0 && fogAt(field, d, lx, lastNeed) === 0);
       }
       // away from the steps (past the clearing and three of its reaches) the fog is the lineage's before the strand drew
-      const boxes = it.steps.map((id) => stepBox(lay.nodes.find((x) => x.id === id), places.get(id).dy));
+      const boxes = it.steps.map((id) => stepBox(lay.nodes.find((x) => x.id === id), places.get(id).dy, true));
       let away = 0, off = 0;
       for (let k = 0; k < d.length; k++) {
         const x = ((k % field.cols) + 0.5) * field.cell, y = (Math.floor(k / field.cols) + 0.5) * field.cell;
@@ -547,26 +585,55 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   const { Progress } = await import('../os/progress.js');
   const ids = WORLD.nodes.map((n) => n.id);
   const lab = (store) => { const p = new Progress(store); return { get: (o) => p.get('alt-reality', o), set: (d, o) => p.set('alt-reality', d, o) }; };
+  const drawOf = (o) => stepsOf(WORLD, o);
+  const judgeOf = (order) => judge(WORLD, order);
+  const perms = (a) => (a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map((p) => [x, ...p])));
+  const rightOf = (steps) => perms(steps).find((o) => checkOrder(WORLD, o).right);
+  const wrongOf = (steps) => perms(steps).find((o) => !checkOrder(WORLD, o).right);
+  const press = (st, t, node) => withPress(st, { t, node, stepsOf: drawOf, judge: judgeOf });
 
-  // an answer and a choice are kept with their time and their mode
+  // an answer and a choice are kept with their time and their mode; an order is started, pressed and answered
   let s = fresh();
   s = withChoice(s, { t: 1000, node: 'fungi' });
-  s = withAnswer(s, { t: 2000, item: 0, order: ['lignin', 'fungi', 'farmed', 'trouble'], right: true });
-  s = withAnswer(s, { t: 3000, item: 1, order: ['lamp', 'trouble', 'nocoal', 'fungi'], right: false, needs: ['lamp', 'nocoal'] });
+  s = withStart(s, { t: 1500, item: 0 });
+  ok('a start opens item 0 with the attempt counter as its seed, and counts the attempt', s.attempts === 1 && s.open.item === 0 && s.open.seed === 0 && s.open.picks.length === 0);
+  const d0 = drawOf(s.open);
+  let t = 2000;
+  for (const id of rightOf(d0)) s = press(s, t++, id);
+  ok('the fourth press is checked and kept as an answer: right, the order closed, the next item after it', s.answered === 1 && s.right === 1 && s.open === null && s.next === 1);
+  s = withStart(s, { t: 3000, item: 1 });
+  ok('the next start takes the next seed', s.open.seed === 1 && s.attempts === 2);
+  const d1 = drawOf(s.open);
+  const wrong1 = wrongOf(d1);
+  for (const id of wrong1) s = press(s, t++, id);
   ok('the count is items answered and items right', s.answered === 2 && s.right === 1 && countLine(s) === '2 answered, 1 right', countLine(s));
   ok('the next item follows the last one answered', s.next === 2);
-  ok('each answer is stored with its time and the mode it came from', s.log.filter((e) => e.kind === 'answer').every((e) => typeof e.t === 'number' && e.mode === 'practice'));
+  const answers = s.log.filter((e) => e.kind === 'answer');
+  ok('each answer is stored with its time, the mode it came from and the order pressed', answers.length === 2 && answers.every((e) => typeof e.t === 'number' && e.mode === 'practice') && answers[1].order.join() === wrong1.join());
   ok('a step chosen in the reading is stored as an action of the explore mode, with its time', s.log[0].mode === 'explore' && s.log[0].kind === 'choose' && s.log[0].node === 'fungi' && s.log[0].t === 1000);
-  ok('a wrong answer keeps the pair that was out of order', s.log[2].right === false && s.log[2].needs.join() === 'lamp,nocoal');
+  ok('a wrong answer keeps the pair that was out of order, as the engine judged it', answers[1].right === false && answers[1].needs.join() === judge(WORLD, wrong1).needs.join());
   ok('the step chosen is kept to reopen on', s.chosen === 'fungi');
-  // the actions of an order are kept too, each with its time and the practice mode
-  let acts = withAction(fresh(), { t: 10, kind: 'start', item: 4 });
-  acts = withAction(acts, { t: 11, kind: 'press', item: 4, node: 'fungi' });
-  acts = withAction(acts, { t: 12, kind: 'undo', item: 4, node: 'fungi' });
-  acts = withAction(acts, { t: 13, kind: 'leave', item: 4 });
-  ok('starting, pressing, undoing and leaving an order are each stored with their time and the practice mode',
-    acts.log.map((e) => `${e.mode}:${e.kind}:${e.t}`).join() === 'practice:start:10,practice:press:11,practice:undo:12,practice:leave:13' && acts.answered === 0);
-  ok('an action that is not one of an order is not stored, nor an answer by that door', withAction(fresh(), { t: 1, kind: 'dance', item: 0 }).log.length === 0 && withAction(fresh(), { t: 1, kind: 'answer', item: 0 }).log.length === 0);
+  ok('every press, start and answer is logged with its time and the practice mode', s.log.filter((e) => e.mode === 'practice').map((e) => e.kind).join() === 'start,press,press,press,press,answer,start,press,press,press,press,answer');
+
+  // a press that is not one changes nothing: none in progress, a step not in the draw, a step pressed already
+  let o = withStart(fresh(), { t: 1, item: 5 });
+  const d5 = drawOf(o.open);
+  const outside = ids.find((id) => !d5.includes(id));
+  ok('a press with no order in progress changes nothing', press(fresh(), 2, d5[0]).log.length === 0);
+  ok('a press on a step that is not in the draw changes nothing', press(o, 2, outside) === o);
+  o = press(o, 2, d5[0]);
+  ok('a step pressed twice is pressed once', press(o, 3, d5[0]) === o && o.open.picks.join() === d5[0]);
+  o = press(o, 3, d5[1]);
+  o = withUndo(o, { t: 4 });
+  ok('an undo takes back the last press, logged with the step it took back', o.open.picks.join() === d5[0] && o.log[o.log.length - 1].kind === 'undo' && o.log[o.log.length - 1].node === d5[1]);
+  ok('an undo with nothing pressed changes nothing', withUndo(withStart(fresh(), { t: 1, item: 0 }), { t: 2 }).log.length === 1);
+  o = withLeave(o, { t: 5 });
+  ok('a leave closes the order unanswered, and its item stays next', o.open === null && o.answered === 0 && o.next === 0 && o.log[o.log.length - 1].kind === 'leave');
+  o = withStart(o, { t: 6, item: 5 });
+  ok('started again, the same item is a new draw: the next seed', o.open.item === 5 && o.open.seed === 1 && o.attempts === 2);
+  ok('a start on another item while one is open takes its place', withStart(o, { t: 7, item: 9 }).open.item === 9 && withStart(o, { t: 7, item: 9 }).open.seed === 2);
+  ok('an item that is not a whole number from 0 starts nothing', withStart(fresh(), { t: 1, item: -1 }).open === null && withStart(fresh(), { t: 1, item: 1.5 }).attempts === 0);
+
   // a walk down the drawing with the arrow keys is one choice, the step it ended on
   let walk = withChoice(fresh(), { t: 0, node: 'lignin' });
   walk = withChoice(walk, { t: 100, node: 'fungi', walk: true });
@@ -575,38 +642,196 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   ok(`arrow-key choices within ${EXERCISE.walkMs} ms are one walk, logged as where it ended; one just past that is a new choice`,
     walk.log.map((e) => e.node).join() === 'lignin,farmed,nocoal' && walk.chosen === 'nocoal', walk.log.map((e) => e.node).join());
   ok('a press is never merged into a walk', withChoice(withChoice(fresh(), { t: 0, node: 'fungi', walk: true }), { t: 10, node: 'lamp' }).log.length === 2);
-  ok('a reload keeps every kind of entry the log may hold', restore({ ...fresh(), log: [...acts.log, ...walk.log] }, ids).log.length === acts.log.length + walk.log.length && Object.keys(KINDS).join() === 'practice,explore');
+  ok('a reload keeps every kind of entry the log may hold', restore({ ...s, log: [...s.log, ...o.log, ...walk.log] }, ids, drawOf).log.length === s.log.length + o.log.length + walk.log.length && Object.keys(KINDS).join() === 'practice,explore');
   let big = s;
   for (let i = 0; i < EXERCISE.logCap + 50; i++) big = withChoice(big, { t: 4000 + i, node: 'lamp' });
   ok(`the log keeps its last ${EXERCISE.logCap} entries and the counts are never trimmed`, big.log.length === EXERCISE.logCap && big.answered === 2 && big.right === 1);
 
-  // a reload: a second keeper over the same store reads back the count, the chosen step and the next item
+  // a reload mid-item: the order in progress, its seed and its presses, through Progress over a memory store
   const store = memoryStore({ persistent: true, note: '' });
   const k1 = new Keeper(lab(store), { persistent: true });
-  ok('a fresh store reads as a fresh record', JSON.stringify(await k1.load(ids)) === JSON.stringify(fresh()));
-  ok('a write to a store that persists is kept', (await k1.save(s)) === true && k1.kept);
+  ok('a fresh store reads as a fresh record', JSON.stringify(await k1.load(ids, drawOf)) === JSON.stringify(fresh()));
+  await k1.apply((r) => withChoice(r, { t: 9, node: 'nocoal' }));
+  await k1.apply((r) => withStart(r, { t: 10, item: 3 }));
+  await k1.apply((r) => withLeave(r, { t: 11 }));
+  const started = (await k1.apply((r) => withStart(r, { t: 12, item: 3 }))).state;
+  const steps3 = drawOf(started.open);
+  await k1.apply((r) => press(r, 13, steps3[0]));
+  const two = await k1.apply((r) => press(r, 14, steps3[1]));
+  ok('each change comes back as the record the store now holds', two.changed && two.state.open.picks.join() === steps3.slice(0, 2).join() && k1.kept);
+  ok('a change that changes nothing is said to, and writes nothing', !(await k1.apply((r) => press(r, 15, steps3[0]))).changed);
   const k2 = new Keeper(lab(store), { persistent: true });
-  const back = await k2.load(ids);
-  ok('after a reload the count, the chosen step and the next item come back', back.answered === 2 && back.right === 1 && back.chosen === 'fungi' && back.next === 2 && back.log.length === 3, JSON.stringify(back));
+  const back = await k2.load(ids, drawOf);
+  ok('after a reload the order in progress comes back: its item, its seed and the two presses', back.open && back.open.item === 3 && back.open.seed === 1 && back.open.picks.join() === steps3.slice(0, 2).join(), JSON.stringify(back.open));
+  ok('and its draw is the one shown before the reload, step for step and place for place', drawOf(back.open).join() === steps3.join());
+  ok('and the attempts, the chosen step and the next item with it', back.attempts === 2 && back.chosen === 'nocoal' && back.next === 0);
+  const rest = rightOf(steps3).filter((id) => !back.open.picks.includes(id));
+  let after = null;
+  for (const id of rest) after = (await k2.apply((r) => press(r, 20, id))).state;
+  ok('the order goes on after the reload and is checked as one answer of the four presses', after.answered === 1 && after.open === null && after.log.filter((e) => e.kind === 'answer')[0].order.slice(0, 2).join() === steps3.slice(0, 2).join());
   ok('the record is the plate\'s, at its version, in the lab\'s progress record', (await new Progress(store).get('alt-reality')).v === RECORD_V && (await new Progress(store).get('alt-reality')).data.page === 'orthogonal');
 
-  // storage refused: no Labs OS, a store that keeps nothing after the tab, or a write that fails
+  // every press is applied to what the store holds: two tabs on one store each press, and both presses are kept
+  const shared = memoryStore({ persistent: true, note: '' });
+  const tabA = new Keeper(lab(shared), { persistent: true }), tabB = new Keeper(lab(shared), { persistent: true });
+  await tabA.load(ids, drawOf);
+  await tabB.load(ids, drawOf);
+  const opened = (await tabA.apply((r) => withStart(r, { t: 1, item: 0 }))).state;
+  const sd = drawOf(opened.open);
+  await tabB.apply((r) => press(r, 2, sd[0]));
+  const both = (await tabA.apply((r) => press(r, 3, sd[1]))).state;
+  ok('a press in one tab is applied to the record the other tab wrote, so neither press is lost', both.open && both.open.picks.join() === sd.slice(0, 2).join(), JSON.stringify(both.open));
+
+  // storage refused: no Labs OS, a store that keeps nothing after the tab, or a read or write that fails
   const none = new Keeper(null, { persistent: true });
-  ok('with no Labs OS the record is fresh and not kept, and the exercise still counts for the visit', JSON.stringify(await none.load(ids)) === JSON.stringify(fresh()) && (await none.save(s)) === false && !none.kept && countLine(withAnswer(fresh(), { t: 1, item: 0, order: ['a'], right: true })) === '1 answered, 1 right');
+  const nRec = await none.load(ids, drawOf);
+  const nOpen = (await none.apply((r) => withStart(r, { t: 1, item: 0 }))).state;
+  let nDone = nOpen;
+  for (const id of rightOf(drawOf(nOpen.open))) nDone = (await none.apply((r) => press(r, 2, id))).state;
+  ok('with no Labs OS the record is fresh and not kept, and the exercise still counts for the visit', JSON.stringify(nRec) === JSON.stringify(fresh()) && !none.kept && countLine(nDone) === '1 answered, 1 right');
   const mem = new Keeper(lab(memoryStore({ persistent: false, note: 'blocked' })), { persistent: false });
-  await mem.save(s);
-  ok('a store that keeps nothing after the tab is said to keep nothing', !mem.kept && (await mem.load(ids)).answered === 2);
+  await mem.load(ids, drawOf);
+  await mem.apply((r) => withStart(r, { t: 1, item: 2 }));
+  ok('a store that keeps nothing after the tab is said to keep nothing, and holds the order for the visit', !mem.kept && (await mem.apply((r) => r)).state.open.item === 2);
   const failing = new Keeper({ get: async () => { throw new Error('refused'); }, set: async () => { throw new Error('refused'); } }, { persistent: true });
-  ok('a store that refuses a read gives a fresh record, not kept', JSON.stringify(await failing.load(ids)) === JSON.stringify(fresh()) && !failing.kept);
-  ok('a store that refuses a write is said to keep nothing', (await failing.save(s)) === false && !failing.kept);
+  ok('a store that refuses a read gives a fresh record, not kept', JSON.stringify(await failing.load(ids, drawOf)) === JSON.stringify(fresh()) && !failing.kept);
+  const fOpen = (await failing.apply((r) => withStart(r, { t: 1, item: 4 }))).state;
+  const fTwo = (await failing.apply((r) => press(r, 2, drawOf(fOpen.open)[0]))).state;
+  ok('and the order in progress is held for the visit, press by press', !failing.kept && fTwo.open.item === 4 && fTwo.open.picks.length === 1);
+  const writeFails = new Keeper({ get: async () => null, set: async () => { throw new Error('quota'); } }, { persistent: true });
+  await writeFails.load(ids, drawOf);
+  const wf = (await writeFails.apply((r) => withStart(r, { t: 1, item: 6 }))).state;
+  ok('a store that refuses a write is said to keep nothing, and the change still holds for the visit', !writeFails.kept && wf.open.item === 6 && (await writeFails.apply((r) => r)).state.open.item === 6);
   ok('the words for that are the bindings\' storage-off diagnosis', STORAGE_OFF === 'Your browser is not letting this page keep anything, so your answers last until you close it. A link to a step still opens that step.');
 
   // a record that does not hold together is never trusted
   ok('a record of another page reads as fresh', restore({ page: 'loom', answered: 3, right: 1, next: 1 }, ids).answered === 0);
   ok('a record with more right than answered reads as fresh', restore({ page: 'orthogonal', answered: 1, right: 2, next: 0, log: [] }, ids).answered === 0);
-  ok('a record with a negative or broken count reads as fresh', restore({ page: 'orthogonal', answered: -1, right: 0, next: 0 }, ids).answered === 0 && restore({ page: 'orthogonal', answered: 1.5, right: 0, next: 0 }, ids).answered === 0);
-  ok('a chosen step that is not in the world is dropped, the rest kept', (() => { const r = restore({ ...s, chosen: 'nowhere' }, ids); return r.chosen === null && r.answered === 2; })());
-  ok('a log entry with no time or no mode is dropped', restore({ ...s, log: [...s.log, { kind: 'answer' }, { t: 5, mode: 'dream', kind: 'answer' }] }, ids).log.length === 3);
+  ok('a record with a negative or broken count reads as fresh', restore({ page: 'orthogonal', answered: -1, right: 0, next: 0 }, ids).answered === 0 && restore({ page: 'orthogonal', answered: 1.5, right: 0, next: 0 }, ids).answered === 0 && restore({ page: 'orthogonal', answered: 1, right: 0, next: 0, attempts: -2 }, ids).answered === 0);
+  ok('a record of version 1, with no attempts and no order in progress, reads with both at their start', (() => { const r = restore({ page: 'orthogonal', answered: 3, right: 2, next: 3, chosen: 'lamp', log: [] }, ids, drawOf); return r.answered === 3 && r.attempts === 0 && r.open === null && r.chosen === 'lamp'; })());
+  ok('a chosen step that is not in the world is dropped, the rest kept', (() => { const r = restore({ ...s, chosen: 'nowhere' }, ids, drawOf); return r.chosen === null && r.answered === 2; })());
+  ok('a log entry with no time or no mode is dropped', restore({ ...s, log: [...s.log, { kind: 'answer' }, { t: 5, mode: 'dream', kind: 'answer' }] }, ids).log.length === s.log.length);
+  const base = { ...fresh(), attempts: 3 };
+  const good = { item: 2, seed: 1, picks: drawOf({ item: 2, seed: 1 }).slice(0, 2) };
+  const notIn = ids.find((id) => !drawOf({ item: 2, seed: 1 }).includes(id));
+  ok('an order in progress that holds together is read back', JSON.stringify(restore({ ...base, open: good }, ids, drawOf).open) === JSON.stringify(good));
+  for (const [what, open] of [
+    ['a seed not yet counted', { ...good, seed: 3 }],
+    ['a seed that is not a whole number', { ...good, seed: 0.5 }],
+    ['a press on a step not in its draw', { ...good, picks: [good.picks[0], notIn] }],
+    ['a step pressed twice', { ...good, picks: [good.picks[0], good.picks[0]] }],
+    ['a step that is not in the world', { ...good, picks: ['nowhere'] }],
+    ['every step pressed, and no answer', { ...good, picks: drawOf({ item: 2, seed: 1 }) }],
+    ['no list of presses', { item: 2, seed: 1 }],
+  ]) ok(`an order in progress with ${what} is dropped, the rest kept`, (() => { const r = restore({ ...base, answered: 1, right: 1, open }, ids, drawOf); return r.open === null && r.answered === 1 && r.attempts === 3; })());
+}
+
+// ---------------------------------------------------------------- 15. L17: no non-answer clears the exercise
+{
+  const ids = WORLD.nodes.map((n) => n.id);
+  // the links' closure, written apart from the engine: a step needs every step its parents need, and its parents
+  const parents = new Map(WORLD.nodes.map((n) => [n.id, n.after]));
+  const closure = new Map();
+  const up = (id) => { if (!closure.has(id)) { const out = new Set(); for (const p of parents.get(id)) { out.add(p); for (const q of up(p)) out.add(q); } closure.set(id, out); } return closure.get(id); };
+  ids.forEach(up);
+  const linksAllow = (order) => order.every((a, i) => order.slice(i + 1).every((b) => !closure.get(a).has(b)));
+  const perms = (a) => (a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map((p) => [x, ...p])));
+  const KEYS = perms([0, 1, 2, 3]);
+  const validOf = new Map();
+  const valid = (steps) => { const k = steps.slice().sort().join(); if (!validOf.has(k)) validOf.set(k, perms(steps).filter(linksAllow).length); return validOf.get(k); };
+  const verdict = new Map();
+  const right = (order) => { const k = order.join(); if (!verdict.has(k)) verdict.set(k, checkOrder(WORLD, order).right); return verdict.get(k); };
+  const N = 24000, MARGIN = 0.01;
+  /* Score every non-answer over N draws: draw(a) is the a-th draw a visitor meets on one path. The previous key is the
+     places of the previous draw's right order (the first right one in place order), pressed again on this draw. */
+  const score = (draw) => {
+    let random = 0, display = 0, prev = 0, prevKey = null;
+    const keys = KEYS.map(() => 0);
+    for (let a = 0; a < N; a++) {
+      const steps = draw(a).steps;
+      random += valid(steps) / 24;
+      if (right(steps)) display++;
+      KEYS.forEach((k, i) => { if (right(k.map((j) => steps[j]))) keys[i]++; });
+      if (prevKey && right(prevKey.map((j) => steps[j]))) prev++;
+      prevKey = KEYS.find((k) => right(k.map((j) => steps[j])));
+    }
+    return { random: random / N, display: display / N, prev: prev / (N - 1), keys: keys.map((h) => h / N) };
+  };
+  // two paths: a visitor who answers each item in turn (attempt a on item a), and one who leaves and restarts each item
+  // 600 times (attempts a on item floor(a / 600)), where the last draw is the same item's
+  const paths = [['each item in turn', (a) => item(WORLD, a, a)], ['one item again and again', (a) => item(WORLD, Math.floor(a / 600), a)]];
+  const res = paths.map(([, draw]) => score(draw));
+  const f = (v) => v.toFixed(4);
+  const rows = [['random pressing, exact from the links', (r) => r.random], ['the order shown, given back', (r) => r.display],
+    ...KEYS.map((k, i) => [`always the places ${k.map((j) => j + 1).join('')}`, (r) => r.keys[i]]), ["the last draw's right places", (r) => r.prev]];
+  console.log(`L17: how often each non-answer is right, over ${N} draws a path; random pressing is valid orders over 24, from the links; margin ${MARGIN}`);
+  console.log(`  ${'non-answer'.padEnd(40)} ${paths.map(([n]) => n.padStart(26)).join(' ')}`);
+  for (const [name, get] of rows) console.log(`  ${name.padEnd(40)} ${res.map((r) => f(get(r)).padStart(26)).join(' ')}`);
+  for (const [k, [name]] of paths.entries()) {
+    const r = res[k], bar = r.random + MARGIN;
+    ok(`L17, ${name}: random pressing's rate is between 1 and 2 in 24, as the sets allow`, r.random >= 1 / 24 && r.random <= 2 / 24, f(r.random));
+    ok(`L17, ${name}: the order shown, given back, is right no more often than random pressing plus ${MARGIN}`, r.display <= bar, `${f(r.display)} against ${f(bar)}`);
+    KEYS.forEach((key, i) => ok(`L17, ${name}: always pressing the places ${key.map((j) => j + 1).join('')} is right no more often than random plus ${MARGIN}`, r.keys[i] <= bar, `${f(r.keys[i])} against ${f(bar)}`));
+    ok(`L17, ${name}: pressing the last draw's right places is right no more often than random plus ${MARGIN}`, r.prev <= bar, `${f(r.prev)} against ${f(bar)}`);
+  }
+  // the table bites: the old rule (a draw seeded by its item alone) is caught by it on the second path
+  const old = score((a) => item(WORLD, Math.floor(a / 600), 0));
+  ok('the table catches the old rule: with a draw seeded by its item alone, the last draw\'s places are right far above random', old.prev > old.random + MARGIN && old.prev > 0.9, `${f(old.prev)} against ${f(old.random)}`);
+}
+
+// ---------------------------------------------------------------- 16. the needs lines: the order can be reasoned out
+{
+  const ids = WORLD.nodes.map((n) => n.id);
+  const root = WORLD.nodes.find((n) => n.role === 'root').id;
+  const STOP = new Set(['that', 'this', 'with', 'from', 'into', 'than', 'then', 'they', 'them', 'their', 'there', 'where', 'when', 'what', 'have', 'make', 'made', 'both', 'each', 'only', 'also', 'before', 'after', 'without', 'every']);
+  const words = (text) => text.toLowerCase().split(/[^a-z]+/).filter((w) => w.length >= 4 && !STOP.has(w));
+  // a line names a step when one of its words begins with the first five letters of a word of the step's label
+  const names = (a, b) => { const line = words(node(WORLD, a).needs); return words(node(WORLD, b).label).some((w) => line.some((x) => x.startsWith(w.slice(0, 5)))); };
+  for (const n of WORLD.nodes) {
+    ok(`${n.id} says what it needs, with no digit`, typeof n.needs === 'string' && n.needs.trim().length > 0 && !/\d/.test(n.needs));
+    for (const b of needsOf(WORLD, n.id)) if (b !== root) ok(`${n.id}'s needs line names ${b}, which it needs`, names(n.id, b), n.needs);
+    for (const b of ids) if (needsOf(WORLD, b).has(n.id)) ok(`${n.id}'s needs line never names ${b}, which needs it`, !names(n.id, b), n.needs);
+  }
+  ok('the root says it needs nothing', /^nothing\b/.test(node(WORLD, root).needs));
+  ok('the needs lines are said with the one verb of every needs sentence', layout(WORLD, { width: 640 }).nodes.every((n) => n.label.needs.join(' ').startsWith(`${needVerb(node(WORLD, n.id))} `)));
+  // a reader given only the four steps' words: a step that needs nothing first, then each step once every step its line
+  // names among the four is placed, ties in the order shown
+  const reader = (shown) => {
+    const out = [];
+    const nothing = shown.filter((a) => /^nothing\b/.test(node(WORLD, a).needs));
+    out.push(...nothing);
+    while (out.length < shown.length) {
+      const next = shown.find((a) => !out.includes(a) && shown.every((b) => b === a || out.includes(b) || !names(a, b)));
+      if (!next) return null;   // the words go round in a circle
+      out.push(next);
+    }
+    return out;
+  };
+  let solved = 0, tried = 0;
+  const perms = (a) => (a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map((p) => [x, ...p])));
+  for (const set of itemSets(WORLD)) for (const shown of perms(set)) {
+    tried++;
+    const o = reader(shown);
+    if (o && checkOrder(WORLD, o).right) solved++;
+    else if (tried - solved <= 3) ok(`the reader orders ${shown.join(' ')}`, false, o ? o.join(' ') : 'a circle');
+  }
+  ok(`a reader given only the four steps' words orders every item right: ${solved} of ${tried} draws (40 sets, 24 orders shown)`, solved === tried && tried === 960, `${solved} of ${tried}`);
+}
+
+// ---------------------------------------------------------------- 17. one rule decides gold
+{
+  ok('the strand is gold in the reading', strandGold({ mode: 'read' }) === true);
+  ok('and ink while an order is given, and once it is checked', strandGold({ mode: 'order' }) === false && strandGold({ mode: 'checked' }) === false && strandGold(null) === false);
+  // the page paints the drawing and the legend's sample from one call of it
+  const main = fs.readFileSync(path.join(HERE, 'main.js'), 'utf8');
+  const body = (main.match(/function paintGold\(\) \{([\s\S]*?)\n\}/) || [])[1] || '';
+  ok('main.js paints the drawing and the legend from one call of strandGold, and nowhere else decides gold',
+    (main.match(/strandGold\(/g) || []).length === 2 && /const gold = strandGold\(\{ mode \}\)/.test(body) && /svg\.classList\.toggle\('gold', gold\)/.test(body) && /\$\('lg-branch'\)\.classList\.toggle\('gold', gold\)/.test(body));
+  const css = fs.readFileSync(path.join(LABS, 'assets', 'css', 'orthogonal.css'), 'utf8');
+  const goldRules = css.split('}').filter((r) => /--accretion/.test(r)).map((r) => r.split('{')[0].trim());
+  ok('every rule that paints the strand gold asks for the drawing\'s class gold, and the legend\'s sample for its own',
+    goldRules.filter((sel) => /\.edge\.(fired|thread)|\.leader|\.node\.fired/.test(sel)).every((sel) => sel.split(',').every((x) => /svg\.gold/.test(x)))
+    && goldRules.filter((sel) => /lg-branch/.test(sel)).every((sel) => /\.lg-branch\.gold/.test(sel)), goldRules.join(' | '));
 }
 
 console.log(`orthogonal: ${pass} passed, ${fail} failed`);

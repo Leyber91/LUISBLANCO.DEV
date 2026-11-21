@@ -9,6 +9,14 @@
    is drawn on that node's row. engine.js checks all of it and lays
    it out; nothing in view.js knows this world.
 
+   Each node also says what it rests on (needs), in the words of
+   the steps it needs: the exercise shows that line under each step
+   it lifts out, so the order can be reasoned out from the four
+   steps alone, by a visitor who never read the lineage. tests.mjs
+   holds each line to the links: it names a word of every step the
+   node needs (the root aside, which needs nothing), and never a
+   word of a step that needs the node.
+
    Each node carries its evidence as items tagged REAL or
    ILLUSTRATIVE. A REAL item cites a key of config.js SOURCES, or
    declares the gap where no source was opened (gap), so the page
@@ -49,11 +57,13 @@ export const WORLD = Object.freeze({
   nodes: [
     {
       id: 'lignin', label: 'Land plants make lignin', role: 'root', branch: 'both', after: [],
+      needs: 'nothing on this plate',
       note: 'Wood is stiffened with lignin, which few organisms can break down. Both worlds start here.',
       evidence: [{ tag: 'REAL', text: 'Lignin decay is the subject of the genome study this plate leans on.', src: 'floudas2012' }],
     },
     {
       id: 'fungi', label: 'Fungi eat lignin', role: 'driver', branch: 'world', after: ['lignin'],
+      needs: 'wood stiffened with lignin',
       note: 'The one change: white-rot fungi learn to digest lignin before the Carboniferous, so dead plants rot where on Earth they piled up.',
       evidence: [
         { tag: 'REAL', text: 'A molecular clock puts the origin of lignin decay near the end of the Carboniferous and supports this lag in part.', src: 'floudas2012' },
@@ -63,26 +73,31 @@ export const WORLD = Object.freeze({
     },
     {
       id: 'buried', label: 'Swamp plants buried as peat', role: 'earth', branch: 'earth', after: ['lignin'], pair: 'fungi',
+      needs: 'lignin-stiff plants, buried in swamps',
       note: 'On Earth, plant matter in everwet swamps was buried faster than it rotted.',
       evidence: [{ tag: 'REAL', text: 'Many Carboniferous coal beds are dominated by lycopsid bark that held no lignin.', src: 'nelsen2016' }],
     },
     {
       id: 'farmed', label: 'Fungi farmed', role: 'substrate', branch: 'world', after: ['fungi'],
+      needs: 'fungi that eat lignin, grown as a crop',
       note: 'Where wood rots fast, the rot itself becomes the crop: beds of fungus are tended as food and as material.',
       evidence: [{ tag: 'ILLUSTRATIVE', text: 'Invented for this world.' }],
     },
     {
       id: 'nocoal', label: 'No coal; iron from rationed forests', role: 'pressure', branch: 'world', after: ['fungi'],
+      needs: 'fungi that rot wood before it piles up',
       note: 'With no coal seams, smelting burns charcoal and forests are rationed. Fuel to burn for light is scarce, and that scarcity forces another kind of lamp.',
       evidence: [{ tag: 'ILLUSTRATIVE', text: 'Invented for this world, on the rejected branch: the evidence says coal would still have formed.' }],
     },
     {
       id: 'seams', label: 'Coal seams', role: 'earth', branch: 'earth', after: ['buried'], pair: 'nocoal',
+      needs: 'swamp peat, buried and pressed',
       note: 'On Earth the buried peat became coal.',
       evidence: [{ tag: 'REAL', text: 'Paleozoic coal abundance came from everwet tropical conditions and wide basins during the assembly of Pangea.', src: 'nelsen2016' }],
     },
     {
       id: 'luminous', label: 'Luminous mycelium + glass', role: 'combination', branch: 'world', after: ['nocoal', 'farmed'],
+      needs: 'farmed fungi that glow, and no coal',
       note: 'Two threads meet: farmed fungi that glow, and glass that keeps them wet and breathing.',
       evidence: [
         { tag: 'REAL', text: 'Panellus stipticus glows on its gill edges, its cross-veins and its rolled margin.', src: 'okane1990' },
@@ -91,11 +106,13 @@ export const WORLD = Object.freeze({
     },
     {
       id: 'coalgas', label: 'Coal gas', role: 'earth', branch: 'earth', after: ['seams'], pair: 'luminous',
+      needs: 'coal of buried swamp peat, heated',
       note: 'On Earth, coal heated without air gave a gas that burned with a bright flame.',
       evidence: [{ tag: 'REAL', text: "Earth's history.", gap: 'No source opened for this step yet.' }],
     },
     {
       id: 'lamp', label: 'Mycelial lamp', role: 'artifact', branch: 'world', after: ['luminous'],
+      needs: 'farmed fungi glowing under glass, and no coal',
       note: 'The street lamp of this world: a column of glass on a ceramic plinth, a culture of shelf fungus on a spindle inside, a louvered hood it breathes through, a flask that keeps it wet.',
       evidence: [
         { tag: 'REAL', text: 'Real fungal light is dim: a culture of P. stipticus was photographed with an 8-minute exposure.', src: 'rabara2025' },
@@ -104,11 +121,13 @@ export const WORLD = Object.freeze({
     },
     {
       id: 'gaslamp', label: 'Gas street lamp', role: 'earth', branch: 'earth', after: ['coalgas'], pair: 'lamp',
+      needs: 'gas from the coal of buried peat',
       note: "Earth's answer to the same job: a gas flame in a glazed lantern on a post, fed by a main under the street.",
       evidence: [{ tag: 'REAL', text: "Earth's history.", gap: 'No source opened for this step yet.' }],
     },
     {
       id: 'trouble', label: 'The rot that lights the city eats its timber', role: 'trouble', branch: 'world', after: ['lamp'],
+      needs: 'mycelial lamps of fungi in a city with no coal',
       note: 'Every success plants the next problem. A city lit by wood-eating fungi lives beside the thing that eats its beams.',
       evidence: [{ tag: 'ILLUSTRATIVE', text: "Invented: the hook of this world's next era." }],
     },
