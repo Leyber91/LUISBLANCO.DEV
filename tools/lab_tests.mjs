@@ -136,6 +136,12 @@ const SPECIFIER = /\b(?:import|export)\s*(?:(?:[\w$*{}\s,]|\/\*[\s\S]*?\*\/|\/\/
 const WALKS = /\b(?:readdir|opendir|glob)(?:Sync)?\s*\(/;
 // a process started: the module files it names are followed as imports (a test run by another, e1.args runs e1)
 const SPAWNS = /\b(?:spawn|spawnSync|fork|execFile|execFileSync|exec|execSync)\s*\(/;
+// a template in a path's place: an argument of a call that takes a path, with no bracket between; one whose text after
+// its first ${x} reads as a path
+const PATH_PLACE = /\b(?:import|join|resolve|URL|readFileSync|readFile|existsSync|statSync|lstatSync|readdirSync|readdir|opendirSync|opendir|createReadStream|cpSync|copyFileSync|openSync|accessSync|spawn|spawnSync|fork|execFile|execFileSync)\s*\([^()]*$/;
+// (a name after a slash, or an extension, that runs to the template's end or its next ${: `${x}/a.json`, `${x}.js`;
+// not `${a}/2`, `${p}.pred: ...` or `${u}/rest?q=1`)
+const PATH_TEXT = /^`\$\{[^}]*\}(?:\/[A-Za-z_.][\w./-]*|\.[A-Za-z]\w{0,5})(?:`|\$\{)/;
 // the kit's mutants runner copies its caller's lab and the folders in also; its callers say what, so its own copies
 // are read at each call (runMutants), not in its text
 const COPY_RUNNER = 'labs/assets/js/kit/tests/mutants.mjs';
@@ -274,8 +280,10 @@ export function builtPaths(text, file, root) {
       if (m[0].startsWith('`')) {
         const end = s.indexOf('`', m.index + 1);
         const tpl = s.slice(m.index, end + 1), v = evalPath(tpl, scope, file);
-        // a template that starts with ./ or ../ is a path; one that starts with ${x} is one only when x is a path
-        if (v || m[0] !== '`${') place(v, tpl);
+        // a template that starts with ./ or ../ is a path; one that starts with ${x} is one when x is a path, when it is
+        // an argument of a call that takes a path, or when the text after its ${x} reads as a path (/name, .ext); else
+        // it is a message (`${a}/${b}`, `${n} files`)
+        if (v || m[0] !== '`${' || PATH_PLACE.test(s.slice(0, m.index).slice(-160)) || PATH_TEXT.test(tpl)) place(v, tpl);
         continue;
       }
       const args = inside(s, start);
@@ -376,7 +384,9 @@ export function reachOf(test, root, cache = new Map()) {
     if (one.walks) walks = true;
     if (one.anywhere) anywhere = true;
     for (const p of one.exact) reads.add(slash(path.relative(root, p)));
-    for (const p of one.opaque) opaque.add(slash(path.relative(root, p)) + '/');
+    // a folder at or above the root holds every file: '' starts every changed path (on 2026-11-21 the root became '/',
+    // which none starts, and a test that reads pages by a path built from the root was skipped)
+    for (const p of one.opaque) { const r = slash(path.relative(root, p)); opaque.add(r === '' || r.startsWith('..') ? '' : r + '/'); }
     queue.push(...one.imports);
   }
   const rel = slash(path.relative(root, test));
@@ -393,7 +403,7 @@ function reaches(t, c) {
     if (n.includes('/') ? (c === n || c.endsWith('/' + n)) : (n === base && (!c.startsWith(JS_DIR) || labOf(c) === t.lab))) return `names ${c}`;
   }
   if (t.walks && t.lab && c.startsWith(`${JS_DIR}${t.lab}/`)) return `lists a folder, and ${c} is in ${JS_DIR}${t.lab}/`;
-  for (const d of t.opaque) if (c.startsWith(d)) return `builds paths under ${d}, where ${c} changed`;
+  for (const d of t.opaque) if (c.startsWith(d)) return `builds paths under ${d || 'the repository root'}, where ${c} changed`;
   if (t.anywhere && c.startsWith('labs/')) return `builds a path whose folder cannot be told, so any change under labs/ runs it: ${c}`;
   if (c.startsWith(DATA_DIR) && t.data.has(c.slice(DATA_DIR.length).split('/')[0])) return `reads ${DATA_DIR}${c.slice(DATA_DIR.length).split('/')[0]}/, where ${c} changed`;
   return null;
@@ -606,10 +616,20 @@ function selftest() {
     const planTests = findTests(path.join(plan, 'labs', 'assets', 'js'));
     const planned = (changed) => { const p = testsToRun(planTests, changed, plan); return { all: p.all, run: [...p.run.keys()].map((t) => t.slice(S.length)).sort(), why: Object.fromEntries([...p.run].map(([t, w]) => [t.slice(S.length), w])), unread: p.unread }; };
     for (const [k, changed] of Object.entries(CHANGES)) P[k] = planned(changed);
-    const blind = site('plan2', { [S + 'i/tests.mjs']: "import path from 'node:path';\nexport function f(x) { return path.join(x, 'y'); }\n", [S + 'j/tests.mjs']: "import '../j/m.js';\n", [S + 'j/tests/m2.mutants.test.mjs']: "await runMutants({ here, file: 'm.js', test: 't.mjs', mutants: [], also: [FOLDER], data: [DFILE] });\n" });
+    const blind = site('plan2', { [S + 'i/tests.mjs']: "import path from 'node:path';\nexport function f(x) { return path.join(x, 'y'); }\n", [S + 'j/tests.mjs']: "import '../j/m.js';\n", [S + 'j/tests/m2.mutants.test.mjs']: "await runMutants({ here, file: 'm.js', test: 't.mjs', mutants: [], also: [FOLDER], data: [DFILE] });\n",
+      [S + 'l/tests.mjs']: "import path from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst ROOT = path.join(here, '../../../..');\nconst p = path.join(ROOT, String(9));\n",
+      [S + 'l2/tests.mjs']: "import path from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst p = path.join(here, '../../../../..', String(9));\n",
+      [S + 'm/tests.mjs']: "import path from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst T = path.join(here, '../../../../tools');\nconst p = path.join(T, String(9));\n",
+      [S + 'n/tests.mjs']: "import fs from 'node:fs';\nconst t = fs.readFileSync(`${somewhere}-${b}`, 'utf8');\n",
+      [S + 'o2/tests.mjs']: "const q = `${name}.json`;\n",
+      [S + 'q/tests.mjs']: "import path from 'node:path';\nimport { fileURLToPath, pathToFileURL } from 'node:url';\nconst here = path.dirname(fileURLToPath(import.meta.url));\nconst D = path.join(here, '../../../../tools');\nconst t = `${D}-${x}`;\n",
+      [S + 'o/tests.mjs']: "const p = `${somewhere}/pages.json`;\n",
+      [S + 'p/tests.mjs']: "console.log(`${count}/${total}`, `${count} files`, `${k}/2`, `${pth}.pred: x`);\n" });
     const blindTests = findTests(path.join(blind, 'labs', 'assets', 'js'));
     P2.inLabs = [...testsToRun(blindTests, ['labs/q.css'], blind).run.keys()].map((t) => t.slice(S.length));
-    P2.outLabs = [...testsToRun(blindTests, ['tools/x.txt'], blind).run.keys()];
+    const outPlan = testsToRun(blindTests, ['tools/x.txt'], blind);
+    P2.outLabs = [...outPlan.run.keys()].map((t) => t.slice(S.length));
+    P2.rootWhy = outPlan.run.get(S + 'l/tests.mjs');
     planCount = planTests.length;
     // the command, as the gates run it, in a git repository: a kit module renamed, one lab's test moved to the new name,
     // another lab's test left on the old one (it fails: the old path still counts), a third lab untouched
@@ -690,7 +710,7 @@ function selftest() {
     ['a template that starts with a folder constant falls under that folder and the text after it', same(P.tplVar.run, ['f/tests/join.test.mjs']), JSON.stringify(P.tplVar)],
     ['join and readdir taken from node:path and node:fs count; an array\'s join and a promise\'s resolve do not', same(P.bareJoin.run, ['f/tests/bare.test.mjs']) && same(P.listed.run, ['f/tests/bare.test.mjs']) && P.listed.why['f/tests/bare.test.mjs'] === 'builds paths under labs/assets/js/iota/, where labs/assets/js/iota/i.css changed', JSON.stringify([P.bareJoin, P.listed])],
     ['a file read by a path joined from literals runs its test, in another lab too; a full path named runs the test that names it', same(P.exactRead.run, ['h/tests/reads.test.mjs']) && P.exactRead.why['h/tests/reads.test.mjs'] === 'reads labs/assets/js/shared/z.css by a path it builds' && same(P.fullName.run, ['h/tests/reads.test.mjs']) && P.fullName.why['h/tests/reads.test.mjs'] === 'names labs/zeta.html', JSON.stringify([P.exactRead, P.fullName])],
-    ['a test whose path cannot be placed, or whose copies name folders that cannot be told, runs on any change under labs/, and on nothing outside it', !!P2.inLabs && same(P2.inLabs, ['i/tests.mjs', 'j/tests/m2.mutants.test.mjs']) && P2.outLabs.length === 0, JSON.stringify(P2)],
+    ['a test whose path cannot be placed, whose copies name folders that cannot be told, or whose template leads with a ${x} that cannot be told in a path\'s place or text, runs on any change under labs/; one that builds from the root or above it runs on any change at all; one that builds under one folder runs on that folder\'s changes; a message template runs on none', !!P2.inLabs && same(P2.inLabs, ['i/tests.mjs', 'j/tests/m2.mutants.test.mjs', 'l/tests.mjs', 'l2/tests.mjs', 'n/tests.mjs', 'o/tests.mjs', 'o2/tests.mjs']) && same(P2.outLabs, ['l/tests.mjs', 'l2/tests.mjs', 'm/tests.mjs', 'q/tests.mjs']) && P2.rootWhy === 'builds paths under the repository root, where tools/x.txt changed', JSON.stringify(P2)],
     ['resolve taken from node:path counts', same(P.bareResolve.run, ['f/tests/bare.test.mjs']), JSON.stringify(P.bareResolve)],
     // the path evaluator itself, on expressions: strings of each quote kind with a bracket or a comma inside, an
     // escaped quote, a call inside the arguments, the module's folder by name, a URL against a path, the temp folder

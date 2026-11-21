@@ -715,11 +715,6 @@
     "to": "for (const one of parts(d[1]).slice(0, 1)) {"
   },
   {
-    "name": "scan: a template that is a count, not a path, cannot be placed",
-    "from": "if (v || m[0] !== '`${') place(v, tpl);",
-    "to": "place(v, tpl);"
-  },
-  {
     "name": "scan: a folder listed is not counted",
     "from": "        if (v && v.str === undefined) { if (v.at !== OUT) out.opaque.push(v.at); }",
     "to": "        if (v && v.str === undefined) { /* not counted */ }"
@@ -786,8 +781,8 @@
   },
   {
     "name": "reach: an opaque folder is matched without its slash",
-    "from": "for (const p of one.opaque) opaque.add(slash(path.relative(root, p)) + '/');",
-    "to": "for (const p of one.opaque) opaque.add(slash(path.relative(root, p)));"
+    "from": "? '' : r + '/')",
+    "to": "? '' : r)"
   },
   {
     "name": "closure: a static import reads the dynamic import's place",
@@ -1078,5 +1073,75 @@
     "name": "copies: data files that cannot be told are joined as they are",
     "from": "if (!data || data.includes(null)) place",
     "to": "if (!data && data.includes(null)) place"
+  },
+  {
+    "name": "root: a path built from the root falls under the folder \"/\"",
+    "from": "opaque.add(r === '' || r.startsWith('..') ? '' : r + '/')",
+    "to": "opaque.add(r === 'x' || r.startsWith('..') ? '' : r + '/')"
+  },
+  {
+    "name": "root: a path built from above the root falls under a folder of \"../\"",
+    "from": "opaque.add(r === '' || r.startsWith('..') ? '' : r + '/')",
+    "to": "opaque.add(r === '' || r.startsWith('...') ? '' : r + '/')"
+  },
+  {
+    "name": "root: only a path both at and above the root runs on any change",
+    "from": "opaque.add(r === '' || r.startsWith('..') ? '' : r + '/')",
+    "to": "opaque.add(r === '' && r.startsWith('..') ? '' : r + '/')"
+  },
+  {
+    "name": "root: the reason does not say the root",
+    "from": "${d || 'the repository root'}",
+    "to": "${d || 'a folder'}"
+  },
+  {
+    "name": "templates: one in a path's place counts only with path text",
+    "from": "|| PATH_PLACE.test(s.slice(0, m.index).slice(-160)) || PATH_TEXT.test(tpl)) place(v, tpl);",
+    "to": "&& PATH_PLACE.test(s.slice(0, m.index).slice(-160)) || PATH_TEXT.test(tpl)) place(v, tpl);"
+  },
+  {
+    "name": "templates: path text counts only in a path's place",
+    "from": "|| PATH_PLACE.test(s.slice(0, m.index).slice(-160)) || PATH_TEXT.test(tpl)) place(v, tpl);",
+    "to": "|| PATH_PLACE.test(s.slice(0, m.index).slice(-160)) && PATH_TEXT.test(tpl)) place(v, tpl);"
+  },
+  {
+    "name": "templates: a call that takes a path is not a path's place",
+    "from": "const PATH_PLACE = /\\b(?:import|join|",
+    "to": "const PATH_PLACE = /\\bNEVER(?:import|join|"
+  },
+  {
+    "name": "templates: any call earlier on the line is a path's place",
+    "from": "|execFile|execFileSync)\\s*\\([^()]*$/;",
+    "to": "|execFile|execFileSync)\\s*\\(/;"
+  },
+  {
+    "name": "templates: a name after a slash is not path text",
+    "from": "const PATH_TEXT = /^`\\$\\{[^}]*\\}(?:\\/[A-Za-z_.][\\w./-]*|",
+    "to": "const PATH_TEXT = /^`\\$\\{[^}]*\\}(?:"
+  },
+  {
+    "name": "templates: a number after a slash is path text",
+    "from": "(?:\\/[A-Za-z_.][\\w./-]*|",
+    "to": "(?:\\/[\\w.][\\w./-]*|"
+  },
+  {
+    "name": "templates: an extension is not path text",
+    "from": "|\\.[A-Za-z]\\w{0,5})(?:`|\\$\\{)/;",
+    "to": ")(?:`|\\$\\{)/;"
+  },
+  {
+    "name": "templates: path text need not run to the end of the template",
+    "from": "|\\.[A-Za-z]\\w{0,5})(?:`|\\$\\{)/;",
+    "to": "|\\.[A-Za-z]\\w{0,5})/;"
+  },
+  {
+    "name": "templates: one that leads with a folder it can tell counts only in a path's place or with path text",
+    "from": "if (v || m[0] !== '`${' || PATH_PLACE",
+    "to": "if (v && m[0] !== '`${' || PATH_PLACE"
+  },
+  {
+    "name": "templates: a message that leads with a ${x} it cannot tell counts as a path",
+    "from": "if (v || m[0] !== '`${' || PATH_PLACE",
+    "to": "if (v || m[0] === '`${' || PATH_PLACE"
   }
 ]
