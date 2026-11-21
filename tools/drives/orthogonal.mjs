@@ -115,6 +115,10 @@ export default async function orthogonal(p, { base, width, height }) {
   let s = await state();
   p.check('it opens on the artifact, chosen and read', s.chosen === 'lamp' && s.reading === 'lamp' && s.pressed.join() === 'lamp', JSON.stringify(s.pressed));
   p.check("the render's record matches the parameters on the site, and says so in one line", s.prov === 'ok' && /its parameters$/.test(s.provText), s.provText);
+  // the provenance line on the page is the one function's, from the record the site serves (review C1)
+  const provWant = await p.ev(`Promise.all([import('${base}/labs/assets/js/orthogonal/render-words.js'), fetch(window.__orthogonal.world.artifact.record).then((r) => r.json())])
+    .then(([W, R]) => { const w = W.provenance(R); return w.head + w.from + 'its parameters'; })`);
+  p.check('the provenance line is written from the render\'s record by the one function the tests read', s.provText.endsWith(provWant) && provWant.length > 40, `${s.provText} | ${provWant}`);
   const named = await p.ev(`({ heads: [...document.querySelectorAll('.head-t')].map((t) => t.textContent).join('|'),
     legend: document.querySelector('.legend').textContent.replace(/\\s+/g, ' ').trim() })`);
   p.check('the two branches are named over their lanes, and a legend says what gold, clear ink and fog mean', named.heads === 'Earth|This world' && /branch this world took/.test(named.legend) && /Earth's branch: history/.test(named.legend) && /Fog: invented, or not yet happened/.test(named.legend), JSON.stringify(named));
@@ -277,6 +281,8 @@ export default async function orthogonal(p, { base, width, height }) {
   p.check('the record is read, and the exercise offered', await p.until(`!document.getElementById('drill-start').disabled`, 10000));
   let x = await dr();
   p.check('a first visit counts nothing yet, and is kept in the browser', x.count === '0 answered, 0 right' && x.kept === true && x.store === 'indexeddb' && !x.offMsg, JSON.stringify({ c: x.count, k: x.kept, s: x.store }));
+  const saltReal = await p.ev('window.__orthogonal.record().salt');
+  p.check('the record has a salt of its own, 32 bits (review C2)', Number.isInteger(saltReal) && saltReal >= 0 && saltReal <= 0xFFFFFFFF, String(saltReal));
   await press('nocoal');
   p.check('a step chosen in the reading is kept as an action of the explore mode', await p.until(`window.__orthogonal.record().log.some((e) => e.mode === 'explore' && e.kind === 'choose' && e.node === 'nocoal' && typeof e.t === 'number')`, 4000));
   await button('drill-start');
@@ -285,8 +291,10 @@ export default async function orthogonal(p, { base, width, height }) {
   const goldNow = () => p.ev(`[...document.querySelectorAll('#lineage-svg .node.step .sq, #lineage-svg .node.step .lbl, #lineage-svg .node.step .ring')].filter((e) => getComputedStyle(e).visibility !== 'hidden' && /212, 162, 76/.test(getComputedStyle(e).stroke + getComputedStyle(e).fill)).length`);
   p.check('the exercise opens item 0 on the drawing: four steps out of their rows, the rest gone, the lines in fog', x.mode === 'order' && x.item.index === 0 && x.shown.length === 4 && x.item.steps.every((id) => x.shown.includes(id)) && x.edges === '0', JSON.stringify({ m: x.mode, shown: x.shown, e: x.edges }));
   const ys = await p.ev(`${JSON.stringify(x.item.steps)}.map((id) => document.querySelector('.node[data-id="' + id + '"] .sq').getBoundingClientRect().top)`);
-  const engineDraw = await p.ev(`import('${ENGINE}').then((E) => E.item(window.__orthogonal.world, ${x.item.index}, ${x.item.seed}).steps)`);
-  p.check("they stand down the drawing in the draw's order, the engine's for the item and the attempt's seed", ys.every((y, i) => i === 0 || y > ys[i - 1]) && engineDraw.join() === x.item.steps.join() && Number.isInteger(x.item.seed), JSON.stringify({ ys, seed: x.item.seed }));
+  const salt0 = await p.ev('window.__orthogonal.record().salt');
+  const engineDraw = await p.ev(`import('${ENGINE}').then((E) => E.item(window.__orthogonal.world, ${x.item.index}, ${x.item.seed}, ${salt0}).steps)`);
+  p.check("they stand down the drawing in the draw's order, the engine's for the item, the attempt's seed and the record's salt", ys.every((y, i) => i === 0 || y > ys[i - 1]) && engineDraw.join() === x.item.steps.join() && Number.isInteger(x.item.seed) && x.item.salt === salt0, JSON.stringify({ ys, seed: x.item.seed, salt: x.item.salt, rec: salt0 }));
+  p.check('and that salt is the one the record had when the page first read it: made once, kept by the first write', salt0 === saltReal, JSON.stringify({ first: saltReal, now: salt0 }));
   const needs = await p.ev(`${JSON.stringify(x.item.steps)}.map((id) => { const g = document.querySelector('.node[data-id="' + id + '"]'); const t = g.querySelector('text.need'); const role = g.querySelector('.role');
     return { id, shown: !!t && getComputedStyle(t).display !== 'none' && t.getBoundingClientRect().height > 0, text: t ? t.textContent : '', role: role ? getComputedStyle(role).visibility : 'none' }; })`);
   const wantNeeds = await p.ev(`${JSON.stringify(x.item.steps)}.map((id) => { const n = window.__orthogonal.world.nodes.find((m) => m.id === id); return (n.role === 'trouble' ? 'grows from ' : 'needs ') + n.needs; })`);
@@ -400,6 +408,8 @@ export default async function orthogonal(p, { base, width, height }) {
   p.check('with storage refused the record is still read (for the visit)', await p.until(`!document.getElementById('drill-start').disabled`, 10000));
   x = await dr();
   p.check("the bar says so in the bindings' storage-off words", x.offMsg === STORAGE_OFF && x.kept === false, x.offMsg);
+  const saltOff = await p.ev('window.__orthogonal.record().salt');
+  p.check('a visit with storage refused starts a record of its own: a new salt, not the stored record\'s', Number.isInteger(saltOff) && saltOff !== saltReal, JSON.stringify({ saltReal, saltOff }));
   await p.ev('window.scrollTo(0, 0)');
   await p.sleep(150);
   const off = await place();

@@ -9,9 +9,20 @@
    The record:
      answered, right  the counts the plate shows, never trimmed
      next             the item the exercise opens next
-     attempts         how many orders have been started: the seed
-                      of each draw (engine.js item), so the same
-                      steps come in new places on each attempt
+     attempts         how many orders have been started: with the
+                      salt, the seed of each draw (engine.js item),
+                      so the same steps come in new places on each
+                      attempt
+     salt             32 random bits (crypto.getRandomValues), made
+                      once when the record is created and kept in it,
+                      so two records never meet the same draws: a
+                      fresh record, one erased from the privacy page
+                      and a reload with storage refused each start
+                      with a new salt (review C2, 2026-11-21: with
+                      the counter alone every new record met item 0
+                      with seed 0, and a key of places written down
+                      once cleared them all). With storage refused
+                      the salt lives for the visit only.
      open             the order in progress, or null: its item, its
                       seed and the steps pressed so far, so a reload
                       draws it again as it was and keeps the presses
@@ -36,10 +47,22 @@
    ============================================================ */
 import { EXERCISE } from './config.js';
 
-export const RECORD_V = 2;   // 2 added attempts and open; a record of version 1 reads with neither
+/* 2 added attempts and open; 3 added salt. A record of version 1 reads with neither attempts nor an order in progress;
+   a record with no salt is given one, and its order in progress, drawn without a salt, is dropped. */
+export const RECORD_V = 3;
 const PAGE = 'orthogonal';
 
-export const fresh = () => ({ page: PAGE, answered: 0, right: 0, next: 0, attempts: 0, open: null, chosen: null, log: [] });
+/* A new record's salt: 32 bits from crypto.getRandomValues. */
+export function newSalt() {
+  const c = globalThis.crypto;
+  if (c && typeof c.getRandomValues === 'function') return c.getRandomValues(new Uint32Array(1))[0];
+  // uncertain: every browser that runs this module has getRandomValues; the fallback only keeps the plate working
+  return Math.floor(Math.random() * 4294967296) >>> 0;
+}
+export const isSalt = (v) => Number.isInteger(v) && v >= 0 && v <= 0xFFFFFFFF;
+
+/* A record as it is created: its salt is made here, once. */
+export const fresh = (salt = newSalt()) => ({ page: PAGE, answered: 0, right: 0, next: 0, attempts: 0, salt, open: null, chosen: null, log: [] });
 
 const count = (v) => (Number.isInteger(v) && v >= 0 ? v : null);
 
@@ -47,13 +70,13 @@ const count = (v) => (Number.isInteger(v) && v >= 0 ? v : null);
 export const KINDS = Object.freeze({ practice: ['answer', 'start', 'press', 'undo', 'leave'], explore: ['choose'] });
 
 /* An order in progress read back, or null when it does not hold together: its item and seed whole numbers from 0, a
-   seed already counted, its presses distinct steps of the world and, given `stepsOf` (engine.js, the draw for an item
-   and a seed), steps of its own draw, fewer than the draw has. */
-function readOpen(o, attempts, known, stepsOf) {
+   seed already counted, its presses distinct steps of the world and, given `stepsOf` (engine.js, the draw for an item,
+   a seed and the record's salt), steps of its own draw, fewer than the draw has. */
+function readOpen(o, attempts, known, stepsOf, salt) {
   if (!o || typeof o !== 'object') return null;
   const it = count(o.item), seed = count(o.seed);
   if (it === null || seed === null || seed >= attempts || !Array.isArray(o.picks)) return null;
-  const steps = stepsOf ? stepsOf({ item: it, seed }) : null;
+  const steps = stepsOf ? stepsOf({ item: it, seed }, salt) : null;
   if (stepsOf && !steps) return null;
   const picks = o.picks;
   if (new Set(picks).size !== picks.length || picks.some((p) => !known.has(p) || (steps && !steps.includes(p)))) return null;
@@ -61,8 +84,10 @@ function readOpen(o, attempts, known, stepsOf) {
   return { item: it, seed, picks: picks.slice() };
 }
 
-/* A stored record read back, or a fresh one when it is not this page's or does not hold together: a record someone
-   edited by hand never breaks the plate. A record of version 1 has no attempts and no order in progress. */
+/* A stored record read back, or a fresh one (with a new salt) when there is none, or it is not this page's or does not
+   hold together: a record someone edited by hand never breaks the plate. A record of version 1 has no attempts and no
+   order in progress; a record with no salt is given one, and keeps no order in progress. A returning record keeps its
+   salt. */
 export function restore(data, nodeIds, stepsOf = null) {
   if (!data || typeof data !== 'object' || data.page !== PAGE) return fresh();
   const answered = count(data.answered), right = count(data.right), next = count(data.next);
@@ -71,8 +96,10 @@ export function restore(data, nodeIds, stepsOf = null) {
   const known = new Set(nodeIds);
   const log = Array.isArray(data.log) ? data.log.filter((e) => e && typeof e.t === 'number' && KINDS[e.mode] && KINDS[e.mode].includes(e.kind))
     .slice(-EXERCISE.logCap) : [];
+  const salted = isSalt(data.salt);
+  const salt = salted ? data.salt : newSalt();
   return {
-    page: PAGE, answered, right, next, attempts, open: readOpen(data.open, attempts, known, stepsOf),
+    page: PAGE, answered, right, next, attempts, salt, open: salted ? readOpen(data.open, attempts, known, stepsOf, salt) : null,
     chosen: known.has(data.chosen) ? data.chosen : null, log,
   };
 }
@@ -80,8 +107,8 @@ export function restore(data, nodeIds, stepsOf = null) {
 const append = (log, entry) => [...log, entry].slice(-EXERCISE.logCap);
 const practice = (t, kind, item, node = null) => ({ t, mode: 'practice', kind, item, ...(node ? { node } : {}) });
 
-/* An order started on item `item`: its seed is the attempt counter, which then counts it. An order already in progress
-   gives way to it. */
+/* An order started on item `item`: its seed is the attempt counter, which then counts it; the draw is seeded by that
+   and the record's salt. An order already in progress gives way to it. */
 export function withStart(state, { t, item }) {
   if (count(item) === null) return state;
   return {
@@ -90,12 +117,12 @@ export function withStart(state, { t, item }) {
   };
 }
 
-/* A press on `node` in the order in progress. `stepsOf` gives the order's steps (engine.js stepsOf, from its item and
-   seed); a press on a step that is not one of them, or is pressed already, changes nothing. The press that completes
-   the order is checked by `judge` (engine.js judge, against the links) and kept as an answer. */
+/* A press on `node` in the order in progress. `stepsOf` gives the order's steps (engine.js stepsOf, from its item, its
+   seed and the record's salt); a press on a step that is not one of them, or is pressed already, changes nothing. The
+   press that completes the order is checked by `judge` (engine.js judge, against the links) and kept as an answer. */
 export function withPress(state, { t, node, stepsOf, judge }) {
   const o = state.open;
-  const steps = o ? stepsOf(o) : null;
+  const steps = o ? stepsOf(o, state.salt) : null;
   if (!steps || !steps.includes(node) || o.picks.includes(node)) return state;
   const picks = [...o.picks, node];
   const pressed = { ...state, open: { ...o, picks }, log: append(state.log, practice(t, 'press', o.item, node)) };
@@ -157,6 +184,7 @@ export class Keeper {
     this.persistent = !!progress && persistent;
     this.failed = false;
     this.mem = null;        // the record for the visit: what the store last gave back, or held here when it fails
+    this.born = null;       // the record this visit created while the store holds none, until the store holds one
     this.ids = [];
     this.stepsOf = null;
     this.queue = new Promise((resolve) => { this.opened = resolve; });   // changes wait until the record is read
@@ -165,8 +193,8 @@ export class Keeper {
   /** Kept across a reload: the store persists and no read or write has failed. */
   get kept() { return this.persistent && !this.failed; }
 
-  /** Read the record once, with the world's step ids and its draws (engine.js stepsOf), and open the Keeper to
-      changes. */
+  /** Read the record once, with the world's step ids and its draws (engine.js stepsOf, given an order and a salt), and
+      open the Keeper to changes. */
   async load(nodeIds, stepsOf = null) {
     this.ids = nodeIds;
     this.stepsOf = stepsOf;
@@ -175,11 +203,16 @@ export class Keeper {
     return this.mem;
   }
 
+  /* The record as the store holds it. While the store holds none, the record this visit created, so its salt is made
+     once and is the one the first write keeps; once the store has held a record, a store found empty again (erased
+     from the privacy page) gives a new record, with a new salt. */
   async read() {
     if (!this.progress || this.failed) return this.mem || fresh();
     try {
       const rec = await this.progress.get({ v: RECORD_V });
-      return restore(rec && rec.data, this.ids, this.stepsOf);
+      if (rec && rec.data) { this.born = null; return restore(rec.data, this.ids, this.stepsOf); }
+      if (!this.born) this.born = fresh();
+      return this.born;
     } catch {
       this.failed = true;
       return this.mem || fresh();
@@ -193,7 +226,8 @@ export class Keeper {
       this.mem = next;
       if (next === cur) return { state: next, changed: false };
       if (this.progress && !this.failed) {
-        try { await this.progress.set(next, { v: RECORD_V }); } catch { this.failed = true; }
+        // once written, the record is the store's: if the store is found empty again, it was erased
+        try { await this.progress.set(next, { v: RECORD_V }); this.born = null; } catch { this.failed = true; }
       }
       return { state: next, changed: true };
     });

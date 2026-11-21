@@ -18,7 +18,8 @@
    - needsOf, needPath         what a step needs, and the links from a step up to one it needs
    - needVerb(node)            "needs", or "grows from" for a seed of trouble: the one verb of every needs sentence
    - itemSets, item            the exercise's sets of steps, and a draw: item n's steps, shuffled by an attempt's seed
-   - stepsOf, judge            an order in progress drawn again from its seed; the check as the record keeps it
+                               and the record's salt
+   - stepsOf, judge            an order in progress drawn again from its seed and salt; the check as the record keeps it
    - checkOrder(world, order)  the check: right, or the first pair out of order and the links that order them
    - needLine(world, path)     those links in words
    - reasons(world)            every reason a wrong order of an item can be given: the footer is reserved for the longest
@@ -579,23 +580,29 @@ function setsOf(world) {
   return s;
 }
 
-/* A draw of item `index` (a whole number from 0) for an attempt's `seed`: its steps, in the order they are shown. The
-   sets are dealt in an order seeded by the world, so no set comes back before every set has come once. The steps are
-   shuffled by a generator seeded by the item and the seed, and the seed is the record's attempt counter (record.js
-   withStart), one more for every order started: the same four steps come in new places on each attempt, and an order
-   in progress, which keeps its seed, is drawn again as it was after a reload. Every order of the four is as likely,
-   the right ones included, so no fixed way of pressing (top to bottom, any one pattern of places, the last answer's)
-   is right more often than pressing at random: tests.mjs measures each (hub lesson L17). */
-export function item(world, index, seed) {
+/* A draw of item `index` (a whole number from 0) for an attempt's `seed` in a record with `salt`: its steps, in the
+   order they are shown. The sets are dealt in an order seeded by the world, so no set comes back before every set has
+   come once, and a link to item n opens the same four steps for everyone. The steps are shuffled by a generator
+   seeded by the item, the seed and the salt. The seed is the record's attempt counter (record.js withStart), one more
+   for every order started, so the same four steps come in new places on each attempt; the salt is the record's own
+   (record.js newSalt), made once when the record is created, so two records, a record erased and started again, or a
+   reload with storage refused, never meet the same places. An order in progress keeps its seed and its record its
+   salt, so it is drawn again as it was after a reload. Every order of the four is as likely, the right ones included,
+   so no fixed way of pressing (top to bottom, any one pattern of places, the last answer's, the places a key from
+   another record wrote down) is right more often than pressing at random: tests.mjs measures each (hub lesson L17).
+   The salt is required: a draw without one is none, so no caller falls back to the counter alone (review C2). */
+export function item(world, index, seed, salt) {
   const { sets, deal } = setsOf(world);
   if (!sets.length || !Number.isInteger(index) || index < 0 || !Number.isInteger(seed) || seed < 0) return null;
-  const rng = mulberry32(seedOf('orthogonal', world.id, 'draw', index, seed));
-  return { index, seed, steps: shuffle(sets[deal[index % sets.length]], rng) };
+  if (!Number.isInteger(salt) || salt < 0 || salt > 0xFFFFFFFF) return null;
+  const rng = mulberry32(seedOf('orthogonal', world.id, 'draw', index, seed, salt));
+  return { index, seed, salt, steps: shuffle(sets[deal[index % sets.length]], rng) };
 }
 
-/* The steps of an order in progress (the record's open: its item and its seed), drawn again; null when it is none. */
-export function stepsOf(world, open) {
-  const it = open ? item(world, open.item, open.seed) : null;
+/* The steps of an order in progress (the record's open: its item and its seed) in a record with `salt`, drawn again;
+   null when it is none. */
+export function stepsOf(world, open, salt) {
+  const it = open ? item(world, open.item, open.seed, salt) : null;
   return it ? it.steps : null;
 }
 

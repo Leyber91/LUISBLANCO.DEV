@@ -43,7 +43,10 @@ export const WORLD = Object.freeze({
     // [ILLUSTRATIVE] said beside the render: the scene is exposed up, as a long exposure records a dim source, and an
     // exposure that long records the night sky's faint light too (air.sky_ambient in the parameter file)
     exposure: 'Drawn as a long exposure records it, sky included; to the eye it is dimmer.',
-    alt: 'At night in fog, a glass column on a ceramic plinth under a louvered hood, drawn in fine ink lines: shelves of gilled bracket fungus on a wooden spindle inside glow blue-white at their gill edges, and light only a small pool of the wet cobbled street around the plinth.',
+    // what the render shows, read from the image (renders/mycelial-lamp.webp, 900 x 1200) and held word by word to the
+    // parameter file, the record and the pipeline (render-words.js, tests.mjs section 18): no word for a thing the
+    // render does not draw, such as the ink lines an earlier alt text named (review C1)
+    alt: "At night in fog, a glass column on a plinth under a hood of stacked rings. Inside it, shelves of gilled bracket fungus on a central spindle glow blue-white along their gills and rims, and a small glass flask stands at the plinth's side. Their light reaches the plinth's top and a pool of wet cobbles in front of it; the hood is dark against the faint sky.",
     // where the render put the instrument's top and foot, as shares of the frame's height from its top (the render's
     // record, measure.frame); Earth's lamp stands on the same two lines. tests.mjs holds the three to each other.
     frame: { top: 0.09, ground: 0.79 },

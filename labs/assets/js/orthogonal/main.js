@@ -33,6 +33,7 @@ import {
 } from './engine.js';
 import { FogPainter } from './fogview.js';
 import { countLine, fresh, Keeper, withChoice, withLeave, withPress, withStart, withUndo } from './record.js';
+import { fallbackLine, provenance as provenanceLine } from './render-words.js';
 import { applyStrand, drawArtifactInk, drawEarthLamp, drawLineage, markChosen, markPicks, markWhy, placeDrill, writeDrill, writeReading } from './view.js';
 import { WORLD } from './worlds/fungi-early.js';
 
@@ -71,7 +72,7 @@ let keeper = null;                  // record.js Keeper, once Labs OS has answer
 let recordRead = false;             // the stored record has been read (or found missing)
 const early = [];                   // choices made before the record was read, applied to it once it is
 
-const drawOf = (o) => stepsOf(WORLD, o);
+const drawOf = (o, salt) => stepsOf(WORLD, o, salt);
 const judgeOf = (order) => judge(WORLD, order);
 
 function draw() {
@@ -199,7 +200,7 @@ async function change(fn) {
 }
 
 /* Start item `index` (null: the order in progress, else the next item). An order in progress on that item goes on as
-   it was; any other start is a new draw, seeded by the record's attempt counter. */
+   it was; any other start is a new draw, seeded by the record's attempt counter and its salt. */
 async function startOrder(index = null, { focus = true } = {}) {
   if (!drawn || !keeper) return;
   clock = Infinity;   // an order asked during the ignition finishes it first
@@ -209,13 +210,14 @@ async function startOrder(index = null, { focus = true } = {}) {
     const want = index === null ? (r.open ? r.open.item : r.next) : index;
     return r.open && r.open.item === want ? r : withStart(r, { t, item: want });
   });
-  if (state.open) openOrder(state.open, { focus });
+  if (state.open) openOrder(state.open, state.salt, { focus });
   else controls();
 }
 
-/* Show the order in progress as the record holds it: its draw, and the steps pressed so far. */
-function openOrder(o, { focus = false } = {}) {
-  drill = { item: item(WORLD, o.item, o.seed), picks: o.picks.slice(), result: null };
+/* Show the order in progress as the record holds it: its draw (from its item, its seed and the record's salt), and the
+   steps pressed so far. */
+function openOrder(o, salt, { focus = false } = {}) {
+  drill = { item: item(WORLD, o.item, o.seed, salt), picks: o.picks.slice(), result: null };
   mode = 'order';
   setOrderParam(o.item);
   showDrill();
@@ -233,19 +235,19 @@ async function pickStep(id) {
   const t = Date.now();
   const { state, changed } = await change((r) => withPress(r, { t, node: id, stepsOf: drawOf, judge: judgeOf }));
   if (!changed) return;
-  if (state.open) { showPresses(state.open); return; }
+  if (state.open) { showPresses(state.open, state.salt); return; }
   showChecked(state.log[state.log.length - 1]);
 }
 
 async function undoPick() {
   if (mode !== 'order') return;
   const { state, changed } = await change((r) => withUndo(r, { t: Date.now() }));
-  if (changed && state.open) showPresses(state.open);
+  if (changed && state.open) showPresses(state.open, state.salt);
 }
 
 /* The presses of the order in progress, as the record gave them back. */
-function showPresses(o) {
-  if (mode !== 'order' || !drill || drill.item.index !== o.item || drill.item.seed !== o.seed) { openOrder(o); return; }
+function showPresses(o, salt) {
+  if (mode !== 'order' || !drill || drill.item.index !== o.item || drill.item.seed !== o.seed || drill.item.salt !== salt) { openOrder(o, salt); return; }
   drill.picks = o.picks.slice();
   markPicks(svg, drawn.groups, drill.picks);
   writeFooter();
@@ -377,8 +379,9 @@ function fixReadingHeight() {
   box.style.minHeight = '';
   let max = 0;
   for (const n of WORLD.nodes) { writeReading(box, WORLD, n.id); max = Math.max(max, box.offsetHeight); }
-  // the exercise at its fullest: every step pressed, and the tallest reason a wrong order of an item can be given
-  const it = item(WORLD, 0, 0);
+  // the exercise at its fullest: every step pressed, and the tallest reason a wrong order of an item can be given (any
+  // draw of any record serves: only its height is read)
+  const it = item(WORLD, 0, 0, 0);
   let drillH = 0;
   for (const line of reasons(WORLD)) {
     writeDrill(box, WORLD, { steps: it.steps, picks: it.steps, size: EXERCISE.size, result: { right: false, line } });
@@ -431,9 +434,9 @@ function art() {
     try {
       drawArtifactInk(ink, JSON.parse(await readParams()), WORLD.artifact.frame);
       ink.hidden = false;
-      status.textContent = `The render did not load; this outline is drawn from ${file} [ILLUSTRATIVE].`;
+      status.textContent = fallbackLine(file, true);
     } catch {
-      status.textContent = `The render did not load, nor its parameters (${file}).`;
+      status.textContent = fallbackLine(file, false);
     }
   };
   img.addEventListener('load', ok);
@@ -456,20 +459,20 @@ async function provenance() {
       readParams(),
     ]);
     const same = crypto.subtle ? (await sha(ptext)) === record.params_sha256 : null;
-    const mins = Math.floor(record.render_s / 60), secs = Math.round(record.render_s % 60);
-    const nb = ' ', dot = ' · ';
+    // the line is written from the record by one function (render-words.js provenance), which tests.mjs reads
+    const words = provenanceLine(record);
     const a = document.createElement('a');
     a.href = WORLD.artifact.params;
     a.textContent = 'its parameters';
     const line = (...parts) => { const s = document.createElement('span'); s.className = 'pl'; s.append(...parts); return s; };
-    const from = line(`Rendered in ${mins}${nb}min${nb}${secs}${nb}s from `, a);
+    const from = line(words.from, a);
     if (same === false) {
       const s = document.createElement('span');
       s.className = 'stale';
       s.textContent = ', changed since this render';
       from.append(s);
     }
-    strip.replaceChildren(line(`Seed${nb}${record.seed}${dot}Blender${nb}${record.blender}${dot}${record.samples}${nb}samples`), from);
+    strip.replaceChildren(line(words.head), from);
     strip.dataset.state = same === false ? 'stale' : same === null ? 'unchecked' : 'ok';
   } catch {
     strip.textContent = `The render's record did not load; its parameters are in ${WORLD.artifact.params.split('/').pop()}.`;
@@ -498,7 +501,7 @@ async function labsOS() {
   if (!params.has('node') && !before.length && rec.chosen && mode === 'read') choose(rec.chosen, { track: false });
   const want = Number(params.get('order'));
   if (params.has('order') && Number.isInteger(want) && want >= 0 && mode === 'read') await startOrder(want, { focus: false });
-  else if (rec.open && !params.has('node') && mode === 'read') openOrder(rec.open);
+  else if (rec.open && !params.has('node') && mode === 'read') openOrder(rec.open, rec.salt);
   controls();
   window.__orthogonal.record = () => ({ ...rec, kept: keeper.kept, store: os ? os.storage.kind : 'none' });
 }
