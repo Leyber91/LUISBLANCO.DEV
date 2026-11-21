@@ -59,7 +59,11 @@ const ROOT = {
   id: 'ground', label: 'Wood, clay, ore and herds', role: 'root', branch: 'both', after: [],
   needs: 'nothing on this plate',
   note: "What both worlds start from: Earth's endowment in the engine's table, from fire and hand tools to whales and running water. This world has all of it but coal.",
-  evidence: [{ tag: 'REAL', text: "Earth's endowment, as the engine's table lists it.", gap: "No source opened for the endowment's items." }],
+  evidence: [
+    { tag: 'REAL', text: "Earth's endowment, as the engine's table lists it.", gap: "No source opened for the endowment's items." },
+    // the rules every step below is grown by (grow.js), cited once here so the lamp's reading stays one footer tall
+    { tag: 'REAL', text: 'Every step below is grown from it by two rules: a step enters when all it consumes and one of its tools exist, and is kept when it meets a need.', src: ['hordijk2023', 'arthurpolak2006'] },
+  ],
 };
 
 const DRIVER_NODE = {
@@ -100,7 +104,7 @@ const WORDS = {
       { tag: 'ILLUSTRATIVE', text: 'The lamp, its brightness and its world are invented. Each cap of its culture is a profile swept round an axis, built from the seed in its parameter file.', src: ['desbenoit2004', 'raistrick2023'] },
       // the lab's core claim is untested (Luis closed box 1 without the core test, 2026-11-21; CORE_TEST.md); since the
       // engine (2026-11-21) the lineage is grown by its rules, which is all this line now adds
-      { tag: 'ILLUSTRATIVE', text: "Lineage grown by the engine's rules from its table; the core claim of the method is not yet tested.", src: ['hordijk2023', 'arthurpolak2006'] },
+      { tag: 'ILLUSTRATIVE', text: "Grown by the engine's rules; the method's core claim is not yet tested." },
     ],
   },
   whaling: {
