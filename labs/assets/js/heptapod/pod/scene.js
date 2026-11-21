@@ -176,7 +176,7 @@ export function initPod(canvas, hooks) {
   const vis = {};                    // thing -> { x, y, k, a }
   let drag = null, pointer = null, pointerAt = -1e9;
   let ink = null;                    // { w (writing), act, t0, still, crop, hang }
-  let targetKey = '', inkBlank = true;
+  let targetKey = '', inkBlank = true, regrid = null;   // regrid: the field was laid again on a new grid
   const gaze = { x: 0, y: 1, tx: 0, ty: 1, lean: 0 };
   let slate = null, flash = null, hover = null, enabled = true, sel = 0, keys = false;
   const givers = [];
@@ -234,7 +234,11 @@ export function initPod(canvas, hooks) {
     // the ink field: about 0.8 cells per CSS pixel of the disc, fewer on the light tier
     const N = clamp(Math.round(((2 * Rd) / dpr) * (Tier.name === 'lite' ? 0.55 : 0.8)), 160, 360);
     if (!field || field.N !== N) {
+      // the ink keeps its place across a change of grid (a resize or the light tier); a new field once dropped it, and
+      // the ring formed again out of the fog (2026-11-21)
+      const before = field;
       field = new InkField(N, fogSeed);
+      if (before) { field.takeFrom(before); regrid = { moving: before.moving }; }
       inkCv.width = inkCv.height = N;
       targetCv.width = targetCv.height = N;
       inkImg = inkCv.getContext('2d').createImageData(N, N);
@@ -318,7 +322,9 @@ export function initPod(canvas, hooks) {
     const q = ph ? Math.round((ph.erode / INK.ERODE_MAX) * 24) : -1;
     const key = ink && ph ? `${ink.t0}|${q}` : 'none';
     if (key === targetKey) return;
-    const fresh = !targetKey.startsWith(ink && ph ? `${ink.t0}|` : '\u0000');
+    let fresh = !targetKey.startsWith(ink && ph ? `${ink.t0}|` : '\u0000');
+    // on a new grid a settled ring only takes its target there; one that was moving moves again from where it was
+    if (regrid) { fresh = regrid.moving; regrid = null; }
     targetKey = key;
     if (!ink || !ph) { field.clear(); if (reduced) field.snap(); return; }
     const erode = (q / 24) * INK.ERODE_MAX;
@@ -632,16 +638,16 @@ export function initPod(canvas, hooks) {
     if (!ph && ink && !ink.still) { ink = null; hooks.inkGone?.(); }
     syncTarget(ink ? ph : null);
     // the field is busy while a ring forms or thins, and while the ink of a ring that left is still in the fog
-    const busy = !!(ph && (ph.forming || ph.thinning)) || (targetKey === 'none' && !inkBlank) || field.oldLive;
+    const busy = !!(ph && (ph.forming || ph.thinning)) || (targetKey === 'none' && !inkBlank) || field.oldLive || field.moving;
     const t0 = performance.now();
     if (!reduced) {
       stir += ((busy ? 3 : 1) - stir) * (1 - Math.exp(-dt / 700));    // the fog stirs while the being writes
       fogT += (dt / 1000) * stir;
-      if (!inkBlank || field.residual > 0.002 || targetKey !== 'none' || field.oldLive) {
+      if (!inkBlank || field.residual > 0.002 || targetKey !== 'none' || field.oldLive || field.moving) {
         field.step(Math.min(0.05, dt / 1000), flowFor(ph ? (ph.forming ? 'forming' : ph.thinning ? 'thinning' : 'hanging') : 'leaving'));
         field.paint(inkPx, INK_RGB);
         inkCv.getContext('2d').putImageData(inkImg, 0, 0);
-        inkBlank = targetKey === 'none' && field.residual <= 0.002 && !field.oldLive;
+        inkBlank = targetKey === 'none' && field.residual <= 0.002 && !field.oldLive && !field.moving;
       }
     } else {
       field.paint(inkPx, INK_RGB);
