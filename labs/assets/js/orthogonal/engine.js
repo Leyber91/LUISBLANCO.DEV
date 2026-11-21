@@ -197,13 +197,13 @@ export function layout(world, { width, height = 0, leader = false } = {}) {
     blockH[r] = Math.max(blockH[r], h);
   }
   const pitch = blockH.map((h) => Math.max(L.minPitch, h + L.rowGap));
-  const natural = L.topPad + pitch.reduce((a, b) => a + b, 0);
+  const natural = L.topPad + L.headH + pitch.reduce((a, b) => a + b, 0);
   if (height > natural) {
     const extra = (height - natural) / rowCount;
     for (let i = 0; i < rowCount; i++) pitch[i] += extra;
   }
   const rowY = [];
-  let y = L.topPad;
+  let y = L.topPad + L.headH;
   for (let i = 0; i < rowCount; i++) { rowY.push(y); y += pitch[i]; }
   const nodes = world.nodes.map((n) => {
     const b = boxes.get(n.id);
@@ -235,7 +235,9 @@ export function layout(world, { width, height = 0, leader = false } = {}) {
     x1: Math.min(width, artBox.left + Math.max(...artBox.lines.map((s) => s.length), artBox.role.length) * L.charW + 10),
     x2: width, y: art.y,
   } : null;
-  return { width, height: Math.max(height, Math.ceil(lastY + 8)), lanes: { earth: E, side: S, trunk: T }, nodes, edges, leader: leaderLine };
+  // the column heads name the two branches; each sits over its lane, its first letter on the lane's square
+  const heads = [{ id: 'earth', text: 'Earth', x: E - L.node / 2, y: L.topPad + 9 }, { id: 'world', text: 'This world', x: T - L.node / 2, y: L.topPad + 9 }];
+  return { width, height: Math.max(height, Math.ceil(lastY + 8)), lanes: { earth: E, side: S, trunk: T }, nodes, edges, leader: leaderLine, heads };
 }
 
 /* A branch line from a parent's square to a child's: straight down a lane, and where the lanes differ, an S-curve over

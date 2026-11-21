@@ -91,7 +91,7 @@ const textBox = (n) => {
   return { x0, x1: x0 + w, y0: n.label.y - 10, y1: n.label.y - 10 + h };
 };
 const hits = (a, b) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
-for (let width = 300; width <= 420; width += 2) {
+for (let width = 300; width <= 640; width += 4) {   // the phone's 300 to 420, and a wide plate's column
   for (const height of [0, 560]) {
     const lay = layout(WORLD, { width, height, leader: height > 0 });
     const where = `${width} x ${height}`;
@@ -106,6 +106,13 @@ for (let width = 300; width <= 420; width += 2) {
         ok(`${where}: ${n.id}'s square is clear of ${id}'s label`, !hits(sq, b));
       }
     }
+    for (const h of lay.heads) {
+      const hb = { x0: h.x, x1: h.x + h.text.length * LAYOUT.charW, y0: h.y - 10, y1: h.y + 4 };
+      ok(`${where}: the head "${h.text}" stays on the drawing`, hb.x0 >= 0 && hb.x1 <= width);
+      for (const [id, b] of boxes) ok(`${where}: the head "${h.text}" is clear of ${id}'s label`, !hits(hb, b));
+      for (const n of lay.nodes) ok(`${where}: the head "${h.text}" is clear of ${n.id}'s square`, !hits(hb, { x0: n.x - 5, x1: n.x + 5, y0: n.y - 5, y1: n.y + 5 }));
+    }
+    ok(`${where}: the heads sit over Earth's lane and the trunk`, Math.abs(lay.heads[0].x - lay.lanes.earth) <= LAYOUT.node && Math.abs(lay.heads[1].x - lay.lanes.trunk) <= LAYOUT.node);
     for (const n of lay.nodes) ok(`${where}: ${n.id}'s target is at least 44 px tall`, n.hit.h >= 44);
     const hb = lay.nodes.map((n) => [n.id, { x0: n.hit.x, x1: n.hit.x + n.hit.w, y0: n.hit.y, y1: n.hit.y + n.hit.h }]);
     for (let i = 0; i < hb.length; i++) for (let j = i + 1; j < hb.length; j++) {
@@ -204,6 +211,7 @@ if (py) {
 const html = fs.readFileSync(path.join(LABS, 'orthogonal.html'), 'utf8').replace(/\s+/g, ' ');
 for (const [what, text] of [['title', WORLD.title], ['driver', WORLD.driver], ['evidence line', WORLD.favours.line],
   ['artifact', WORLD.artifact.title], ['artifact line', WORLD.artifact.line], ["Earth's artifact", WORLD.earthArtifact.title],
+  ["Earth's line", WORLD.earthArtifact.line],
   ['image', WORLD.artifact.image], ['alt text', WORLD.artifact.alt]]) {
   ok(`the markup's ${what} is the data's`, html.includes(text), text);
 }

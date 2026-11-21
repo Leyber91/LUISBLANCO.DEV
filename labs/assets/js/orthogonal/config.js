@@ -42,6 +42,7 @@ export const LAYOUT = Object.freeze({
   minPitch: 52,        // a row is never shorter, so a finger's target is at least 44 px tall at 390
   curve: 56,           // the most a branch curve takes before the node it reaches
   topPad: 6,
+  headH: 22,           // the column heads, 'Earth' over Earth's lane and 'This world' over the trunk
 });
 
 /* The ignition: the fired branch draws itself from the driver down, one row after another, and the render surfaces

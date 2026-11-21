@@ -139,7 +139,8 @@ def parse_argv(argv: list[str]) -> dict:
 
 # ----------------------------------------------------------------------------------------------------- the scene (bpy)
 def build_shelf_culture_lamp(P: dict, seed: int):
-    """The lamp of the fungus world. Returns (scene, camera, instrument objects, caps, the measure function)."""
+    """The lamp of the fungus world. Returns the scene, its camera, the collection the drafting ink skips, and the
+    function that measures the culture."""
     import bmesh
     import bpy
     import numpy as np

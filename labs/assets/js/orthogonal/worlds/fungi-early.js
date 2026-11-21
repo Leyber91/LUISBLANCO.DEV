@@ -31,13 +31,13 @@ export const WORLD = Object.freeze({
     image: 'assets/data/orthogonal/renders/mycelial-lamp.webp',
     record: 'assets/data/orthogonal/renders/mycelial-lamp.render.json',
     title: 'The mycelial street lamp',
-    line: 'This world, built for light at night',
+    line: "This world's answer to light at night",
     alt: 'A wide glass column on a ceramic plinth under a louvered hood, seen from low down: shelves of gilled bracket fungus climb a wooden spindle inside, their gill edges and rolled margins glowing blue-white in fog.',
   },
   earthArtifact: {
     node: 'gaslamp',
     title: 'The coal-gas street lamp',
-    line: 'Earth, same job',
+    line: "Earth's answer to the same job",
     supply: 'Gas main',
   },
   nodes: [

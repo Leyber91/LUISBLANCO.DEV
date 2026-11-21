@@ -1,52 +1,79 @@
 /* ============================================================
    orthogonal.css: the Orthogonal plate (Alternate Reality, the
-   Contact world: ink in fog). One sheet: a header, the lineage,
-   the render, Earth's ghost, the evidence footer and a title
-   block. Gold only on what fired (view.js header).
+   Contact world: ink in fog). One sheet: a header with its title
+   block, the lineage, the render, Earth's ghost and the evidence
+   footer. Gold only on what fired (view.js header).
+
+   The render and Earth's ghost share one box height and one
+   caption strip, so the two lamps stand on one ground line; the
+   evidence footer is a subgrid of the sheet, so its claims start
+   at the render's left edge.
+
+   Labels are in sentence case on purpose: small uppercase widely
+   tracked labels are listed as a tell in Exomania's approved bar
+   sheet, waiting on Luis's ruling (ROAD.md, the hub's notes).
    ============================================================ */
+
+@property --reveal { syntax: '<length>'; inherits: false; initial-value: 2400px; }
 
 body { font-size: 12px; line-height: 1.5; }
 body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 214, .05), transparent 72%); }
-html { background-image: linear-gradient(rgba(159, 179, 214, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(159, 179, 214, .03) 1px, transparent 1px); background-size: 32px 32px; }
 
 .sheet {
-  --cols-h: clamp(460px, calc(100vh - 350px), 680px);
+  --cols-h: clamp(480px, calc(100vh - 268px), 780px);
+  --strip: 88px;
   position: relative; z-index: 1;
   margin: 24px; padding: 6px 16px 16px; border: 1px solid var(--line);
+  background-image: linear-gradient(rgba(159, 179, 214, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(159, 179, 214, .03) 1px, transparent 1px);
+  background-size: 32px 32px; background-position: -1px -1px;
   display: grid; column-gap: 0; row-gap: 0;
-  grid-template-columns: minmax(330px, 410px) calc(var(--cols-h) * 0.7143) minmax(240px, 1fr);
+  grid-template-columns: minmax(380px, 1fr) calc((var(--cols-h) - var(--strip)) * 0.7143) minmax(260px, 330px);
   grid-template-rows: auto var(--cols-h) auto;
   grid-template-areas:
     "head head head"
     "lin  art  earth"
     "read read read";
 }
+.corner { position: absolute; width: 18px; height: 18px; border: 1px solid var(--accretion); opacity: .8; pointer-events: none; }
+.corner.tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.corner.tr { top: -1px; right: -1px; border-left: 0; border-bottom: 0; }
+.corner.bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; }
+.corner.br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
 
 /* ---------- header ---------- */
-.head { grid-area: head; padding: 4px 0 14px; }
-.head-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.head { grid-area: head; padding: 4px 0 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.head-main { min-width: 0; }
+.head-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: none; }
 .kick-line { margin: 0; font-size: 11px; color: var(--text-dim); }
 .back { font-size: 11px; letter-spacing: .06em; text-transform: none; padding: 4px 10px; }
 .title { margin: 4px 0 0; font: italic 400 40px/1.1 'Fraunces', Georgia, serif; color: var(--text-bright); letter-spacing: -.01em; }
-.thesis { margin: 8px 0 0; font-size: 13px; color: var(--text); max-width: 120ch; }
+.thesis { margin: 6px 0 0; font-size: 13px; color: var(--text); max-width: 140ch; }
 .thesis b { font-weight: 500; color: var(--text-bright); }
 
+.titleblock { display: grid; grid-template-columns: auto auto; border: 1px solid var(--line); font-size: 11px; color: var(--text-dim); }
+.titleblock span { padding: 1px 10px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.titleblock span:nth-child(2n) { border-right: 0; color: var(--text); }
+.titleblock span:nth-last-child(-n+2) { border-bottom: 0; }
+
 /* ---------- the lineage ---------- */
-.lineage { grid-area: lin; position: relative; min-width: 0; }
-.lineage svg { position: absolute; left: 0; top: 0; display: block; overflow: visible; }
-.lineage svg:focus { outline: none; }
+.lineage { grid-area: lin; min-width: 0; display: flex; flex-direction: column; padding-right: 8px; }
+.lin-box { position: relative; flex: 1 1 auto; min-height: 0; }
+.lin-box svg { position: absolute; left: 0; top: 0; display: block; overflow: visible; }
+.lin-box svg:focus { outline: none; }
 .lineage text { font-family: var(--font-mono); font-size: 11px; fill: var(--text); }
 .lineage .role { fill: var(--text-dim); }
+.lineage .head-t { fill: var(--text-dim); }
 .edge { fill: none; stroke-width: 1; }
 .edge.fired { stroke: var(--accretion); }
 .edge.thread { stroke: var(--accretion); stroke-opacity: .55; }
 .edge.earth { stroke: var(--text-faint); stroke-dasharray: 2 4; }
 .edge.pending { stroke: var(--text-dim); stroke-dasharray: 3 3; }
 .leader { stroke: var(--accretion); stroke-width: 1; stroke-opacity: .7; }
+.no-art .leader { stroke: var(--text-faint); stroke-opacity: 1; }
 .pair-rule { stroke: var(--horizon); stroke-width: 1; stroke-dasharray: 1 3; opacity: 0; transition: opacity var(--t-mid) var(--ease); }
 .pair-rule.on { opacity: .8; }
 
-.node { cursor: pointer; outline: none; transition: opacity 360ms var(--ease-out); }
+.node { cursor: pointer; outline: none; }
 .node .hit { fill: transparent; }
 .node .sq { fill: var(--void); stroke-width: 1; }
 .node .ring { fill: none; stroke: var(--horizon); stroke-width: 1; opacity: 0; transition: opacity var(--t-fast) var(--ease); }
@@ -64,93 +91,99 @@ html { background-image: linear-gradient(rgba(159, 179, 214, .03) 1px, transpare
 .node.chosen .lbl { fill: var(--text-bright); }
 .node:focus-visible .ring { opacity: 1; stroke-width: 1.5; }
 
+.legend { margin: 8px 0 0; font-size: 11px; color: var(--text-dim); line-height: 1.7; }
+.legend > span { white-space: nowrap; }
+.lg { display: inline-block; width: 18px; height: 0; vertical-align: middle; margin: 0 6px 0 0; border-top: 1px solid; }
+.lg.gold { border-color: var(--accretion); }
+.lg.dot { border-top-style: dotted; border-color: var(--text-dim); margin-left: 10px; }
+.lg.dash { border-top-style: dashed; border-color: var(--text-dim); margin-left: 10px; }
 
-/* ---------- the render ---------- */
-.art {
-  grid-area: art; position: relative; margin: 0; overflow: hidden; min-width: 0;
-  border-left: 1px solid var(--line); border-right: 1px solid var(--line); background: #05070B;
-}
+/* ---------- the render and Earth's ghost: one box height, one caption strip ---------- */
+.art, .earth { margin: 0; min-width: 0; display: grid; grid-template-rows: minmax(0, 1fr) var(--strip); }
+.art { grid-area: art; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.art-view, .earth-view { position: relative; overflow: hidden; }
+.art-view { background: #05070B; }
 .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
-  transition: opacity 1400ms cubic-bezier(.16, 1, .3, 1), filter 1400ms cubic-bezier(.16, 1, .3, 1); }
-.art.fog img { opacity: 0; filter: blur(10px) brightness(.55); }
+  /* the fog clears outward from where the gold strand reaches the render (main.js sets --rx and --ry) */
+  -webkit-mask-image: radial-gradient(circle at var(--rx, 0px) var(--ry, 60%), #000 calc(var(--reveal) - 220px), transparent var(--reveal));
+  mask-image: radial-gradient(circle at var(--rx, 0px) var(--ry, 60%), #000 calc(var(--reveal) - 220px), transparent var(--reveal));
+  transition: --reveal 1700ms cubic-bezier(.33, 0, .2, 1); }
+/* fogged at once: a transition here would run the reveal backwards from full while the strand draws */
+.art.fog img { --reveal: 0px; transition: none; }
 .art.failed img { visibility: hidden; }
-.art-cap { position: absolute; left: 16px; right: 16px; bottom: 12px; display: flex; flex-direction: column; gap: 2px; }
-.art-name { color: var(--text-bright); font-size: 13px; }
-.art-line { color: var(--text-dim); font-size: 11px; }
-.art-status { color: var(--text); font-size: 11px; max-width: 40ch; }
+.art-ink { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.art-ink path, .art-ink rect, .art-ink ellipse, .art-ink circle, .art-ink line { fill: none; stroke: var(--text-dim); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.art-ink .glass { stroke: var(--horizon-dim); }
+.art-ink .cap { stroke: var(--text); }
+
+.art-cap, .earth-cap { display: flex; flex-direction: column; gap: 0; padding: 8px 14px 0; border-top: 1px solid var(--line); min-width: 0; line-height: 1.45; }
+.art-name, .earth-name { color: var(--text-bright); font-size: 13px; }
+.art-line, .dim-line { color: var(--text-dim); font-size: 11px; }
+.art-status { color: var(--text); font-size: 11px; }
 .art-status:empty { display: none; }
-.provenance { margin-top: 8px; font-size: 10.5px; color: var(--text-dim); line-height: 1.5; }
+.failed .provenance { display: none; }
 .provenance .pl { display: block; }
+.provenance { margin-top: 3px; font-size: 11px; color: var(--text-dim); }
 .provenance a { color: var(--horizon); text-underline-offset: 3px; }
 .provenance a:hover { color: var(--text-bright); }
 .provenance .stale { color: var(--text-bright); }
+.earth-tag { margin-top: 3px; font-size: 11px; color: var(--text-dim); }
 
-/* ---------- Earth's ghost ---------- */
-.earth { grid-area: earth; position: relative; min-width: 0; padding: 10px 0 96px 28px; display: flex; flex-direction: column; }
-.earth-head { margin: 0; display: flex; flex-direction: column; font-size: 11px; }
-.dim-line { color: var(--text-dim); }
-.earth-name { color: var(--text); font-size: 12px; }
-.earth-svg { flex: 1 1 auto; min-height: 0; width: 100%; max-width: 300px; margin: 18px auto 0; display: block; }
+.earth { grid-area: earth; }
+.earth-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
 .earth-svg .ghost path { fill: none; stroke: var(--text-faint); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .earth-svg .ghost .flame { stroke: var(--text-dim); }
 .earth-svg .ghost .main { stroke-dasharray: 6 4; }
-.earth-foot { margin: 6px 0 0; font-size: 11px; color: var(--text-dim); }
+.earth-svg text { font-family: var(--font-mono); font-size: 11px; fill: var(--text-dim); }
 
-/* ---------- the evidence footer and the title block ---------- */
-.reading { grid-area: read; padding: 14px 0 0; border-top: 1px solid var(--line); min-width: 0;
-  display: grid; grid-template-columns: minmax(0, 9fr) minmax(0, 11fr); column-gap: 40px; align-content: start;
-  grid-template-areas: "h e" "n e" "b e" ". e"; grid-template-rows: auto auto auto 1fr; }
+/* ---------- the evidence footer, on the sheet's own columns ---------- */
+.reading { grid-area: read; grid-column: 1 / -1; padding: 14px 0 0; border-top: 1px solid var(--line); min-width: 0;
+  display: grid; grid-template-columns: subgrid; align-content: start;
+  grid-template-areas: "h e e" "n e e" "b e e" ". e e"; grid-template-rows: auto auto auto 1fr; }
 .rd-head { grid-area: h; } .rd-note { grid-area: n; } .rd-beside { grid-area: b; }
-.reading p { margin: 0; }
+.reading p { margin: 0; padding-right: 32px; }
 .rd-head { font-size: 12px; color: var(--text-dim); }
 .rd-label { color: var(--text-bright); font-weight: 500; }
-.rd-note { margin-top: 2px !important; color: var(--text); font-size: 12px; max-width: 110ch; }
+.rd-note { margin-top: 2px !important; color: var(--text); font-size: 12px; }
 .rd-beside { margin-top: 2px !important; color: var(--text-dim); font-size: 11px; }
 .rd-pair { color: var(--text); }
-.rd-evidence { grid-area: e; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-width: 120ch; }
-.rd-evidence li { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+.rd-evidence { grid-area: e; list-style: none; margin: 0; padding: 0 0 0 14px; display: flex; flex-direction: column; gap: 3px; max-width: 120ch; }
+.rd-evidence li { font-size: 11px; color: var(--text); line-height: 1.5; }
 .rd-evidence .t { font-weight: 500; margin-right: 4px; }
 .rd-evidence .t.real { color: var(--horizon); }
 .rd-evidence .t.ill { color: var(--text-dim); }
-.rd-evidence cite { font-style: normal; color: var(--text); }
-.rd-gap { color: var(--text); }
+.rd-evidence cite { font-style: normal; color: var(--text-dim); }
+.rd-gap { color: var(--text-dim); }
 
-.titleblock { grid-area: earth; align-self: end; justify-self: end; margin-bottom: 6px; display: grid; grid-template-columns: auto auto;
-  border: 1px solid var(--line); font-size: 11px; color: var(--text-dim); }
-.titleblock span { padding: 3px 10px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.titleblock span:nth-child(2n) { border-right: 0; color: var(--text); }
-.titleblock span:nth-last-child(-n+2) { border-bottom: 0; }
-
-/* ---------- narrow: one column, the render first, Earth's lamp beside it in the reading order ---------- */
+/* ---------- narrow: one column; the render, then the lineage that grew it and its reading, then Earth ---------- */
 @media (max-width: 999px) {
   .sheet {
+    --strip: auto;
     margin: 8px; padding: 4px 12px 14px;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: none;
-    grid-template-areas: "head" "art" "earth" "lin" "read" "tb";
+    grid-template-areas: "head" "art" "lin" "read" "earth";
   }
-  .reading { display: block; }
-  .rd-evidence { margin-top: 6px; }
-  .titleblock { grid-area: tb; justify-self: start; margin: 14px 0 0;
-  }
+  .head { flex-direction: column-reverse; gap: 8px; }
+  .head-side { flex-direction: row; justify-content: space-between; align-items: center; align-self: stretch; }
   .title { font-size: 30px; }
   .back { min-height: 44px; display: inline-flex; align-items: center; }
   .thesis { font-size: 12px; }
-  .art { aspect-ratio: 940 / 1316; border: 1px solid var(--line); }
-  .earth { padding: 14px 0 8px; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 16px; align-items: start; }
-  .earth-head { grid-column: 1; grid-row: 1; }
-  .earth-foot { grid-column: 1; grid-row: 2; align-self: end; }
-  .earth-svg { grid-column: 2; grid-row: 1 / span 2; width: 120px; height: 198px; margin: 0; }
-  .lineage { margin-top: 10px; padding-top: 16px; border-top: 1px solid var(--line); box-sizing: content-box; }
-  .lineage svg { top: 16px; }
+  .art { border: 1px solid var(--line); grid-template-rows: auto auto; }
+  .art-view { aspect-ratio: 940 / 1316; }
+  .art-cap { padding-bottom: 10px; }
+  .lineage { margin-top: 14px; padding-right: 0; }
+  .reading { grid-column: auto; display: block; margin-top: 12px; }
+  .reading p { padding-right: 0; }
+  .rd-evidence { margin-top: 6px; padding-left: 0; }
+  .earth { margin-top: 16px; border-top: 1px solid var(--line); grid-template-columns: minmax(0, 1fr) 120px; grid-template-rows: auto; }
+  .earth-view { grid-column: 2; grid-row: 1; height: 200px; }
+  .earth-cap { grid-column: 1; grid-row: 1; border-top: 0; padding: 12px 0 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .art img, .node, .pair-rule, .node .ring { transition: none; }
+  .art img, .pair-rule, .node .ring { transition: none; }
 }
 
-/* the caption sits on the render's dark foot; a scrim keeps the drafting hairlines of the plinth from running through
-   its words */
-.art-cap::before { content: ''; position: absolute; left: -16px; right: -16px; bottom: -12px; height: calc(100% + 40px); z-index: -1;
-  background: linear-gradient(to bottom, rgba(5, 7, 11, 0), rgba(5, 7, 11, .82) 34%, rgba(5, 7, 11, .9)); pointer-events: none; }
-.art-cap { z-index: 1; }
+/* the gas main's name, against its dashed line at the foot of Earth's ghost */
+.earth-main { position: absolute; right: 8px; bottom: 14px; font-size: 11px; color: var(--text-dim); }

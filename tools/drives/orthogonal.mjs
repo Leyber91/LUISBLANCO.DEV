@@ -25,7 +25,8 @@
 import { standard } from '../invariants.mjs';
 
 const PAGE = '/labs/orthogonal.html';
-const GOLD = ['.bp', '.edge.fired', '.edge.thread', '.leader', '.node.fired .sq'];
+// the plate's corners, the branch that fired, and the legend's swatch that says what that gold means
+const GOLD = ['.corner', '.edge.fired', '.edge.thread', '.leader', '.node.fired .sq', '.lg.gold'];
 
 export default async function orthogonal(p, { base, width }) {
   for (const [name, expr] of standard({ gold: { allow: GOLD } })) p.invariant(name, expr);
@@ -64,7 +65,15 @@ export default async function orthogonal(p, { base, width }) {
   p.check("the render's record is read", await p.until('document.getElementById("provenance").dataset.state !== "loading"', 20000));
   let s = await state();
   p.check('it opens on the artifact, chosen and read', s.chosen === 'lamp' && s.reading === 'lamp' && s.pressed.join() === 'lamp', JSON.stringify(s.pressed));
-  p.check("the record matches the parameters on the site", s.prov === 'ok' && /match the render/.test(s.provText), s.provText);
+  p.check("the render's record matches the parameters on the site, and says so in one line", s.prov === 'ok' && /its parameters$/.test(s.provText), s.provText);
+  const named = await p.ev(`({ heads: [...document.querySelectorAll('.head-t')].map((t) => t.textContent).join('|'),
+    legend: document.querySelector('.legend').textContent.replace(/\\s+/g, ' ').trim() })`);
+  p.check('the two branches are named over their lanes, and a legend says what gold, dots and dashes mean', named.heads === 'Earth|This world' && /branch this world took/.test(named.legend) && /Earth's branch/.test(named.legend), JSON.stringify(named));
+  if (width >= 1000) {
+    const boxes = await p.ev(`(() => { const a = document.querySelector('.art-view').getBoundingClientRect(), e = document.querySelector('.earth-view').getBoundingClientRect();
+      return { a: [Math.round(a.top), Math.round(a.bottom)], e: [Math.round(e.top), Math.round(e.bottom)] }; })()`);
+    p.check("the render and Earth's ghost share one box, so the two lamps stand on one ground line", boxes.a[0] === boxes.e[0] && boxes.a[1] === boxes.e[1], JSON.stringify(boxes));
+  }
   const counts = await p.ev(`({ nodes: document.querySelectorAll('.node').length, gold: document.querySelectorAll('.node.fired').length,
     filled: [...document.querySelectorAll('.node.fired .sq')].filter((r) => getComputedStyle(r).fill !== 'rgb(6, 8, 13)').length,
     earth: document.querySelectorAll('.edge.earth').length, leader: !!document.querySelector('.leader') })`);
@@ -81,6 +90,11 @@ export default async function orthogonal(p, { base, width }) {
   p.check("its Earth step is ringed beside it, joined by the row's rule", s.paired === 'buried' && s.rule);
   p.check('the reading tags each claim and names its sources', /\[REAL\]/.test(s.readingText) && /Nelsen, DiMichele, Peters and Boyce/.test(s.readingText) && /\[ILLUSTRATIVE\]/.test(s.readingText));
   p.check('the footer keeps its height', s.readingH === h0, `${h0} then ${s.readingH}`);
+  const rtop = await p.ev(`Math.round(document.getElementById('reading').getBoundingClientRect().top - innerHeight)`);
+  // a narrow plate scrolls the reading up to its first claims; a wide one has the reading beside the evidence, its head
+  // and first lines in the window
+  const room = width >= 1000 ? 100 : 150;
+  p.check(`after a press the reading has its head and first lines in the window (${room} px of it)`, rtop <= -room, `${rtop} px from the window's foot`);
   await p.shot('02-driver');
 
   // ---- the keys
@@ -103,7 +117,7 @@ export default async function orthogonal(p, { base, width }) {
   // ---- links
   await open('node=gaslamp&still');
   s = await state();
-  p.check('a link opens the plate on its step', s.chosen === 'gaslamp' && /^Earth/.test(s.readingText), s.chosen);
+  p.check('a link opens the plate on its step', s.chosen === 'gaslamp' && /^Gas street lamp · Earth/.test(s.readingText), s.readingText.slice(0, 40));
   await open('node=nowhere&still');
   s = await state();
   p.check('a step not in the world opens the artifact', s.chosen === 'lamp');
@@ -113,6 +127,8 @@ export default async function orthogonal(p, { base, width }) {
   await p.until('document.getElementById("art").classList.contains("failed")', 8000);
   s = await state();
   p.check('a missing render is said in words', s.failed && /did not load/.test(s.status), s.status);
+  p.check('and the lamp is drawn in ink from its parameters in its place', await p.until(`!document.getElementById('art-ink').hidden && document.getElementById('art-ink').childElementCount > 20`, 8000));
+  p.check('the strand that pointed at the render is no longer gold', await p.ev(`document.getElementById('lineage').classList.contains('no-art')`));
   const artH = await p.ev(`document.getElementById('art').offsetHeight`);
   p.check('in a box of the same height', artH > 300, String(artH));
   await p.shot('04-render-missing');
@@ -122,7 +138,9 @@ export default async function orthogonal(p, { base, width }) {
   const early = await p.ev(`(() => {
     const o = window.__orthogonal;
     const dash = [...document.querySelectorAll('.edge.fired')].map((e) => parseFloat(getComputedStyle(e).strokeDashoffset) || 0);
-    return { fog: document.getElementById('art').classList.contains('fog'), drawing: dash.filter((d) => d > 1).length,
+    // what the visitor sees, not a class: the mask's radius on the render (0 px: none of it shows)
+    const reveal = parseFloat(getComputedStyle(document.getElementById('art-img')).getPropertyValue('--reveal'));
+    return { fog: document.getElementById('art').classList.contains('fog') && reveal < 40, reveal, drawing: dash.filter((d) => d > 1).length,
       ms: Math.round(performance.now() - o.startedAt), revealAt: o.revealAt };
   })()`);
   p.check('live, the gold strand is still drawing and the render waits in the fog', early.fog && early.drawing > 0, JSON.stringify(early));

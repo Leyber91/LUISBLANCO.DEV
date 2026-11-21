@@ -15,46 +15,55 @@
 <link rel="stylesheet" href="assets/css/orthogonal.css" />
 </head>
 <body>
-<span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
-
 <main class="sheet">
+  <i class="corner tl" aria-hidden="true"></i><i class="corner tr" aria-hidden="true"></i><i class="corner bl" aria-hidden="true"></i><i class="corner br" aria-hidden="true"></i>
   <header class="head">
-    <div class="head-row">
+    <div class="head-main">
       <p class="kick-line">Plate A &middot; Alternate Reality &middot; Orthogonal</p>
-      <a class="back" href="index.html">&larr; labs</a>
+      <h1 class="title">A world where the fungi came early</h1>
+      <p class="thesis">Changed driver: <b>lignin-eating fungi before the Carboniferous</b>. The evidence favours the other branch: Nelsen et al. 2016 reject this lag; Floudas et al. 2012 support it in part.</p>
     </div>
-    <h1 class="title">A world where the fungi came early</h1>
-    <p class="thesis">Changed driver: <b>lignin-eating fungi before the Carboniferous</b>. The evidence favours the other branch: Nelsen et al. 2016 reject this lag; Floudas et al. 2012 support it in part.</p>
+    <div class="head-side">
+      <a class="back" href="index.html">&larr; labs</a>
+      <div class="titleblock" aria-label="Title block">
+        <span>Sheet</span><span>A / 1</span>
+        <span>Rev</span><span>1</span>
+        <span>Date</span><span>2026-11-21</span>
+      </div>
+    </div>
   </header>
 
-  <section class="lineage" id="lineage" aria-label="The lineage of the lamp: this world's branch and Earth's">
-    <svg id="lineage-svg" role="group" aria-label="Choose a step to read it; the arrow keys move along the rows and across to Earth's step"></svg>
+  <section class="lineage" aria-label="The lineage of the lamp: this world's branch and Earth's">
+    <div class="lin-box" id="lineage">
+      <svg id="lineage-svg" role="group" aria-label="Choose a step to read it; the arrow keys move along the rows and across to Earth's step"></svg>
+    </div>
+    <p class="legend"><span><span class="lg gold" aria-hidden="true"></span>the branch this world took</span> <span><span class="lg dot" aria-hidden="true"></span>Earth's branch for the same jobs</span> <span><span class="lg dash" aria-hidden="true"></span>not yet happened</span></p>
   </section>
 
   <figure class="art" id="art">
-    <img id="art-img" src="assets/data/orthogonal/renders/mycelial-lamp.webp" width="940" height="1316" decoding="async"
-      alt="A wide glass column on a ceramic plinth under a louvered hood, seen from low down: shelves of gilled bracket fungus climb a wooden spindle inside, their gill edges and rolled margins glowing blue-white in fog." />
+    <div class="art-view">
+      <img id="art-img" src="assets/data/orthogonal/renders/mycelial-lamp.webp" width="940" height="1316" decoding="async"
+        alt="A wide glass column on a ceramic plinth under a louvered hood, seen from low down: shelves of gilled bracket fungus climb a wooden spindle inside, their gill edges and rolled margins glowing blue-white in fog." />
+      <svg id="art-ink" class="art-ink" hidden aria-hidden="true"></svg>
+    </div>
     <figcaption class="art-cap">
       <span class="art-name">The mycelial street lamp</span>
-      <span class="art-line">This world, built for light at night</span>
+      <span class="art-line">This world's answer to light at night</span>
       <span class="art-status" id="art-status" role="status"></span>
       <span class="provenance" id="provenance" data-state="loading">Reading the render's record.</span>
     </figcaption>
   </figure>
 
-  <section class="earth" aria-label="Earth's artifact for the same job, ghosted">
-    <p class="earth-head"><span class="dim-line">Earth, same job</span><span class="earth-name">The coal-gas street lamp</span></p>
-    <svg id="earth-svg" class="earth-svg" aria-hidden="true"></svg>
-    <p class="earth-foot">Gas main</p>
-  </section>
+  <figure class="earth" aria-label="Earth's artifact for the same job, ghosted">
+    <div class="earth-view"><svg id="earth-svg" class="earth-svg" aria-hidden="true"></svg></div>
+    <figcaption class="earth-cap">
+      <span class="earth-name">The coal-gas street lamp</span>
+      <span class="dim-line">Earth's answer to the same job</span>
+      <span class="earth-tag">Outline [ILLUSTRATIVE] on the render's ground line, not to scale</span>
+    </figcaption>
+  </figure>
 
   <section class="reading" id="reading" aria-live="polite" aria-label="The chosen step's reading and its evidence"></section>
-
-  <div class="titleblock" aria-label="Title block">
-    <span>Sheet</span><span>A / 1</span>
-    <span>Rev</span><span>slice 1</span>
-    <span>Date</span><span>2026-11-21</span>
-  </div>
 </main>
 
 <script type="module" src="assets/js/orthogonal/main.js"></script>

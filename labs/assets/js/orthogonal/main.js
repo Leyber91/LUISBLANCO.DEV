@@ -8,7 +8,7 @@
    ============================================================ */
 import { EVENTS, TIMING } from './config.js';
 import { check, step } from './engine.js';
-import { drawEarthLamp, drawLineage, ignite, markChosen, settle, writeReading } from './view.js';
+import { drawArtifactInk, drawEarthLamp, drawLineage, ignite, markChosen, settle, writeReading } from './view.js';
 import { WORLD } from './worlds/fungi-early.js';
 
 const $ = (id) => document.getElementById(id);
@@ -26,6 +26,7 @@ if (problems.length) {
 let chosen = WORLD.nodes.some((n) => n.id === params.get('node')) ? params.get('node') : WORLD.artifact.node;
 let drawn = null;
 let os = null;
+let artParams = null;   // the artifact's parameter file, once read: the ink drawing is computed from it
 
 const holder = $('lineage');
 const svg = $('lineage-svg');
@@ -33,23 +34,46 @@ const svg = $('lineage-svg');
 let size = '';   // the box the lineage was last drawn for: a resize that keeps it redraws nothing
 
 function draw() {
+  const isWide = wide.matches;
+  if (isWide) holder.style.height = '';   // the box's own height on a wide plate, not the one a narrow plate set
   const width = Math.floor(holder.clientWidth);
   if (width < 200) return;
-  const isWide = wide.matches;
   const height = isWide ? Math.floor(holder.clientHeight) : 0;
   size = `${width}x${height}`;
   drawn = drawLineage(svg, WORLD, { width, height, leader: isWide });
   if (!isWide) holder.style.height = `${drawn.lay.height}px`;
-  else holder.style.height = '';
   markChosen(svg, WORLD, drawn.groups, chosen);
+  aimReveal();
 }
 
-function choose(id, { focus = false, track = true } = {}) {
+/* The fog clears outward from where the gold strand meets the render: the leader's row on a wide plate, the render's
+   foot on a narrow one, where the lineage below it grows up into it. */
+function aimReveal() {
+  const fig = $('art');
+  const view = fig.querySelector('.art-view').getBoundingClientRect();
+  const lead = svg.querySelector('.leader');
+  if (wide.matches && lead) {
+    const y = lead.getBoundingClientRect().top - view.top;
+    fig.style.setProperty('--rx', '0px');
+    fig.style.setProperty('--ry', `${Math.round(Math.max(0, Math.min(view.height, y)))}px`);
+  } else {
+    fig.style.setProperty('--rx', '50%');
+    fig.style.setProperty('--ry', '100%');
+  }
+}
+
+function choose(id, { focus = false, track = true, reveal = false } = {}) {
   if (!id || !drawn || !drawn.groups.has(id)) return;
   chosen = id;
   markChosen(svg, WORLD, drawn.groups, id);
   writeReading($('reading'), WORLD, id);
   if (focus) drawn.groups.get(id).focus({ preventScroll: false });
+  // on a narrow plate the reading is below the drawing: a press brings its head and first claims into view
+  if (reveal && !wide.matches) {
+    const r = $('reading').getBoundingClientRect();
+    const short = r.top + 200 - innerHeight;
+    if (short > 0) scrollBy({ top: short, behavior: still ? 'auto' : 'smooth' });
+  }
   const url = new URL(location.href);
   url.searchParams.set('node', id);
   history.replaceState(null, '', url);
@@ -66,10 +90,17 @@ function fixReadingHeight() {
   writeReading(box, WORLD, chosen);
 }
 
-/* The render: it surfaces from the fog once it has loaded and the gold strand has reached it. */
+async function readParams() {
+  if (!artParams) artParams = fetch(WORLD.artifact.params).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.text(); });
+  return artParams;
+}
+
+/* The render: it surfaces from the fog once it has loaded and the gold strand has reached it. When it does not load, the
+   lamp is drawn in ink from its parameter file in the same box, and the strand that pointed at it goes to ink. */
 function art(revealAt) {
   const fig = $('art');
   const img = $('art-img');
+  const ink = $('art-ink');
   const status = $('art-status');
   let loaded = false, timeUp = still;
   const show = () => {
@@ -78,18 +109,34 @@ function art(revealAt) {
     fig.dataset.liftedAt = String(Math.round(performance.now()));   // read by the drive: never before the strand arrives
   };
   if (!still) { fig.classList.add('fog'); setTimeout(() => { timeUp = true; show(); }, revealAt); }
-  const ok = () => { loaded = true; fig.classList.remove('failed'); status.textContent = ''; show(); };
-  const fail = () => {
+  const ok = () => {
+    loaded = true;
+    fig.classList.remove('failed');
+    $('lineage').classList.remove('no-art');
+    ink.hidden = true;
+    status.textContent = '';
+    show();
+  };
+  const fail = async () => {
     fig.classList.remove('fog');
     fig.classList.add('failed');
-    status.textContent = `The render did not load. It is drawn by render_artifact.py from ${WORLD.artifact.params.split('/').pop()}.`;
+    $('lineage').classList.add('no-art');
+    const file = WORLD.artifact.params.split('/').pop();
+    try {
+      drawArtifactInk(ink, JSON.parse(await readParams()));
+      ink.hidden = false;
+      status.textContent = `The render did not load; this outline is drawn from ${file} [ILLUSTRATIVE].`;
+    } catch {
+      status.textContent = `The render did not load, nor its parameters (${file}).`;
+    }
   };
   img.addEventListener('load', ok);
   img.addEventListener('error', fail);
   if (img.complete) { if (img.naturalWidth) ok(); else if (img.getAttribute('src')) fail(); }
 }
 
-/* The provenance strip: the render's record, and whether the parameters on the site are the ones it was drawn from. */
+/* The render's record in one line, and a warning only when the parameters on the site are not the ones it was drawn
+   from (their SHA-256 against the record's). */
 async function provenance() {
   const strip = $('provenance');
   const sha = async (text) => {
@@ -99,27 +146,27 @@ async function provenance() {
   };
   try {
     const [rec, ptext] = await Promise.all([
-      fetch(WORLD.artifact.record).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-      fetch(WORLD.artifact.params).then((r) => { if (!r.ok) throw new Error(r.status); return r.text(); }),
+      fetch(WORLD.artifact.record).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); }),
+      readParams(),
     ]);
     const same = crypto.subtle ? (await sha(ptext)) === rec.params_sha256 : null;
-    const day = String(rec.rendered_utc).slice(0, 10);
     const mins = Math.floor(rec.render_s / 60), secs = Math.round(rec.render_s % 60);
-    const line = (...parts) => { const s = document.createElement('span'); s.className = 'pl'; s.append(...parts); return s; };
+    const nb = ' ', dot = ' · ';
     const a = document.createElement('a');
     a.href = WORLD.artifact.params;
-    a.textContent = rec.params;
-    const verdict = line(same === null ? 'The parameters were not checked against the render.'
-      : same ? 'The parameters on this site match the render.' : 'The parameters changed after this render.');
-    if (same === false) verdict.classList.add('stale');
-    strip.replaceChildren(
-      line(`Seed ${rec.seed} \u00b7 Blender ${rec.blender} \u00b7 ${rec.samples} samples \u00b7 ${mins} min ${secs} s`),
-      line(`Rendered ${day} from `, a),
-      verdict,
-    );
-    strip.dataset.state = same === false ? 'stale' : 'ok';
+    a.textContent = 'its parameters';
+    const line = (...parts) => { const s = document.createElement('span'); s.className = 'pl'; s.append(...parts); return s; };
+    const from = line(`Rendered in ${mins}${nb}min${nb}${secs}${nb}s from `, a);
+    if (same === false) {
+      const s = document.createElement('span');
+      s.className = 'stale';
+      s.textContent = ', changed since this render';
+      from.append(s);
+    }
+    strip.replaceChildren(line(`Seed${nb}${rec.seed}${dot}Blender${nb}${rec.blender}${dot}${rec.samples}${nb}samples`), from);
+    strip.dataset.state = same === false ? 'stale' : same === null ? 'unchecked' : 'ok';
   } catch {
-    strip.textContent = `The render's record did not load; the parameters are in ${WORLD.artifact.params.split('/').pop()}.`;
+    strip.textContent = `The render's record did not load; its parameters are in ${WORLD.artifact.params.split('/').pop()}.`;
     strip.dataset.state = 'error';
   }
 }
@@ -143,14 +190,13 @@ function words() {
   q('.art-name').textContent = WORLD.artifact.title;
   q('.art-line').textContent = WORLD.artifact.line;
   $('art-img').alt = WORLD.artifact.alt;
-  q('.dim-line').textContent = WORLD.earthArtifact.line;
   q('.earth-name').textContent = WORLD.earthArtifact.title;
-  q('.earth-foot').textContent = WORLD.earthArtifact.supply;
+  q('.dim-line').textContent = WORLD.earthArtifact.line;
 }
 
 function boot() {
   words();
-  drawEarthLamp($('earth-svg'));
+  drawEarthLamp($('earth-svg'), WORLD.earthArtifact.supply);
   draw();
   fixReadingHeight();
   writeReading($('reading'), WORLD, chosen);
@@ -163,12 +209,12 @@ function boot() {
 
   svg.addEventListener('click', (ev) => {
     const g = ev.target.closest('.node');
-    if (g) choose(g.getAttribute('data-id'));
+    if (g) choose(g.getAttribute('data-id'), { reveal: true });
   });
   svg.addEventListener('keydown', (ev) => {
     const g = ev.target.closest('.node');
     if (!g) return;
-    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); choose(g.getAttribute('data-id')); return; }
+    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); choose(g.getAttribute('data-id'), { reveal: true }); return; }
     const next = step(WORLD, g.getAttribute('data-id'), ev.key);
     if (next) { ev.preventDefault(); choose(next, { focus: true }); }
   });

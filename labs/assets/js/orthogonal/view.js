@@ -52,6 +52,10 @@ export function drawLineage(svg, world, { width, height, leader }) {
   svg.setAttribute('viewBox', `0 0 ${width} ${lay.height}`);
   svg.setAttribute('width', String(width));
   svg.setAttribute('height', String(lay.height));
+  for (const h of lay.heads) {
+    const t = svgEl('text', { x: r1(h.x), y: r1(h.y), class: 'head-t', 'data-head': h.id }, svg);
+    t.textContent = h.text;
+  }
   const rowRule = svgEl('line', { class: 'pair-rule', x1: 0, x2: 0, y1: 0, y2: 0 }, svg);
   const gEdges = svgEl('g', { class: 'edges' }, svg);
   for (const e of lay.edges) {
@@ -154,7 +158,7 @@ export function writeReading(root, world, id) {
     return e;
   };
   const head = make('p', 'rd-head');
-  head.append(make('span', 'rd-role', r.role), make('span', 'rd-sep', ' · '), make('b', 'rd-label', r.label));
+  head.append(make('b', 'rd-label', r.label), make('span', 'rd-sep', ' · '), make('span', 'rd-role', r.role));
   const note = make('p', 'rd-note', r.note);
   const parts = [head, note];
   if (r.beside) {
@@ -175,11 +179,28 @@ export function writeReading(root, world, id) {
   root.dataset.node = id;
 }
 
-/* The ghost of Earth's artifact: a coal-gas street lamp in faint ink, drawn into a 200 x 320 box. [ILLUSTRATIVE] The
-   outline is a common form of the lamp, drawn from general knowledge; no measured drawing was opened. */
-export function drawEarthLamp(svg) {
+/* Where the render's lamp stands in its frame: render_artifact.py frames the instrument to fill 0.93 of the height,
+   centred, so its top is at 0.035 of the frame and its ground at 0.965. Earth's ghost and the ink drawing use the same
+   two lines, so the lamps stand on one ground. */
+export const FRAME = Object.freeze({ top: 0.035, ground: 0.965 });
+
+/* A viewBox (in the drawing's own units, y down) that puts `top` and `ground` on FRAME's lines of a box `aspect` wide
+   for each unit of height, centred on x = cx. */
+function frameBox(top, ground, aspect, cx) {
+  const h = (ground - top) / (FRAME.ground - FRAME.top);
+  const y0 = top - FRAME.top * h;
+  const w = h * aspect;
+  return `${r1k(cx - w / 2)} ${r1k(y0)} ${r1k(w)} ${r1k(h)}`;
+}
+const r1k = (v) => Math.round(v * 1000) / 1000;
+
+/* The ghost of Earth's artifact: a coal-gas street lamp in faint ink, standing on the render's ground line and as tall
+   as the render's lamp. [ILLUSTRATIVE] The outline is a common form of the lamp, drawn from general knowledge; no
+   measured drawing was opened, and the two lamps are not to one scale. */
+export function drawEarthLamp(svg, supply) {
   svg.replaceChildren();
-  svg.setAttribute('viewBox', '0 0 200 330');
+  svg.setAttribute('viewBox', frameBox(2, 316, 180 / 338, 100));
+  svg.setAttribute('preserveAspectRatio', 'xMidYMax meet');
   const g = svgEl('g', { class: 'ghost' }, svg);
   const p = (d, cls = '') => svgEl('path', { d, class: cls }, g);
   p('M50 60 L150 60 L135 155 L65 155 Z');                       // the glazed lantern
@@ -191,6 +212,52 @@ export function drawEarthLamp(svg) {
   p('M94 172 L90 290 M106 172 L110 290');                        // the post
   p('M60 230 L140 230');                                         // the ladder bar
   p('M76 290 L124 290 L132 316 L68 316 Z');                      // the base
-  p('M0 326 L200 326', 'main');                                  // the gas main under the street
-  p('M100 316 L100 326');
+  p('M-40 323 L240 323', 'main');                                // the gas main under the street
+  p('M100 316 L100 323');
+  if (supply) {
+    const view = svg.parentElement;
+    let tag = view.querySelector('.earth-main');
+    if (!tag) { tag = document.createElement('span'); tag.className = 'earth-main'; view.appendChild(tag); }
+    tag.textContent = supply;
+  }
+}
+
+/* The artifact in ink, computed from its parameter file: an elevation of the shelf-culture lamp (plinth, glass column,
+   spindle, brim, louvers, finial, flask) with its front caps as fans on alternate sides, for when the render does not
+   load. [ILLUSTRATIVE] An outline from the same numbers the render was built from, not the render. */
+export function drawArtifactInk(svg, P) {
+  const I = P.instrument, C = P.culture;
+  const ph = I.plinth_height_m, pr = I.column_radius_m + I.plinth_overhang_m, cr = I.column_radius_m, ch = I.column_height_m;
+  const top = ph + ch, br = cr + I.brim_overhang_m, kh = br / 0.43;
+  const hoodTop = Math.max(...I.louvers.map((l) => l[1]));
+  const finial = top + hoodTop + 0.12;
+  svg.replaceChildren();
+  svg.setAttribute('viewBox', frameBox(-(finial + 0.055), 0, 940 / 1316, 0));
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  const add = (tag, a, cls) => svgEl(tag, cls ? { ...a, class: cls } : a, svg);
+  const n = (v) => r1k(v);
+  add('line', { x1: n(-1.2), x2: n(1.2), y1: 0, y2: 0 });                                            // the ground
+  add('rect', { x: n(-pr), y: n(-ph), width: n(2 * pr), height: n(ph) });                             // the plinth
+  add('rect', { x: n(-cr), y: n(-top), width: n(2 * cr), height: n(ch) }, 'glass');                   // the glass column
+  add('line', { x1: 0, x2: 0, y1: n(-ph), y2: n(-top) });                                             // the spindle
+  add('rect', { x: n(-br), y: n(-(top + 0.035)), width: n(2 * br), height: 0.035 });                  // the brim
+  for (const [rr, dz] of I.louvers) add('ellipse', { cx: 0, cy: n(-(top + dz)), rx: n(rr * kh), ry: 0.026 });   // the louvers
+  add('circle', { cx: 0, cy: n(-finial), r: 0.055 });                                                 // the finial
+  if (I.flask_radius_m > 0) {
+    const fx = pr + I.flask_radius_m + 0.02;
+    add('circle', { cx: n(fx), cy: n(-(ph + 0.14)), r: n(I.flask_radius_m) }, 'glass');                // the flask
+    add('line', { x1: n(cr), x2: n(fx - I.flask_radius_m), y1: n(-(ph + 0.14)), y2: n(-(ph + 0.14)) });
+  }
+  const R = (C.front_radius_m[0] + C.front_radius_m[1]) / 2, sr = I.spindle_radius_m;
+  const lo = ph + C.floor_m, hi = top - C.ceiling_m;
+  for (let i = 0; i < C.front_caps; i++) {
+    const z = C.front_caps > 1 ? lo + (hi - lo) * i / (C.front_caps - 1) : (lo + hi) / 2;
+    const s = i % 2 === 0 ? -1 : 1;
+    const fan = `M${n(s * sr)} ${n(-z)} C${n(s * R * 0.3)} ${n(-(z + R * 0.3))} ${n(s * R * 0.9)} ${n(-(z + R * 0.2))} ${n(s * R)} ${n(-(z + 0.02))}`
+      + ` C${n(s * R * 0.85)} ${n(-(z - R * 0.12))} ${n(s * R * 0.3)} ${n(-(z - R * 0.1))} ${n(s * sr)} ${n(-(z - 0.01))} Z`;
+    add('path', { d: fan }, 'cap');
+    for (const k of [0.4, 0.55, 0.7, 0.85]) {                                                         // gills under it
+      add('line', { x1: n(s * sr * 2), y1: n(-(z - 0.005)), x2: n(s * R * k), y2: n(-(z - R * 0.1 * Math.sin(Math.PI * k))) }, 'cap');
+    }
+  }
 }
