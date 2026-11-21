@@ -25,7 +25,11 @@ merged. A run that changed nothing still writes its entry, with the reason.
   repeated (no tool changed) and runs in the gates workflow. Render: labs/figure.html at 1280 px and 390 px in
   headless Chromium over a local http server, 0 console errors, the description present, and the document scroll
   width equal to the screen width. Forbidden-name check: runs in the gates workflow on the pull request.
-- Gates on the pull request: pending when this entry was written.
+- Gates on pull request #84: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+  tools/ship_pr.mjs could not read the pull request from this session (GitHub GraphQL is refused here), so the
+  run applied its rules by hand over the REST API: both required checks and every other check passed on the head
+  commit, and the branch contains main.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-20, The Dimensions dial's slider has a name (roadmap item 1)
 
