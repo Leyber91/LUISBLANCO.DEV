@@ -186,8 +186,8 @@
   },
   {
     "name": "run: with one lab named, every lab's tests run",
-    "from": "const files = findTests(JS).filter(inLab);",
-    "to": "const files = findTests(JS);"
+    "from": "const found = findTests(JS).filter(inLab);",
+    "to": "const found = findTests(JS);"
   },
   {
     "name": "run: a missing labs folder passes with nothing run",
@@ -263,5 +263,300 @@
     "name": "output: the last lines not printed after the failing checks",
     "from": "      say(lines.slice(-20).join('\\n'));\n",
     "to": ""
+  },
+  {
+    "name": "changed: a change to lab_tests.mjs does not run every test",
+    "from": "const RUNS_ALL = ['tools/lab_tests.mjs', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const RUNS_ALL = ['tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "changed: a change to mutate.mjs does not run every test",
+    "from": "const RUNS_ALL = ['tools/lab_tests.mjs', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const RUNS_ALL = ['tools/lab_tests.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "changed: a change to the gates workflow does not run every test",
+    "from": "const RUNS_ALL = ['tools/lab_tests.mjs', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const RUNS_ALL = ['tools/lab_tests.mjs', 'tools/mutate.mjs'];"
+  },
+  {
+    "name": "changed: a near name of the runner runs every test",
+    "from": "RUNS_ALL.includes(c) || PACKAGE.test(c)",
+    "to": "RUNS_ALL.some((r) => c.includes(r)) || PACKAGE.test(c)"
+  },
+  {
+    "name": "changed: a package.json does not run every test",
+    "from": "(package\\.json|package-lock\\.json|",
+    "to": "(package-lock\\.json|"
+  },
+  {
+    "name": "changed: a package-lock.json does not run every test",
+    "from": "|package-lock\\.json|",
+    "to": "|"
+  },
+  {
+    "name": "changed: an npm-shrinkwrap.json does not run every test",
+    "from": "|npm-shrinkwrap\\.json|",
+    "to": "|"
+  },
+  {
+    "name": "changed: a yarn.lock does not run every test",
+    "from": "|yarn\\.lock|",
+    "to": "|"
+  },
+  {
+    "name": "changed: a pnpm-lock.yaml does not run every test",
+    "from": "|pnpm-lock\\.yaml)$/;",
+    "to": ")$/;"
+  },
+  {
+    "name": "changed: a name that only starts like a package file runs every test",
+    "from": "|pnpm-lock\\.yaml)$/;",
+    "to": "|pnpm-lock\\.yaml)/;"
+  },
+  {
+    "name": "changed: the files that run every test are not reported",
+    "from": "  if (shared.length) return { all: `${shared.join(', ')} changed`, run: new Map(), unread: [] };\n",
+    "to": ""
+  },
+  {
+    "name": "changed: files that cannot be named run none",
+    "from": "if (!changed) return { all: 'the changed files are not known', run: new Map(), unread: [] };",
+    "to": "if (!changed) changed = [];"
+  },
+  {
+    "name": "closure: a static import is not followed",
+    "from": "/\\b(?:import|export)\\s*(?:",
+    "to": "/\\b(?:export)\\s*(?:"
+  },
+  {
+    "name": "closure: export ... from is not followed",
+    "from": "/\\b(?:import|export)\\s*(?:",
+    "to": "/\\b(?:import)\\s*(?:"
+  },
+  {
+    "name": "closure: import() with a literal path is not followed",
+    "from": "|\\bimport\\s*\\(\\s*(['\"`])([^'\"`$\\n]+)\\3\\s*\\)/g;",
+    "to": "/g;"
+  },
+  {
+    "name": "closure: an import over several lines is not followed",
+    "from": "(?:[\\w$*{}\\s,]*?\\bfrom\\s*)?",
+    "to": "(?:[\\w$*{} ,]*?\\bfrom\\s*)?"
+  },
+  {
+    "name": "closure: a query after the path hides the module",
+    "from": ".split(/[?#]/)[0];\n      if (spec",
+    "to": ";\n      if (spec"
+  },
+  {
+    "name": "closure: only the test file's own imports are followed, not theirs in turn",
+    "from": "queue.push(...one.imports);",
+    "to": "if (f === test) queue.push(...one.imports);"
+  },
+  {
+    "name": "closure: an import from the site root is not followed",
+    "from": "      else if (spec.startsWith('/') && !spec.startsWith('//')) one.imports.push(path.join(root, spec));\n",
+    "to": ""
+  },
+  {
+    "name": "closure: a path missing on disk is dropped, so a test still on a renamed path is skipped",
+    "from": "    if (!one) continue;\n    for (const n of one.names)",
+    "to": "    if (!one) { seen.delete(f); continue; }\n    for (const n of one.names)"
+  },
+  {
+    "name": "closure: any file of a folder the test imports from counts as imported",
+    "from": "if (t.imports.has(c)) return `imports ${c}`;",
+    "to": "if ([...t.imports].some((i) => i.split('/').slice(0, 4).join('/') === c.split('/').slice(0, 4).join('/'))) return `imports ${c}`;"
+  },
+  {
+    "name": "closure: a test file changed is not said to have changed itself",
+    "from": "  if (c === t.rel) return 'changed itself';\n",
+    "to": ""
+  },
+  {
+    "name": "names: a file a test names is not counted",
+    "from": "for (const n of text.match(PATH_RUN) || [])",
+    "to": "for (const n of [])"
+  },
+  {
+    "name": "names: ./ and ../ are kept, so a relative name never matches",
+    "from": "one.names.push(n.replace(/^(\\.{1,2}\\/)+|^\\/+/, ''))",
+    "to": "one.names.push(n)"
+  },
+  {
+    "name": "names: a name with a path matches any file of its last name",
+    "from": "(c === n || c.endsWith('/' + n))",
+    "to": "(c.split('/').pop() === n.split('/').pop())"
+  },
+  {
+    "name": "names: a bare name does not reach files outside the module folders",
+    "from": "(!c.startsWith(JS_DIR) || labOf(c) === t.lab)",
+    "to": "(labOf(c) === t.lab)"
+  },
+  {
+    "name": "names: a bare name reaches another lab's module folder",
+    "from": "(!c.startsWith(JS_DIR) || labOf(c) === t.lab)",
+    "to": "true"
+  },
+  {
+    "name": "names: an extension of four letters is not read as a file name",
+    "from": "ENDS_AS_FILE = /[\\w-]\\.[A-Za-z][A-Za-z0-9]{0,5}$/;",
+    "to": "ENDS_AS_FILE = /[\\w-]\\.[A-Za-z][A-Za-z0-9]{0,2}$/;"
+  },
+  {
+    "name": "walks: a test that lists a folder reaches nothing more",
+    "from": "if (t.walks && t.lab && c.startsWith(`${JS_DIR}${t.lab}/`))",
+    "to": "if (false)"
+  },
+  {
+    "name": "walks: a lab folder reaches the folders whose names start with it",
+    "from": "c.startsWith(`${JS_DIR}${t.lab}/`)) return",
+    "to": "c.startsWith(`${JS_DIR}${t.lab}`)) return"
+  },
+  {
+    "name": "walks: every test reaches its whole lab folder",
+    "from": "if (t.walks && t.lab && c.startsWith",
+    "to": "if (t.lab && c.startsWith"
+  },
+  {
+    "name": "walks: readdir does not count as listing a folder",
+    "from": "const WALKS = /\\b(?:readdir|opendir|glob)",
+    "to": "const WALKS = /\\b(?:opendir|glob)"
+  },
+  {
+    "name": "walks: an import of a computed path does not count",
+    "from": "(?:Sync)?\\s*\\(|\\bimport\\s*\\(\\s*(?!(['\"`])[^'\"`$\\n]+\\1\\s*\\))/;",
+    "to": "(?:Sync)?\\s*\\(/;"
+  },
+  {
+    "name": "walks: an import with a literal path counts as computed",
+    "from": "(?:Sync)?\\s*\\(|\\bimport\\s*\\(\\s*(?!(['\"`])[^'\"`$\\n]+\\1\\s*\\))/;",
+    "to": "(?:Sync)?\\s*\\(|\\bimport\\s*\\(/;"
+  },
+  {
+    "name": "data: a data folder a test names runs nothing",
+    "from": "if (c.startsWith(DATA_DIR) && t.data.has(",
+    "to": "if (false && t.data.has("
+  },
+  {
+    "name": "data: a data folder reaches the folders whose names start with it",
+    "from": "t.data.has(c.slice(DATA_DIR.length).split('/')[0])) return",
+    "to": "[...t.data].some((d) => c.slice(DATA_DIR.length).startsWith(d))) return"
+  },
+  {
+    "name": "data: data/<folder> is not read as a data folder",
+    "from": "const DATA_NAMED = /\\bdata(?:\\/|['\"`]\\s*,",
+    "to": "const DATA_NAMED = /\\bdata(?:['\"`]\\s*,"
+  },
+  {
+    "name": "data: 'data', '<folder>' is not read as a data folder",
+    "from": "const DATA_NAMED = /\\bdata(?:\\/|['\"`]\\s*,\\s*['\"`])([\\w-]+)/g;",
+    "to": "const DATA_NAMED = /\\bdata(?:\\/)([\\w-]+)/g;"
+  },
+  {
+    "name": "data: a data file no test reaches runs nothing",
+    "from": "    if (c.startsWith(DATA_DIR)) wide.push(",
+    "to": "    if (false) wide.push("
+  },
+  {
+    "name": "data: any file under labs that no test reaches runs every test",
+    "from": "    if (c.startsWith(DATA_DIR)) wide.push(",
+    "to": "    if (c.startsWith('labs/')) wide.push("
+  },
+  {
+    "name": "unknown: a module no test reaches runs nothing",
+    "from": "    else if (c.startsWith(JS_DIR) && LOADABLE.test(c)) wide.push(",
+    "to": "    else if (false) wide.push("
+  },
+  {
+    "name": "unknown: a file outside labs/assets/js that no test reaches runs every test",
+    "from": "    else if (c.startsWith(JS_DIR) && LOADABLE.test(c)) wide.push(",
+    "to": "    else if (LOADABLE.test(c)) wide.push("
+  },
+  {
+    "name": "unknown: a name that only starts like a module counts as one",
+    "from": "const LOADABLE = /\\.([cm]?js|json)$/;",
+    "to": "const LOADABLE = /\\.([cm]?js|json)/;"
+  },
+  {
+    "name": "unknown: a JSON file no test reaches runs nothing",
+    "from": "const LOADABLE = /\\.([cm]?js|json)$/;",
+    "to": "const LOADABLE = /\\.([cm]?js)$/;"
+  },
+  {
+    "name": "unknown: a .cjs file no test reaches runs nothing",
+    "from": "const LOADABLE = /\\.([cm]?js|json)$/;",
+    "to": "const LOADABLE = /\\.(m?js|json)$/;"
+  },
+  {
+    "name": "unknown: only the first reason to run every test is given",
+    "from": "if (wide.length) return { all: wide.join('; '),",
+    "to": "if (wide.length) return { all: wide[0],"
+  },
+  {
+    "name": "plan: a change reaches only the first test file it can",
+    "from": "hit = true; if (!run.has(t.rel)) run.set(t.rel, why); }",
+    "to": "hit = true; if (!run.size) run.set(t.rel, why); }"
+  },
+  {
+    "name": "command: the plan is printed and every test still runs",
+    "from": "      files = found.filter((f) => plan.run.has(rel(f)));\n",
+    "to": ""
+  },
+  {
+    "name": "command: which test files ran and why is not printed",
+    "from": "      for (const f of files) say(`lab_tests: ran ${rel(f)}: ${plan.run.get(rel(f))}`);\n",
+    "to": ""
+  },
+  {
+    "name": "command: which test files were skipped is not printed",
+    "from": "for (const [lab, n] of left) say(",
+    "to": "for (const [lab, n] of []) say("
+  },
+  {
+    "name": "command: why every test runs is not printed",
+    "from": "if (plan.all) say(`lab_tests: every test runs: ${plan.all}`);",
+    "to": "if (plan.all) { /* silent */ }"
+  },
+  {
+    "name": "command: the changed files no test reads are not listed",
+    "from": "if (plan.unread.length) say(`lab_tests: changed and read by no test:",
+    "to": "if (false) say(`lab_tests: changed and read by no test:"
+  },
+  {
+    "name": "command: the count of skipped test files is not given",
+    "from": "const skipped = found.length - files.length ? `, ${found.length - files.length} skipped as out of the change's reach` : '';",
+    "to": "const skipped = '';"
+  },
+  {
+    "name": "command: files that cannot be named run every test with no plan printed",
+    "from": "if (changed !== undefined) {\n    // over every lab",
+    "to": "if (changed) {\n    // over every lab"
+  },
+  {
+    "name": "command: git is asked in the current folder, not in --root",
+    "from": "changed = changedSince(sinceArg, root);",
+    "to": "changed = changedSince(sinceArg);"
+  },
+  {
+    "name": "command: why every test runs when git cannot name the files is not printed",
+    "from": "    if (!changed) console.log(sinceArg ? `lab_tests: git could not",
+    "to": "    if (false) console.log(sinceArg ? `lab_tests: git could not"
+  },
+  {
+    "name": "command: no ref is reported as a ref git cannot read",
+    "from": "console.log(sinceArg ? `lab_tests: git could not",
+    "to": "console.log(true ? `lab_tests: git could not"
+  },
+  {
+    "name": "command: --changed-since is not read",
+    "from": "sinceArg = take('--changed-since');",
+    "to": "sinceArg = undefined;"
+  },
+  {
+    "name": "command: with one lab named, the plan reads only that lab's tests",
+    "from": "const plan = testsToRun(findTests(JS), changed, root);",
+    "to": "const plan = testsToRun(found, changed, root);"
   }
 ]

@@ -27,7 +27,8 @@
 // files changed since <ref> (renames as a deletion and an addition, so a watched file moved away still counts) and runs
 // a gated list only when one of its files changed; --changed <file> gives the paths instead, one a line; with neither,
 // as on a push to main, every list runs. When the files cannot be named, or --changed-since is given no ref, every list
-// runs, and that is said. Every other list, mutate.core.json among them, runs on every pull request.
+// runs, and that is said. Since 2026-11-21 every list is gated, each by its own tool's files (GATED), so that a pull
+// request that touches no gate tool runs no list; a list GATED does not name runs on every pull request.
 //
 // usage: node tools/mutate.mjs [<list>] [--tools <folder>] [--changed-since <ref> | --changed <file>]
 //        node tools/mutate.mjs selftest [core]
@@ -82,11 +83,32 @@ function runs(file, limit = LIMIT_MS, env = process.env, part = '') {
 
 // The tools whose selftests drive Chrome: their lists run one copy at a time, under the machine's lock.
 const SLOW = ['drive', 'invariants'];
-// The lists that run on a pull request only when one of their files changed, as on every push to main. mutate's own
+// The lists that run on a pull request only when one of their files changed; a push to main runs every list. mutate's own
 // list (this PR's entries: the timeouts, the machine's lock, the stopped runs) took 498 s of every pull request on
-// 2026-11-17; the entries main had before, in mutate.core.json, run on every pull request.
+// 2026-11-17; the entries main had before are in mutate.core.json.
 const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];
 const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'] };
+// Every other list, by its own tool's files since 2026-11-21 (Luis: "not to over test what hasn't been changed unless it
+// affects another area"): the tool, its list, every file of this folder the tool spells as a quoted name ('drive.mjs',
+// './drive.mjs': what it imports or reads; the selftest checks this), and the runner, this file and the gates workflow.
+// Before, these lists ran on every pull request, about 6.7 minutes whatever it changed. A list missing here still
+// runs on every pull request, and the selftest fails on it.
+const RUNNER = ['tools/mutate.mjs', '.github/workflows/gates.yml'];
+const own = (list, tool, ...reads) => [...new Set([`tools/${tool}.mjs`, `tools/mutants/${list}.json`, ...reads, ...RUNNER])];
+Object.assign(GATED, {
+  atlas: own('atlas', 'atlas'),
+  'drive.waits': [...CHROME_FILES, 'tools/mutants/drive.waits.json'],
+  evolution: own('evolution', 'evolution'),
+  lab_tests: own('lab_tests', 'lab_tests'),
+  'labs-wt': own('labs-wt', 'labs-wt', 'tools/drive.mjs', 'tools/levels.mjs', 'tools/ship_pr.mjs'),
+  'mutate.core': own('mutate.core', 'mutate', 'tools/drive.mjs'),
+  ship_pr: own('ship_pr', 'ship_pr'),
+  stories: own('stories', 'stories'),
+});
+// the siblings a tool spells as a quoted file name, bare or after ./ (siblings: the file names of its folder)
+export function quotedSiblings(source, siblings, self) {
+  return siblings.filter((s) => s !== self && new RegExp(`['"\`](\\./)?${s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"\`]`).test(source));
+}
 // changed: the paths that changed, or null when they are not known (then every list runs). hits: for each gated list
 // that runs, the changed files that made it run
 export function listsToRun(names, changed) {
@@ -451,6 +473,36 @@ process.exit(await run(undefined, ${J(tools)}, () => {}, how === 'limit' ? { lim
     ['a tool named on the command line with no mutants file exits 2', cli.unknownName === 2],
     ['no mutants folder, or an empty one, is a failure and never a pass', cli.noFolder === 1 && cli.emptyFolder === 1],
     ['the command finds its own folder when the path holds a space and a tilde', cli.ownFolder.code === 0 && /mutate toy: 1 broken rules, 1 caught/.test(cli.ownFolder.text), JSON.stringify(cli.ownFolder)],
+    // since 2026-11-21 every list is gated: each runs when one of its own files changed, alone, and for nothing else
+    ['each list runs when its tool, its list, a sibling its tool reads, mutate.mjs or the gates workflow changed, each alone; another gate\'s file, a near name or a lab file runs none', (() => {
+      const OWN = { atlas: ['tools/atlas.mjs'], evolution: ['tools/evolution.mjs'], lab_tests: ['tools/lab_tests.mjs'], ship_pr: ['tools/ship_pr.mjs'], stories: ['tools/stories.mjs'],
+        'labs-wt': ['tools/labs-wt.mjs', 'tools/drive.mjs', 'tools/levels.mjs', 'tools/ship_pr.mjs'], 'mutate.core': ['tools/drive.mjs'],
+        'drive.waits': ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json'] };
+      const bad = [];
+      for (const [n, files] of Object.entries(OWN)) {
+        for (const f of [...files, `tools/mutants/${n}.json`, 'tools/mutate.mjs', '.github/workflows/gates.yml']) if (JSON.stringify(listsToRun([n], [f])) !== JSON.stringify({ run: [n], skipped: [], hits: { [n]: [f] } })) bad.push(`${n} not run by ${f}`);
+        for (const f of ['tools/anti_tells.mjs', `tools/${n.split('.')[0]}.mjs.orig`, `x/tools/mutants/${n}.json`, 'labs/assets/js/kit/fog.js']) if (listsToRun([n], [f]).run.length) bad.push(`${n} run by ${f}`);
+      }
+      return bad.length === 0 || (console.log('  ' + bad.join('; ')), false);
+    })()],
+    ['a pull request that touches no gate tool runs no list', (() => {
+      const folder = path.join(TOOLS, 'mutants'), lists = fs.existsSync(folder) ? fs.readdirSync(folder).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5)) : Object.keys(GATED);
+      const plan = listsToRun(lists, ['labs/assets/js/kit/fog.js', 'labs/orthogonal.html', 'tools/drives/orthogonal.mjs', 'tools/anti_tells.mjs', 'ROADMAP.md']);
+      return lists.length >= 11 && plan.run.length === 0;
+    })()],
+    ['every list has its entry, and the entry holds its tool, its list, the runner and every sibling its tool spells as a quoted name', (() => {
+      const folder = path.join(TOOLS, 'mutants'), lists = fs.existsSync(folder) ? fs.readdirSync(folder).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5)) : Object.keys(GATED);
+      const siblings = fs.readdirSync(TOOLS).filter((f) => /\.(mjs|js|json)$/.test(f)), bad = [];
+      for (const n of lists) {
+        const tool = n.split('.')[0];
+        if (!Object.hasOwn(GATED, n)) { bad.push(`${n}: no entry`); continue; }
+        const need = [`tools/${tool}.mjs`, `tools/mutants/${n}.json`, 'tools/mutate.mjs', '.github/workflows/gates.yml'];
+        if (fs.existsSync(path.join(TOOLS, `${tool}.mjs`))) need.push(...quotedSiblings(fs.readFileSync(path.join(TOOLS, `${tool}.mjs`), 'utf8'), siblings, `${tool}.mjs`).map((s) => `tools/${s}`));
+        for (const f of need) if (!GATED[n].includes(f)) bad.push(`${n}: lacks ${f}`);
+      }
+      return bad.length === 0 || (console.log('  ' + bad.join('; ')), false);
+    })()],
+    ['a sibling counts as read when it is quoted bare or after ./, not as a repository path, in a comment or inside a longer name', JSON.stringify(quotedSiblings("import('./a.mjs'); join(d, 'b.mjs'); join(d, \"c.json\"); `d.mjs`; 'tools/e.mjs'; // f.mjs\n'xg.mjs'; 'self.mjs'", ['a.mjs', 'b.mjs', 'c.json', 'd.mjs', 'e.mjs', 'f.mjs', 'g.mjs', 'self.mjs'], 'self.mjs')) === JSON.stringify(['a.mjs', 'b.mjs', 'c.json', 'd.mjs'])],
   ];
   if (!core) cases.push(
     ['a run stopped at the limit, and stopped again on its second run, is timed out, apart from caught and survived; it ran twice, no more',
@@ -468,16 +520,16 @@ process.exit(await run(undefined, ${J(tools)}, () => {}, how === 'limit' ? { lim
       && said.und.some((l) => /^  TIMED OUT a break that never ends: the selftest did not end within 1.5 s, twice; nothing saw it fail/.test(l))
       && said.dec.some((l) => /^  TIMED OUT a break that never ends: .*declared: the break is an endless loop$/.test(l))],
     ['a timeout is declared with its reason, 8 characters or more', shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: '' }], 't').length === 1 && shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: 'seven c' }], 't').length === 1 && shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: 'eight ch' }], 't').length === 0],
-    ['mutate\'s own list runs when mutate.mjs, its list, drive.mjs or the gates workflow changed, each alone; the core list and the others run whatever changed', ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'].every((f) => JSON.stringify(listsToRun(['atlas', 'mutate', 'mutate.core'], [f]).run) === JSON.stringify(['atlas', 'mutate', 'mutate.core']))
-      && JSON.stringify(listsToRun(['atlas', 'mutate', 'mutate.core'], ['labs/a.css', 'tools/mutants/mutate.core.json'])) === JSON.stringify({ run: ['atlas', 'mutate.core'], skipped: ['mutate'], hits: {} })],
+    ['mutate\'s own list runs when mutate.mjs, its list, drive.mjs or the gates workflow changed, each alone; the core list\'s own list runs the core list and not the other two', ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'].every((f) => JSON.stringify(listsToRun(['mutate'], [f]).run) === JSON.stringify(['mutate']))
+      && JSON.stringify(listsToRun(['atlas', 'mutate', 'mutate.core'], ['labs/a.css', 'tools/mutants/mutate.core.json'])) === JSON.stringify({ run: ['mutate.core'], skipped: ['atlas', 'mutate'], hits: { 'mutate.core': ['tools/mutants/mutate.core.json'] } })],
     ['each gated list is run by its own files: invariants.mjs runs drive and invariants, not mutate; mutate\'s list runs mutate, not the other two', JSON.stringify(listsToRun(['drive', 'invariants', 'mutate'], ['tools/invariants.mjs'])) === JSON.stringify({ run: ['drive', 'invariants'], skipped: ['mutate'], hits: { drive: ['tools/invariants.mjs'], invariants: ['tools/invariants.mjs'] } })
       && JSON.stringify(listsToRun(['drive', 'invariants', 'mutate'], ['tools/mutants/mutate.json'])) === JSON.stringify({ run: ['mutate'], skipped: ['drive', 'invariants'], hits: { mutate: ['tools/mutants/mutate.json'] } })
       && JSON.stringify(listsToRun(['constructor', 'toString'], ['x']).run) === JSON.stringify(['constructor', 'toString'])],
     ['a list named <tool>.<part>.json breaks <tool>.mjs and runs that part of its selftest; one whose tool is missing is a failure that names it', codes.part === 0 && said.part.some((l) => /^mutate toy\.quick: 1 broken rules, 1 caught by the selftest/.test(l)) && codes.ghost === 1 && said.ghost.includes('mutate ghost.quick: tools/ghost.mjs does not exist'), JSON.stringify([said.part, said.ghost])],
     ['a list of a tool that drives Chrome holds the machine lock, whatever its part', codes.slowPart === 0 && held.part === String(process.pid), JSON.stringify([codes.slowPart, held.part])],
     ['with no list of changes every list runs', JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], null).run) === JSON.stringify(['atlas', 'drive', 'invariants'])],
-    ['each watched file alone runs the slow lists, the gates workflow among them', ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'].every((f) => JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], [f]).run) === JSON.stringify(['atlas', 'drive', 'invariants']))],
-    ['a change to none of them skips drive and invariants and runs every other list, a near name included', JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], ['labs/a.css', 'tools/drives/air.mjs', 'tools/drive.mjs.orig', 'x/tools/drive.mjs'])) === JSON.stringify({ run: ['atlas'], skipped: ['drive', 'invariants'], hits: {} }) && JSON.stringify(listsToRun(['atlas', 'drive'], []).skipped) === JSON.stringify(['drive'])],
+    ['each watched file alone runs the slow lists, the gates workflow among them', ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'].every((f) => JSON.stringify(listsToRun(['toy', 'drive', 'invariants'], [f]).run) === JSON.stringify(['toy', 'drive', 'invariants']))],
+    ['a change to none of their files skips the gated lists and runs a list GATED does not name, a near name included', JSON.stringify(listsToRun(['atlas', 'drive', 'invariants', 'toy'], ['labs/a.css', 'tools/drives/air.mjs', 'tools/drive.mjs.orig', 'x/tools/drive.mjs'])) === JSON.stringify({ run: ['toy'], skipped: ['atlas', 'drive', 'invariants'], hits: {} }) && JSON.stringify(listsToRun(['atlas', 'drive'], []).skipped) === JSON.stringify(['atlas', 'drive'])],
     ['the command says which way it went', codes.skip === 0 && said.skip.some((l) => l === 'mutate: skipped drive: none of tools/drive.mjs, tools/invariants.mjs, tools/drives/invariants.mjs, tools/mutants/drive.json, tools/mutants/invariants.json, tools/mutate.mjs, .github/workflows/gates.yml changed') && !said.skip.some((l) => l.startsWith('mutate drive:')) && said.skip.some((l) => l.startsWith('mutate toy:'))
       && codes.ran === 0 && said.ran.includes('mutate: ran drive: changed files tools/drive.mjs') && said.ran.some((l) => /^mutate drive: 2 broken rules, 2 caught by the selftest, 0 run again, \d+ s$/.test(l))],
     ['a slow list runs its copies one at a time', slowRuns.map((l) => l.split(' ')[0]).join(' ') === 'start end start end', slowRuns.join(' ')],
