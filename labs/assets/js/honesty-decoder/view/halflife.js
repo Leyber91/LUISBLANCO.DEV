@@ -34,8 +34,8 @@ function readout(d, s, w, r, i) {
   const m = d.models[i], c = s.cells[w][r][i];
   const rule = r === 'exact' ? 'exact' : s.partial ? `partial (${s.partial})` : 'exact (no partial rule for this sentence)';
   const verdict = c.clears ? 'clears the bar' : 'does not clear the bar';
-  const at = deathIndex(d, s, w, r) === i ? ', the first model to do so: the sentence died here' : '';
-  return `${m.name}, released ${m.released}: ${c.k} of ${c.n} right, ${rule}, ${d.wordings.find((x) => x.id === w).name} wording. Lower bound ${c.lower.toFixed(2)}, so it ${verdict}${at}.`;
+  const at = deathIndex(d, s, w, r) === i ? ', the first model to do so, so the sentence is counted dead by this one' : '';
+  return `${m.name}, released ${m.released}: ${c.k} of ${c.n} ${r === 'exact' || !s.partial ? 'right' : 'passed'}, ${rule}, ${d.wordings.find((x) => x.id === w).name} wording. Lower bound ${c.lower.toFixed(2)}, so it ${verdict}${at}.`;
 }
 
 function render(root, d) {
@@ -46,18 +46,18 @@ function render(root, d) {
   root.replaceChildren();
   const head = el('div', 'hl-head');
   head.append(el('p', 'hl-kick', `a sealed test, run ${d.run.asked} on ${d.run.machine}`));
-  const h = el('h2', 'hl-h', `${held.length} of ${d.sentences.length} things people say AI can't do still held in ${monthYear(newest.released)}, on small open models.`);
+  const h = el('h2', 'hl-h', `${held.length} of ${d.sentences.length} things people say AI can't do held under every wording and scoring, on all ${d.models.length} small open models tested, up to ${newest.short} (${monthYear(newest.released)}).`);
   h.id = 'hl-h';
   head.append(h);
   const nOf = (id) => d.sentences.find((s) => s.id === id)?.n;
   head.append(el('p', 'hl-lede',
-    `Each sentence became ${nOf('reverse')} generated questions (${nOf('letters')} for letter counting), asked of ${d.models.length} open models released from ${d.models[0].released.slice(0, 4)} to ${newest.released.slice(0, 4)}, ` +
-    `in ${d.wordings.length} wordings. Every answer was held to a typed field by the runtime, with no reasoning mode. A sentence dies on the first model whose ${d.rule.bound} on the pass rate reaches ${d.rule.bar.toFixed(2)}: ${d.rule.needs[nOf('reverse')]} of ${nOf('reverse')} right, or ${d.rule.needs[nOf('letters')]} of ${nOf('letters')}.`));
+    `Each sentence became ${nOf('reverse')} generated questions (${nOf('letters')} for letter counting), asked of ${d.models.length} open models ${d.size}, released from ${d.models[0].released.slice(0, 4)} to ${newest.released.slice(0, 4)}, ` +
+    `in ${d.wordings.length} wordings. Every answer was held to a typed field by the runtime, with no reasoning mode. A sentence is counted dead by the first model whose ${d.rule.bound} on the pass rate reaches ${d.rule.bar.toFixed(2)}: ${d.rule.needs[nOf('reverse')]} of ${nOf('reverse')} right, or ${d.rule.needs[nOf('letters')]} of ${nOf('letters')}.`));
   root.append(head);
 
   const ctl = el('div', 'hl-ctl');
   const wScale = scale({ name: 'wording', ariaLabel: 'How the question was put', value: state.w,
-    options: d.wordings.map((w) => ({ value: w.id, label: w.gated ? w.short : `${w.short} *`, attrs: { 'aria-label': w.gated ? `${w.name} wording` : `${w.name} wording, reported and not tested` } })) });
+    options: d.wordings.map((w) => ({ value: w.id, label: w.gated ? w.short : `${w.short} *`, attrs: { 'aria-label': w.gated ? `${w.name} wording` : `${w.name} wording, shown for the record; the verdict did not use it` } })) });
   const rScale = scale({ name: 'scoring', ariaLabel: 'How an answer was scored', value: state.r,
     options: d.rules.map((r) => ({ value: r, label: r })) });
   ctl.append(wScale, rScale);
@@ -100,25 +100,39 @@ function render(root, d) {
   root.append(out, ask);
 
   const foot = el('div', 'hl-foot');
-  const moved = d.sentences.filter((s) => s.spreadMonths > 0);
-  const scoringMoved = d.sentences.filter((s) => s.scoringMonths.A > 0 || s.scoringMonths.B > 0);
-  const gated = d.wordings.filter((w) => w.gated).length;
+  const gatedW = d.wordings.filter((w) => w.gated);
   // how many models apart a sentence's deaths fell across the tested wordings, under either rule
   const apart = (s) => Math.max(...d.rules.map((r) => {
-    const at = d.wordings.filter((w) => w.gated).map((w) => deathIndex(d, s, w.id, r));
+    const at = gatedW.map((w) => deathIndex(d, s, w.id, r));
     return at.some((i) => i < 0) ? 0 : Math.max(...at) - Math.min(...at);
   }));
-  const movedText = moved.length
-    ? `Under the ${gated} tested wordings, ${moved.map((s) => `${s.id} died ${apart(s)} models apart`).join(' and ')}: at least ${moved.map((s) => s.spreadMonths).join(' and ')} months by the test's interval rule, short of the ${d.rule.generationMonths} months it required.`
-    : `Under the ${gated} tested wordings, no death moved.`;
-  const scoringText = scoringMoved.length ? `Scoring moved ${scoringMoved.map((s) => s.id).join(', ')}.` : 'Scoring moved no date.';
+  // how many models a sentence's death moved between exact and partial scoring, under any tested wording
+  const byScoring = (s) => Math.max(...gatedW.map((w) => {
+    const e = deathIndex(d, s, w.id, 'exact'), p = deathIndex(d, s, w.id, 'partial');
+    return e < 0 || p < 0 ? 0 : Math.abs(e - p);
+  }));
+  const models = (k) => `${k} model${k === 1 ? '' : 's'}`;
+  const byW = d.sentences.filter((s) => apart(s) > 0);
+  const byS = d.sentences.filter((s) => byScoring(s) > 0);
+  const wText = byW.length
+    ? `Under the ${gatedW.length} tested wordings, deaths fell up to ${models(Math.max(...byW.map(apart)))} apart (${byW.map((s) => `${s.id} ${apart(s)}`).join(', ')}). By the test's interval rule that is at least ${byW.map((s) => s.spreadMonths).join(', ')} months, short of the ${d.rule.generationMonths} it required.`
+    : `Under the ${gatedW.length} tested wordings, no death moved.`;
+  const sText = byS.length
+    ? `Partial scoring moved a death by up to ${models(Math.max(...byS.map(byScoring)))} (${byS.map((s) => s.id).join(', ')}); under the plain wording the test measured that as at least ${Math.max(...d.sentences.map((s) => Math.max(s.scoringMonths.A, s.scoringMonths.B)))} months.`
+    : 'Partial scoring moved no death.';
+  const others = d.models.filter((m) => m.framing !== d.models[d.models.length - 1].framing);
+  const frame = `How each model was asked: ${others.map((m) => `${m.short} was ${m.framing}`).join('; ')}; the other ${d.models.length - others.length} were ${newest.framing.replace('its own chat template', 'their own chat templates')}.`;
+  const early = d.removed.filter((m) => m.released < '2023');   // the models of 2020 to 2022 that were tried
+  const later = d.removed.filter((m) => !early.includes(m));
   foot.append(
-    el('p', '', `${movedText} ${scoringText} The test asked whether wording moves the date a claim dies, and it ended without an answer: ${d.sentences.length - held.length} sentences died at all, and it needed ${d.rule.movingMin} to move.`),
-    el('p', '', '* Steps (step by step) is reported, not tested. Under a typed answer its working had to fit one text field, and its replies were the ones most often cut at the length limit.'),
-    el('p', '', `What this cannot show: free-text answers, models that reason before they answer, models larger than 8B, and the years 2020 to 2022, whose open models the runtime here (${d.run.runtime}, on ${d.run.machine}) could not run.`),
+    el('p', '', `${wText} ${sText} The test asked whether wording or scoring moves the date a claim dies, and it ended without an answer: ${d.sentences.length - held.length} sentences died at all, and it needed ${d.rule.movingMin} to move.`),
+    el('p', '', '* Steps (step by step) is shown for the record; the verdict did not use it. Under a typed answer its working had to fit one text field, and its replies were the ones most often cut at the length limit.'),
+    el('p', '', frame),
+    el('p', '', `Taken out before the run: ${later.map((m) => `${m.short} (${ym(m.released)})`).join(', ')}, because too many of their practice answers did not parse.`),
+    el('p', '', `What this cannot show: free-text answers; models that reason before they answer; models larger than these; and the years 2020 to 2022. Of the open models tried from those years, only ${early.map((m) => `${m.short} (${ym(m.released)})`).join(', ')} runs in this runtime (${d.run.runtime}, on ${d.run.machine}), and ${early[0]?.by || 'a pilot'} took it out. Size and family change with date along the strip, so a date is not age alone.`),
   );
   const tag = el('p', 'hl-tags');
-  tag.append(el('b', 't-real', '[REAL]'), document.createTextNode(` every count, bound, death and spread, from ${d.run.replies.toLocaleString('en-US')} recorded replies, read through the rules that gave the test's verdict. Sentences and wordings as asked; the example questions are from the unsealed practice draw.`));
+  tag.append(el('b', 't-real', '[REAL]'), document.createTextNode(` every count, bound, death and spread, from ${(d.replies.drawA + d.replies.drawB).toLocaleString('en-US')} recorded replies, read through the rules that gave the test's verdict: ${d.replies.drawA.toLocaleString('en-US')} to the questions above in ${d.wordings.length} wordings, and ${d.replies.drawB.toLocaleString('en-US')} to a second set under the plain wording, which the test used as a replicate. The example questions are from the unsealed practice set.`));
   foot.append(tag);
   root.append(foot);
 
@@ -136,7 +150,7 @@ function render(root, d) {
       const isDead = at >= 0;
       r.say.classList.toggle('struck', isDead);
       r.note.textContent = isDead
-        ? `died at ${d.models[at].short}, ${ym(d.models[at].released)}`
+        ? `dead by ${d.models[at].short}, ${ym(d.models[at].released)}`
         : `held through ${newest.short}, ${ym(newest.released)}`;
       r.note.classList.toggle('dead', isDead);
       r.cells.forEach((b, i) => {

@@ -21,7 +21,7 @@ const EXPECT = `(async (w, r) => {
   const rows = d.sentences.map((s) => {
     const x = s.deaths[w][r];
     const m = x.kind === 'alive' ? null : d.models.find((y) => y.name === x.model);
-    return { struck: !!m, note: m ? 'died at ' + m.short + ', ' + m.released.slice(0, 7) : 'held through ' + newest.short + ', ' + newest.released.slice(0, 7) };
+    return { struck: !!m, note: m ? 'dead by ' + m.short + ', ' + m.released.slice(0, 7) : 'held through ' + newest.short + ', ' + newest.released.slice(0, 7) };
   });
   return { held, total: d.sentences.length, rows };
 })`;
@@ -44,7 +44,7 @@ export default async function honestyDecoder(p, { base, width }) {
 
   const e1 = await p.ev(`${EXPECT}('w1', 'exact')`);
   const head = await p.ev(`document.querySelector('#hl-h').textContent`);
-  p.check('the heading counts the sentences that held under every wording and scoring', head.startsWith(`${e1.held} of ${e1.total} things`), `${head} | expected ${e1.held} of ${e1.total}`);
+  p.check('the heading counts the sentences that held under every wording and scoring', head.startsWith(`${e1.held} of ${e1.total} things`) && head.includes('under every wording and scoring'), `${head} | expected ${e1.held} of ${e1.total}`);
   p.check('plain and exact: every strike and margin note is the file\'s', JSON.stringify(await p.ev(SHOWN)) === JSON.stringify(e1.rows), JSON.stringify(await p.ev(SHOWN)).slice(0, 300));
 
   // the code-like wording and partial scoring, by presses on the controls
@@ -60,6 +60,11 @@ export default async function honestyDecoder(p, { base, width }) {
   const out = await p.ev(`document.querySelector('#half-life .hl-readout').textContent`);
   const first = await p.ev(`(async () => { const d = await (await fetch('${DATA}')).json(); const c = d.sentences[0].cells.w4.partial[0]; return { name: d.models[0].name, k: c.k, n: c.n }; })()`);
   p.check('a pressed cell is the one the readout names, with its count', out.startsWith(`${first.name}, released`) && out.includes(`${first.k} of ${first.n} right`), out.slice(0, 200));
+
+  // the foot's counts: the replies (both sets), and the models taken out, each from the file
+  const foot = await p.ev(`document.querySelector('#half-life .hl-foot').innerText`);
+  const fx = await p.ev(`(async () => { const d = await (await fetch('${DATA}')).json(); return { total: (d.replies.drawA + d.replies.drawB).toLocaleString('en-US'), a: d.replies.drawA.toLocaleString('en-US'), b: d.replies.drawB.toLocaleString('en-US'), removed: d.removed.map((m) => m.short) }; })()`);
+  p.check('the foot gives both sets of replies and names every model taken out, from the file', foot.includes(`from ${fx.total} recorded replies`) && foot.includes(`${fx.a} to the questions above`) && foot.includes(`${fx.b} to a second set`) && fx.removed.every((n) => foot.includes(n)), foot);
 
   const wide = await p.ev('document.documentElement.scrollWidth - document.documentElement.clientWidth');
   p.check(`no sideways scroll at ${width} px`, wide <= 0, `${wide} px too wide`);
