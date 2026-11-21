@@ -1,0 +1,293 @@
+/* ============================================================
+   orthogonal.css: the Orthogonal plate (Alternate Reality, the
+   Contact world: ink in fog; the world brief is
+   _reference/labs/plans/alt-reality/world_brief.md). One sheet: a
+   header with its title block, the lineage, the render, Earth's
+   lamp and the evidence footer, in one 1440 x 900 frame. Gold only
+   on what fired (view.js header); the corner brackets are in the
+   ink ladder.
+
+   The render and Earth's ghost share one box height and one
+   caption strip, so the two lamps stand on one ground line; the
+   evidence footer is a subgrid of the sheet, so its claims start
+   at the render's left edge. The exercise's bar is a row of its
+   own under the three, the sheet's full width on a wide plate, so
+   the storage-off diagnosis takes the one line the count is on and
+   nothing in the drawing above it moves.
+
+   Labels are in sentence case on purpose: small uppercase widely
+   tracked labels are listed as a tell in Exomania's approved bar
+   sheet, waiting on Luis's ruling (ROAD.md, the hub's notes).
+   ============================================================ */
+
+@property --reveal { syntax: '<length>'; inherits: false; initial-value: 2400px; }
+
+body { font-size: 12px; line-height: 1.5; }
+body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 214, .05), transparent 72%); }
+
+.sheet {
+  /* the row of drawings takes what the viewport leaves after the header, the exercise's bar (34 px), the evidence
+     footer and the margins, so the footer is in the frame at 1440 x 900 */
+  --cols-h: clamp(440px, calc(100vh - 318px), 760px);
+  --strip: 168px;   /* the caption strip: the render's note names all three of its departures (review H4); the drive checks it fits */
+  --art-aspect: 0.75;   /* the render's width over its height (900 x 1200) */
+  position: relative; z-index: 1;
+  margin: 14px 24px; padding: 2px 16px 10px; border: 1px solid var(--line);
+  background-image: linear-gradient(rgba(159, 179, 214, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(159, 179, 214, .03) 1px, transparent 1px);
+  background-size: 32px 32px; background-position: -1px -1px;
+  display: grid; column-gap: 0; row-gap: 0;
+  grid-template-columns: minmax(380px, 1fr) calc((var(--cols-h) - var(--strip)) * var(--art-aspect)) minmax(260px, 330px);
+  grid-template-rows: auto var(--cols-h) auto auto;
+  grid-template-areas:
+    "head head head"
+    "lin  art  earth"
+    "bar  bar  bar"
+    "read read read";
+}
+.corner { position: absolute; width: 18px; height: 18px; border: 1px solid var(--text-dim); pointer-events: none; }
+.corner.tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.corner.tr { top: -1px; right: -1px; border-left: 0; border-bottom: 0; }
+.corner.bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; }
+.corner.br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+/* ---------- header ---------- */
+.head { grid-area: head; padding: 4px 0 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.head-main { min-width: 0; }
+.head-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: none; }
+.kick-line { margin: 0; font-size: 11px; color: var(--text-dim); }
+.kick-line .earlier { color: var(--text-dim); text-decoration: underline; text-underline-offset: 2px; }
+.back { font-size: 11px; letter-spacing: .06em; text-transform: none; padding: 4px 10px; }
+.title { margin: 2px 0 0; font: italic 400 36px/1.1 'Fraunces', Georgia, serif; color: var(--text-bright); letter-spacing: -.01em; }
+.thesis { margin: 6px 0 0; font-size: 13px; color: var(--text); max-width: 140ch; }
+.thesis b { font-weight: 500; color: var(--text-bright); }
+/* a claim's tag, as the evidence footer draws [REAL] (review H1: the header's evidence line had none) */
+.thesis .t, .provenance .t { font-weight: 500; color: var(--horizon); }
+
+.titleblock { display: grid; grid-template-columns: auto auto; border: 1px solid var(--line); font-size: 11px; color: var(--text-dim); }
+.titleblock span { padding: 1px 10px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.titleblock span:nth-child(2n) { border-right: 0; color: var(--text); }
+.titleblock span:nth-last-child(-n+2) { border-bottom: 0; }
+
+/* ---------- the lineage ---------- */
+.lineage { grid-area: lin; min-width: 0; display: flex; flex-direction: column; padding-right: 8px; }
+.lin-box { position: relative; flex: 1 1 auto; min-height: 0; }
+.lin-box svg { position: absolute; left: 0; top: 0; display: block; overflow: visible; }
+.lin-box svg:focus { outline: none; }
+/* the fog: a canvas the box sizes (labs.md: a canvas that fills a box is positioned absolutely inside it) */
+.lin-fog { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.lineage text { font-family: var(--font-mono); font-size: 11px; fill: var(--text); }
+/* a label over the fog is cut out of it by a halo of the ground, as a map's names are, so it keeps its contrast */
+.lineage text { paint-order: stroke; stroke: var(--void); stroke-width: 3px; stroke-linejoin: round; }
+.lineage .role { fill: var(--text-dim); }
+.lineage .head-t { fill: var(--text-dim); }
+/* the lineage's lines are brush strokes (kit/brush.js): filled outlines, wide at the cause, a point at the effect. The
+   strand (this world's branch, the threads that met in it, the leader to the render and its steps) is gold only when
+   the drawing carries the class gold, which main.js sets from engine.js strandGold, as it does the legend's sample */
+.edge path { stroke: none; }
+.edge .blot { fill-opacity: .9; }
+.edge.fired path { fill: var(--text-dim); }
+.edge.thread path { fill: var(--text-dim); fill-opacity: .72; }
+svg.gold .edge.fired path { fill: var(--accretion); }
+svg.gold .edge.thread path { fill: var(--accretion); }
+/* Earth's branch: round dots (engine.js lineStyle sets their size and spacing), not a brush stroke (review H2) */
+.edge.earth .dots { fill: none; stroke: var(--text-dim); }
+.edge.pending path { fill: var(--text-dim); fill-opacity: .7; }
+.leader { stroke: var(--text-faint); stroke-width: 1; }
+svg.gold .leader { stroke: var(--accretion); stroke-opacity: .7; }
+.no-art svg.gold .leader { stroke: var(--text-faint); stroke-opacity: 1; }
+.pair-rule { stroke: var(--horizon); stroke-width: 1; stroke-dasharray: 1 3; opacity: 0; transition: opacity var(--t-mid) var(--ease); }
+.pair-rule.on { opacity: .8; }
+.pair-rule.held { opacity: 0; transition: none; }
+
+.node { cursor: pointer; outline: none; }
+.node .hit { fill: transparent; }
+.node .sq { fill: var(--void); stroke-width: 1; }
+.node .ring { fill: none; stroke: var(--horizon); stroke-width: 1; opacity: 0; transition: opacity var(--t-fast) var(--ease); }
+.node.root .sq { stroke: var(--horizon); }
+.node.fired .sq { stroke: var(--text-dim); }
+svg.gold .node.fired .sq { stroke: var(--accretion); }
+svg.gold .node.fired.role-driver .sq, svg.gold .node.fired.role-artifact .sq { fill: var(--accretion); }
+.node.fired.role-driver .lbl, .node.fired.role-artifact .lbl { fill: var(--text-bright); }
+.node.earth .sq { stroke: var(--text-faint); }
+.node.earth .lbl { fill: var(--text-dim); }
+.node.pending .sq { stroke: var(--text-dim); }
+.node.pending .lbl { fill: var(--text-dim); }
+.node:hover .ring { opacity: .45; }
+.node.paired .ring { opacity: .45; stroke-dasharray: 2 2; }
+.node.chosen .ring { opacity: 1; }
+.node.chosen .lbl { fill: var(--text-bright); }
+/* a step the strand has not reached: a faint square in the fog, its words not yet there */
+.node .sq, .node .lbl { transition: opacity 360ms cubic-bezier(.16, 1, .3, 1); }
+.node.unreached .sq { opacity: .3; }
+.node.unreached .lbl, .node.unreached .ring { opacity: 0; }
+.node:focus-visible .ring { opacity: 1; stroke-width: 1.5; }
+
+/* ---------- the exercise, on the drawing (view.js header) ---------- */
+/* a step leaves its row and comes back by a transform the view sets; the others leave and the lines go into fog */
+.node { transition: transform 560ms cubic-bezier(.16, 1, .3, 1), opacity 320ms var(--ease), visibility 0s; }
+.edges, .leader { transition: opacity 360ms var(--ease); }
+.drill .edges, .drill .leader { opacity: 0; }
+.drill .pair-rule { visibility: hidden; }
+.drill .node.off { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 320ms var(--ease), visibility 0s 320ms; }
+.drill .node.step:hover .ring { opacity: .6; }
+/* while an order is given nothing is gold, since gold would say which steps are on the branch, and the role lines
+   are gone, since the method's roles come in its order */
+.drill .node.step .sq { stroke: var(--text-dim); fill: var(--void); }
+.drill .node.step .lbl { fill: var(--text-bright); }
+.drill .role { visibility: hidden; }
+/* in place of the role, what each step needs (engine.js layout, label.needs); its target covers those words too */
+.lineage text.need { display: none; fill: var(--text-dim); }
+.drill .node.step text.need { display: inline; }
+.node .hit-drill { fill: transparent; display: none; }
+.drill .node.step .hit-drill { display: inline; }
+/* a pressed step: its square gives way to a ring with its number in it, on the ground, over the line's blot */
+.node.picked .sq { opacity: 0; }
+.node.picked .ring { opacity: 1; stroke: var(--text-bright); fill: var(--void); }
+.lineage text.num { font-size: 10px; font-weight: 500; fill: var(--text-bright); }
+/* checked: the verdict is what the drawing shows, so the lineage is in ink (no class gold, engine.js strandGold). Right
+   is a decision, and its rings and numbers are the only gold on the drawing; wrong is ink, the pair out of order bright
+   and every other ring dim */
+.ord-right .node.picked .ring { stroke: var(--accretion); }
+svg.ord-right text.num { fill: var(--accretion); }
+.ord-wrong .node.picked:not(.why) .ring { stroke: var(--text-dim); }
+.ord-wrong .node.picked:not(.why) text.num { fill: var(--text-dim); }
+.node.why .ring { stroke-width: 2; }
+.why-line { fill: none; stroke: var(--text-bright); stroke-width: 1.4; stroke-dasharray: 3 3; stroke-linecap: round; }
+.still .node, .still .drill .node.off, .still .edges, .still .leader { transition: none; }
+
+.drill-bar { grid-area: bar; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0; padding: 6px 0 0; min-height: 28px; }
+.drill-acts { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+.drill-btn { font: 400 11px/1.3 var(--font-mono); color: var(--text); background: transparent; border: 1px solid var(--line-bright);
+  padding: 5px 10px; cursor: pointer; border-radius: 0; transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease); }
+.drill-btn:hover:not(:disabled), .drill-btn:focus-visible { border-color: var(--horizon); color: var(--text-bright); outline: none; }
+.drill-btn:disabled { color: var(--text-dim); cursor: default; }
+.drill-btn[hidden] { display: none; }
+.drill-count { font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+/* what is kept: the storage-off diagnosis, or where the answers are kept, on the count's line: one line beside it on a
+   wide plate */
+.drill-kept { flex: 0 1 auto; font-size: 11px; color: var(--text-dim); }
+.drill-kept[hidden] { display: none; }
+
+/* the exercise in the footer: the pressed order, numbered, its places not pressed yet kept as dotted rules */
+.rd-order .t { color: var(--text-dim); margin-right: 6px; font-variant-numeric: tabular-nums; }
+.rd-order .slot { display: inline-block; width: 18ch; vertical-align: middle; border-bottom: 1px dotted var(--line-bright); }
+.reading[data-drill] .dr-verdict { color: var(--text-bright); }
+
+.legend { margin: 6px 0 0; font-size: 11px; color: var(--text-dim); line-height: 1.7; }
+.legend > span { white-space: nowrap; margin-right: 12px; }
+.lg { display: inline-block; width: 26px; height: 8px; vertical-align: middle; margin: 0 6px 0 0; }
+.lg-branch { fill: var(--text-dim); }
+.lg-branch.gold { fill: var(--accretion); }
+.lg-dots { fill: none; stroke: var(--text-dim); }
+/* the fog's swatch: the fog's own colour in a soft patch, within config.js FOG_LIMIT (tests.mjs section 21 holds every
+   --horizon haze in this file to it) */
+.lg-fog { display: inline-block; width: 26px; height: 12px; vertical-align: middle; margin: 0 6px 0 0;
+  background: radial-gradient(closest-side, rgba(159, 179, 214, .14), rgba(159, 179, 214, .07) 60%, transparent); }
+
+/* ---------- the render and Earth's ghost: one box height, one caption strip ---------- */
+.art, .earth { margin: 0; min-width: 0; display: grid; grid-template-rows: minmax(0, 1fr) var(--strip); }
+.art { grid-area: art; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.art-view, .earth-view { position: relative; overflow: hidden; }
+/* no ground of its own: the render's black is lightened to the sheet's, so the drafting grid runs on under it and the
+   photograph sits on the plate rather than pasted over it */
+.art-view { background: transparent; }
+/* the fog the render surfaces from, there only while the render is in it (the reveal, main.js) */
+.art-view::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 1700ms cubic-bezier(.33, 0, .2, 1);
+  background: radial-gradient(70% 55% at 50% 55%, rgba(159, 179, 214, .11), rgba(159, 179, 214, .035) 60%, transparent 88%); }
+.art.fog .art-view::before { opacity: 1; transition: none; }
+.art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; mix-blend-mode: lighten;
+  /* the fog clears outward from where the gold strand reaches the render (main.js sets --rx and --ry) */
+  -webkit-mask-image: radial-gradient(circle at var(--rx, 0px) var(--ry, 60%), #000 calc(var(--reveal) - 220px), transparent var(--reveal));
+  mask-image: radial-gradient(circle at var(--rx, 0px) var(--ry, 60%), #000 calc(var(--reveal) - 220px), transparent var(--reveal));
+  transition: --reveal 1700ms cubic-bezier(.33, 0, .2, 1); }
+/* fogged at once: a transition here would run the reveal backwards from full while the strand draws */
+.art.fog img { --reveal: 0px; transition: none; }
+.art.failed img { visibility: hidden; }
+.art-ink { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.art-ink path, .art-ink rect, .art-ink ellipse, .art-ink circle, .art-ink line { fill: none; stroke: var(--text-dim); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.art-ink .glass { stroke: var(--horizon-dim); }
+.art-ink .cap { stroke: var(--text); }
+
+.art-cap, .earth-cap { display: flex; flex-direction: column; gap: 0; padding: 8px 14px 0; border-top: 1px solid var(--line); min-width: 0; line-height: 1.45; }
+.art-name, .earth-name { color: var(--text-bright); font-size: 13px; }
+.art-line, .dim-line { color: var(--text-dim); font-size: 11px; }
+.art-exposure { color: var(--text-dim); font-size: 11px; }
+.art-exposure .t { font-weight: 500; color: var(--text-dim); }
+.art-status { color: var(--text); font-size: 11px; }
+.art-status:empty { display: none; }
+.failed .provenance { display: none; }
+.provenance .pl { display: block; }
+.provenance { margin-top: 3px; font-size: 11px; color: var(--text-dim); }
+.provenance a { color: var(--horizon); text-underline-offset: 3px; }
+.provenance a:hover { color: var(--text-bright); }
+.provenance .stale { color: var(--text-bright); }
+.earth-tag { margin-top: 3px; font-size: 11px; color: var(--text-dim); }
+
+.earth { grid-area: earth; }
+.earth-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+/* Earth's lamp is history, so it is drawn in clear ink, quieter than the render by weight alone */
+.earth-svg .ghost path { fill: none; stroke: var(--horizon-dim); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.earth-svg .ghost .flame { stroke: var(--text-dim); }
+.earth-svg .ghost .main { stroke-dasharray: 6 4; }
+.earth-svg .ghost .ground { stroke: var(--line-bright); }
+.earth-svg text { font-family: var(--font-mono); font-size: 11px; fill: var(--text-dim); }
+
+/* ---------- the evidence footer, on the sheet's own columns ---------- */
+.reading { grid-area: read; grid-column: 1 / -1; padding: 14px 0 0; border-top: 1px solid var(--line); min-width: 0;
+  display: grid; grid-template-columns: subgrid; align-content: start;
+  grid-template-areas: "h e e" "n e e" "b e e" ". e e"; grid-template-rows: auto auto auto 1fr; }
+.rd-head { grid-area: h; } .rd-note { grid-area: n; } .rd-beside { grid-area: b; }
+.reading p { margin: 0; padding-right: 32px; }
+.rd-head { font-size: 12px; color: var(--text-dim); }
+.rd-label { color: var(--text-bright); font-weight: 500; }
+.rd-note { margin-top: 2px !important; color: var(--text); font-size: 12px; }
+.rd-beside { margin-top: 2px !important; color: var(--text-dim); font-size: 11px; }
+.rd-pair { color: var(--text); }
+.rd-evidence { grid-area: e; list-style: none; margin: 0; padding: 0 0 0 14px; display: flex; flex-direction: column; gap: 3px; max-width: 120ch; }
+.rd-evidence li { font-size: 11px; color: var(--text); line-height: 1.5; }
+.rd-evidence .t { font-weight: 500; margin-right: 4px; }
+.rd-evidence .t.real { color: var(--horizon); }
+.rd-evidence .t.ill { color: var(--text-dim); }
+.rd-evidence cite { font-style: normal; color: var(--text-dim); }
+.rd-gap { color: var(--text-dim); }
+
+/* ---------- narrow: one column; the render with Earth's lamp under it, then the lineage that grew it and its
+   reading. The reading is the last block, so nothing the visitor looks at sits below it and it takes the height of
+   what it says (main.js applyReadingHeight; the road's call before the review, item 8) ---------- */
+@media (max-width: 999px) {
+  .sheet {
+    --strip: auto;
+    margin: 8px; padding: 4px 12px 14px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas: "head" "art" "earth" "lin" "bar" "read";
+  }
+  .head { flex-direction: column-reverse; gap: 8px; }
+  .head-side { flex-direction: row; justify-content: space-between; align-items: center; align-self: stretch; }
+  .title { font-size: 30px; }
+  .back { min-height: 44px; display: inline-flex; align-items: center; }
+  .kick-line .earlier { min-height: 44px; display: inline-flex; align-items: center; }
+  .drill-btn { min-height: 44px; padding: 6px 12px; }
+  .thesis { font-size: 12px; }
+  .art { border: 1px solid var(--line); grid-template-rows: auto auto; }
+  .art-view { aspect-ratio: 900 / 1200; }
+  .art-cap { padding-bottom: 10px; }
+  .lineage { margin-top: 14px; padding-right: 0; }
+  .reading { grid-column: auto; display: block; margin-top: 12px; }
+  .reading p { padding-right: 0; }
+  .rd-evidence { margin-top: 6px; padding-left: 0; }
+  /* Earth's lamp for the same job, under the render in the same frame, so the two answers are read together */
+  .earth { margin-top: 0; border: 1px solid var(--line); border-top: 0; grid-template-columns: minmax(0, 1fr) 120px; grid-template-rows: auto; }
+  .earth-view { grid-column: 2; grid-row: 1; height: 200px; }
+  .earth-cap { grid-column: 1; grid-row: 1; border-top: 0; padding: 10px 0 10px 14px; }
+  /* the bar's line about what is kept takes its own line, at the height of the longer of its two states (main.js
+     fixKeptHeight), so the storage-off state moves nothing below it (item 9) */
+  .drill-kept { flex: 1 1 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art img, .pair-rule, .node, .drill .node.off, .node .ring, .node .sq, .node .lbl, .edges, .leader, .art-view::before { transition: none; }
+}
+
+/* the gas main's name, against its dashed line at the foot of Earth's ghost */
+.earth-main { position: absolute; right: 8px; bottom: 14px; font-size: 11px; color: var(--text-dim); }

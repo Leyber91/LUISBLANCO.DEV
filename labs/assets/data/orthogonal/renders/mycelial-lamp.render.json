@@ -1,0 +1,156 @@
+{
+  "artifact": "mycelial-lamp",
+  "family": "shelf-culture-lamp",
+  "title": "The mycelial street lamp",
+  "tag": "ILLUSTRATIVE",
+  "seed": 20261121,
+  "params": "mycelial-lamp.json",
+  "params_sha256": "28e713f979ea4cef05492d573199140673d2f87f42beb0584691a65c20851ab6",
+  "image": "mycelial-lamp.webp",
+  "image_bytes": 20614,
+  "width": 900,
+  "height": 1200,
+  "blender": "5.1.0",
+  "engine": "Cycles, CPU",
+  "samples": 24,
+  "denoiser": "OpenImageDenoise",
+  "exposure_stops": 4.8,
+  "time_limit_s": 400,
+  "render_s": 217.9,
+  "rendered_utc": "2026-11-21T18:12:34+00:00",
+  "measure": {
+    "caps": [
+      {
+        "cap": "cap_00",
+        "radius_m": 0.354,
+        "height_m": 0.552,
+        "faces_deg": -33.2,
+        "plate_px": 67.3,
+        "box_px": [
+          129,
+          262,
+          197,
+          287
+        ],
+        "underside_seen_deg": 7.2,
+        "verts": 19912
+      },
+      {
+        "cap": "cap_01",
+        "radius_m": 0.347,
+        "height_m": 0.795,
+        "faces_deg": 28.1,
+        "plate_px": 70.3,
+        "box_px": [
+          158,
+          227,
+          228,
+          251
+        ],
+        "underside_seen_deg": 11.7,
+        "verts": 16712
+      },
+      {
+        "cap": "cap_02",
+        "radius_m": 0.356,
+        "height_m": 1.06,
+        "faces_deg": -45.9,
+        "plate_px": 69.3,
+        "box_px": [
+          127,
+          189,
+          196,
+          211
+        ],
+        "underside_seen_deg": 10.6,
+        "verts": 16968
+      },
+      {
+        "cap": "cap_03",
+        "radius_m": 0.377,
+        "height_m": 1.37,
+        "faces_deg": 35.3,
+        "plate_px": 76.9,
+        "box_px": [
+          157,
+          136,
+          234,
+          169
+        ],
+        "underside_seen_deg": 18.5,
+        "verts": 20104
+      },
+      {
+        "cap": "cap_04",
+        "radius_m": 0.247,
+        "height_m": 0.66,
+        "faces_deg": 151.4,
+        "plate_px": 47.5,
+        "box_px": [
+          165,
+          250,
+          212,
+          264
+        ],
+        "underside_seen_deg": -14.2,
+        "verts": 17992
+      },
+      {
+        "cap": "cap_05",
+        "radius_m": 0.254,
+        "height_m": 1.23,
+        "faces_deg": -178.5,
+        "plate_px": 48.8,
+        "box_px": [
+          154,
+          173,
+          203,
+          185
+        ],
+        "underside_seen_deg": -5.8,
+        "verts": 18184
+      }
+    ],
+    "overlaps": [],
+    "farthest_m": 0.431,
+    "glass_radius_m": 0.48,
+    "lens_mm": 38.06,
+    "shift_y": -0.0541,
+    "frame": {
+      "top": 0.09,
+      "ground": 0.79
+    },
+    "regions": {
+      "hood": [
+        0.2598,
+        0.09,
+        0.7402,
+        0.2592
+      ],
+      "plinth": [
+        0.2868,
+        0.6026,
+        0.7131,
+        0.79
+      ],
+      "column": [
+        0.309,
+        0.2104,
+        0.6911,
+        0.6672
+      ]
+    },
+    "light": {
+      "culture_p99": 0.9426,
+      "beyond_column_p995": 0.283,
+      "sky_p50": 0.0502,
+      "hood_p10": 0.0454,
+      "hood_p50": 0.0592,
+      "hood_p90": 0.1141,
+      "plinth_p10": 0.1185,
+      "plinth_p50": 0.1527,
+      "plinth_p90": 0.4827,
+      "frame_p50": 0.1107
+    }
+  }
+}
