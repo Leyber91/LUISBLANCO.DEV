@@ -26,6 +26,8 @@ export const SOURCES = Object.freeze({
   okane1990: "O'Kane, Lingle, Porter and Wampler, Mycologia 82, 595 (1990), read through a secondary source",
   rabara2025: 'Rabara and Xie, J. Fungi 11, 774 (2025)',
   desbenoit2004: 'Desbenoit, Vanderhaghe, Galin and Grosjean, Eurographics 2004 short paper',
+  // the two sources render_artifact.py's header gives for its cap: a profile swept round an axis
+  raistrick2023: 'Raistrick et al., Infinigen, CVPR 2023',
 });
 
 /* The lineage's geometry, in CSS px. The lanes are placed as shares of the drawing's width (engine.js lanes): Earth's

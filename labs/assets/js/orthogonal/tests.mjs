@@ -84,7 +84,7 @@ import { brushStroke } from '../kit/brush.js';
 import { seedOf } from '../kit/rng.js';
 import { EXERCISE, FOG, INK, LAYOUT, ROLES, SOURCES, STORAGE_OFF, TIMING } from './config.js';
 import {
-  arrival, check, checkOrder, drillFog, drillPlaces, fogAt, fogDensity, fogField, ignitionEnd, item, itemSets, judge, layout, needLine,
+  arrival, check, checkOrder, drillFog, drillPlaces, fogAt, fogDensity, fogField, ignitionEnd, item, itemSets, judge, layout, needLine, srcsOf,
   needPath, needsOf, needVerb, pairOf, reading, reasons, stateOf, step, stepBox, stepsOf, strandAt, strandGold, trunk, wrap,
 } from './engine.js';
 import { countLine, fresh, isSalt, Keeper, KINDS, newSalt, RECORD_V, restore, withChoice, withLeave, withPress, withStart, withUndo } from './record.js';
@@ -119,6 +119,8 @@ const broken = [
   ['a cycle', (w) => { node(w, 'fungi').after = ['lignin', 'lamp']; }],
   ['a REAL claim with no source and no gap', (w) => { node(w, 'coalgas').evidence = [{ tag: 'REAL', text: 'x' }]; }],
   ['a source that does not exist', (w) => { node(w, 'fungi').evidence[0].src = 'nobody2099'; }],
+  ['a list of sources with one that does not exist', (w) => { node(w, 'lamp').evidence[1].src = ['desbenoit2004', 'nobody2099']; }],
+  ['an empty list of sources', (w) => { node(w, 'lamp').evidence[1].src = []; }],
   ['a tag other than REAL or ILLUSTRATIVE', (w) => { node(w, 'fungi').evidence[0].tag = 'LIKELY'; }],
   ['no evidence', (w) => { node(w, 'farmed').evidence = []; }],
   ['a step with no line saying what it needs', (w) => { node(w, 'nocoal').needs = ' '; }],
@@ -225,7 +227,8 @@ for (const n of WORLD.nodes) {
   for (const e of r.evidence) ok(`${n.id}: a REAL claim names its source or its gap`, e.tag !== 'REAL' || !!(e.source || e.gap));
   ok(`${n.id}: its note has no digit the data did not cite`, !/\d/.test(n.note) || n.evidence.some((e) => e.src));
 }
-ok('every source cited is used', Object.keys(SOURCES).every((k) => WORLD.nodes.some((n) => n.evidence.some((e) => e.src === k))));
+ok('every source cited is used', Object.keys(SOURCES).every((k) => WORLD.nodes.some((n) => n.evidence.some((e) => srcsOf(e).includes(k)))));
+ok('an item that cites two sources is read with both, in its order', reading(WORLD, 'lamp').evidence[1].source === `${SOURCES.desbenoit2004}; ${SOURCES.raistrick2023}`, reading(WORLD, 'lamp').evidence[1].source);
 
 // ---------------------------------------------------------------- 6. the pipeline
 const paramsPath = path.join(LABS, WORLD.artifact.params);
@@ -1021,6 +1024,13 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
   const altOf = (text) => [{ where: 'the alt text', text, closed: true }];
   ok('the alt text the review found (C1) fails: "ink" while ink.thickness_px is 0', renderWordFaults(altOf(oldAlt), facts).some((x) => x.includes('"ink"')));
   ok('and "ink" stands just inside, once ink.thickness_px is above 0', !renderWordFaults(altOf(oldAlt), { ...facts, P: { ...params, ink: { ...params.ink, thickness_px: 0.01 } } }).some((x) => x.includes('"ink"')));
+  // the method sentence the review found (H5): the pipeline sweeps a profile and holds no grammar
+  const grammar = 'The lamp, its brightness and its world are invented. Its form is drawn by a seeded procedural grammar after published mushroom-modelling methods.';
+  ok('the method sentence the review found (H5) fails: "grammar", and the pipeline defines no rewriting rules', renderWordFaults([{ where: "the artifact's evidence", text: grammar }], facts).some((x) => x.includes('"grammar"')));
+  ok("and the sentence that replaced it says what the pipeline does, with the two sources its header gives", (() => {
+    const e = WORLD.nodes.find((n) => n.id === WORLD.artifact.node).evidence.find((x) => /swept round an axis/.test(x.text));
+    return !!e && srcsOf(e).join() === 'desbenoit2004,raistrick2023' && /Desbenoit, Vanderhaghe, Galin and Grosjean/.test(S) && /Raistrick et al\., CVPR 2023/.test(S);
+  })());
   const moon = renderWordFaults(altOf(`${WORLD.artifact.alt} A green moon.`), facts);
   ok('a word in the alt text that no fact stands for fails its closed vocabulary', moon.some((x) => x.includes('"green"')) && moon.some((x) => x.includes('"moon"')), moon.join(' | '));
   ok('a word of the render outside the alt text still has to hold', renderWordFaults([{ where: 'a probe', text: 'drawn in ink' }], facts).length === 1);
@@ -1041,6 +1051,7 @@ for (const [width, height] of [[640, 560], [360, 0], [390, 0]]) {
       { world: { ...WORLD, artifact: { ...WORLD.artifact, frame: { ...WORLD.artifact.frame, ground: G + 0.0019 } } } }],
     ['seed', "a record whose seed is not the file's", { R: { ...record, seed: record.seed + 1 } }],
     ['samples', "a record whose samples are not the file's", { R: { ...record, samples: record.samples + 1 } }],
+    ['sweep', 'a pipeline whose cap is not swept', { S: S.replace('close both ends of the sweep', 'close both ends') }],
   ];
   for (const [id, what, out, inside] of bites) {
     const used = sentences.some((s) => RENDER_WORDS.find((w) => w.id === id).re.test(s.text));

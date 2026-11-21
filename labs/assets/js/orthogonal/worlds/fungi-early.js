@@ -18,9 +18,10 @@
    word of a step that needs the node.
 
    Each node carries its evidence as items tagged REAL or
-   ILLUSTRATIVE. A REAL item cites a key of config.js SOURCES, or
-   declares the gap where no source was opened (gap), so the page
-   never shows a REAL tag with nothing behind it.
+   ILLUSTRATIVE. A REAL item cites a key of config.js SOURCES (or
+   a list of them), or declares the gap where no source was opened
+   (gap), so the page never shows a REAL tag with nothing behind
+   it.
    ============================================================ */
 
 export const WORLD = Object.freeze({
@@ -119,7 +120,8 @@ export const WORLD = Object.freeze({
       note: 'The street lamp of this world: a column of glass on a ceramic plinth, a culture of shelf fungus on a spindle inside, a louvered hood it breathes through, a flask that keeps it wet.',
       evidence: [
         { tag: 'REAL', text: 'Real fungal light is dim: a culture of P. stipticus was photographed with an 8-minute exposure.', src: 'rabara2025' },
-        { tag: 'ILLUSTRATIVE', text: 'The lamp, its brightness and its world are invented. Its form is drawn by a seeded procedural grammar after published mushroom-modelling methods.', src: 'desbenoit2004' },
+        // what render_artifact.py does (review H5: it holds no grammar), with the two sources its header gives
+        { tag: 'ILLUSTRATIVE', text: 'The lamp, its brightness and its world are invented. Each cap of its culture is a profile swept round an axis, built from the seed in its parameter file.', src: ['desbenoit2004', 'raistrick2023'] },
       ],
     },
     {

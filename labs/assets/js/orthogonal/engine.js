@@ -30,6 +30,8 @@ import { mulberry32, seedOf, shuffle } from '../kit/rng.js';
 import { EXERCISE, FOG, LAYOUT, ROLES, SOURCES, TIMING } from './config.js';
 
 const byId = (world) => new Map(world.nodes.map((n) => [n.id, n]));
+/* The sources an evidence item cites: none, one key of config.js SOURCES, or a list of them. */
+export const srcsOf = (e) => (e.src === undefined ? [] : [].concat(e.src));
 
 /* Every way the world breaks the rules, as sentences; an empty list when it holds. */
 export function check(world) {
@@ -62,8 +64,9 @@ export function check(world) {
     if (!Array.isArray(n.evidence) || !n.evidence.length) out.push(`${n.id}: no evidence`);
     for (const e of n.evidence || []) {
       if (e.tag !== 'REAL' && e.tag !== 'ILLUSTRATIVE') out.push(`${n.id}: evidence tagged "${e.tag}"`);
-      if (e.src !== undefined && !SOURCES[e.src]) out.push(`${n.id}: cites "${e.src}", which is not a source`);
-      if (e.tag === 'REAL' && !e.src && !String(e.gap || '').trim()) out.push(`${n.id}: a REAL item with no source and no declared gap`);
+      for (const k of srcsOf(e)) if (!SOURCES[k]) out.push(`${n.id}: cites "${k}", which is not a source`);
+      if (e.src !== undefined && !srcsOf(e).length) out.push(`${n.id}: cites an empty list of sources`);
+      if (e.tag === 'REAL' && !srcsOf(e).length && !String(e.gap || '').trim()) out.push(`${n.id}: a REAL item with no source and no declared gap`);
     }
   }
   if (out.length) return out;
@@ -476,7 +479,7 @@ export function reading(world, id) {
   return {
     id, role: n.branch === 'earth' ? 'Earth' : ROLES[n.role], label: n.label, note: n.note, state: stateOf(world, id),
     beside: q ? { id: q.id, label: q.label, side: q.branch === 'earth' ? 'Earth, same step' : 'This world, same step' } : null,
-    evidence: n.evidence.map((e) => ({ tag: e.tag, text: e.text, source: e.src ? SOURCES[e.src] : null, gap: e.gap || null })),
+    evidence: n.evidence.map((e) => ({ tag: e.tag, text: e.text, source: srcsOf(e).length ? srcsOf(e).map((k) => SOURCES[k]).join('; ') : null, gap: e.gap || null })),
   };
 }
 
