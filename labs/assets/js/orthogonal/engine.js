@@ -142,6 +142,9 @@ function firedSet(world) {
     n.after.forEach(walk);
   };
   walk(world.artifact.node);
+  // gold marks only what the engine keeps: an artifact it built and did not keep is drawn in the fog, which the
+  // legend reads as invented (2026-11-21, the road's call before the merge)
+  if (world.grown && world.grown.kept === false) out.delete(world.artifact.node);
   return out;
 }
 

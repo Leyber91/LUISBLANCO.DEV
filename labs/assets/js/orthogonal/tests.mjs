@@ -160,8 +160,9 @@ for (const [name, breakIt] of broken) {
 // ---------------------------------------------------------------- 2. what fired
 ok('the trunk runs driver, substrate, combination, artifact', JSON.stringify(trunk(WORLD)) === JSON.stringify(['fungi', 'farmed', 'luminous', 'lamp']), trunk(WORLD).join());
 const states = Object.fromEntries(WORLD.nodes.map((n) => [n.id, stateOf(WORLD, n.id)]));
-ok('gold is the driver and the steps the artifact grew from', ['fungi', 'farmed', 'luminous', 'lamp'].every((id) => states[id] === 'fired'));
-ok('nothing else is gold', Object.values(states).filter((s) => s === 'fired').length === 4);
+const goldWant = WORLD.grown && WORLD.grown.kept === false ? ['fungi', 'farmed', 'luminous'] : ['fungi', 'farmed', 'luminous', 'lamp'];
+ok('gold is the driver and the steps the engine keeps; an artifact built and not kept is not gold', goldWant.every((id) => states[id] === 'fired') && (goldWant.includes('lamp') || states.lamp !== 'fired'));
+ok('nothing else is gold', Object.values(states).filter((s) => s === 'fired').length === goldWant.length);
 ok('the seed of trouble has not happened', states.trouble === 'pending');
 ok("Earth's branch is the ghost", ['whaling', 'whaleoil', 'oillamp'].every((id) => states[id] === 'earth'));
 ok('the root belongs to both', states.ground === 'root');
@@ -343,7 +344,7 @@ for (const [what, text] of [['title', WORLD.title], ['driver', WORLD.driver], ['
   ok("at 0 Earth's branch is all there", lay.edges.every((e, i) => (e.kind === 'earth' ? s0.edges[i] === 1 : true)));
   ok('at 0 no step of this world shows, and Earth and the root do', lay.nodes.every((n) => s0.nodes.get(n.id) === (n.state === 'fired' || n.state === 'pending' ? 0 : 1)));
   const art = arrival(WORLD, lay), into = idx('luminous', 'lamp');
-  ok('the line into the artifact is drawn at arrival', at(art).edges[into] === 1);
+  if (!(WORLD.grown && WORLD.grown.kept === false)) ok('the line into the artifact is drawn at arrival', at(art).edges[into] === 1);
   ok('and not 1 ms before', at(art - 1).edges[into] < 1);
   ok('arrival is the artifact row less one, times a row, plus a line', art === (lay.nodes.find((n) => n.id === 'lamp').row - 1) * TIMING.perRow + TIMING.edge);
   ok('the driver is drawn before the step under it', at(TIMING.edge).edges[idx('ground', 'fungi')] === 1 && at(TIMING.edge).edges[idx('fungi', 'farmed')] < 1);

@@ -51,7 +51,8 @@ const PAGE = '/labs/orthogonal.html';
 // (grown by the engine since 2026-11-21: worlds/fungi-early.js buildWorld; the ids are the ones it gives the rows it grew)
 const WORLD_IDS = ['ground', 'fungi', 'farmed', 'whaling', 'luminous', 'whaleoil', 'lamp', 'oillamp', 'trouble'];
 // the steps gold marks: the driver and this world's own steps up to the artifact (engine.js stateOf)
-const FIRED = ['fungi', 'farmed', 'luminous', 'lamp'];
+// the engine builds this world's lamp and does not keep it (grow.js, fc0c06d), so gold stops at the culture
+const FIRED = ['fungi', 'farmed', 'luminous'];
 // the branch that fired, and the legend's swatch that says what that gold means (the corners are in the ink ladder
 // since pass 3, by the hub's ruling of 2026-11-21 10:49); an order checked right is a decision, so its numbers and
 // their rings are gold
@@ -203,7 +204,7 @@ export default async function orthogonal(p, { base, width, height }) {
     filled: [...document.querySelectorAll('.node.fired .sq')].filter((r) => getComputedStyle(r).fill !== 'rgb(6, 8, 13)').length,
     earth: document.querySelectorAll('.edge.earth').length, leader: !!document.querySelector('.leader') })`);
   p.check(`the lineage draws every step of the data, ${FIRED.length} of them gold`, counts.nodes === WORLD_IDS.length && counts.gold === FIRED.length, JSON.stringify(counts));
-  p.check('the driver and the artifact are the filled stamps', counts.filled === 2, String(counts.filled));
+  p.check('the driver is the filled stamp; the artifact, built and not kept, is not', counts.filled === 1, String(counts.filled));
   // Earth's branch is dotted as the bindings ask (review H2): the drawn dash read back against the one rule's numbers
   const dots = await p.ev(`Promise.all([import('${base}/labs/assets/js/orthogonal/config.js')]).then(([C]) => {
     const want = '0px, ' + C.EARTH_DOTS.gap + 'px';
