@@ -11,18 +11,23 @@ Writes, beside this file:
                status "drafted", provenance, name (plain) and draft_name (the drafted one)
   calls.json   one record per call: tag, attempt, cost_usd, duration_s, tokens, from the cache record
 
-The source is the repository's _reference copy of the drafts (SOURCE below); it is read here and nowhere at runtime.
+The drafts and the call harness live in the author's private planning repository, which is not published. Their
+locations are given when the script is run, never written here:
+  ORTH_CORE    the folder holding the isolated call harness (launch.py)
+  ORTH_DRAFTS  the drafted worlds file (drafted_42.json)
+Both are read here and nowhere at runtime; the page reads only the committed outputs.
 """
 from __future__ import annotations
 
 import json
+import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-CORE = Path(r"C:\Users\Luis.Blanco\dev\LUISBLANCO.DEV\_reference\labs\concepts\alt-reality\orthogonal\kill_test\core")
-SOURCE = Path(r"C:\Users\Luis.Blanco\dev\LUISBLANCO.DEV\_reference\labs\plans\alt-reality\catalog\drafted_42.json")
+CORE = Path(os.environ["ORTH_CORE"]) if os.environ.get("ORTH_CORE") else None
+SOURCE = Path(os.environ["ORTH_DRAFTS"]) if os.environ.get("ORTH_DRAFTS") else None
 MODEL = "claude-sonnet-5-5"
 
 KINDS = ["column", "plinth", "box", "lattice", "vessel", "mast", "mirror", "disc", "gimbal", "wing", "rotor", "shutter",
@@ -120,6 +125,8 @@ def one(launch, e: dict) -> tuple[str, dict, list[dict]]:
 
 
 def main() -> None:
+    if CORE is None or SOURCE is None:
+        sys.exit("set ORTH_CORE (the harness folder) and ORTH_DRAFTS (drafted_42.json) to run this script")
     sys.path.insert(0, str(CORE))
     import launch  # the core test's isolated harness
 
