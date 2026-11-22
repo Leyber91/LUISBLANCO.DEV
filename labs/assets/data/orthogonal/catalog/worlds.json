@@ -1,0 +1,1560 @@
+{
+ "about": "The catalogue of 42 drafted worlds. Names and parts trees were drafted offline by make_parts.py.",
+ "model": "claude-sonnet-5-5",
+ "worlds": [
+  {
+   "id": "w00",
+   "domain": "energy",
+   "kind": "removal",
+   "driver": "All fossil hydrocarbons in the crust are gone, leaving no coal, oil, or gas deposits.",
+   "job": "Generating dispatchable power",
+   "steps": [
+    {
+     "technology": "Biomass charcoal-and-wood coppice power guilds with managed fast-rotation energy forests",
+     "needs": "Surveyed forestry, kiln metallurgy, and land tenure over fuel-bearing regions"
+    },
+    {
+     "technology": "Pressurized sealed-boiler steam engines burning dense briquetted biomass, with fuel-feed scheduling",
+     "needs": "Boiler plate iron from charcoal smelting, pressure gauges, briquetting presses"
+    },
+    {
+     "technology": "Thermal mass storage: hot stone-and-ceramic regenerator beds charged by solar mirrors and surplus heat",
+     "needs": "Kiln-grade refractory ceramics, polished metal mirrors, regenerator experience from furnaces"
+    },
+    {
+     "technology": "Hydro-pumped lift reservoirs and geared flywheel stations that store power for dispatch on demand",
+     "needs": "Large-scale masonry hydraulics, precision gears, steam engines for pumping"
+    },
+    {
+     "technology": "Engineered fuel-microbe bioreactors producing methane and hydrogen from farm waste, feeding turbines",
+     "needs": "Microbiology, sealed fermenters, gas-handling alloys, turbines tolerant of impure gas"
+    }
+   ],
+   "artifact": {
+    "name": "Hybrid dispatch power hall",
+    "draft_name": "Regenerator-Bank Dispatch Hall",
+    "function": "Delivers scheduled on-demand power by combining stored heat, pumped water, and biogas turbines",
+    "form": "A masonry hall of ceramic heat-bed towers, a hillside reservoir penstock, flywheel gearhouses, and gas-burning turbines on one dispatch floor."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w01",
+   "domain": "energy",
+   "kind": "removal",
+   "driver": "Uranium and thorium become non-fissile, so nuclear fission is impossible.",
+   "job": "Supplying steady baseload electricity",
+   "steps": [
+    {
+     "technology": "Mass thorium-oxide mantle lighting and refractory industry from harmless monazite sands",
+     "needs": "Cheap monazite mining; rare-earth separation; no radiation regulation"
+    },
+    {
+     "technology": "Thoria-lined regenerative furnaces reaching 2500°C for metallurgy",
+     "needs": "Pure thoria brick sintering; regenerative heat-recycling designs; abundant fuel"
+    },
+    {
+     "technology": "Thoria heat-bank blocks storing surplus wind, solar and combustion heat",
+     "needs": "Thoria bricks; resistive heating; insulated vaults; variable renewable surplus"
+    },
+    {
+     "technology": "Thoria-emitter thermophotovoltaics converting heat-bank glow directly to electricity",
+     "needs": "Mantle-style selective emission; narrow-bandgap photovoltaic cells; actively cooled receivers"
+    },
+    {
+     "technology": "Continental heat-bank grid trading stored heat between monazite-coast towns",
+     "needs": "Standardized glow towers; rail-shipped hot thoria cartridges; heat metering"
+    }
+   ],
+   "artifact": {
+    "name": "Thoria heat bank tower",
+    "draft_name": "Glow Tower",
+    "function": "Stores surplus heat in thoria and converts it to steady electricity without moving parts",
+    "form": "Windowless tower of stacked thoria blocks heated to 2000°C, ringed by cooled photovoltaic panels, glowing white-hot behind shutters."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w02",
+   "domain": "energy",
+   "kind": "removal",
+   "driver": "Lithium vanishes from the crust and oceans.",
+   "job": "Storing portable electrical energy",
+   "steps": [
+    {
+     "technology": "Sodium-sulfur and zinc-manganese cells in sealed, rechargeable, heavy portable canisters",
+     "needs": "Abundant sodium, zinc, manganese; ceramic electrolyte sintering; sealed-vessel metalworking"
+    },
+    {
+     "technology": "Mechanical flywheel cartridges spun by hand cranks and mains, replacing chemical portable storage",
+     "needs": "Vacuum-sealed housings, magnetic bearings, high-strength carbon fibre or steel rotors"
+    },
+    {
+     "technology": "Standardized exchangeable cartridge networks run by regional depots, with deposit-and-return circulation",
+     "needs": "Common cartridge dimensions, depot spin-up stations, trusted charge-metering and accounting"
+    },
+    {
+     "technology": "Hybrid flywheel-supercapacitor cartridges using carbon electrodes and sodium-ion electrolytes for electrical output",
+     "needs": "Activated carbon production, sodium electrolytes, power electronics converting spin to steady current"
+    },
+    {
+     "technology": "Regional recovery of sodium, zinc and manganese from brines and tailings into dedicated cartridge supply chains",
+     "needs": "Large-scale electrochemical extraction, recycling mandates, regional standards bodies governing material flows"
+    }
+   ],
+   "artifact": {
+    "name": "Flywheel energy cartridge",
+    "draft_name": "Spin-Cell Cartridge",
+    "function": "Stores portable electrical energy as rotational momentum with a sodium-carbon buffer",
+    "form": "Sealed vacuum-cased cylinder with internal rotor, carbon buffer stack, standardized terminal collar, and depot-readable charge-meter ring"
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w03",
+   "domain": "energy",
+   "kind": "removal",
+   "driver": "Wind stops entirely as the atmosphere circulates only vertically.",
+   "job": "Harvesting renewable mechanical energy",
+   "steps": [
+    {
+     "technology": "Thermal-column mapping by drifting ash-filament tethers",
+     "needs": "Vertical-only circulation; light fibers; long observation of rising and sinking air"
+    },
+    {
+     "technology": "Tall lattice updraft shafts with vertical-axis ducted rotors",
+     "needs": "Mapped columns; lightweight lattice; stable airflow guidance within shafts"
+    },
+    {
+     "technology": "Differential-heating stacks: dark-surface solar chimneys that manufacture drafts",
+     "needs": "Shaft rotors; heat-absorbing pigments; thermal mass for night operation"
+    },
+    {
+     "technology": "Counterweight ratchet clockwork storing rotor torque as spring tension",
+     "needs": "Precision gearing; tempered springs; draft-powered rotor output"
+    },
+    {
+     "technology": "Stack-networked draft grids with pressure-linked rotor arrays across basins",
+     "needs": "Many stacks; standardized ratchets; shared thermal mapping; governance of draft rights"
+    }
+   ],
+   "artifact": {
+    "name": "Solar chimney torque tower",
+    "draft_name": "Ratchet Stack Mill",
+    "function": "Converts engineered vertical drafts into stored mechanical torque for grinding, pumping, and weaving",
+    "form": "A dark-walled chimney tower holding a ducted vertical rotor, geared to a spring-ratchet drum that releases torque on demand."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w04",
+   "domain": "energy",
+   "kind": "abundance",
+   "driver": "Sunlight reaching the surface doubles in intensity.",
+   "job": "Collecting solar power",
+   "steps": [
+    {
+     "technology": "Sunburn-resistant pigment-tolerant cultivation guilds shading living canopies and harvesting heat",
+     "needs": "Doubled light scorching crops; surviving biology; selective breeding of shade-casting plants"
+    },
+    {
+     "technology": "Thermal-gradient mass: sunlit rock-and-brine ponds with convective salt-layer heat trapping",
+     "needs": "Shade-farm salt trade; masonry; brine management knowledge from preservation of shaded harvests"
+    },
+    {
+     "technology": "Light-sensitive living films: bioluminescent-reversible algal membranes converting photons to stored sugar-like fuel",
+     "needs": "Pond cultivation lineages; membrane casting; controlled microbial strains from shade guilds"
+    },
+    {
+     "technology": "Photon-gated mineral lattices: layered crystals grown in ponds that pass current under strong light",
+     "needs": "Brine-crystal growers; film-era understanding of light-driven charge; purity techniques from salt refining"
+    },
+    {
+     "technology": "Tiled crystal terraces with self-shading louver arrays tuned by thermal warping",
+     "needs": "Crystal lattices; metal-free mounting from stone and fired clay; wire-drawing from salt-works"
+    }
+   ],
+   "artifact": {
+    "name": "Stepped crystal solar terraces",
+    "draft_name": "Louver Terrace",
+    "function": "Collecting solar power",
+    "form": "Stepped stone terraces of brine-grown photon-gated crystal tiles shaded by heat-warping clay louvers that self-adjust to sunlight intensity."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w05",
+   "domain": "energy",
+   "kind": "abundance",
+   "driver": "Usable geothermal heat sits within one kilometre of the surface everywhere.",
+   "job": "Heating buildings and industry",
+   "steps": [
+    {
+     "technology": "Passive thermosiphon wells: sealed volatile-filled tubes carrying ground heat upward without pumps",
+     "needs": "Drilled 1 km shafts, sealed tube joinery, volatile working fluids"
+    },
+    {
+     "technology": "Variable-conductance heat gates that throttle or shut off heat entering a building",
+     "needs": "Thermosiphon wells, gas-loaded heat-pipe valves, precision metal bellows"
+    },
+    {
+     "technology": "Cascade stacking: industry takes the hottest stage, then buildings, then greenhouses, in series",
+     "needs": "Gated flows, standard wellhead couplings, per-stage temperature rating"
+    },
+    {
+     "technology": "Salt-water sorption heat transformers lifting ground heat to industrial smelting and ceramics temperatures",
+     "needs": "Salt chemistry, pressure-sealed vessels, cascade stage interfaces"
+    },
+    {
+     "technology": "Seasonal cold-recharge networks injecting winter cold into depleted ground to restore gradients",
+     "needs": "Sorption chillers, insulated seasonal storage, mapped ground-thermal rights"
+    }
+   ],
+   "artifact": {
+    "name": "Ground heat wellhead manifold",
+    "draft_name": "Gated cascade wellhead",
+    "function": "Draws, throttles and sequences ground heat to feed industry first, then buildings, and returns winter cold downward.",
+    "form": "Squat steel manifold on a sealed bore, with bellows gate valves, three stacked sorption stages, and an insulated cold-return intake pipe."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w06",
+   "domain": "energy",
+   "kind": "abundance",
+   "driver": "Room-temperature superconducting ore is common and cheap to refine.",
+   "job": "Transmitting power over distance",
+   "steps": [
+    {
+     "technology": "Ore-seam bus: bare superconducting rods laid along mining galleries, cooled by ambient rock",
+     "needs": "Cheap refining; mines already cold; persistent-current loops charged once from hand-cranked dynamos"
+    },
+    {
+     "technology": "Persistent-current relay loops: stored current passed between loops by inductive handoff, not generated",
+     "needs": "Rod coils; quench-proof joints; reliable loop-coupling geometry"
+    },
+    {
+     "technology": "Critical-field metering: power sold by magnetic ceiling reserved on a line, not energy delivered",
+     "needs": "Relay loops; field-threshold gauges; contracts based on reserved current capacity"
+    },
+    {
+     "technology": "Quench-sacrificial fuses: graded ore alloys that collapse locally and isolate faults",
+     "needs": "Critical-field metering; alloy grading by refinery; known failure thresholds"
+    },
+    {
+     "technology": "Continental ring-mains: kilometre-scale persistent loops linking basins as shared, pooled current reservoirs",
+     "needs": "Sacrificial fuses; reserve-based metering; standardized joint alloys across rival mining guilds"
+    }
+   ],
+   "artifact": {
+    "name": "Wall niche current dial",
+    "draft_name": "Ring-Main Reserve Gauge",
+    "function": "Shows a district's reserved current ceiling against live draw, warning before quench-triggering overdraw",
+    "form": "Brass-cased dial with a magnetized needle over a ore-rod coil, sealed in a wall niche beside the supply junction"
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w07",
+   "domain": "materials",
+   "kind": "removal",
+   "driver": "Iron ore disappears from the crust, leaving only trace meteoritic iron.",
+   "job": "Framing large structures",
+   "steps": [
+    {
+     "technology": "Bamboo-and-timber lashed trusses with tension-tuned cordage geometry",
+     "needs": "Fast-growing giant grasses, plant-fiber rope, empirical joint-loading lore without metal fasteners"
+    },
+    {
+     "technology": "Laminated cellulose-resin beams bonded with polymerized tree-gum and pressed hot",
+     "needs": "Plantation resin tapping, kilns, controlled moisture, glue chemistry from lacquer traditions"
+    },
+    {
+     "technology": "Silicate-glass fiber rovings wound into pultruded resin-matrix structural rods",
+     "needs": "High-temperature furnaces, sand and soda supply, resin laminating, drawing-tower skill"
+    },
+    {
+     "technology": "Meteoritic-iron nodes: scarce nickel-iron hoarded into precision joint hubs",
+     "needs": "Meteorite-fall recovery networks, cold-forging, fiber rods, standardized hub geometry"
+    },
+    {
+     "technology": "Carbon-fiber and basalt-fiber space-frame lattices pyrolyzed in place, self-monitoring by acoustics",
+     "needs": "Oxygen-free ovens, resin pyrolysis, basalt melting, acoustic sensors on tuned fibers"
+    }
+   ],
+   "artifact": {
+    "name": "Woven lattice hall roof",
+    "draft_name": "Resonant Lattice Hall",
+    "function": "Roofs vast public spaces and reports structural strain without iron",
+    "form": "Hall-sized woven carbon-basalt lattice, glass-fiber ribs, few meteoritic-iron hubs, humming tuned strands signaling overload."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w08",
+   "domain": "materials",
+   "kind": "removal",
+   "driver": "Limestone and calcium carbonate deposits no longer exist.",
+   "job": "Making cement and concrete",
+   "steps": [
+    {
+     "technology": "Alkali-activated binders from volcanic ash, slag and calcined clay",
+     "needs": "Abundant aluminosilicate waste, lye from wood ash, kilns reaching 700-900C"
+    },
+    {
+     "technology": "Biogenic carbonate harvesting from shell middens, coral rubble and bone ash",
+     "needs": "Coastal collection networks, ash-calcium purification, standardized grading by calcium content"
+    },
+    {
+     "technology": "Engineered microbial mineralization: bacteria precipitating calcium from brines and ash leachate",
+     "needs": "Calcium-rich waste streams, fermentation vats, urease-active cultures, brine supply"
+    },
+    {
+     "technology": "Magnesium and sulfate binders from seawater bitterns, gypsum and desalination brine",
+     "needs": "Solar evaporation pans, magnesia kilns, chloride-resistant reinforcement, brine disposal methods"
+    },
+    {
+     "technology": "Recycled concrete re-binding: crushing, re-activating and re-casting old structures as ore",
+     "needs": "Demolition sorting, mineral-liberation grinding, low-temperature rehydration, binder-chemistry tracking"
+    }
+   ],
+   "artifact": {
+    "name": "Concrete recycling port plant",
+    "draft_name": "Rebinding Mill",
+    "function": "Turns demolished concrete and mixed ash into fresh, castable binder",
+    "form": "Port-side plant with crusher, low-temperature kiln, brine tanks and microbial vats feeding a blending hall; output is graded by calcium content."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w09",
+   "domain": "materials",
+   "kind": "removal",
+   "driver": "Rare earth elements vanish from all rock.",
+   "job": "Building compact electric motors",
+   "steps": [
+    {
+     "technology": "Rare-earth-free reluctance motors with laminated iron-silicon cores and tight air gaps",
+     "needs": "Silicon steel rolling; precision machining; existing magnet-motor stock to cannibalize"
+    },
+    {
+     "technology": "Superconducting-coil motors using abundant niobium-titanium and iron-nitride flux guides",
+     "needs": "Cryogenic cooling; niobium wire drawing; iron-nitride phase synthesis"
+    },
+    {
+     "technology": "Pulsed-field supercharged coils from capacitor banks and solid-state switching",
+     "needs": "Fast power semiconductors; low-inductance windings; thermal-cycling insulation"
+    },
+    {
+     "technology": "Printed phase-locked multiphase controllers driving many tiny segmented stators",
+     "needs": "Pulsed switching; cheap microcontrollers; high-resolution rotor position sensing"
+    },
+    {
+     "technology": "Self-recycling motor loops reclaiming iron, copper and nitride from worn units",
+     "needs": "Modular stator designs; sorting by alloy signature; low-temperature nitride re-synthesis"
+    }
+   ],
+   "artifact": {
+    "name": "Segmented stator motor stack",
+    "draft_name": "Pulse-Stack Motor",
+    "function": "Compact high-torque electric drive without permanent magnets",
+    "form": "Palm-sized stack of iron-nitride-cored segmented stator rings with a toothed soft-iron rotor, pulsed by an integrated timing board."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w10",
+   "domain": "materials",
+   "kind": "removal",
+   "driver": "Silica sand is replaced by non-melting mineral grains.",
+   "job": "Manufacturing glass and chips",
+   "steps": [
+    {
+     "technology": "Binder-fusion: sintering grains with sacrificial flux glasses and pressure",
+     "needs": "Grain-surface chemistry, kiln pressure vessels, fluxes from volcanic ash or salts"
+    },
+    {
+     "technology": "Acoustic-pressure grain packing into transparent sintered sheets",
+     "needs": "Precise grain-size sieving, resonant presses, binder-fusion mastery"
+    },
+    {
+     "technology": "Grain-boundary index matching using infiltrated liquid-to-solid resins",
+     "needs": "Packed sheets, polymer resin chemistry, vacuum infiltration"
+    },
+    {
+     "technology": "Layered grain-sheet lithography: printing circuits via patterned grain-lattice doping",
+     "needs": "Index-matched sheets, dopant salts, mask stencils, controlled kiln atmospheres"
+    },
+    {
+     "technology": "Sintered monolithic grain-chip stacks with optical interconnects between layers",
+     "needs": "Doped lattice lithography, transparent layer bonding, resin-index waveguides"
+    }
+   ],
+   "artifact": {
+    "name": "Transparent circuit glass tile",
+    "draft_name": "Lattice Loom Chip",
+    "function": "Computes and transmits light signals while serving as clear structural glass",
+    "form": "A palm-sized clear tile of fused mineral grains, doped circuit layers inside, edges ending in light-guiding ports."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w11",
+   "domain": "materials",
+   "kind": "abundance",
+   "driver": "Copper is abundant at the surface, as common as clay.",
+   "job": "Wiring and plumbing",
+   "steps": [
+    {
+     "technology": "Sintered copper-earth bricks and slabs used like clay for walls and floors",
+     "needs": "Surface copper soil, fuel-fired kilns, and clay-working traditions already mature"
+    },
+    {
+     "technology": "Clay-die extruded copper pipe with self-sealing verdigris patina lining",
+     "needs": "Fired ceramic dies, soft annealed copper, and slab-forming skill"
+    },
+    {
+     "technology": "Ceramic insulating sleeves and isolation couplings to break conductive walls and soil",
+     "needs": "Glazed clay insulators, plus understanding that wet copper soil makes galvanic currents"
+    },
+    {
+     "technology": "Low-voltage, water-cooled heavy copper bus conduits, with no thin-wire high-voltage practice",
+     "needs": "Fat bars, ceramic sleeves, and pumped flow through hollow conductors"
+    },
+    {
+     "technology": "Municipal mains that carry water and current in one insulated, segmented pipe",
+     "needs": "Isolation couplings, cooled bus conduits, and standardized pipe-wall gauges"
+    }
+   ],
+   "artifact": {
+    "name": "Combined water power main",
+    "draft_name": "Wet-Bus Main",
+    "function": "Delivers both water and electric power to every building through one shared pipe",
+    "form": "A fat verdigris-lined copper pipe in ceramic collars; water flows inside, current runs in the wall, and each house taps through insulated couplings."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w12",
+   "domain": "materials",
+   "kind": "abundance",
+   "driver": "Carbon nanotube fibre grows naturally in common plants.",
+   "job": "Building lightweight tension structures",
+   "steps": [
+    {
+     "technology": "Ash-and-sap fibre extraction: harvesting nanotube strands from common weeds and grasses",
+     "needs": "Plants hold fibres in bundles; fire and retting practices already exist"
+    },
+    {
+     "technology": "Sheath-spinning: twisting raw strands into continuous cables with plant-gum binders",
+     "needs": "Extraction yield; gum chemistry; slip-free twist to share load across strands"
+    },
+    {
+     "technology": "Grafted fibre-cultivars: breeding long-strand lineages with aligned, defect-free nanotube bundles",
+     "needs": "Spinning feedback on strand quality; seed-saving guilds; multi-generation selection records"
+    },
+    {
+     "technology": "Living-anchor tension grids: cable nets rooted in tended trees and ground-crops",
+     "needs": "Cultivars with stable strength; root-grip knowledge; tension monitoring by sound pitch"
+    },
+    {
+     "technology": "Resonance-tuned tension reading: plucked-pitch gauges mapping stress across whole lightweight structures",
+     "needs": "Living anchors needing constant balancing; musical tuning traditions; cultivar uniformity"
+    }
+   ],
+   "artifact": {
+    "name": "Living tree cable web bridge",
+    "draft_name": "Rooted Span-Web",
+    "function": "Lightweight tension structure carrying people and goods across gorges, fields and settlements",
+    "form": "Pitch-tuned nanotube cable web slung between living trees, with cultivar-grown strands, gum-bound splices, and plucked-string stress gauges."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w13",
+   "domain": "materials",
+   "kind": "abundance",
+   "driver": "Natural elastic polymers ooze from trees worldwide in huge quantities.",
+   "job": "Sealing and insulating",
+   "steps": [
+    {
+     "technology": "Smoke-cured sap skins layered over roofs, hulls and grain stores",
+     "needs": "Hearth smoke curing, bark cup tapping, bone scrapers"
+    },
+    {
+     "technology": "Ash-lye and tannin stabilized liquid sap sold in sealed jars",
+     "needs": "Species cure-time knowledge, lye making, fired clay jars"
+    },
+    {
+     "technology": "Yeast-whipped foamed sap batting for cold-climate insulation",
+     "needs": "Sap-wine fermentation skill, stabilizers, paddle whisks, slow-cure frames"
+    },
+    {
+     "technology": "Pressure-fitted elastic sap gaskets for lidded vessels and ducts",
+     "needs": "Molded sap rings, graded stiffness, lathe-turned seats, foam-cored cushions"
+    },
+    {
+     "technology": "Living-reservoir self-healing wall panels fed by tapped trees",
+     "needs": "Sealed sap channels, grafted tap spouts, foam laminates, standardized panel frames"
+    }
+   ],
+   "artifact": {
+    "name": "Self-healing sap insulation panel",
+    "draft_name": "Weeping Wall Panel",
+    "function": "Seals and insulates buildings and cold stores, closing punctures automatically with fresh sap",
+    "form": "Double-skinned foam-sap slab with an internal sap channel, piped to a tapped host tree, which oozes into and cures over any breach."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w14",
+   "domain": "communication",
+   "kind": "removal",
+   "driver": "The ionosphere blocks all radio above 1 MHz, so microwave and satellite signalling are impossible.",
+   "job": "Carrying wireless data",
+   "steps": [
+    {
+     "technology": "Ground-wave long-wire relay chains using sub-MHz carriers hugging terrain",
+     "needs": "Huge low-frequency antennas, tall masts, high-power alternators, ionosphere-independent propagation"
+    },
+    {
+     "technology": "Slow-symbol narrowband coding: very low bandwidth, redundant long-integration modulation",
+     "needs": "Stable alternator carriers, sharp resonant filters, error-repeating codebooks, noise-averaging receivers"
+    },
+    {
+     "technology": "Earth-conduction and deep-bedrock/water-guided signalling grids with buried electrode arrays",
+     "needs": "Mapped ground conductivity, corrosion-proof electrodes, mining boreholes, ground-wave coding methods"
+    },
+    {
+     "technology": "Cooperative multi-band ground-wave mesh with standardized time-slot sharing and conductivity-aware routing",
+     "needs": "Dense node networks, precise clocks, conductivity maps, shared coding standards, local power"
+    },
+    {
+     "technology": "Portable loop-antenna terminals using near-field magnetic induction linked into the ground mesh",
+     "needs": "Compact ferrite or superconducting loops, low-power coding chips, mesh gateways, local induction beacons"
+    }
+   ],
+   "artifact": {
+    "name": "Handheld ferrite loop slate",
+    "draft_name": "Loopmesh Terminal",
+    "function": "Carrying wireless data between people and cities despite the ionosphere's microwave blockade",
+    "form": "Handheld ferrite-loop slate that magnetically couples to street induction beacons, which relay slow coded data through the continental ground-wave mesh."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w15",
+   "domain": "communication",
+   "kind": "removal",
+   "driver": "Seawater corrodes any submerged cable within weeks.",
+   "job": "Linking continents by cable",
+   "steps": [
+    {
+     "technology": "Relay towers on sea-stacks and reefs using signal mirrors and lamp codes",
+     "needs": "Stable rock anchorages, polished metal mirrors, trained watch-keepers, shared coded alphabet"
+    },
+    {
+     "technology": "Living-reef relay stations: engineered coral and shellfish colonies growing mooring platforms",
+     "needs": "Coral husbandry, brine-resistant cement, tidal-chart knowledge from earlier tower failures"
+    },
+    {
+     "technology": "Cable-free carrier lines: kite-and-balloon chains carrying dry conductive filaments between reef stations",
+     "needs": "Lightweight sealed gas envelopes, hydrophobic wax-lacquer coatings, reef anchor points"
+    },
+    {
+     "technology": "Sound-channel signalling: tuned reef resonators sending coded pulses through deep ocean sound layer",
+     "needs": "Resonator alloys, pulse-timing clocks, hydrophone listeners at reef stations"
+    },
+    {
+     "technology": "Mineral-bed seawater-immune cable: glass-and-ceramic filaments laid in sealed reef-grown trenches",
+     "needs": "Glassdrawing, ceramic sheathing, reef-cement trench lining, resonator timing for fault location"
+    }
+   ],
+   "artifact": {
+    "name": "Reef trench cable station",
+    "draft_name": "Reef-Voice Trunk",
+    "function": "Continent-to-continent messaging across ocean basins without corroding metal cable",
+    "form": "A glass-filament line inside living reef trenches, with resonator stations pulsing sound to locate faults and carry backup messages."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w16",
+   "domain": "communication",
+   "kind": "removal",
+   "driver": "Sound cannot travel more than ten metres in air.",
+   "job": "Coordinating groups at distance",
+   "steps": [
+    {
+     "technology": "Relay-chains of trained bearers passing patterned body-gestures hand to hand",
+     "needs": "Line-of-sight spacing under ten metres; disciplined, memorized gesture vocabularies"
+    },
+    {
+     "technology": "Gesture-grammar codes standardized into drilled, rank-marked relay guilds with fixed stations",
+     "needs": "Stable stationed populations, shared gesture lexicon, error-correcting repetition between neighbouring bearers"
+    },
+    {
+     "technology": "Tension-cord networks carrying plucked pulse-patterns through ground-anchored fibre lines",
+     "needs": "Strong twisted fibre, tensioning posts, knowledge that solids carry vibration beyond air's limit"
+    },
+    {
+     "technology": "Resonant relay posts that re-pluck and amplify pulses along cords, forming trunk lines",
+     "needs": "Tuned resonator boxes, spring-tensioned strikers, standard pitch-pulse alphabet, cord-tension maintenance"
+    },
+    {
+     "technology": "Pulse-addressed junction exchanges routing messages to group-specific branch cords",
+     "needs": "Filtered resonators tuned to address-pitches, standardized trunk alphabets, trained exchange keepers"
+    }
+   ],
+   "artifact": {
+    "name": "Reed resonator routing frame",
+    "draft_name": "Address-Pitch Exchange Frame",
+    "function": "Routes cord-borne pulse messages to chosen groups across distant settlements without clogging the trunk",
+    "form": "Waist-high wooden frame where trunk cords pass tuned reed resonators; matching address pitches shake free branch-cord strikers, relaying messages onward."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w17",
+   "domain": "communication",
+   "kind": "removal",
+   "driver": "Ink and pigment fade from any surface within a year.",
+   "job": "Keeping durable written records",
+   "steps": [
+    {
+     "technology": "Carved-groove records: incising into stone, bone and fired clay",
+     "needs": "Hard durable substrates; sharp tools; surfaces unaffected by fading pigment"
+    },
+    {
+     "technology": "Tactile tally-cord and knot-bead notation, reading by touch",
+     "needs": "Carved script conventions; fiber twisting; standardized bead and knot grammar"
+    },
+    {
+     "technology": "Cold-struck metal foil embossing presses for mass shape-script",
+     "needs": "Rolled soft-metal foil; die-cutting; screw or lever presses from tally standardization"
+    },
+    {
+     "technology": "Relief-pattern archives: stacked embossed sheets with stamped index edges",
+     "needs": "Uniform foil gauges; edge-notching; corrosion-resistant alloys; shared sorting conventions"
+    },
+    {
+     "technology": "Recopy-by-impression guilds: rolling cylinder re-stamping to renew corroding archives",
+     "needs": "Master dies kept in vaults; trained reader-stampers; metallurgical knowledge of oxidation rates"
+    }
+   ],
+   "artifact": {
+    "name": "Embossed foil archive stack",
+    "draft_name": "Notched Foil Ledger",
+    "function": "Durable, retrievable written records that survive ink-fading by encoding meaning in physical relief",
+    "form": "Stack of palm-sized embossed alloy foils, bound by a rod, with coded edge notches for touch-search"
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w18",
+   "domain": "communication",
+   "kind": "abundance",
+   "driver": "Free, unlimited satellite bandwidth reaches every point on the planet.",
+   "job": "Broadcasting information universally",
+   "steps": [
+    {
+     "technology": "Beam-powered paper-thin receivers that run on the downlink's own energy",
+     "needs": "Rectenna films, saturating beam flux, ultralow-power demodulation"
+    },
+    {
+     "technology": "Endless content-hash carousels replacing requests, schedules and return channels",
+     "needs": "Powered passive receivers, hash-addressable content, cheap keyed tuning"
+    },
+    {
+     "technology": "Orbital-geometry provenance stamps proving where and when content entered the carousel",
+     "needs": "Multi-satellite uplink reception, nanosecond timing, carousel hashes"
+    },
+    {
+     "technology": "Community-signed lens charters filtering the carousel into local attention",
+     "needs": "Provenance stamps, receiver-side keyed filters, regional uplink stewards"
+    },
+    {
+     "technology": "Expiring key lattices making forgetting a broadcast act",
+     "needs": "Lens charters, carousel hashes, receiver clocks, rotating decryption keys"
+    }
+   ],
+   "artifact": {
+    "name": "Self-powered stamp receiver",
+    "draft_name": "Skyleaf",
+    "function": "Self-powered universal reception of verified, locally filtered, deliberately expiring broadcast information",
+    "form": "Postage-stamp film that powers itself from the sky, shows its lens's filtered stream, and goes blank when keys expire."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w19",
+   "domain": "communication",
+   "kind": "abundance",
+   "driver": "Every human gains perfect instant translation of any spoken language.",
+   "job": "Negotiating across languages",
+   "steps": [
+    {
+     "technology": "Oath-chorus contracts: binding terms spoken aloud before witnesses, since only speech is translated",
+     "needs": "Reliable speech translation, witness customs, no shared written script across regions"
+    },
+    {
+     "technology": "Script-ink caucus: private strategy notes in a local script no counterpart reads",
+     "needs": "Untranslated writing, scribe training, courier trust, mother-tongue literacy kept alive"
+    },
+    {
+     "technology": "Non-lexical signalling: hummed, tapped and tonal codes passed across the table",
+     "needs": "Trained pitch and rhythm vocabularies, since translation parses only words"
+    },
+    {
+     "technology": "Hearing-radius law and tiered sound-sealed chambers that limit who may listen",
+     "needs": "Acoustic damping masonry, legal definition of audible range, listener licensing"
+    },
+    {
+     "technology": "Sign-language brokerage guilds acting as translation-blind intermediaries",
+     "needs": "Deaf and signing communities, cross-regional sign pidgins, guild charters, vetting"
+    }
+   ],
+   "artifact": {
+    "name": "Sound sealed negotiation chamber",
+    "draft_name": "Sealed Tiered Parley Chamber",
+    "function": "Lets rival-language parties bargain privately, binding terms by oath and signalling without being overheard",
+    "form": "Double-walled stone room with felt-lined baffles, a witness gallery behind a grille, a ledger-ink alcove and a signer's bench between parties."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w20",
+   "domain": "communication",
+   "kind": "abundance",
+   "driver": "Ordinary rock can store lossless data indefinitely at negligible cost.",
+   "job": "Archiving knowledge permanently",
+   "steps": [
+    {
+     "technology": "Lithic grain-resonance reading: stone strata mapped by acoustic scanning for stored patterns",
+     "needs": "Ordinary rock holds lossless data; sensitive acoustic probes; quarry-scale surveying"
+    },
+    {
+     "technology": "Deliberate imprinting: writing data into stone by controlled pressure-and-heat cycles",
+     "needs": "Reading standards, calibrated thermal presses, stable quarry stone of known grain"
+    },
+    {
+     "technology": "Geological indexing: rock-seam registries cataloguing which stone holds which knowledge",
+     "needs": "Imprinting at scale; survey maps; quarry ownership records; durable naming conventions"
+    },
+    {
+     "technology": "Tectonic-aware archive siting: choosing stable bedrock and modelling uplift, erosion, and fracture",
+     "needs": "Geological indexing, strain models, deep-time erosion data, seismic monitoring"
+    },
+    {
+     "technology": "Stone-lineage copying: regional guilds clone imprints across bedrock to guarantee redundancy",
+     "needs": "Siting models, shared encoding standards, cross-region transport of reference stones"
+    }
+   ],
+   "artifact": {
+    "name": "Stone quarry archive face",
+    "draft_name": "The Living Bedrock Library",
+    "function": "Permanent, geographically redundant storage of all civilizational knowledge in ordinary stone",
+    "form": "Mountainside quarries of imprinted rock faces, indexed by seam maps, read by acoustic probes, guarded by regional guilds."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w21",
+   "domain": "transport",
+   "kind": "removal",
+   "driver": "Rubber and paved surfaces lose all traction, so wheels slip everywhere.",
+   "job": "Moving freight overland",
+   "steps": [
+    {
+     "technology": "Rope-and-cable haulage using fixed anchor stations and winch relays",
+     "needs": "Fibre rope-making, stone anchor masonry, water or animal-powered capstans"
+    },
+    {
+     "technology": "Toothed rack-and-pawl trackways of cast or carved pinned stone and timber",
+     "needs": "Metal founding, precise stonecutting, standard tooth pitch, quarry-scale labor"
+    },
+    {
+     "technology": "Sled-hulls with sprag-claw runners gripping bored ground sockets",
+     "needs": "Hardened claw alloys, socket-boring tools, wear-replaceable steel runners, survey stakes"
+    },
+    {
+     "technology": "Resonant pulse-towing: vibrating ground-wire guides that synchronize multi-sled trains",
+     "needs": "Tuned springs, cable tension gauges, standardized clock signals, trained tension-keepers"
+    },
+    {
+     "technology": "Self-laying peg-line crawlers that plant their own gripping sockets ahead",
+     "needs": "Compact steam or spring engines, hardened drill-spikes, mapped surveys, precision cam timing"
+    }
+   ],
+   "artifact": {
+    "name": "Self-planting sled chain",
+    "draft_name": "Peg-Line Crawler Train",
+    "function": "Hauls freight over frictionless ground by planting and gripping its own sockets",
+    "form": "Long articulated sled-chain with a lead drilling-spike carriage, claw-footed runners, and tensioned timing cable linking all cars."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w22",
+   "domain": "transport",
+   "kind": "removal",
+   "driver": "All navigable rivers shrink to shallow streams.",
+   "job": "Moving bulk cargo inland",
+   "steps": [
+    {
+     "technology": "Sled-hulled drag barges hauled along dry riverbeds by relay teams",
+     "needs": "Hardened clay-lined channels, draft animals, stable dry-season beds"
+    },
+    {
+     "technology": "Channel-bed rail grooves: stone-cut tracks following old river courses",
+     "needs": "Quarrying of exposed riverbed stone, surveyed gradients, sledge friction data"
+    },
+    {
+     "technology": "Pulse-fed canal ladders: sealed lock chains filled from upland spring reservoirs",
+     "needs": "Precise reservoir surveying, watertight masonry, valve gates, spring capture works"
+    },
+    {
+     "technology": "Surge-riding convoys: bulk barges launched on scheduled reservoir flood releases",
+     "needs": "Timetabled releases, river-wide signal relay, standardized barge hulls, gauge-keepers"
+    },
+    {
+     "technology": "Wave-surfing buoyant trains with ballast-controlled keels and downstream-to-upstream cable return",
+     "needs": "Wave-speed prediction, ballast tanks, long cable winches, surge-front sensors"
+    }
+   ],
+   "artifact": {
+    "name": "Ballast barge flood train",
+    "draft_name": "Surge Train",
+    "function": "Carries bulk cargo inland along shrunken rivers using stored, scheduled water releases",
+    "form": "A chain of shallow-keeled ballast barges coupled to a winch cable, riding a timed reservoir flood crest up the valley."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w23",
+   "domain": "transport",
+   "kind": "removal",
+   "driver": "Earth's magnetic field collapses, ending compass navigation.",
+   "job": "Finding direction",
+   "steps": [
+    {
+     "technology": "Cosmic-ray muon tracking slates replace needles as the first magnetless direction reference",
+     "needs": "Mineral scintillator crystals; mining-camp radiation lore; existing deep-shaft survey practice"
+    },
+    {
+     "technology": "Magnetless sky-polarization lenses with crystal wedge filters read sun bearing through cloud",
+     "needs": "Birefringent crystal grinding; guild star-tables; reliable local clocks"
+    },
+    {
+     "technology": "Chronometer-linked gyroscopic spinning-top keepers hold bearings after sky references vanish",
+     "needs": "Precision bearings; clockwork spring steel; jeweled pivots; stable lubricants"
+    },
+    {
+     "technology": "Shore-chained beacon lattices broadcast spark-timed bearings, calibrating drifting gyroscopes",
+     "needs": "Spark transmitters; coastal towers; standard time signals; trained operators"
+    },
+    {
+     "technology": "Chartered pole-fixed inertial-and-beacon fusion binders replace local magnetic variation tables entirely",
+     "needs": "Standardized beacon frequencies; gyroscope manufacture; trained cartographic guild apprenticeships"
+    }
+   ],
+   "artifact": {
+    "name": "Gyro bearing case",
+    "draft_name": "Beaconwright's Gyro-Bearing Case",
+    "function": "Finding direction without any magnetic field",
+    "form": "Brass hand-sized case with a gimballed spinning top, timepiece, and receiver dial showing beacon-corrected bearing."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w24",
+   "domain": "transport",
+   "kind": "removal",
+   "driver": "Every major harbour freezes solid for most of the year.",
+   "job": "Handling sea trade",
+   "steps": [
+    {
+     "technology": "Ice-cargo sledge-hauling conventions: standardized load-bearing crates, tolled ice-roads over frozen harbours",
+     "needs": "Thick reliable seasonal ice; draft animals; existing winter overland trade customs"
+    },
+    {
+     "technology": "Ice-grading and thickness-charting guilds who certify safe routes and load limits",
+     "needs": "Standardized crates; accumulated ice records; guild charter authority over route tolls"
+    },
+    {
+     "technology": "Ice-berthed hulls: flat-bottomed cargo ships designed to be frozen in and unloaded in place",
+     "needs": "Ice-grade charts; shipwright knowledge of hull crush resistance; sledge-compatible cargo crates"
+    },
+    {
+     "technology": "Thermal-lane harbours: waste-heat channels from salt-boiling and smelting works keep berths unfrozen",
+     "needs": "Industrial furnaces near coast; piped hot brine or water; ice-grade expertise to map melt zones"
+    },
+    {
+     "technology": "Tide-and-thaw ledger exchange: cargo trading by ice-state forward contracts and thaw-date futures",
+     "needs": "Ice charts; thermal-lane berth records; guild-certified standard crates as tradeable units"
+    }
+   ],
+   "artifact": {
+    "name": "Bronze ice-notch berth tablet",
+    "draft_name": "The Lane-Berth Warrant",
+    "function": "Certifies a crate's right to a heated berth and sets its thaw-date delivery price",
+    "form": "A stamped bronze-and-wax tablet cut with ice-thickness notches, copied into guild ledgers and traded between merchants before freeze-up."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w25",
+   "domain": "transport",
+   "kind": "abundance",
+   "driver": "Air density doubles at sea level, giving far more lift and drag.",
+   "job": "Flying aircraft",
+   "steps": [
+    {
+     "technology": "Flapping-free soaring gliders using dense-air thermal ridges for cargo hauling",
+     "needs": "Light spruce-silk wings; dense-air lift tables; cliff-launch sites"
+    },
+    {
+     "technology": "Pedal and crank propellers sized for thick air, tiny and slow-turning",
+     "needs": "Lightweight geared cranks; laminated blades; glider airframes proven stable"
+    },
+    {
+     "technology": "Drag-tolerant low-power engines: steam-bellows and compressed-spring motors",
+     "needs": "Thin boilers; reliable crank props; fuel-light alloy tubing"
+    },
+    {
+     "technology": "Dense-air airframe science: slender low-drag fuselages and gust-load structural codes",
+     "needs": "Wind-tunnel water-channels; engine reliability; accident records from stress failures"
+    },
+    {
+     "technology": "Air-lane networks with ground-effect skimmers and high-density air-traffic corridors",
+     "needs": "Strong structures; beacon towers; engines for sustained cruising"
+    }
+   ],
+   "artifact": {
+    "name": "Low steam skimmer aircraft",
+    "draft_name": "Thickair Skimmer",
+    "function": "Slow, efficient passenger and cargo flight using low-power engines in dense air",
+    "form": "Broad short-span wing, slender hull, small slow-turning laminated propeller driven by compact steam-bellows motor, skimming low over lanes."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w26",
+   "domain": "transport",
+   "kind": "abundance",
+   "driver": "Steady, predictable tailwinds blow along every major trade route.",
+   "job": "Sailing long distances",
+   "steps": [
+    {
+     "technology": "Lane-keeping rope-and-pennant logbooks recording wind-bearing as a fixed route constant",
+     "needs": "Centuries of observation proving winds never vary; literate pilot guilds"
+    },
+    {
+     "technology": "Single-purpose downwind hulls: deep, narrow, rudderless, steered by trim of fixed sails",
+     "needs": "Pilot logbooks; sail-trim tables; lightweight laminated timber"
+    },
+    {
+     "technology": "Pennant-tension gauges converting sail load into speed and distance estimates",
+     "needs": "Calibrated cordage, standardized sail cuts, route constants from logbooks"
+    },
+    {
+     "technology": "Convoy slot scheduling: ships spaced by tension-derived speed along route lanes",
+     "needs": "Tension gauges, signal flags, harbor guild clocks (sand or water)"
+    },
+    {
+     "technology": "Return-leg tacking sails and cross-lane keel-wing rigs for leaving the tailwind corridors",
+     "needs": "Tension data, convoy congestion, hull geometry knowledge, off-route exploration incentives"
+    }
+   ],
+   "artifact": {
+    "name": "Mainsheet spring tension gauge",
+    "draft_name": "Lane Tension Pennant Gauge",
+    "function": "Estimating ship speed and distance from sail load along steady-wind routes",
+    "form": "Brass-and-hemp spring cradle on the mainsheet with a graduated pennant scale, read against route-constant tables."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w27",
+   "domain": "transport",
+   "kind": "abundance",
+   "driver": "Natural low-friction ice-like surfaces cover all lowland ground.",
+   "job": "Hauling heavy loads",
+   "steps": [
+    {
+     "technology": "Grit-lashed hide runners with bone-spike brake claws for controlled sliding",
+     "needs": "Slick surfaces everywhere; animal hides, bone; no rolling traction available"
+    },
+    {
+     "technology": "Frozen-in anchor lanes: pegged guide grooves chiselled and re-flooded into the surface",
+     "needs": "Runner sleds, chisel tools, water flooding to harden grooves"
+    },
+    {
+     "technology": "Sail-and-kite traction rigs plus wind-timed convoys of linked sleds",
+     "needs": "Guide grooves, light woven fabric, rope, wind-reading knowledge"
+    },
+    {
+     "technology": "Thermal-friction control: heated or salted runner shoes and brine-sprinkled braking patches",
+     "needs": "Lane networks, salt trade, controllable heat sources, convoy coordination"
+    },
+    {
+     "technology": "Ice-trunk freight corridors with brine-gradient surfaces regulating speed and grip zones",
+     "needs": "Thermal control, lane maintenance guilds, wind forecasting, salt supply chains"
+    }
+   ],
+   "artifact": {
+    "name": "Wind-hauled linked sled train",
+    "draft_name": "Brinegate Convoy Train",
+    "function": "Hauling heavy bulk loads across frozen lowlands by wind power along engineered friction-gradient lanes",
+    "form": "Linked hide-and-bone sleds under a lead kite sail, with salt-shoe runners, spike brakes, and sprinkled brine grip patches."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w28",
+   "domain": "food",
+   "kind": "removal",
+   "driver": "Bees and all other pollinating insects vanish.",
+   "job": "Pollinating crops",
+   "steps": [
+    {
+     "technology": "Pollen-ledger forensics: mapping surviving wind- and self-pollinated crop genetics by yield loss",
+     "needs": "Herbarium pollen archives, crop yield records, microscopy, seed banks"
+    },
+    {
+     "technology": "Cryo-banked pollen logistics: freeze-dried pollen stored and shipped to orchards by cold-chain",
+     "needs": "Cold-chain, desiccation methods, pollen viability assays, flowering-time forecasts"
+    },
+    {
+     "technology": "Electrostatic pollen-mist rigs exploiting flowers' evolved charge-attraction to deliver dust",
+     "needs": "Electrostatic sprayers, flower-charge studies, pollen carriers, tractor-scale power"
+    },
+    {
+     "technology": "Swarm micro-drone pollinators steered by floral scent and ultraviolet-pattern vision",
+     "needs": "Cheap micro-flight, battery density, floral volatile libraries, onboard vision"
+    },
+    {
+     "technology": "Engineered self-fertile crop lines with synchronized bloom, bred for mechanical shaking",
+     "needs": "Gene editing, marker breeding, pollen-ledger data, field trial infrastructure"
+    }
+   ],
+   "artifact": {
+    "name": "Tracked pollination cart",
+    "draft_name": "Bloom Cart",
+    "function": "Deliver stored pollen to open flowers at peak receptivity, replacing vanished insect pollinators",
+    "form": "Tracked electric cart with a cryo-pollen hopper, charged mist nozzles, bloom-sensing cameras, and a tethered micro-drone dock"
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w29",
+   "domain": "food",
+   "kind": "removal",
+   "driver": "Salt disappears from the oceans and the earth.",
+   "job": "Preserving food",
+   "steps": [
+    {
+     "technology": "Sun-pan bittern curing: fish and meat dried in magnesium-potassium sulfate crusts",
+     "needs": "Shallow coastal evaporation pans; sulfate-rich seawater; leaching vessels to remove laxative bitterness"
+    },
+    {
+     "technology": "Potash-ash lye ferment pits for plants and eggs, with bitter-salt rinses",
+     "needs": "Potassium-rich plant ash; fired clay pits; knowledge of bittern rinse timing"
+    },
+    {
+     "technology": "Endothermic hydrate-dissolution chilling: bittern crystals dissolved in water to cool storage vaults",
+     "needs": "Bulk sulfate hydrate crystals; double-walled stone vaults; reliable crystal purity grading"
+    },
+    {
+     "technology": "Solar crystallization cycle: sun-driven re-evaporation regenerates hydrate crystals for continuous vault cooling",
+     "needs": "Glazed pans; pumped brine loops; seals tight enough to cycle hydrates without losing water"
+    },
+    {
+     "technology": "Cooled, sealed provision cellars with fermenter-managed low-oxygen air",
+     "needs": "Stable cold vaults; sealed ceramics; cultured fermenters that consume oxygen and emit acid"
+    }
+   ],
+   "artifact": {
+    "name": "Solar sulfate cold cellar",
+    "draft_name": "Bittern-Cycle Cold Vault",
+    "function": "Keep food cold and unspoiled for months using sun-regenerated sulfate crystals, without ice or salt",
+    "form": "Stone cellar lined with crystal-filled channels, fed by roof-mounted glazed evaporation pans, and sealed with ceramic doors and fermenter jars."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w30",
+   "domain": "food",
+   "kind": "removal",
+   "driver": "Wheat, rice, and maize become sterile.",
+   "job": "Supplying staple calories",
+   "steps": [
+    {
+     "technology": "Seed-bank triage: sterility mapping and clonal rescue of surviving fertile cereal lines",
+     "needs": "Germplasm vaults, pollen viability assays, tissue culture, regional crop registries"
+    },
+    {
+     "technology": "Clonal tiller-propagated perennial grain fields replacing seed sowing",
+     "needs": "Rescued sterile lines, rhizome and tiller splitting, vegetative-vigour selection, irrigation"
+    },
+    {
+     "technology": "Vegetative-biomass starch extraction from sterile cereal stems and roots",
+     "needs": "Clonal fields, enzyme hydrolysis, wet-milling, fermentation vats"
+    },
+    {
+     "technology": "Continental fermentation-mill networks converting cellulose-starch slurry into stable flour and syrup",
+     "needs": "Extraction chemistry, cellulase production, rail or canal slurry logistics, sterile processing hygiene"
+    },
+    {
+     "technology": "Engineered fertility-restorer symbiont microbes restoring pollen and seed set in cereals",
+     "needs": "Plant-microbe genomics, sterility mechanism diagnosis, clonal field trials, biocontainment protocols"
+    }
+   ],
+   "artifact": {
+    "name": "Field starch fermentation mill",
+    "draft_name": "Culm-Mill Loaf Works",
+    "function": "Supplying staple calories from sterile cereal plants' stems and roots without grain",
+    "form": "Field-adjacent fermentation mill turning clonal cereal stalk slurry into shelf-stable starch flour blocks and syrup for distribution."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w31",
+   "domain": "food",
+   "kind": "removal",
+   "driver": "Groundwater drops far below reach in every farming region.",
+   "job": "Irrigating farmland",
+   "steps": [
+    {
+     "technology": "Deep-column resonance sounding to map surviving aquifer pockets and moisture seams",
+     "needs": "Seismic-acoustic sensing, deep borehole casings, shared regional survey records"
+    },
+    {
+     "technology": "Thermal-gradient wells that lift water as vapor and condense it at surface",
+     "needs": "Deep drilling, heat-resistant liners, geothermal or waste-heat sources, condensing stacks"
+    },
+    {
+     "technology": "Rock-wick fields: porous mineral columns drawing deep moisture upward by capillarity",
+     "needs": "Engineered ceramic pore sizes, deep emplacement, vapor-well geometry knowledge"
+    },
+    {
+     "technology": "Root-coupled subsurface dosing lines delivering condensate directly to individual crop roots",
+     "needs": "Rock-wick output, microporous tubing, soil moisture sensing, low-volume metering"
+    },
+    {
+     "technology": "Crop breeding for deep-tap roots that bond with wick columns",
+     "needs": "Dosing-line root mapping, seed banks, multi-generation selection, mycorrhizal culture methods"
+    }
+   ],
+   "artifact": {
+    "name": "Ceramic moisture wick column",
+    "draft_name": "Wick-Stack Orchard Well",
+    "function": "Draws deep residual moisture to the surface and delivers it to crop roots",
+    "form": "A ceramic column driven deep into dry strata, topped by a condensing chimney feeding buried microtubes beside tap-rooted crops."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w32",
+   "domain": "food",
+   "kind": "abundance",
+   "driver": "Soil nitrogen is naturally replenished at very high rates everywhere.",
+   "job": "Fertilizing fields",
+   "steps": [
+    {
+     "technology": "Repeated sacrificial mowing of lush stands to bleed surplus nitrogen and force seed set",
+     "needs": "Scythe-like cutting tools; crop varieties that regrow rapidly; labor surplus between seasons"
+    },
+    {
+     "technology": "Bloom-to-leaf ratio indicator weeds as a field assay for hidden mineral shortage",
+     "needs": "Generations of flowering records; named weed guilds; shared field-watcher vocabulary"
+    },
+    {
+     "technology": "Brewed phosphorus-scavenging fungal mats, sugar-fed and inoculated into barren-seeding fields",
+     "needs": "Sap-sugar boiling; sealed vats; soil fungi already thriving in nitrogen-rich ground"
+    },
+    {
+     "technology": "Quarry fungal beds on crushed rock, cut into living cakes and carried to fields",
+     "needs": "Rock crushing; cake-cutting and wrapping methods; river or road haulage; indicator-weed maps"
+    },
+    {
+     "technology": "Registered fungal lineage banks with mandated cross-region swapping to prevent collapse",
+     "needs": "Lineage marks; courier networks; trusted culture-keeper guilds; isolation vessels"
+    }
+   ],
+   "artifact": {
+    "name": "Buried fungal rock disc",
+    "draft_name": "Tithe-cake",
+    "function": "Delivers rock-derived phosphorus to seed crops via a living fungal partner",
+    "form": "Palm-sized wax-sealed disc of rock dust, sugar and fungal mat, buried at furrow ends, stamped with lineage mark."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w33",
+   "domain": "food",
+   "kind": "abundance",
+   "driver": "Ocean fish stocks quadruple and regenerate rapidly.",
+   "job": "Providing dietary protein",
+   "steps": [
+    {
+     "technology": "Pulse-harvest quotas keyed to spawning-cycle booms, with tidal weir-pens",
+     "needs": "Reliable boom timing records; coastal communities organized around shared tidal grounds"
+    },
+    {
+     "technology": "Cold-chain-free brine-and-smoke fermentation guilds preserving glut catches for months",
+     "needs": "Coastal salt works, smokehouses, and standardized fermentation vessels"
+    },
+    {
+     "technology": "Whole-fish fractionation mills separating muscle protein, oil, and bone-mineral paste",
+     "needs": "Water-powered grinding, pressing, and settling-tank chemistry; fermentation-guild process knowledge"
+    },
+    {
+     "technology": "Dried protein-flour grain-substitute standards, milled and traded like cereal",
+     "needs": "Mill fractionation output; uniform grading; overland pack-route trade networks"
+    },
+    {
+     "technology": "Stock-pulse forecasting by spawning-bank sentinel networks governing harvest-release and flour reserves",
+     "needs": "Flour granaries as buffers; coastal observers reporting spawn density; shared ledger conventions"
+    }
+   ],
+   "artifact": {
+    "name": "Fish flour granary ledger",
+    "draft_name": "Spawn-Bank Ledger and Flour Granary Charter",
+    "function": "Providing dietary protein stably across inland and coastal populations despite boom-bust fish pulses",
+    "form": "A coastal-registered tally ledger of spawning-bank counts linked to sealed granaries of graded fish flour, with release rules tied to forecast pulses"
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w34",
+   "domain": "food",
+   "kind": "abundance",
+   "driver": "Perennial grain crops grow wild on all temperate land.",
+   "job": "Sustaining farming without replanting",
+   "steps": [
+    {
+     "technology": "Stand-reading: field lore for judging a wild perennial stand's vigor by rhizome density and seedhead lean",
+     "needs": "Long human observation of wild stands; shared vocabulary among gatherers; no tillage tradition"
+    },
+    {
+     "technology": "Rotational cutting calendars that stagger harvest so stands re-seed and rhizomes stay undisturbed",
+     "needs": "Stand-reading lore; settled bands; tally-cord memory of per-stand harvest history"
+    },
+    {
+     "technology": "Sod-knife and crown-pruning tools that thin aging rhizome mats without killing them",
+     "needs": "Cutting calendars; stone or bone blades; knowledge of when crowns senesce"
+    },
+    {
+     "technology": "Rhizome-plug transplant lines extending prime stands along trails, hearths and water edges",
+     "needs": "Pruning tools generating spare plugs; seasonal moisture knowledge; claims over stand lineages"
+    },
+    {
+     "technology": "Lineage registries: kept stand-descent records selecting plugs for seed-hold, drought and grazing tolerance",
+     "needs": "Transplant lines; tally and knot record systems; inter-band exchange of plugs"
+    }
+   ],
+   "artifact": {
+    "name": "Crown knife and plug carrier",
+    "draft_name": "Stand-keeper's plug-and-cord kit",
+    "function": "Renews and extends perennial grain stands without replanting, while tracking stand lineage and health",
+    "form": "A bone-edged crown knife, a hide plug-carrier with damp moss, and knotted cords recording each stand's cuttings and descent"
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w35",
+   "domain": "environment",
+   "kind": "removal",
+   "driver": "The ozone layer disappears completely.",
+   "job": "Shielding life from ultraviolet",
+   "steps": [
+    {
+     "technology": "Sunlit-hour mapping by photosensitive bacterial lawns that die at lethal UV doses",
+     "needs": "Culturable UV-sensitive microbes; shared agar-plate practice; no ozone baseline"
+    },
+    {
+     "technology": "Cultivated melanin-and-mycosporine fungal mats grown as living roofing and shade crops",
+     "needs": "Fungal cultivation; pigment extraction knowledge; survivors from radiotrophic or deep-shade lineages"
+    },
+    {
+     "technology": "Selective breeding of crops with transplanted fungal sunscreen pigment pathways",
+     "needs": "Stable fungal pigment genes; grafting or crossing methods; seed banks surviving the collapse"
+    },
+    {
+     "technology": "Pigment-bearing aerosol or microbial films seeded across shallow water and soil surfaces",
+     "needs": "Mass pigment production; crop-pigment surplus; dispersal systems; ecological monitoring from bacterial dose maps"
+    },
+    {
+     "technology": "Regional pigment-regulated living canopy networks tuning transmitted UV by season",
+     "needs": "Engineered responsive pigment biology; film monitoring; regional governance of shared canopies"
+    }
+   ],
+   "artifact": {
+    "name": "Tiered living fungal canopy",
+    "draft_name": "Dose-Gradient Canopy Lattice",
+    "function": "Shielding life from ultraviolet while admitting photosynthetically useful light",
+    "form": "A tiered living roof of pigmented fungal mat and engineered film, whose melanin density shifts with measured UV, grown over fields and settlements."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w36",
+   "domain": "environment",
+   "kind": "removal",
+   "driver": "Axial tilt drops to zero, ending seasons.",
+   "job": "Timing annual planning cycles",
+   "steps": [
+    {
+     "technology": "Heliacal star-rise tallies as sole year-count, replacing solstice markers",
+     "needs": "Flat horizons, dawn watch guilds, fixed day length for repeatable sightings"
+    },
+    {
+     "technology": "Pinhole shaft solar-disk micrometry reading perihelion swell of sun's apparent diameter",
+     "needs": "Stone-lined dark shafts, graduated discs, cloud-tolerant daytime observation"
+    },
+    {
+     "technology": "Sealed water-mass thermal integrators amplifying the tiny eccentricity-driven annual temperature swing",
+     "needs": "Glassblowing, matched twin vessels, differential readout of lagged versus instant heat"
+    },
+    {
+     "technology": "Equal-area ephemeris tables predicting sun-disk size and drift rate across the year",
+     "needs": "Centuries of pooled disk and star records; standardized observatory network; ellipse geometry"
+    },
+    {
+     "technology": "Staggered cohort planning ledgers phase-locked to perihelion standard, offsetting peak demand",
+     "needs": "Calibrated gauges in every district, relay messaging, bureaus using shared ephemeris"
+    }
+   ],
+   "artifact": {
+    "name": "Pinhole shaft and twin vessels",
+    "draft_name": "Perihelion Gauge",
+    "function": "Fixes the district's position in the year so planning cohorts can start staggered cycles",
+    "form": "Dark stone shaft with pinhole and graduated disc, paired with twin sealed water vessels whose lagged temperature difference is read against ephemeris tables."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w37",
+   "domain": "environment",
+   "kind": "removal",
+   "driver": "Polar ice caps are gone and no longer exist.",
+   "job": "Regulating sea level and reflectivity",
+   "steps": [
+    {
+     "technology": "Drowned-coast tide-gauge ledgers fused with satellite altimetry into a basin-by-basin sea-level ledger",
+     "needs": "Centuries of port records, orbital altimeters, shared cross-basin data standards"
+    },
+    {
+     "technology": "Meltwater-balance models tracing every freshwater flux to compute sea level budgets",
+     "needs": "Step 1 ledgers, ocean circulation simulation, river and aquifer gauging networks"
+    },
+    {
+     "technology": "Continental water banking: pumping ocean-bound runoff into deep basins and reservoirs",
+     "needs": "Desalination-grade pumps, mapped aquifers, budget models from step 2, coastal engineering"
+    },
+    {
+     "technology": "Floating bright-foam reflective mats seeded across dark open polar ocean",
+     "needs": "Biodegradable microbubble films, ice-free Arctic shipping fleets, albedo-measuring satellites"
+    },
+    {
+     "technology": "Coupled reflectivity-and-volume governance grid tying mats and water banks to one controller",
+     "needs": "Real-time ocean albedo sensing, basin ledgers, treaty-bound shared control of pumps and mats"
+    }
+   ],
+   "artifact": {
+    "name": "Coupled sea level control grid",
+    "draft_name": "The Tidal Ledger Grid",
+    "function": "Regulates sea level and planetary reflectivity as one coupled, jointly governed system",
+    "form": "A network of coastal gauge towers, inland water-bank reservoirs, and drifting white foam mats linked to orbital sensors and a treaty-governed control hub"
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w38",
+   "domain": "environment",
+   "kind": "removal",
+   "driver": "Soil decomposer microbes die off worldwide.",
+   "job": "Recycling organic waste",
+   "steps": [
+    {
+     "technology": "Dry-heap triage: sorting waste by fiber, fat, and wet pulp, then stacking it",
+     "needs": "Rot stopped; sorting labor; cheap dry storage; shared notion of waste classes"
+    },
+    {
+     "technology": "Mechanical and thermal breakdown: grinding mills, steam pressure vats, and fire-kilns converting waste to char",
+     "needs": "Waterwheel or steam power; metallurgy for pressure vessels; fuel surplus from dry waste"
+    },
+    {
+     "technology": "Enzyme brewing: culturing surviving fungi and gut bacteria to extract cellulase and lipase broths",
+     "needs": "Sterile culture methods; survivor strain surveys; fermentation vessels from brewing trades"
+    },
+    {
+     "technology": "Insect and worm farming cascades: engineered larval colonies fed on pretreated waste",
+     "needs": "Enzyme-softened feed; temperature-controlled halls; selective breeding records; escape containment"
+    },
+    {
+     "technology": "Microbe vaults: sealed reserve libraries and rented consortia to reseed soils district by district",
+     "needs": "Stable consortium preservation; soil chemistry testing; regional trade networks; larval-frass stabilizers"
+    }
+   ],
+   "artifact": {
+    "name": "Organic waste processing hall",
+    "draft_name": "Frass-Loom Hall",
+    "function": "Converts sorted organic waste into fertilizer, protein, and reseeded soil culture for a district",
+    "form": "Warm brick hall of tiered larval trays beneath enzyme vats, with a locked cold vault of consortium jars at the end"
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w39",
+   "domain": "environment",
+   "kind": "abundance",
+   "driver": "Rainfall doubles across all continents.",
+   "job": "Controlling floods",
+   "steps": [
+    {
+     "technology": "Living-root terrace weirs: engineered mangrove-like trees pruned to hold slopes and slow runoff",
+     "needs": "Selective breeding of fast-rooting trees; communal pruning guilds and seasonal knowledge"
+    },
+    {
+     "technology": "Rain-gauge tithe networks: villages report rainfall by drum-coded relays upstream to downstream",
+     "needs": "Standardized vessel gauges, drum-code languages, trained watch-keepers on every ridge"
+    },
+    {
+     "technology": "Hydraulic memory ledgers: flood-height records cut into river-stones, aggregated into crest-prediction tables",
+     "needs": "Decades of gauge data, stone-marking standards, arithmetic guilds computing routing delays"
+    },
+    {
+     "technology": "Sluice-clock cascades: float-driven gates opening in timed sequence to stagger flood crests across basins",
+     "needs": "Crest tables, precision float-escapement timers, rot-resistant gate materials, standardized channel gradients"
+    },
+    {
+     "technology": "Continental basin compacts: shared flood-storage wetlands governed by cross-border water-credit treaties",
+     "needs": "Sluice cascades spanning borders, trusted arbitration, wetland ecologies able to absorb overflow"
+    }
+   ],
+   "artifact": {
+    "name": "Sluice clock tower",
+    "draft_name": "Crestkeeper Gate-Clock",
+    "function": "Automatically times sluice gates so upstream flood crests are staggered and stored downstream.",
+    "form": "Stone-and-hardwood tower holding a rain-filled float chamber, escapement clock, and drum-signal horn driving a gate."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w40",
+   "domain": "environment",
+   "kind": "abundance",
+   "driver": "Tides triple in height and force.",
+   "job": "Defending coastlines",
+   "steps": [
+    {
+     "technology": "Tide-ledger bell towers: coastal communities recording surge heights in resonant bronze tallies",
+     "needs": "Bronze casting, lunar-cycle calendars, shared coastal signalling traditions"
+    },
+    {
+     "technology": "Breathing seawalls: porous, hollow-chambered ramparts that fill and bleed off surge momentum",
+     "needs": "Tide ledger data, lime-shell concrete, sluice-gate carpentry"
+    },
+    {
+     "technology": "Reef-grafting: engineered living oyster and coral ridges seeded offshore as self-repairing breakwaters",
+     "needs": "Breathing wall chambers as nurseries, salinity-gradient knowledge, tidal-flat farming"
+    },
+    {
+     "technology": "Tide-turbine bastions: wall-embedded rotors converting surge flow into stored brine-pressure",
+     "needs": "Breathing chambers, reef-calmed channels, geared water-mill metallurgy"
+    },
+    {
+     "technology": "Pressure-ledger networks: bastions linked by hydraulic pulse-lines forecasting surges and pre-adjusting gates",
+     "needs": "Turbine bastions, sealed pressure pipes, bell-tower tally codes"
+    }
+   ],
+   "artifact": {
+    "name": "Porous tidal seawall rampart",
+    "draft_name": "The Breathing Bastion",
+    "function": "Absorbs, harvests and forecasts tidal surges while self-repairing, defending coastlines",
+    "form": "A coastal rampart of hollow porous stone chambers, oyster-crusted outside, with internal rotors, brine-pressure tanks and bronze pulse-line gates."
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  },
+  {
+   "id": "w41",
+   "domain": "environment",
+   "kind": "abundance",
+   "driver": "Methane-eating and pollutant-eating microbes thrive in air and water everywhere.",
+   "job": "Cleaning polluted air",
+   "steps": [
+    {
+     "technology": "Wild consortium ecology: mapping which microbes dominate which air masses and pollutants",
+     "needs": "Ubiquitous airborne microbes; sampling of aerosols; culture-free community tracking"
+    },
+    {
+     "technology": "Aerosol-habitat design: humidified mist corridors that sustain pollutant-eating microbes in moving air",
+     "needs": "Consortium maps; droplet physics; water supply; microbe moisture tolerance"
+    },
+    {
+     "technology": "Nutrient-dosing networks that steer microbial appetite toward specific pollutants and away from useful gases",
+     "needs": "Metabolic pathway knowledge; trace nutrient chemistry; sensors for gas fluxes"
+    },
+    {
+     "technology": "Phage-governed strain licensing: viral keys limiting microbe survival to authorized zones",
+     "needs": "Phage engineering; strain tracing; regional governance of airsheds"
+    },
+    {
+     "technology": "Airshed metabolism markets: pricing and trading microbial appetite across regions",
+     "needs": "Licensed strains; continuous flux monitoring; inter-regional agreements on shared air"
+    }
+   ],
+   "artifact": {
+    "name": "Rooftop mist frame array",
+    "draft_name": "Appetite Lattice",
+    "function": "Cleaning polluted air by steering and confining pollutant-eating microbes within licensed zones",
+    "form": "Roof-and-street mist frames hosting dosed microbial films, with flux sensors and phage-key dispensers linked to a regional airshed ledger"
+   },
+   "status": "drafted",
+   "provenance": "Drafted by claude-sonnet-5-5 under the method's rules (E1 write phase, method arm, 2026-11-21); not grown by the engine, not modeled, voice unedited"
+  }
+ ]
+}
