@@ -365,7 +365,7 @@
    ],
    "artifact": {
     "name": "Segmented stator motor stack",
-    "draft_name": "Pulse-Stack Motor",
+    "draft_name": "Stepped Stack Motor",
     "function": "Compact high-torque electric drive without permanent magnets",
     "form": "Palm-sized stack of iron-nitride-cored segmented stator rings with a toothed soft-iron rotor, pulsed by an integrated timing board."
    },
@@ -618,7 +618,7 @@
      "needs": "Tuned resonator boxes, spring-tensioned strikers, standard pitch-pulse alphabet, cord-tension maintenance"
     },
     {
-     "technology": "Pulse-addressed junction exchanges routing messages to group-specific branch cords",
+     "technology": "Signal-addressed junction exchanges routing messages to group-specific branch cords",
      "needs": "Filtered resonators tuned to address-pitches, standardized trunk alphabets, trained exchange keepers"
     }
    ],
@@ -832,7 +832,7 @@
      "needs": "Quarrying of exposed riverbed stone, surveyed gradients, sledge friction data"
     },
     {
-     "technology": "Pulse-fed canal ladders: sealed lock chains filled from upland spring reservoirs",
+     "technology": "Surge-fed canal ladders: sealed lock chains filled from upland spring reservoirs",
      "needs": "Precise reservoir surveying, watertight masonry, valve gates, spring capture works"
     },
     {
@@ -1231,7 +1231,7 @@
    "job": "Providing dietary protein",
    "steps": [
     {
-     "technology": "Pulse-harvest quotas keyed to spawning-cycle booms, with tidal weir-pens",
+     "technology": "Seasonal-harvest quotas keyed to spawning-cycle booms, with tidal weir-pens",
      "needs": "Reliable boom timing records; coastal communities organized around shared tidal grounds"
     },
     {
