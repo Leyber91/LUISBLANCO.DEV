@@ -3,6 +3,31 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-22, Seed has a meta description (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
+  today, so this run took the next finding the 2026-11-17 sweep left open: pages with no meta description. Of the
+  seven left in that list, labs/seed.html is the most visible: the home page lists the labs in the order Honesty
+  Decoder, The Figure, Seed, and the first two have one. This run did not repeat the full sweep.
+- Cause: labs/seed.html had a title and no meta description, so a search result or a shared link showed no summary
+  of the page.
+- Changed (labs/seed.html, one added line): a meta description of 330 characters, taken from the page's own
+  subtitle and its blurb on the labs hub (src/ui/lab.js): one symbol and four rules rewritten at once each
+  generation, a motif turned into a new rule, and no model or network. Nothing a visitor sees changed.
+- Still open for later runs of item 1, from the 2026-11-17 sweep and not re-checked today: 404.html,
+  hero_proto.html, labs/claude-prep/, labs/roaster.html, leak_map_demo.html and triad_demos.html have no meta
+  description; labs/claude-prep/ requests seal.json, which returns 404 (Luis decides). Item 2 was not re-checked
+  today; on 2026-11-21 no tracked file outside _archive/ referenced labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 31 pages, 0 findings; levels 32 labs, 0
+  errors; atlas, stories and evolution checks pass (stories prints NOT_CHECKED for the private plans); anti-tells
+  selftest 27 of 27; node tools/anti_tells.mjs scan labs/seed.html lists 7 tells, the same count as on 2026-11-18,
+  none on the changed line; lab tests 105 files, 0 failed. No script changed, so there was no syntax check to run. The mutate run was
+  not repeated (no tool changed) and runs in the gates workflow. Render: labs/seed.html at 1280 px and 390 px in
+  headless Chromium over a local http server, 0 console errors, the description present, and the document scroll
+  width equal to the screen width. Forbidden-name check: runs in the gates workflow on the pull request.
+- Gates on the pull request: GATES.
+- Merged: MERGED.
+
 ## 2026-11-21, The Figure has a meta description (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 29 pages and 0 findings on main
