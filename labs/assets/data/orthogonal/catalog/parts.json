@@ -1,0 +1,9999 @@
+{
+ "kinds": [
+  "column",
+  "plinth",
+  "box",
+  "lattice",
+  "vessel",
+  "mast",
+  "mirror",
+  "disc",
+  "gimbal",
+  "wing",
+  "rotor",
+  "shutter",
+  "dial",
+  "pipe",
+  "sphere"
+ ],
+ "materials": [
+  "glass",
+  "ceramic",
+  "wood",
+  "bronze",
+  "stone",
+  "fabric",
+  "bone",
+  "living"
+ ],
+ "trees": {
+  "w00": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      26,
+      1,
+      16
+     ],
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      14,
+      6,
+      10
+     ],
+     "at": [
+      0,
+      4,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      3,
+      10,
+      3
+     ],
+     "at": [
+      -9,
+      6,
+      -4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": true
+    },
+    {
+     "kind": "column",
+     "size": [
+      3,
+      10,
+      3
+     ],
+     "at": [
+      -9,
+      6,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": true
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      4,
+      3,
+      0.3
+     ],
+     "at": [
+      -12,
+      3,
+      0
+     ],
+     "rot": [
+      0,
+      90,
+      30
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      4,
+      5,
+      4
+     ],
+     "at": [
+      9,
+      3.5,
+      -4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      4,
+      5,
+      4
+     ],
+     "at": [
+      9,
+      3.5,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": true
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      5,
+      5,
+      5
+     ],
+     "at": [
+      14,
+      3.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      4,
+      0.8,
+      4
+     ],
+     "at": [
+      0,
+      8.4,
+      -3
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      4,
+      0.8,
+      4
+     ],
+     "at": [
+      0,
+      8.4,
+      3
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      1,
+      18,
+      1
+     ],
+     "at": [
+      0,
+      14,
+      -11
+     ],
+     "rot": [
+      60,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      10,
+      1.5,
+      6
+     ],
+     "at": [
+      0,
+      16,
+      -17
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "rotor",
+     "size": [
+      3,
+      3,
+      1
+     ],
+     "at": [
+      4,
+      7.8,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w01": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      12,
+      1.5,
+      12
+     ],
+     "at": [
+      0,
+      0.75,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      8,
+      3,
+      8
+     ],
+     "at": [
+      0,
+      3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": true
+    },
+    {
+     "kind": "box",
+     "size": [
+      7,
+      3,
+      7
+     ],
+     "at": [
+      0,
+      6,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": true
+    },
+    {
+     "kind": "box",
+     "size": [
+      6,
+      3,
+      6
+     ],
+     "at": [
+      0,
+      9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": true
+    },
+    {
+     "kind": "box",
+     "size": [
+      5,
+      3,
+      5
+     ],
+     "at": [
+      0,
+      12,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": true
+    },
+    {
+     "kind": "box",
+     "size": [
+      4,
+      2,
+      4
+     ],
+     "at": [
+      0,
+      14.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": true
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      6,
+      8,
+      0.4
+     ],
+     "at": [
+      0,
+      5.5,
+      5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      6,
+      8,
+      0.4
+     ],
+     "at": [
+      0,
+      5.5,
+      -5
+     ],
+     "rot": [
+      0,
+      180,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      6,
+      8,
+      0.4
+     ],
+     "at": [
+      5,
+      5.5,
+      0
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      6,
+      8,
+      0.4
+     ],
+     "at": [
+      -5,
+      5.5,
+      0
+     ],
+     "rot": [
+      0,
+      -90,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      5,
+      6,
+      0.3
+     ],
+     "at": [
+      0,
+      11,
+      4.2
+     ],
+     "rot": [
+      -10,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      5,
+      6,
+      0.3
+     ],
+     "at": [
+      0,
+      11,
+      -4.2
+     ],
+     "rot": [
+      10,
+      180,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      5,
+      6,
+      0.3
+     ],
+     "at": [
+      4.2,
+      11,
+      0
+     ],
+     "rot": [
+      0,
+      90,
+      -10
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      5,
+      6,
+      0.3
+     ],
+     "at": [
+      -4.2,
+      11,
+      0
+     ],
+     "rot": [
+      0,
+      -90,
+      10
+     ],
+     "material": "glass",
+     "emits": false
+    }
+   ]
+  },
+  "w02": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      1.2,
+      0.1,
+      1.2
+     ],
+     "at": [
+      0,
+      0.05,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      1.0,
+      1.6,
+      1.0
+     ],
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "rotor",
+     "size": [
+      0.8,
+      0.2,
+      0.8
+     ],
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.12,
+      1.4,
+      0.12
+     ],
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.8,
+      0.08,
+      0.8
+     ],
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.8,
+      0.08,
+      0.8
+     ],
+     "at": [
+      0,
+      0.62,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.8,
+      0.08,
+      0.8
+     ],
+     "at": [
+      0,
+      0.74,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.9,
+      0.1,
+      0.9
+     ],
+     "at": [
+      0,
+      1.75,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      1.05,
+      0.12,
+      1.05
+     ],
+     "at": [
+      0,
+      1.35,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.5,
+      0.2,
+      0.5
+     ],
+     "at": [
+      0,
+      1.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w03": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      10,
+      1,
+      10
+     ],
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      5,
+      16,
+      5
+     ],
+     "at": [
+      0,
+      9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      6,
+      3,
+      6
+     ],
+     "at": [
+      0,
+      18.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      3.5,
+      2,
+      3.5
+     ],
+     "at": [
+      0,
+      20.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "rotor",
+     "size": [
+      3,
+      1,
+      3
+     ],
+     "at": [
+      0,
+      12,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      4,
+      3,
+      4
+     ],
+     "at": [
+      0,
+      2.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      3,
+      0.6,
+      3
+     ],
+     "at": [
+      4.5,
+      2.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3,
+      2.5,
+      3
+     ],
+     "at": [
+      7,
+      2.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      1,
+      1,
+      0.3
+     ],
+     "at": [
+      7,
+      4.2,
+      1.6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.4,
+      6,
+      0.4
+     ],
+     "at": [
+      0,
+      5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      4,
+      2,
+      0.3
+     ],
+     "at": [
+      0,
+      7,
+      2.6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    }
+   ]
+  },
+  "w04": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      16,
+      1,
+      12
+     ],
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      13,
+      1,
+      10
+     ],
+     "at": [
+      0,
+      1.5,
+      -0.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      10,
+      1,
+      8
+     ],
+     "at": [
+      0,
+      2.5,
+      -1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      7,
+      1,
+      6
+     ],
+     "at": [
+      0,
+      3.5,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      14,
+      0.15,
+      4
+     ],
+     "at": [
+      0,
+      1.1,
+      3.5
+     ],
+     "rot": [
+      -12,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      11,
+      0.15,
+      3.5
+     ],
+     "at": [
+      0,
+      2.1,
+      2.5
+     ],
+     "rot": [
+      -12,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      8,
+      0.15,
+      3
+     ],
+     "at": [
+      0,
+      3.1,
+      1.5
+     ],
+     "rot": [
+      -12,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      5.5,
+      0.15,
+      2.5
+     ],
+     "at": [
+      0,
+      4.1,
+      0.5
+     ],
+     "rot": [
+      -12,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      14,
+      0.2,
+      1.2
+     ],
+     "at": [
+      0,
+      2.6,
+      5.4
+     ],
+     "rot": [
+      30,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      11,
+      0.2,
+      1.2
+     ],
+     "at": [
+      0,
+      3.6,
+      4.2
+     ],
+     "rot": [
+      30,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      8,
+      0.2,
+      1.2
+     ],
+     "at": [
+      0,
+      4.6,
+      3.1
+     ],
+     "rot": [
+      30,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      5.5,
+      0.2,
+      1.2
+     ],
+     "at": [
+      0,
+      5.6,
+      2
+     ],
+     "rot": [
+      30,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.4,
+      3,
+      0.4
+     ],
+     "at": [
+      -6.5,
+      2,
+      5.8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.4,
+      3,
+      0.4
+     ],
+     "at": [
+      6.5,
+      2,
+      5.8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    }
+   ]
+  },
+  "w05": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      6,
+      0.6,
+      6
+     ],
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      4,
+      1.2,
+      3
+     ],
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2.2,
+      1.6,
+      2.2
+     ],
+     "at": [
+      -1.2,
+      3.0,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2.0,
+      1.4,
+      2.0
+     ],
+     "at": [
+      -1.2,
+      4.6,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      1.8,
+      1.2,
+      1.8
+     ],
+     "at": [
+      -1.2,
+      6.0,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.5,
+      3.5,
+      0.5
+     ],
+     "at": [
+      1.2,
+      3.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.4,
+      5,
+      0.4
+     ],
+     "at": [
+      3.6,
+      0.9,
+      1.2
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.9,
+      1.6,
+      0.9
+     ],
+     "at": [
+      0,
+      0.8,
+      -2.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      0.6,
+      0.6,
+      0.2
+     ],
+     "at": [
+      0,
+      1.6,
+      1.6
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.7,
+      0.7,
+      0.7
+     ],
+     "at": [
+      1.2,
+      5.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.7,
+      0.7,
+      0.7
+     ],
+     "at": [
+      -0.2,
+      1.9,
+      1.6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.7,
+      0.7,
+      0.7
+     ],
+     "at": [
+      0.9,
+      1.9,
+      1.6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w06": {
+   "parts": [
+    {
+     "kind": "box",
+     "size": [
+      1.2,
+      1.6,
+      0.3
+     ],
+     "at": [
+      0,
+      0.8,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      1.0,
+      0.15,
+      0.4
+     ],
+     "at": [
+      0,
+      0.075,
+      0.1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.9,
+      1.2,
+      0.12
+     ],
+     "at": [
+      0,
+      0.9,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.7,
+      0.05,
+      0.7
+     ],
+     "at": [
+      0,
+      1.1,
+      0.28
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.6,
+      0.02,
+      0.6
+     ],
+     "at": [
+      0,
+      1.1,
+      0.31
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.03,
+      0.27,
+      0.03
+     ],
+     "at": [
+      0.05,
+      1.15,
+      0.33
+     ],
+     "rot": [
+      0,
+      0,
+      30
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.7,
+      0.03,
+      0.7
+     ],
+     "at": [
+      0,
+      1.1,
+      0.34
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      0.5,
+      0.3,
+      0.5
+     ],
+     "at": [
+      0,
+      0.5,
+      0.28
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.08,
+      0.5,
+      0.08
+     ],
+     "at": [
+      0.55,
+      0.8,
+      0.1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.3,
+      0.3,
+      0.2
+     ],
+     "at": [
+      0.8,
+      0.5,
+      0.1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      0.4,
+      0.3,
+      0.1
+     ],
+     "at": [
+      0,
+      0.3,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w07": {
+   "parts": [
+    {
+     "kind": "lattice",
+     "size": [
+      24,
+      4,
+      18
+     ],
+     "at": [
+      0,
+      9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      24,
+      2,
+      18
+     ],
+     "at": [
+      0,
+      6.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      6,
+      0.8
+     ],
+     "at": [
+      -11,
+      3,
+      -8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      6,
+      0.8
+     ],
+     "at": [
+      11,
+      3,
+      -8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      6,
+      0.8
+     ],
+     "at": [
+      -11,
+      3,
+      8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      6,
+      0.8
+     ],
+     "at": [
+      11,
+      3,
+      8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      1,
+      1,
+      1
+     ],
+     "at": [
+      -11,
+      6.3,
+      -8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      1,
+      1,
+      1
+     ],
+     "at": [
+      11,
+      6.3,
+      -8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      1,
+      1,
+      1
+     ],
+     "at": [
+      -11,
+      6.3,
+      8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      1,
+      1,
+      1
+     ],
+     "at": [
+      11,
+      6.3,
+      8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.2,
+      0.2,
+      18
+     ],
+     "at": [
+      0,
+      7.8,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      26,
+      0.4,
+      20
+     ],
+     "at": [
+      0,
+      0.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    }
+   ]
+  },
+  "w08": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      28,
+      1,
+      16
+     ],
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      8,
+      5,
+      6
+     ],
+     "at": [
+      -9,
+      3.5,
+      -4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      1.2,
+      1.2,
+      8
+     ],
+     "at": [
+      -9,
+      7,
+      -4
+     ],
+     "rot": [
+      0,
+      0,
+      30
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      4,
+      9,
+      4
+     ],
+     "at": [
+      -1,
+      5.5,
+      -4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": true
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.8,
+      6,
+      0.8
+     ],
+     "at": [
+      -1,
+      13,
+      -4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3,
+      3,
+      3
+     ],
+     "at": [
+      -7,
+      2.5,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3,
+      3,
+      3
+     ],
+     "at": [
+      -3,
+      2.5,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3.5,
+      4,
+      3.5
+     ],
+     "at": [
+      2,
+      3,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": true
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3.5,
+      4,
+      3.5
+     ],
+     "at": [
+      6,
+      3,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": true
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.5,
+      0.5,
+      12
+     ],
+     "at": [
+      2,
+      5.5,
+      0
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      12,
+      6,
+      8
+     ],
+     "at": [
+      9,
+      4,
+      -3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      4,
+      3,
+      0.3
+     ],
+     "at": [
+      9,
+      4,
+      1.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      1,
+      8,
+      1
+     ],
+     "at": [
+      13,
+      5,
+      5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    }
+   ]
+  },
+  "w09": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      0.16,
+      0.02,
+      0.16
+     ],
+     "at": [
+      0,
+      0.01,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.14,
+      0.02,
+      0.14
+     ],
+     "at": [
+      0,
+      0.03,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.14,
+      0.02,
+      0.14
+     ],
+     "at": [
+      0,
+      0.06,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.14,
+      0.02,
+      0.14
+     ],
+     "at": [
+      0,
+      0.09,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.14,
+      0.02,
+      0.14
+     ],
+     "at": [
+      0,
+      0.12,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.14,
+      0.02,
+      0.14
+     ],
+     "at": [
+      0,
+      0.15,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "rotor",
+     "size": [
+      0.09,
+      0.14,
+      0.09
+     ],
+     "at": [
+      0,
+      0.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.02,
+      0.06,
+      0.02
+     ],
+     "at": [
+      0,
+      0.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.1,
+      0.02,
+      0.06
+     ],
+     "at": [
+      0,
+      0.185,
+      0.09
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.03,
+      0.01,
+      0.02
+     ],
+     "at": [
+      0.02,
+      0.2,
+      0.09
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.02,
+      0.1,
+      0.02
+     ],
+     "at": [
+      0.09,
+      0.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w10": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      0.16,
+      0.012,
+      0.16
+     ],
+     "at": [
+      0,
+      0.006,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.14,
+      0.004,
+      0.14
+     ],
+     "at": [
+      0,
+      0.014,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.14,
+      0.004,
+      0.14
+     ],
+     "at": [
+      0,
+      0.022,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.14,
+      0.004,
+      0.14
+     ],
+     "at": [
+      0,
+      0.03,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.16,
+      0.012,
+      0.16
+     ],
+     "at": [
+      0,
+      0.038,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.02,
+      0.01,
+      0.01
+     ],
+     "at": [
+      0.09,
+      0.024,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.02,
+      0.01,
+      0.01
+     ],
+     "at": [
+      -0.09,
+      0.024,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.01,
+      0.01,
+      0.02
+     ],
+     "at": [
+      0,
+      0.024,
+      0.09
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.01,
+      0.01,
+      0.02
+     ],
+     "at": [
+      0,
+      0.024,
+      -0.09
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    }
+   ]
+  },
+  "w11": {
+   "parts": [
+    {
+     "kind": "pipe",
+     "size": [
+      1.2,
+      1.2,
+      16
+     ],
+     "at": [
+      0,
+      1.6,
+      0
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      1.5,
+      1.5,
+      0.5
+     ],
+     "at": [
+      0,
+      1.6,
+      -6
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      1.5,
+      1.5,
+      0.5
+     ],
+     "at": [
+      0,
+      1.6,
+      0
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      1.5,
+      1.5,
+      0.5
+     ],
+     "at": [
+      0,
+      1.6,
+      6
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      1.4,
+      0.8,
+      1.4
+     ],
+     "at": [
+      0,
+      0.4,
+      -6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      1.4,
+      0.8,
+      1.4
+     ],
+     "at": [
+      0,
+      0.4,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      1.4,
+      0.8,
+      1.4
+     ],
+     "at": [
+      0,
+      0.4,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.5,
+      0.5,
+      3
+     ],
+     "at": [
+      2,
+      1.6,
+      -3
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.5,
+      0.5,
+      3
+     ],
+     "at": [
+      -2,
+      1.6,
+      3
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.7,
+      0.7,
+      0.3
+     ],
+     "at": [
+      0.8,
+      1.6,
+      -3
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.7,
+      0.7,
+      0.3
+     ],
+     "at": [
+      -0.8,
+      1.6,
+      3
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      2.2,
+      2.2,
+      2.2
+     ],
+     "at": [
+      4.2,
+      1.1,
+      -3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      2.2,
+      2.2,
+      2.2
+     ],
+     "at": [
+      -4.2,
+      1.1,
+      3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    }
+   ]
+  },
+  "w12": {
+   "parts": [
+    {
+     "kind": "column",
+     "size": [
+      2.5,
+      14,
+      2.5
+     ],
+     "at": [
+      -12,
+      7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      2.5,
+      12,
+      2.5
+     ],
+     "at": [
+      12,
+      6,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      7,
+      5,
+      7
+     ],
+     "at": [
+      -12,
+      15,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      6,
+      4.5,
+      6
+     ],
+     "at": [
+      12,
+      13.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      24,
+      0.3,
+      3
+     ],
+     "at": [
+      0,
+      8,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      2
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      25,
+      0.1,
+      0.1
+     ],
+     "at": [
+      0,
+      11,
+      1.5
+     ],
+     "rot": [
+      0,
+      0,
+      -4
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      25,
+      0.1,
+      0.1
+     ],
+     "at": [
+      0,
+      11,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      -4
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      24,
+      3,
+      0.1
+     ],
+     "at": [
+      0,
+      9.5,
+      1.5
+     ],
+     "rot": [
+      0,
+      0,
+      -3
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      24,
+      3,
+      0.1
+     ],
+     "at": [
+      0,
+      9.5,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      -3
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.5,
+      0.8,
+      0.3
+     ],
+     "at": [
+      -6,
+      9.6,
+      2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.5,
+      0.8,
+      0.3
+     ],
+     "at": [
+      0,
+      8.6,
+      2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.5,
+      0.8,
+      0.3
+     ],
+     "at": [
+      6,
+      7.8,
+      2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    }
+   ]
+  },
+  "w13": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      6,
+      0.4,
+      3
+     ],
+     "at": [
+      0,
+      0.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      4,
+      2.6,
+      0.3
+     ],
+     "at": [
+      0,
+      1.7,
+      0.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      4,
+      2.6,
+      0.3
+     ],
+     "at": [
+      0,
+      1.7,
+      -0.1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      3.6,
+      2.2,
+      0.25
+     ],
+     "at": [
+      0,
+      1.7,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      4.2,
+      2.8,
+      0.15
+     ],
+     "at": [
+      0,
+      1.7,
+      0.85
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.2,
+      3,
+      0.2
+     ],
+     "at": [
+      -2.2,
+      1.9,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.2,
+      3.5,
+      0.2
+     ],
+     "at": [
+      -3.8,
+      0.4,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      0.6,
+      0.8,
+      0.6
+     ],
+     "at": [
+      2.4,
+      0.8,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.9,
+      6,
+      0.9
+     ],
+     "at": [
+      -6,
+      3.4,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      4.5,
+      3.5,
+      4.5
+     ],
+     "at": [
+      -6,
+      7.5,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.15,
+      0.6,
+      0.15
+     ],
+     "at": [
+      -5.5,
+      1.6,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w14": {
+   "parts": [
+    {
+     "kind": "box",
+     "size": [
+      0.22,
+      0.02,
+      0.32
+     ],
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "rot": [
+      -20,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.18,
+      0.005,
+      0.26
+     ],
+     "at": [
+      0,
+      0.92,
+      0
+     ],
+     "rot": [
+      -20,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.2,
+      0.015,
+      0.2
+     ],
+     "at": [
+      0,
+      0.88,
+      0.0
+     ],
+     "rot": [
+      -20,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.03,
+      0.12,
+      0.03
+     ],
+     "at": [
+      -0.09,
+      0.84,
+      0.12
+     ],
+     "rot": [
+      -20,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.03,
+      0.12,
+      0.03
+     ],
+     "at": [
+      0.09,
+      0.84,
+      0.12
+     ],
+     "rot": [
+      -20,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      0.05,
+      0.02,
+      0.05
+     ],
+     "at": [
+      0.08,
+      0.93,
+      0.1
+     ],
+     "rot": [
+      -20,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      0.6,
+      0.7,
+      0.6
+     ],
+     "at": [
+      0,
+      0.35,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.5,
+      0.04,
+      0.5
+     ],
+     "at": [
+      0,
+      0.72,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": true
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.05,
+      1.4,
+      0.05
+     ],
+     "at": [
+      0.9,
+      0.7,
+      -0.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w15": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      14,
+      1.5,
+      10
+     ],
+     "at": [
+      0,
+      0.75,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      12,
+      1,
+      3
+     ],
+     "at": [
+      0,
+      1.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.4,
+      24,
+      0.4
+     ],
+     "at": [
+      0,
+      1.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "column",
+     "size": [
+      2,
+      6,
+      2
+     ],
+     "at": [
+      -5,
+      4.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      2,
+      6,
+      2
+     ],
+     "at": [
+      5,
+      4.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2.6,
+      2.2,
+      2.6
+     ],
+     "at": [
+      -5,
+      8.6,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2.6,
+      2.2,
+      2.6
+     ],
+     "at": [
+      5,
+      8.6,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      3.5,
+      0.3,
+      3.5
+     ],
+     "at": [
+      -5,
+      10.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": true
+    },
+    {
+     "kind": "disc",
+     "size": [
+      3.5,
+      0.3,
+      3.5
+     ],
+     "at": [
+      5,
+      10.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": true
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      3,
+      2,
+      3
+     ],
+     "at": [
+      -10,
+      1.2,
+      2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      3,
+      2,
+      3
+     ],
+     "at": [
+      10,
+      1.2,
+      -2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      4,
+      3,
+      3
+     ],
+     "at": [
+      0,
+      3.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    }
+   ]
+  },
+  "w16": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      1.6,
+      0.1,
+      0.8
+     ],
+     "at": [
+      0,
+      0.05,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.1,
+      1.1,
+      0.1
+     ],
+     "at": [
+      -0.7,
+      0.65,
+      0.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.1,
+      1.1,
+      0.1
+     ],
+     "at": [
+      0.7,
+      0.65,
+      0.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.1,
+      1.1,
+      0.1
+     ],
+     "at": [
+      -0.7,
+      0.65,
+      -0.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.1,
+      1.1,
+      0.1
+     ],
+     "at": [
+      0.7,
+      0.65,
+      -0.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      1.6,
+      0.08,
+      0.8
+     ],
+     "at": [
+      0,
+      1.24,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.03,
+      1.8,
+      0.03
+     ],
+     "at": [
+      0,
+      0.75,
+      0.05
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.5,
+      0.35,
+      0.3
+     ],
+     "at": [
+      -0.35,
+      0.95,
+      0.05
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.04,
+      0.3,
+      0.04
+     ],
+     "at": [
+      -0.5,
+      0.95,
+      0.22
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.04,
+      0.24,
+      0.04
+     ],
+     "at": [
+      -0.35,
+      0.95,
+      0.22
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.04,
+      0.18,
+      0.04
+     ],
+     "at": [
+      -0.2,
+      0.95,
+      0.22
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.04,
+      0.5,
+      0.04
+     ],
+     "at": [
+      0.4,
+      0.5,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      30
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.03,
+      1.0,
+      0.03
+     ],
+     "at": [
+      0.95,
+      0.5,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      70
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "at": [
+      0.55,
+      0.28,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w17": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      0.5,
+      0.06,
+      0.4
+     ],
+     "at": [
+      0,
+      0.03,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.3,
+      0.02,
+      0.22
+     ],
+     "at": [
+      0,
+      0.07,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.3,
+      0.02,
+      0.22
+     ],
+     "at": [
+      0,
+      0.1,
+      0
+     ],
+     "rot": [
+      0,
+      2,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.3,
+      0.02,
+      0.22
+     ],
+     "at": [
+      0,
+      0.13,
+      0
+     ],
+     "rot": [
+      0,
+      -2,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.3,
+      0.02,
+      0.22
+     ],
+     "at": [
+      0,
+      0.16,
+      0
+     ],
+     "rot": [
+      0,
+      3,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.3,
+      0.02,
+      0.22
+     ],
+     "at": [
+      0,
+      0.19,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.3,
+      0.02,
+      0.22
+     ],
+     "at": [
+      0,
+      0.22,
+      0
+     ],
+     "rot": [
+      0,
+      -3,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      0.3,
+      0.2,
+      0.01
+     ],
+     "at": [
+      0,
+      0.17,
+      0.115
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.02,
+      0.26,
+      0.02
+     ],
+     "at": [
+      -0.11,
+      0.19,
+      -0.07
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.02,
+      0.26,
+      0.02
+     ],
+     "at": [
+      -0.11,
+      0.19,
+      0.07
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.04,
+      0.04,
+      0.04
+     ],
+     "at": [
+      -0.11,
+      0.33,
+      -0.07
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.04,
+      0.04,
+      0.04
+     ],
+     "at": [
+      -0.11,
+      0.33,
+      0.07
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w18": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      0.9,
+      0.05,
+      0.9
+     ],
+     "at": [
+      0,
+      0.025,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.6,
+      0.02,
+      0.75
+     ],
+     "at": [
+      0,
+      0.35,
+      0
+     ],
+     "rot": [
+      -70,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      0.56,
+      0.01,
+      0.7
+     ],
+     "at": [
+      0,
+      0.36,
+      0.01
+     ],
+     "rot": [
+      -70,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.28,
+      0.01,
+      0.28
+     ],
+     "at": [
+      0,
+      0.42,
+      0.11
+     ],
+     "rot": [
+      -70,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.04,
+      0.3,
+      0.04
+     ],
+     "at": [
+      0,
+      0.17,
+      -0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.02,
+      0.5,
+      0.02
+     ],
+     "at": [
+      0.3,
+      0.3,
+      -0.3
+     ],
+     "rot": [
+      0,
+      0,
+      8
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      0.2,
+      0.01,
+      0.2
+     ],
+     "at": [
+      0.32,
+      0.58,
+      -0.3
+     ],
+     "rot": [
+      -45,
+      0,
+      8
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      0.1,
+      0.03,
+      0.1
+     ],
+     "at": [
+      -0.3,
+      0.06,
+      0.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": true
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      0.5,
+      0.01,
+      0.12
+     ],
+     "at": [
+      0,
+      0.12,
+      0.38
+     ],
+     "rot": [
+      -70,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    }
+   ]
+  },
+  "w19": {
+   "parts": [
+    {
+     "kind": "box",
+     "size": [
+      14,
+      0.4,
+      12
+     ],
+     "at": [
+      0,
+      0.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      12,
+      5,
+      10
+     ],
+     "at": [
+      0,
+      2.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      10.4,
+      4.4,
+      8.4
+     ],
+     "at": [
+      0,
+      2.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      12.6,
+      0.5,
+      10.6
+     ],
+     "at": [
+      0,
+      5.65,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      6,
+      2.5,
+      0.3
+     ],
+     "at": [
+      0,
+      3.2,
+      -5.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      7,
+      0.5,
+      3
+     ],
+     "at": [
+      0,
+      0.65,
+      -7.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      3,
+      3.2,
+      3
+     ],
+     "at": [
+      8,
+      1.8,
+      2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": true
+    },
+    {
+     "kind": "box",
+     "size": [
+      4,
+      0.6,
+      1
+     ],
+     "at": [
+      0,
+      0.7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      2,
+      3,
+      0.3
+     ],
+     "at": [
+      0,
+      1.9,
+      5.15
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.6,
+      5,
+      0.6
+     ],
+     "at": [
+      -6.8,
+      2.9,
+      5.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.6,
+      5,
+      0.6
+     ],
+     "at": [
+      6.8,
+      2.9,
+      5.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    }
+   ]
+  },
+  "w20": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      24,
+      1,
+      16
+     ],
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      16,
+      10,
+      6
+     ],
+     "at": [
+      0,
+      6,
+      -3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      10,
+      6,
+      5
+     ],
+     "at": [
+      -6,
+      4,
+      1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      8,
+      4,
+      4
+     ],
+     "at": [
+      7,
+      3,
+      2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      12,
+      8,
+      0.5
+     ],
+     "at": [
+      0,
+      6,
+      0.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.6,
+      6,
+      0.6
+     ],
+     "at": [
+      -3,
+      4,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.6,
+      6,
+      0.6
+     ],
+     "at": [
+      3,
+      4,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.3,
+      5,
+      0.3
+     ],
+     "at": [
+      9,
+      3.5,
+      5
+     ],
+     "rot": [
+      0,
+      0,
+      20
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      1.5,
+      0.2,
+      1.5
+     ],
+     "at": [
+      9.8,
+      6,
+      5
+     ],
+     "rot": [
+      60,
+      0,
+      20
+     ],
+     "material": "ceramic",
+     "emits": true
+    },
+    {
+     "kind": "dial",
+     "size": [
+      1.2,
+      1.2,
+      0.3
+     ],
+     "at": [
+      0,
+      2.5,
+      5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": true
+    },
+    {
+     "kind": "box",
+     "size": [
+      3,
+      1.5,
+      2
+     ],
+     "at": [
+      -9,
+      1.75,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    }
+   ]
+  },
+  "w21": {
+   "parts": [
+    {
+     "kind": "box",
+     "size": [
+      2.5,
+      1.6,
+      3.5
+     ],
+     "at": [
+      0,
+      1.2,
+      -9
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.4,
+      3,
+      0.4
+     ],
+     "at": [
+      0,
+      1.0,
+      -11.6
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      2.4,
+      1.4,
+      4
+     ],
+     "at": [
+      0,
+      1.1,
+      -4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      2.4,
+      1.4,
+      4
+     ],
+     "at": [
+      0,
+      1.1,
+      1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      2.4,
+      1.4,
+      4
+     ],
+     "at": [
+      0,
+      1.1,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.5,
+      0.3,
+      17
+     ],
+     "at": [
+      -1.5,
+      0.15,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.5,
+      0.3,
+      17
+     ],
+     "at": [
+      1.5,
+      0.15,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "wing",
+     "size": [
+      0.6,
+      0.8,
+      0.8
+     ],
+     "at": [
+      -1.5,
+      0.4,
+      -9.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "wing",
+     "size": [
+      0.6,
+      0.8,
+      0.8
+     ],
+     "at": [
+      1.5,
+      0.4,
+      -9.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.12,
+      0.12,
+      17
+     ],
+     "at": [
+      0,
+      2.1,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.3,
+      1.2,
+      0.3
+     ],
+     "at": [
+      -1.5,
+      0.1,
+      8.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.3,
+      1.2,
+      0.3
+     ],
+     "at": [
+      1.5,
+      0.1,
+      8.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w22": {
+   "parts": [
+    {
+     "kind": "box",
+     "size": [
+      3,
+      0.6,
+      8
+     ],
+     "at": [
+      0,
+      0.4,
+      -10
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      3,
+      0.6,
+      8
+     ],
+     "at": [
+      0,
+      0.4,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      3,
+      0.6,
+      8
+     ],
+     "at": [
+      0,
+      0.4,
+      10
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2.4,
+      1.2,
+      6
+     ],
+     "at": [
+      0,
+      1.3,
+      -10
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2.4,
+      1.2,
+      6
+     ],
+     "at": [
+      0,
+      1.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2.4,
+      1.2,
+      6
+     ],
+     "at": [
+      0,
+      1.3,
+      10
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.15,
+      0.15,
+      26
+     ],
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      12,
+      0.3,
+      30
+     ],
+     "at": [
+      0,
+      0.05,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      1.2,
+      2.5,
+      1.2
+     ],
+     "at": [
+      0,
+      1.25,
+      16
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "rotor",
+     "size": [
+      1.6,
+      1.6,
+      1.2
+     ],
+     "at": [
+      0,
+      2.8,
+      16
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.2,
+      5,
+      0.2
+     ],
+     "at": [
+      0,
+      3.5,
+      -14.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    }
+   ]
+  },
+  "w23": {
+   "parts": [
+    {
+     "kind": "box",
+     "size": [
+      0.12,
+      0.03,
+      0.16
+     ],
+     "at": [
+      0,
+      0.015,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.115,
+      0.03,
+      0.155
+     ],
+     "at": [
+      0,
+      0.045,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "gimbal",
+     "size": [
+      0.09,
+      0.02,
+      0.09
+     ],
+     "at": [
+      0,
+      0.07,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "rotor",
+     "size": [
+      0.06,
+      0.015,
+      0.06
+     ],
+     "at": [
+      0,
+      0.07,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.012,
+      0.012,
+      0.012
+     ],
+     "at": [
+      0,
+      0.07,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      0.05,
+      0.008,
+      0.05
+     ],
+     "at": [
+      0,
+      0.064,
+      0.055
+     ],
+     "rot": [
+      -20,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "dial",
+     "size": [
+      0.035,
+      0.008,
+      0.035
+     ],
+     "at": [
+      -0.035,
+      0.064,
+      -0.05
+     ],
+     "rot": [
+      -20,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.12,
+      0.004,
+      0.16
+     ],
+     "at": [
+      0,
+      0.062,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.008,
+      0.03,
+      0.008
+     ],
+     "at": [
+      0.05,
+      0.075,
+      -0.065
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.004,
+      0.05,
+      0.004
+     ],
+     "at": [
+      0.05,
+      0.11,
+      -0.065
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w24": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      3.0,
+      0.3,
+      2.0
+     ],
+     "at": [
+      0,
+      0.15,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      2.4,
+      0.2,
+      1.5
+     ],
+     "at": [
+      0,
+      0.4,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      2.0,
+      0.15,
+      1.2
+     ],
+     "at": [
+      0,
+      0.575,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.15,
+      0.1,
+      1.0
+     ],
+     "at": [
+      -0.8,
+      0.7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.15,
+      0.1,
+      1.0
+     ],
+     "at": [
+      -0.4,
+      0.7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.15,
+      0.1,
+      1.0
+     ],
+     "at": [
+      0.0,
+      0.7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.15,
+      0.1,
+      1.0
+     ],
+     "at": [
+      0.4,
+      0.7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.15,
+      0.1,
+      1.0
+     ],
+     "at": [
+      0.8,
+      0.7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.6,
+      0.08,
+      0.6
+     ],
+     "at": [
+      0.55,
+      0.69,
+      0.35
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.35,
+      0.06,
+      0.35
+     ],
+     "at": [
+      -0.6,
+      0.68,
+      -0.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.12,
+      0.12,
+      1.8
+     ],
+     "at": [
+      0,
+      0.25,
+      1.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": true
+    }
+   ]
+  },
+  "w25": {
+   "parts": [
+    {
+     "kind": "vessel",
+     "size": [
+      3,
+      2.5,
+      16
+     ],
+     "at": [
+      0,
+      3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "wing",
+     "size": [
+      20,
+      0.4,
+      5
+     ],
+     "at": [
+      0,
+      4.2,
+      1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "wing",
+     "size": [
+      7,
+      0.3,
+      2.5
+     ],
+     "at": [
+      0,
+      4,
+      -7.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "wing",
+     "size": [
+      0.3,
+      2.5,
+      2.5
+     ],
+     "at": [
+      0,
+      5.3,
+      -7.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "rotor",
+     "size": [
+      3.2,
+      3.2,
+      0.3
+     ],
+     "at": [
+      0,
+      3,
+      8.6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      1.6,
+      1.4,
+      2
+     ],
+     "at": [
+      0,
+      3,
+      7.4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.3,
+      0.3,
+      2.5
+     ],
+     "at": [
+      0,
+      4.6,
+      5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      2.2,
+      0.6,
+      6
+     ],
+     "at": [
+      0,
+      1.4,
+      -1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.2,
+      1.2,
+      0.2
+     ],
+     "at": [
+      -3,
+      3.4,
+      1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.2,
+      1.2,
+      0.2
+     ],
+     "at": [
+      3,
+      3.4,
+      1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      1.8,
+      0.8,
+      3
+     ],
+     "at": [
+      0,
+      4.5,
+      3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    }
+   ]
+  },
+  "w26": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      1.2,
+      0.1,
+      0.6
+     ],
+     "at": [
+      0,
+      0.05,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.12,
+      3.0,
+      0.12
+     ],
+     "at": [
+      -0.4,
+      1.6,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.5,
+      0.3,
+      0.3
+     ],
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      0.25,
+      0.7,
+      0.25
+     ],
+     "at": [
+      0,
+      0.8,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.06,
+      0.9,
+      0.06
+     ],
+     "at": [
+      0.2,
+      1.0,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.06,
+      0.9,
+      0.06
+     ],
+     "at": [
+      -0.2,
+      1.0,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      0.4,
+      0.04,
+      1.2
+     ],
+     "at": [
+      0,
+      1.6,
+      0.35
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.05,
+      0.05,
+      1.6
+     ],
+     "at": [
+      0,
+      1.0,
+      0.1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.04,
+      0.5,
+      0.02
+     ],
+     "at": [
+      0.15,
+      1.9,
+      0.38
+     ],
+     "rot": [
+      0,
+      0,
+      15
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.3,
+      0.05,
+      0.3
+     ],
+     "at": [
+      0,
+      0.17,
+      0.4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w27": {
+   "parts": [
+    {
+     "kind": "mast",
+     "size": [
+      0.3,
+      9,
+      0.3
+     ],
+     "at": [
+      -10,
+      4.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "wing",
+     "size": [
+      7,
+      6,
+      0.2
+     ],
+     "at": [
+      -10,
+      11,
+      0
+     ],
+     "rot": [
+      10,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      4,
+      0.6,
+      2.4
+     ],
+     "at": [
+      -10,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      5,
+      1.6,
+      2.6
+     ],
+     "at": [
+      -3,
+      1.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      5,
+      1.6,
+      2.6
+     ],
+     "at": [
+      3,
+      1.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      5,
+      1.6,
+      2.6
+     ],
+     "at": [
+      9,
+      1.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      5.4,
+      0.25,
+      0.4
+     ],
+     "at": [
+      -3,
+      0.15,
+      0.9
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      5.4,
+      0.25,
+      0.4
+     ],
+     "at": [
+      3,
+      0.15,
+      0.9
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      5.4,
+      0.25,
+      0.4
+     ],
+     "at": [
+      9,
+      0.15,
+      0.9
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.1,
+      0.1,
+      6
+     ],
+     "at": [
+      -6.5,
+      0.6,
+      0
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.1,
+      0.1,
+      1
+     ],
+     "at": [
+      0.1,
+      0.6,
+      0
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.15,
+      0.9,
+      0.15
+     ],
+     "at": [
+      11.8,
+      0.5,
+      0.8
+     ],
+     "rot": [
+      0,
+      0,
+      20
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      30,
+      0.1,
+      5
+     ],
+     "at": [
+      0,
+      0.05,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    }
+   ]
+  },
+  "w28": {
+   "parts": [
+    {
+     "kind": "box",
+     "size": [
+      3.2,
+      0.6,
+      1.8
+     ],
+     "at": [
+      0,
+      0.7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      3.6,
+      0.5,
+      0.5
+     ],
+     "at": [
+      0,
+      0.25,
+      0.85
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      3.6,
+      0.5,
+      0.5
+     ],
+     "at": [
+      0,
+      0.25,
+      -0.85
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      1.4,
+      1.5,
+      1.4
+     ],
+     "at": [
+      -0.6,
+      1.75,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.12,
+      1.8,
+      0.12
+     ],
+     "at": [
+      1.0,
+      2.0,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.1,
+      1.6,
+      0.1
+     ],
+     "at": [
+      1.5,
+      1.5,
+      0.6
+     ],
+     "rot": [
+      0,
+      0,
+      70
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.1,
+      1.6,
+      0.1
+     ],
+     "at": [
+      1.5,
+      1.5,
+      -0.6
+     ],
+     "rot": [
+      0,
+      0,
+      70
+     ],
+     "material": "bronze",
+     "emits": true
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.3,
+      0.3,
+      0.3
+     ],
+     "at": [
+      1.0,
+      3.0,
+      0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.3,
+      0.3,
+      0.3
+     ],
+     "at": [
+      1.0,
+      3.0,
+      -0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "disc",
+     "size": [
+      1.0,
+      0.1,
+      1.0
+     ],
+     "at": [
+      -1.0,
+      1.1,
+      -0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "rotor",
+     "size": [
+      0.6,
+      0.05,
+      0.6
+     ],
+     "at": [
+      -1.0,
+      1.3,
+      -0.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    }
+   ]
+  },
+  "w29": {
+   "parts": [
+    {
+     "kind": "box",
+     "size": [
+      10,
+      3.5,
+      7
+     ],
+     "at": [
+      0,
+      1.75,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      11,
+      0.4,
+      8
+     ],
+     "at": [
+      0,
+      0.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      3,
+      2.4,
+      0.3
+     ],
+     "at": [
+      0,
+      1.4,
+      3.6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      4.5,
+      0.25,
+      3
+     ],
+     "at": [
+      -2.5,
+      3.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      12
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      4.5,
+      0.25,
+      3
+     ],
+     "at": [
+      2.5,
+      3.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      -12
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      4.5,
+      0.25,
+      3
+     ],
+     "at": [
+      -2.5,
+      3.9,
+      -3.2
+     ],
+     "rot": [
+      0,
+      0,
+      12
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      4.5,
+      0.25,
+      3
+     ],
+     "at": [
+      2.5,
+      3.9,
+      -3.2
+     ],
+     "rot": [
+      0,
+      0,
+      -12
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.3,
+      3,
+      0.3
+     ],
+     "at": [
+      -4.6,
+      2,
+      2.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.3,
+      3,
+      0.3
+     ],
+     "at": [
+      4.6,
+      2,
+      2.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      8,
+      1.5,
+      0.4
+     ],
+     "at": [
+      0,
+      1.5,
+      -3.7
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      0.9,
+      1.1,
+      0.9
+     ],
+     "at": [
+      -2.8,
+      0.95,
+      4.4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      0.9,
+      1.1,
+      0.9
+     ],
+     "at": [
+      2.8,
+      0.95,
+      4.4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      0.7,
+      0.9,
+      0.7
+     ],
+     "at": [
+      0,
+      0.85,
+      4.8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    }
+   ]
+  },
+  "w30": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      18,
+      0.6,
+      12
+     ],
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      10,
+      5,
+      7
+     ],
+     "at": [
+      -2,
+      3.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "wing",
+     "size": [
+      11,
+      0.4,
+      4.2
+     ],
+     "at": [
+      -2,
+      6.3,
+      -2.0
+     ],
+     "rot": [
+      0,
+      0,
+      25
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "wing",
+     "size": [
+      11,
+      0.4,
+      4.2
+     ],
+     "at": [
+      -2,
+      6.3,
+      2.0
+     ],
+     "rot": [
+      0,
+      0,
+      -25
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3,
+      5,
+      3
+     ],
+     "at": [
+      5.5,
+      3.1,
+      -2.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3,
+      5,
+      3
+     ],
+     "at": [
+      5.5,
+      3.1,
+      2.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.6,
+      0.6,
+      6
+     ],
+     "at": [
+      5.5,
+      6.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.8,
+      0.8,
+      9
+     ],
+     "at": [
+      -9.5,
+      1.4,
+      0
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      1.2,
+      9,
+      1.2
+     ],
+     "at": [
+      -5.5,
+      5.1,
+      3.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      3,
+      1.2,
+      2
+     ],
+     "at": [
+      -11,
+      0.9,
+      5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      3,
+      1.2,
+      2
+     ],
+     "at": [
+      -8,
+      0.9,
+      5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      8,
+      1.5,
+      4
+     ],
+     "at": [
+      -10,
+      0.75,
+      -7
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      2,
+      0.3,
+      2
+     ],
+     "at": [
+      5.5,
+      5.8,
+      0
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    }
+   ]
+  },
+  "w31": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      3,
+      0.4,
+      3
+     ],
+     "at": [
+      0,
+      0.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      6,
+      0.8
+     ],
+     "at": [
+      0,
+      3.4,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      1.2,
+      1.5,
+      1.2
+     ],
+     "at": [
+      0,
+      7.15,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2.2,
+      2,
+      2.2
+     ],
+     "at": [
+      0,
+      8.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.5,
+      3,
+      0.5
+     ],
+     "at": [
+      0,
+      11.4,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      2.8,
+      0.3,
+      2.8
+     ],
+     "at": [
+      0,
+      7.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.25,
+      0.25,
+      8
+     ],
+     "at": [
+      0,
+      0.5,
+      5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.25,
+      0.25,
+      8
+     ],
+     "at": [
+      0,
+      0.5,
+      -5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.25,
+      0.25,
+      8
+     ],
+     "at": [
+      5,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.25,
+      0.25,
+      8
+     ],
+     "at": [
+      -5,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.8,
+      0.8,
+      0.8
+     ],
+     "at": [
+      3,
+      0.5,
+      4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.8,
+      0.8,
+      0.8
+     ],
+     "at": [
+      -3,
+      0.5,
+      -4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    }
+   ]
+  },
+  "w32": {
+   "parts": [
+    {
+     "kind": "disc",
+     "size": [
+      0.24,
+      0.05,
+      0.24
+     ],
+     "at": [
+      0,
+      0.025,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.26,
+      0.015,
+      0.26
+     ],
+     "at": [
+      0,
+      0.057,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.2,
+      0.02,
+      0.2
+     ],
+     "at": [
+      0,
+      0.075,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.08,
+      0.012,
+      0.08
+     ],
+     "at": [
+      0,
+      0.091,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.05,
+      0.01,
+      0.012
+     ],
+     "at": [
+      0,
+      0.099,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.012,
+      0.01,
+      0.05
+     ],
+     "at": [
+      0,
+      0.099,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.04,
+      0.03,
+      0.04
+     ],
+     "at": [
+      0.08,
+      0.1,
+      0.05
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.035,
+      0.025,
+      0.035
+     ],
+     "at": [
+      -0.07,
+      0.098,
+      -0.06
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "plinth",
+     "size": [
+      0.6,
+      0.04,
+      0.6
+     ],
+     "at": [
+      0,
+      -0.02,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    }
+   ]
+  },
+  "w33": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      12,
+      0.6,
+      8
+     ],
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3,
+      4,
+      3
+     ],
+     "at": [
+      -4,
+      2.6,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3,
+      4,
+      3
+     ],
+     "at": [
+      0,
+      2.6,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3,
+      4,
+      3
+     ],
+     "at": [
+      4,
+      2.6,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      3.4,
+      0.3,
+      3.4
+     ],
+     "at": [
+      -4,
+      4.75,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      3.4,
+      0.3,
+      3.4
+     ],
+     "at": [
+      0,
+      4.75,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      3.4,
+      0.3,
+      3.4
+     ],
+     "at": [
+      4,
+      4.75,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      8,
+      1,
+      1.6
+     ],
+     "at": [
+      0,
+      1.1,
+      2.4
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      7.4,
+      0.15,
+      1.2
+     ],
+     "at": [
+      0,
+      1.65,
+      2.4
+     ],
+     "rot": [
+      -15,
+      0,
+      0
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      1.2,
+      1.2,
+      0.3
+     ],
+     "at": [
+      -5.2,
+      2.4,
+      2.6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.3,
+      7,
+      0.3
+     ],
+     "at": [
+      5.4,
+      4.1,
+      2.8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.6,
+      0.6,
+      0.6
+     ],
+     "at": [
+      5.4,
+      7.8,
+      2.8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    }
+   ]
+  },
+  "w34": {
+   "parts": [
+    {
+     "kind": "box",
+     "size": [
+      2.2,
+      0.1,
+      1.4
+     ],
+     "at": [
+      0,
+      0.05,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.9,
+      0.03,
+      0.12
+     ],
+     "at": [
+      -0.5,
+      0.16,
+      0.1
+     ],
+     "rot": [
+      0,
+      15,
+      0
+     ],
+     "material": "bone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      0.3,
+      0.05,
+      0.1
+     ],
+     "at": [
+      -0.95,
+      0.15,
+      0.1
+     ],
+     "rot": [
+      0,
+      15,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      0.5,
+      0.35,
+      0.35
+     ],
+     "at": [
+      0.4,
+      0.27,
+      -0.1
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.4,
+      0.04,
+      0.3
+     ],
+     "at": [
+      0.4,
+      0.46,
+      -0.1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.14,
+      0.12,
+      0.14
+     ],
+     "at": [
+      0.75,
+      0.18,
+      0.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.14,
+      0.12,
+      0.14
+     ],
+     "at": [
+      0.95,
+      0.18,
+      0.15
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.05,
+      1.1,
+      0.05
+     ],
+     "at": [
+      -0.9,
+      0.65,
+      -0.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.05,
+      1.1,
+      0.05
+     ],
+     "at": [
+      -0.2,
+      0.65,
+      -0.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.9,
+      0.04,
+      0.04
+     ],
+     "at": [
+      -0.55,
+      1.18,
+      -0.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      0.6,
+      0.8,
+      0.03
+     ],
+     "at": [
+      -0.55,
+      0.75,
+      -0.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    }
+   ]
+  },
+  "w35": {
+   "parts": [
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      6,
+      0.8
+     ],
+     "at": [
+      -9,
+      3,
+      -6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      6,
+      0.8
+     ],
+     "at": [
+      9,
+      3,
+      -6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      6,
+      0.8
+     ],
+     "at": [
+      -9,
+      3,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      6,
+      0.8
+     ],
+     "at": [
+      9,
+      3,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      20,
+      0.6,
+      14
+     ],
+     "at": [
+      0,
+      6.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      18,
+      0.8,
+      12
+     ],
+     "at": [
+      0,
+      7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      13,
+      0.7,
+      8.5
+     ],
+     "at": [
+      0,
+      8,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      8,
+      0.6,
+      5
+     ],
+     "at": [
+      0,
+      8.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      14,
+      0.1,
+      9
+     ],
+     "at": [
+      0,
+      9.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.3,
+      5,
+      0.3
+     ],
+     "at": [
+      0,
+      11.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      1.2,
+      1.2,
+      0.3
+     ],
+     "at": [
+      0,
+      14.2,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": true
+    }
+   ]
+  },
+  "w36": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      8,
+      0.6,
+      6
+     ],
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      1.2,
+      7,
+      1.2
+     ],
+     "at": [
+      -2,
+      4.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      1.6,
+      0.5,
+      1.6
+     ],
+     "at": [
+      -2,
+      7.85,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      0.2,
+      0.2,
+      0.2
+     ],
+     "at": [
+      -2,
+      8.15,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      2.4,
+      0.1,
+      2.4
+     ],
+     "at": [
+      -2,
+      0.65,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      1.8,
+      1.8,
+      0.15
+     ],
+     "at": [
+      -0.9,
+      3.5,
+      0.7
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      1.4,
+      1.8,
+      1.4
+     ],
+     "at": [
+      1.8,
+      1.5,
+      -1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      1.4,
+      1.8,
+      1.4
+     ],
+     "at": [
+      3.4,
+      1.5,
+      -1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      3.6,
+      0.4,
+      1.8
+     ],
+     "at": [
+      2.6,
+      0.8,
+      -1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.15,
+      0.15,
+      1.6
+     ],
+     "at": [
+      2.6,
+      2.1,
+      -1
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      1.2,
+      1.2,
+      0.12
+     ],
+     "at": [
+      2.6,
+      3.2,
+      -1
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    }
+   ]
+  },
+  "w37": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      28,
+      1,
+      24
+     ],
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      6,
+      4,
+      6
+     ],
+     "at": [
+      0,
+      3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      4,
+      4,
+      4
+     ],
+     "at": [
+      0,
+      7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.5,
+      10,
+      0.5
+     ],
+     "at": [
+      0,
+      10,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "mirror",
+     "size": [
+      3,
+      0.2,
+      3
+     ],
+     "at": [
+      0,
+      15.5,
+      0
+     ],
+     "rot": [
+      30,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      1,
+      9,
+      1
+     ],
+     "at": [
+      -11,
+      5.5,
+      8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      2,
+      2,
+      0.5
+     ],
+     "at": [
+      -11,
+      10.5,
+      8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": true
+    },
+    {
+     "kind": "column",
+     "size": [
+      1,
+      9,
+      1
+     ],
+     "at": [
+      -11,
+      5.5,
+      -8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      6,
+      3,
+      6
+     ],
+     "at": [
+      11,
+      2.5,
+      7
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      6,
+      3,
+      6
+     ],
+     "at": [
+      11,
+      2.5,
+      -7
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.8,
+      0.8,
+      14
+     ],
+     "at": [
+      11,
+      1.6,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.8,
+      0.8,
+      10
+     ],
+     "at": [
+      5.5,
+      1.6,
+      0
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      5,
+      0.3,
+      5
+     ],
+     "at": [
+      -4,
+      1.2,
+      10
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    },
+    {
+     "kind": "disc",
+     "size": [
+      4,
+      0.3,
+      4
+     ],
+     "at": [
+      4,
+      1.2,
+      10
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "fabric",
+     "emits": false
+    }
+   ]
+  },
+  "w38": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      22,
+      0.6,
+      10
+     ],
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      16,
+      5,
+      8
+     ],
+     "at": [
+      -2,
+      3.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "wing",
+     "size": [
+      17,
+      0.5,
+      5
+     ],
+     "at": [
+      -2,
+      6.2,
+      -2.2
+     ],
+     "rot": [
+      0,
+      0,
+      25
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "wing",
+     "size": [
+      17,
+      0.5,
+      5
+     ],
+     "at": [
+      -2,
+      6.2,
+      2.2
+     ],
+     "rot": [
+      0,
+      0,
+      -25
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      12,
+      3,
+      0.6
+     ],
+     "at": [
+      -2,
+      2.6,
+      4.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": true
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2,
+      3,
+      2
+     ],
+     "at": [
+      -7,
+      8,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2,
+      3,
+      2
+     ],
+     "at": [
+      -3,
+      8,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      2,
+      3,
+      2
+     ],
+     "at": [
+      1,
+      8,
+      -1.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.4,
+      0.4,
+      14
+     ],
+     "at": [
+      -3,
+      6.8,
+      0.8
+     ],
+     "rot": [
+      0,
+      90,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      5,
+      4,
+      7
+     ],
+     "at": [
+      8.5,
+      2.6,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      2,
+      3,
+      0.3
+     ],
+     "at": [
+      8.5,
+      2.3,
+      3.6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      1,
+      6,
+      1
+     ],
+     "at": [
+      -9.5,
+      3.6,
+      4.3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    }
+   ]
+  },
+  "w39": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      8,
+      1,
+      8
+     ],
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      6,
+      6,
+      6
+     ],
+     "at": [
+      0,
+      4,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      3.5,
+      3,
+      3.5
+     ],
+     "at": [
+      0,
+      8.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      5,
+      0.6,
+      5
+     ],
+     "at": [
+      0,
+      7.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "dial",
+     "size": [
+      2.4,
+      2.4,
+      0.4
+     ],
+     "at": [
+      0,
+      5,
+      3.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      4,
+      0.8
+     ],
+     "at": [
+      -2.5,
+      9.5,
+      -2.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      4,
+      0.8
+     ],
+     "at": [
+      2.5,
+      9.5,
+      -2.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      4,
+      0.8
+     ],
+     "at": [
+      2.5,
+      9.5,
+      2.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.8,
+      4,
+      0.8
+     ],
+     "at": [
+      -2.5,
+      9.5,
+      2.5
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      6,
+      0.6,
+      6
+     ],
+     "at": [
+      0,
+      11.8,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      1.2,
+      3,
+      1.2
+     ],
+     "at": [
+      4.5,
+      11.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      70
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      4,
+      5,
+      0.6
+     ],
+     "at": [
+      0,
+      3,
+      8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "wood",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      5,
+      0.8,
+      8
+     ],
+     "at": [
+      0,
+      0.4,
+      6
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    }
+   ]
+  },
+  "w40": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      24,
+      1.5,
+      6
+     ],
+     "at": [
+      0,
+      0.75,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      22,
+      4,
+      4.5
+     ],
+     "at": [
+      0,
+      3.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      4,
+      3,
+      3
+     ],
+     "at": [
+      -8,
+      3.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      4,
+      3,
+      3
+     ],
+     "at": [
+      0,
+      3.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      4,
+      3,
+      3
+     ],
+     "at": [
+      8,
+      3.5,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "box",
+     "size": [
+      24,
+      1.2,
+      1.5
+     ],
+     "at": [
+      0,
+      6.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      20,
+      2,
+      1.5
+     ],
+     "at": [
+      0,
+      1.2,
+      -4.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "rotor",
+     "size": [
+      2.5,
+      2.5,
+      0.8
+     ],
+     "at": [
+      -4,
+      3,
+      2.6
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "rotor",
+     "size": [
+      2.5,
+      2.5,
+      0.8
+     ],
+     "at": [
+      4,
+      3,
+      2.6
+     ],
+     "rot": [
+      90,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      2.5,
+      3,
+      0.4
+     ],
+     "at": [
+      -12,
+      3.5,
+      2.8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "shutter",
+     "size": [
+      2.5,
+      3,
+      0.4
+     ],
+     "at": [
+      12,
+      3.5,
+      2.8
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.5,
+      22,
+      0.5
+     ],
+     "at": [
+      0,
+      5.2,
+      2.4
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "bronze",
+     "emits": true
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.8,
+      5,
+      0.8
+     ],
+     "at": [
+      -11,
+      8.7,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": true
+    }
+   ]
+  },
+  "w41": {
+   "parts": [
+    {
+     "kind": "plinth",
+     "size": [
+      12,
+      0.6,
+      8
+     ],
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "stone",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.4,
+      6,
+      0.4
+     ],
+     "at": [
+      -5,
+      3.6,
+      -3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.4,
+      6,
+      0.4
+     ],
+     "at": [
+      5,
+      3.6,
+      -3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.4,
+      6,
+      0.4
+     ],
+     "at": [
+      -5,
+      3.6,
+      3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "column",
+     "size": [
+      0.4,
+      6,
+      0.4
+     ],
+     "at": [
+      5,
+      3.6,
+      3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      10,
+      5,
+      0.3
+     ],
+     "at": [
+      0,
+      3.5,
+      -3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "lattice",
+     "size": [
+      10,
+      5,
+      0.3
+     ],
+     "at": [
+      0,
+      3.5,
+      3
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "living",
+     "emits": false
+    },
+    {
+     "kind": "pipe",
+     "size": [
+      0.3,
+      10,
+      0.3
+     ],
+     "at": [
+      0,
+      6.4,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      90
+     ],
+     "material": "ceramic",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      1.2,
+      1.6,
+      1.2
+     ],
+     "at": [
+      -3,
+      1.4,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "vessel",
+     "size": [
+      1.2,
+      1.6,
+      1.2
+     ],
+     "at": [
+      3,
+      1.4,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": false
+    },
+    {
+     "kind": "mast",
+     "size": [
+      0.2,
+      3,
+      0.2
+     ],
+     "at": [
+      0,
+      2.1,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "bronze",
+     "emits": false
+    },
+    {
+     "kind": "sphere",
+     "size": [
+      0.6,
+      0.6,
+      0.6
+     ],
+     "at": [
+      0,
+      3.9,
+      0
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "glass",
+     "emits": true
+    },
+    {
+     "kind": "dial",
+     "size": [
+      0.8,
+      0.8,
+      0.2
+     ],
+     "at": [
+      0,
+      1.2,
+      4.2
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "material": "ceramic",
+     "emits": true
+    }
+   ]
+  }
+ }
+}
