@@ -3,6 +3,34 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-23, The Roaster has a meta description (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
+  today, so this run took the next finding the 2026-11-17 sweep left open: pages with no meta description. Of the
+  six left in that list, labs/roaster.html is the only lab listed on the labs hub (src/ui/lab.js); the others are
+  the 404 page, two demo pages, the hero prototype and labs/claude-prep/. This run did not repeat the full sweep.
+- Cause: labs/roaster.html had a title and no meta description, so a search result or a shared link showed no
+  summary of the page.
+- Changed (labs/roaster.html, one added line): a meta description of 300 characters, taken from the page's own
+  subtitle and its blurb on the labs hub: a model that roasts the myth of a named system or of the visitor's own
+  claim, and grades how much of it is real. Nothing a visitor sees changed.
+- Still open for later runs of item 1, from the 2026-11-17 sweep and not re-checked today: 404.html,
+  hero_proto.html, labs/claude-prep/, leak_map_demo.html and triad_demos.html have no meta description;
+  labs/claude-prep/ requests seal.json, which returns 404 (Luis decides). Item 2 was not re-checked today; on
+  2026-11-21 no tracked file outside _archive/ referenced labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 31 pages, 0 findings; levels 32 labs, 0
+  errors; lab tests 105 files, 0 failed; atlas, stories and
+  evolution checks pass (stories prints NOT_CHECKED for the private plans); anti-tells selftest 27 of 27; node tools/anti_tells.mjs scan labs/roaster.html lists 33
+  tells before and after, none on the changed line. No script changed, so there was no syntax check to run. The
+  mutate run was not repeated (no tool changed) and runs in the gates workflow. Render: labs/roaster.html at 1280
+  px and 390 px in headless Chromium over a local http server; the description is present, the document scroll
+  width equals the screen width, and the only console errors are the expected ones, the live roast request refused
+  by CORS from localhost, as on 2026-11-19. Forbidden-name check: runs in the gates workflow on the pull request.
+- Gates on pull request #95: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+  The run applied tools/ship_pr.mjs's rules by hand over the GitHub API, as on 2026-11-22: both required checks and
+  every other check passed on the head commit, and the branch contains main.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
+
 ## 2026-11-22, Seed has a meta description (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
