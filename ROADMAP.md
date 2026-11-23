@@ -16,6 +16,9 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-23: Item 1, one finding: The Roaster (labs/roaster.html) had no meta description; it now has one taken
+  from its subtitle and its hub blurb. Item 1 stays in "Next". Pull request "evolve 2026-11-23: roaster has a meta
+  description".
 - 2026-11-22: Item 1, one finding: Seed (labs/seed.html) had no meta description; it now has one taken from its
   subtitle and its hub blurb. Item 1 stays in "Next". Pull request "evolve 2026-11-22: seed has a meta description".
 - 2026-11-21: Item 1, one finding: The Figure (labs/figure.html) had no meta description; it now has one taken
