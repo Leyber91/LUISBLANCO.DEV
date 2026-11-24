@@ -3,6 +3,36 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-24, The 404 page has a meta description (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
+  today, so this run took the next finding the 2026-11-17 sweep left open: pages with no meta description. Of the
+  five left in that list, this run took 404.html, which GitHub Pages serves for every address that has no page.
+  labs/claude-prep/ is also listed on the labs hub (labs/assets/js/config/site.config.js), but its index.html is
+  the output of a build (it loads assets/index-BW1plUG6.js) and its source is not in this repository, so a hand
+  edit there may be lost on the next publish (Luis decides). hero_proto.html, leak_map_demo.html and
+  triad_demos.html are linked from no page; the home page's demos were ported from triad_demos into
+  src/routes/spa-demos.js. This run did not repeat the full sweep.
+- Cause: 404.html had a title and no meta description, so a shared link to a missing address showed no summary.
+- Changed (404.html, one added line): a meta description of 148 characters saying there is no page at the address
+  and that the home page links to the work, the labs and the log. The header comment names tools/publish_labs.py,
+  which is no longer in tools/, so nothing regenerates the file. Nothing a visitor sees changed.
+- Still open for later runs of item 1, from the 2026-11-17 sweep and not re-checked today: hero_proto.html,
+  labs/claude-prep/, leak_map_demo.html and triad_demos.html have no meta description; labs/claude-prep/ requests
+  seal.json, which returns 404 (Luis decides). Item 2 was not re-checked today; on 2026-11-21 no tracked file
+  outside _archive/ referenced labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 31 pages, 0 findings; levels 32 labs, 0
+  errors (levels selftest 12 of 12); lab tests 105 files, 0 failed; atlas selftest 114 of 114, stories 87
+  of 87, evolution 109 of 109, and their checks pass (stories prints NOT_CHECKED for the private plans); anti-tells
+  selftest 27 of 27, no new tells, and node tools/anti_tells.mjs scan 404.html finds 0. No script changed, so there was no syntax check to run. The mutate run was not repeated (no
+  tool changed) and runs in the gates workflow. Render: 404.html at 1280 px and 390 px in headless Chromium over a
+  local http server, 0 console errors, the description present, and the document scroll width equal to the screen
+  width. Forbidden-name check: runs in the gates workflow on the pull request.
+- Gates on pull request #96: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+  The run applied tools/ship_pr.mjs's rules by hand over the GitHub API, as on 2026-11-23: both required checks and
+  every other check passed on the head commit, and the branch contains main.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
+
 ## 2026-11-23, The Roaster has a meta description (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
