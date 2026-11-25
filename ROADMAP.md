@@ -16,6 +16,9 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-25: Item 1, one finding: the three-demonstrations page (triad_demos.html) had no meta description; it
+  now has one taken from its heading and its three cards. Item 1 stays in "Next". Pull request "evolve 2026-11-25:
+  demonstrations page has a meta description".
 - 2026-11-24: Item 1, one finding: the 404 page (404.html) had no meta description; it now has one saying there is
   no page at the address and where the home page leads. Item 1 stays in "Next". Pull request "evolve 2026-11-24:
   404 page has a meta description".
