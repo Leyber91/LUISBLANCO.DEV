@@ -3,6 +3,30 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-25, The three-demonstrations page has a meta description (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
+  today, so this run took the next finding the 2026-11-17 sweep left open: pages with no meta description. Of the
+  four left, labs/claude-prep/ is a build output whose source is not in this repository (Luis decides), and
+  hero_proto.html, leak_map_demo.html and triad_demos.html are linked from no page. This run took triad_demos.html
+  because the home page's demos were ported from it (src/routes/spa-demos.js) and it links to the other demos.
+- Cause: triad_demos.html had a title and no meta description, so a shared link to it showed no summary.
+- Changed (triad_demos.html, one added line): a meta description of 297 characters taken from the page's own
+  heading and its three cards: one rule, make the waste visible and drive it toward zero, and what each of The Leak
+  Map, TokenGateKeeper and Conjunction Driver does, with the page's note that the data is synthetic unless a live
+  source is named. Nothing a visitor sees changed.
+- Still open for later runs of item 1, from the 2026-11-17 sweep and not re-checked today: hero_proto.html,
+  labs/claude-prep/ and leak_map_demo.html have no meta description; labs/claude-prep/ requests seal.json, which
+  returns 404 (Luis decides). Item 2 was not re-checked today; on 2026-11-21 no tracked file outside _archive/
+  referenced labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 31 pages, 0 findings; levels 32 labs, 0
+  errors (levels selftest 12 of 12); CHECKS_REST. No script changed, so there was no syntax check to run. The
+  mutate run was not repeated (no tool changed) and runs in the gates workflow. Render: triad_demos.html at 1280 px
+  and 390 px in headless Chromium over a local http server, 0 console errors, the description present, and the
+  document scroll width equal to the screen width. Forbidden-name check: runs in the gates workflow on the pull
+  request.
+- Gates: GATES_PENDING
+
 ## 2026-11-24, The 404 page has a meta description (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
