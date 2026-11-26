@@ -3,6 +3,37 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-26, The Leak Map demo has a meta description (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
+  today, so this run took the next finding the 2026-11-17 sweep left open: pages with no meta description. Of the
+  three left, labs/claude-prep/ is a build output whose source is not in this repository (Luis decides), and
+  hero_proto.html and leak_map_demo.html are linked from no page. This run took leak_map_demo.html because the
+  three-demonstrations page, fixed on 2026-11-25, describes it first.
+- Cause: leak_map_demo.html had a title and no meta description, so a shared link to it showed no summary.
+- Changed (leak_map_demo.html, one added line): a meta description of 331 characters taken from the page's own
+  heading, subtitle and labels and from its four detectors: the dollars a logistics operation leaks each week,
+  each traced to the source rows that prove it (freight billed above contract, duplicate charges, expedite premiums
+  after a missed connection, stale fuel rates), then driven toward zero, on illustrative synthetic data. Nothing a
+  visitor sees changed.
+- Still open for later runs of item 1, from the 2026-11-17 sweep and not re-checked today: hero_proto.html and
+  labs/claude-prep/ have no meta description; labs/claude-prep/ requests seal.json, which returns 404 (Luis
+  decides). Item 2 was not re-checked today; on 2026-11-21 no tracked file outside _archive/ referenced
+  labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 31 pages, 0 findings; levels 32 labs, 0
+  errors (levels selftest 12 of 12); lab tests 105 files, 0 failed; atlas selftest 114 of 114, stories 87 of 87,
+  evolution 109 of 109, and their checks pass (stories and evolution print NOT_CHECKED for the private plans);
+  anti-tells selftest 27 of 27, no new tells, and node tools/anti_tells.mjs scan leak_map_demo.html lists 3 tells
+  before and after, none on the changed line. No script changed, so there was no syntax check to run. The mutate
+  run was not repeated (no tool changed) and runs in the gates workflow. Render: leak_map_demo.html at 1280 px and
+  390 px in headless Chromium over a local http server, 0 console errors, the description present, and the document
+  scroll width equal to the screen width. Forbidden-name check: runs in the gates workflow on the pull request.
+- Gates on pull request #98: privacy passed (selftest and forbidden-name scan), site passed (every step, lab tests
+  and the mutation test included), GitGuardian passed, on the first commit of the branch. The run applies
+  tools/ship_pr.mjs's rules by hand over the GitHub API, as on 2026-11-25: both required checks and every other
+  check must pass on the head commit, and the branch contains main.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
+
 ## 2026-11-25, The three-demonstrations page has a meta description (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main

@@ -16,6 +16,9 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-26: Item 1, one finding: the Leak Map demo (leak_map_demo.html) had no meta description; it now has one
+  taken from its heading, its subtitle and its four detectors. Item 1 stays in "Next". Pull request "evolve
+  2026-11-26: leak map demo has a meta description".
 - 2026-11-25: Item 1, one finding: the three-demonstrations page (triad_demos.html) had no meta description; it
   now has one taken from its heading and its three cards. Item 1 stays in "Next". Pull request "evolve 2026-11-25:
   demonstrations page has a meta description".
