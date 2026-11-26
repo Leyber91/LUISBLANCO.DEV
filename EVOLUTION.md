@@ -28,7 +28,11 @@ merged. A run that changed nothing still writes its entry, with the reason.
   run was not repeated (no tool changed) and runs in the gates workflow. Render: leak_map_demo.html at 1280 px and
   390 px in headless Chromium over a local http server, 0 console errors, the description present, and the document
   scroll width equal to the screen width. Forbidden-name check: runs in the gates workflow on the pull request.
-- Gates and merge: pending at the time of this commit.
+- Gates on pull request #98: privacy passed (selftest and forbidden-name scan), site passed (every step, lab tests
+  and the mutation test included), GitGuardian passed, on the first commit of the branch. The run applies
+  tools/ship_pr.mjs's rules by hand over the GitHub API, as on 2026-11-25: both required checks and every other
+  check must pass on the head commit, and the branch contains main.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-25, The three-demonstrations page has a meta description (roadmap item 1)
 
