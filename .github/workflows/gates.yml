@@ -45,9 +45,16 @@ jobs:
       - name: level ladders
         run: |
           if [ -f tools/levels.mjs ]; then node tools/levels.mjs selftest && node tools/levels.mjs check; else echo "NOT_CHECKED: tools/levels.mjs does not exist"; fi
+      # On a pull request tools/lab_tests.mjs asks git what changed since main (renames split, as mutate does) and runs
+      # only the test files a change can reach (their imports, the files they name or list, their data folders); a
+      # change it cannot place, or to the runner, runs them all. On a push to main every test runs. It says which way.
       - name: lab tests
         run: |
-          if [ -f tools/lab_tests.mjs ]; then node tools/lab_tests.mjs selftest && node tools/lab_tests.mjs; else echo "NOT_CHECKED: tools/lab_tests.mjs does not exist"; fi
+          if [ -f tools/lab_tests.mjs ]; then
+            since=""
+            if [ "${{ github.event_name }}" = "pull_request" ]; then since="--changed-since origin/main"; fi
+            node tools/lab_tests.mjs selftest && node tools/lab_tests.mjs $since
+          else echo "NOT_CHECKED: tools/lab_tests.mjs does not exist"; fi
       - name: atlas
         run: |
           if [ -f tools/atlas.mjs ]; then node tools/atlas.mjs selftest && node tools/atlas.mjs; else echo "NOT_CHECKED: tools/atlas.mjs does not exist"; fi
@@ -63,9 +70,9 @@ jobs:
           if [ -f tools/drive.mjs ]; then node tools/drive.mjs selftest; else echo "NOT_CHECKED: tools/drive.mjs does not exist"; fi
           if [ -f tools/invariants.mjs ]; then node tools/invariants.mjs selftest; else echo "NOT_CHECKED: tools/invariants.mjs does not exist"; fi
       # a selftest is only as good as the broken rules it catches: each listed rule is broken in a copy and must fail it.
-      # On a pull request tools/mutate.mjs asks git what changed since main (renames split) and runs a gated list (drive
-      # and invariants, about 55 minutes here; mutate's own, about 8) only when one of its files changed; on a push to
-      # main every list runs. It says which way it went.
+      # On a pull request tools/mutate.mjs asks git what changed since main (renames split) and runs a list (drive and
+      # invariants, about 55 minutes here; mutate's own, about 8; every other list since 2026-11-21) only when one of its
+      # files changed; on a push to main every list runs. It says which way it went.
       - name: mutation test of the gates
         run: |
           if [ -f tools/mutate.mjs ]; then
