@@ -3,6 +3,31 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-27, The hero prototype has a meta description (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
+  today, so this run took the next finding the 2026-11-17 sweep left open: pages with no meta description. Of the
+  two left, labs/claude-prep/ is a build output whose source is not in this repository (Luis decides), so this run
+  took hero_proto.html. No tracked page outside _archive/ links to it.
+- Cause: hero_proto.html had a title and no meta description, so a shared link to it showed no summary.
+- Changed (hero_proto.html, one added line): a meta description of 226 characters taken from the page's own name,
+  plate, figure label and counts: a prototype of the home page hero, the name on a blueprint plate, the autonomous
+  entity architecture drawn live as its figure (5 axes, 10 seeds, 4 mechanics, 4 ops and 3 rules), which a visitor
+  can drag to turn. Nothing a visitor sees changed.
+- Still open for later runs of item 1, from the 2026-11-17 sweep and not re-checked today: labs/claude-prep/ has no
+  meta description and requests seal.json, which returns 404 (Luis decides; its source is not in this repository).
+  With that, the routine has no meta-description finding left it can fix. Item 2 was not re-checked today; on
+  2026-11-21 no tracked file outside _archive/ referenced labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 31 pages, 0 findings; levels 32 labs, 0
+  errors (levels selftest 12 of 12); LAB_TESTS_RESULT; atlas selftest 114 of 114, stories 87 of 87, evolution 109
+  of 109, and their checks pass (stories and evolution print NOT_CHECKED for the private plans); anti-tells
+  selftest 27 of 27, and node tools/anti_tells.mjs scan hero_proto.html lists 4 tells before and after, none on the
+  changed line. No script changed, so there was no syntax check to run. The mutate run was not repeated (no tool
+  changed) and runs in the gates workflow. Render: hero_proto.html at 1280 px and 390 px in headless Chromium over
+  a local http server, 0 console errors, the description present, and the document scroll width equal to the
+  screen width. Forbidden-name check: runs in the gates workflow on the pull request.
+- Merged: pending the gates on the pull request.
+
 ## 2026-11-26, The Leak Map demo has a meta description (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
