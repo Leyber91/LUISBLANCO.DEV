@@ -350,33 +350,43 @@ function frameBox(frame, top, ground, aspect, cx) {
 }
 const r1k = (v) => Math.round(v * 1000) / 1000;
 
-/* The ghost of Earth's artifact: a coal-gas street lamp in faint ink, standing on the render's ground line and as tall
-   as the render's lamp. [ILLUSTRATIVE] The outline is a common form of the lamp, drawn from general knowledge; no
-   measured drawing was opened, and the two lamps are not to one scale. */
-export function drawEarthLamp(svg, supply, frame) {
+/* The ghost of Earth's artifact: a street lamp in faint ink, standing on the render's ground line and as tall as the
+   render's lamp, of the kind the world's data names (earth.kind): an oil lamp, its wick's flame over a font of oil
+   inside the lantern, or a coal-gas lamp, its jet fed by a main under the street, which earth.supply names. The lantern,
+   post and base are one outline for both. [ILLUSTRATIVE] The outline is a common form of the lamp, drawn from general
+   knowledge; no measured drawing was opened, and the two lamps are not to one scale. */
+export function drawEarthLamp(svg, earth, frame) {
   svg.replaceChildren();
   svg.setAttribute('viewBox', frameBox(frame, 2, 316, 180 / 338, 100));
   svg.setAttribute('preserveAspectRatio', 'xMidYMax meet');
   const g = svgEl('g', { class: 'ghost' }, svg);
   const p = (d, cls = '') => svgEl('path', { d, class: cls }, g);
+  const gas = earth.kind === 'gas';
   p('M50 60 L150 60 L135 155 L65 155 Z');                       // the glazed lantern
   p('M40 60 L100 18 L160 60');                                   // its roof
   p('M100 2 L100 18');                                           // the finial
   p('M68 60 L78 155 M132 60 L122 155');                          // the glazing bars
   p('M60 155 L140 155 L132 172 L68 172 Z');                      // the lantern's foot
-  p('M100 136 C92 126 94 112 100 102 C106 112 108 126 100 136 Z', 'flame');   // the gas jet
+  if (gas) p('M100 136 C92 126 94 112 100 102 C106 112 108 126 100 136 Z', 'flame');   // the gas jet
+  else {
+    p('M84 152 L116 152 L111 138 L89 138 Z');                    // the font of oil, on the lantern's floor
+    p('M100 138 L100 130');                                      // the wick
+    p('M100 130 C94 124 95 114 100 106 C105 114 106 124 100 130 Z', 'flame');   // its flame
+  }
   p('M94 172 L90 290 M106 172 L110 290');                        // the post
   p('M60 230 L140 230');                                         // the ladder bar
   p('M76 290 L124 290 L132 316 L68 316 Z');                      // the base
   p('M-40 316 L240 316', 'ground');                              // the street, on the render's ground line
-  p('M-40 323 L240 323', 'main');                                // the gas main under the street
-  p('M100 316 L100 323');
-  if (supply) {
-    const view = svg.parentElement;
-    let tag = view.querySelector('.earth-main');
-    if (!tag) { tag = document.createElement('span'); tag.className = 'earth-main'; view.appendChild(tag); }
-    tag.textContent = supply;
+  if (gas) {
+    p('M-40 323 L240 323', 'main');                              // the gas main under the street
+    p('M100 316 L100 323');
   }
+  const view = svg.parentElement;
+  let tag = view.querySelector('.earth-main');
+  if (earth.supply) {
+    if (!tag) { tag = document.createElement('span'); tag.className = 'earth-main'; view.appendChild(tag); }
+    tag.textContent = earth.supply;
+  } else if (tag) tag.remove();
 }
 
 /* The artifact in ink, computed from its parameter file: an elevation of the shelf-culture lamp (plinth, glass column,
