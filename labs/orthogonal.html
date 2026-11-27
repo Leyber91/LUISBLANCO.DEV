@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Orthogonal · Alternate Reality</title>
+<meta name="description" content="One world where lignin-eating fungi arrive early and coal never forms: the technologies it grew, each with what it needs, drawn beside Earth's, and a street lamp of glowing fungus under glass beside Earth's whale-oil lamp for the same job." />
+<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/plate.css" />
+<link rel="stylesheet" href="assets/css/os.css" />
+<link rel="stylesheet" href="assets/css/orthogonal.css" />
+</head>
+<body>
+<main class="sheet">
+  <i class="corner tl" aria-hidden="true"></i><i class="corner tr" aria-hidden="true"></i><i class="corner bl" aria-hidden="true"></i><i class="corner br" aria-hidden="true"></i>
+  <header class="head">
+    <div class="head-main">
+      <p class="kick-line" data-label>Plate A &middot; Alternate Reality &middot; Orthogonal &middot; <a class="earlier" href="altverse.html">the lab's earlier version, the world loom</a> &middot; <a class="earlier" href="orthogonal-catalog.html">the catalogue of 42 drafted worlds</a></p>
+      <h1 class="title" data-label>A world where the fungi came early</h1>
+      <p class="thesis"><span class="driver-line" data-label>Changed driver: <b>lignin-eating fungi before the Carboniferous</b>.</span> <span class="favours" data-claim><b class="t real">[REAL]</b> <span class="favours-text">The evidence favours the other branch: Nelsen et al. 2016 (PNAS) reject that coal formed because fungi could not yet digest lignin; Floudas et al. 2012 (Science) support that lag in part.</span></span></p>
+    </div>
+    <div class="head-side">
+      <a class="back" href="index.html" data-label>&larr; labs</a>
+      <div class="titleblock" aria-label="Title block" data-label>
+        <span>Sheet</span><span>A / 1</span>
+        <span>Rev</span><span>3</span>
+        <span>Date</span><span>2026-11-21</span>
+      </div>
+    </div>
+    <p class="verdict" id="verdict"><span class="verdict-lead" data-label>The engine:</span> <span class="verdict-claim" data-claim><b class="t real">[REAL]</b> <span class="verdict-text">Without coal, wood gas replaces coal gas, but gas still loses to kerosene on price.</span></span> <span class="verdict-claim" data-claim><b class="t ill">[ILLUSTRATIVE]</b> <span class="verdict-text">The mycelial lamp needs the bright strains and, unpriced, loses to whale oil.</span></span></p>
+    <p class="verdict" id="eras"><span class="verdict-lead" data-label>Earth's eras:</span> <span class="verdict-claim" data-claim><b class="t real">[REAL]</b> <span class="verdict-text">Ranked by the price of light at each date, the rules regrow 5 of Earth's 6 lighting eras, against 3 of 6 by first price; missed: the arc lamp (Table 1.6 gives it no price).</span></span></p>
+  </header>
+
+  <section class="lineage" aria-label="The lineage of the lamp: this world's branch and Earth's">
+    <div class="lin-box" id="lineage">
+      <canvas id="lineage-fog" class="lin-fog" aria-hidden="true"></canvas>
+      <svg id="lineage-svg" role="group" aria-label="Choose a step to read it; the arrow keys move along the rows and across to Earth's step"></svg>
+    </div>
+    <p class="legend" data-label><span><svg class="lg" viewBox="0 0 26 8" aria-hidden="true"><path id="lg-branch" class="lg-branch gold" d="M1 2.2 C9 2 17 3 25 3.8 L25 4.2 C17 4.9 9 6 1 5.8 Z" /></svg>The branch this world took</span> <span><svg class="lg" viewBox="0 0 26 8" aria-hidden="true"><path id="lg-earth" class="lg-dots" d="M3 4 L25 4" stroke-width="2" stroke-dasharray="0 6" stroke-linecap="round" /></svg>Earth's branch: history</span> <span><span class="lg-fog" aria-hidden="true"></span>Fog: invented, or not yet happened</span></p>
+  </section>
+
+  <div class="drill-bar" id="drill-bar" data-mode="read">
+    <span class="drill-acts">
+      <button type="button" class="drill-btn" id="drill-start" disabled>Order four steps by what each needs</button>
+      <button type="button" class="drill-btn" id="drill-undo" hidden>Undo</button>
+      <button type="button" class="drill-btn" id="drill-leave" hidden>Leave</button>
+      <button type="button" class="drill-btn" id="drill-next" hidden>Next four steps</button>
+      <button type="button" class="drill-btn" id="drill-back" hidden>Back to the reading</button>
+    </span>
+    <span class="drill-count" id="drill-count" aria-live="polite"></span>
+    <span class="drill-kept" id="drill-kept"></span>
+  </div>
+
+  <figure class="art" id="art">
+    <div class="art-view">
+      <img id="art-img" src="assets/data/orthogonal/renders/mycelial-lamp.webp" width="900" height="1200" decoding="async"
+        alt="At night in fog, a glass column on a plinth under a hood of stacked rings. Inside it, shelves of gilled bracket fungus on a central spindle glow blue-white along their gills and rims, and a small glass flask stands at the plinth's side. Their light reaches the plinth's top and a pool of wet cobbles in front of it; the hood is dark against the faint sky." />
+      <svg id="art-ink" class="art-ink" hidden aria-hidden="true"></svg>
+    </div>
+    <figcaption class="art-cap">
+      <span class="art-name" data-label>The mycelial street lamp</span>
+      <span class="art-line" data-label>This world's lamp for light at night</span>
+      <span class="art-exposure" data-claim><b class="t ill">[ILLUSTRATIVE]</b> <span class="art-exposure-text">Drawn as a long exposure, sky included, in the plate's blue-white; to the eye fungal light is dimmer, and green (Kotlobay et al. 2018, PNAS).</span></span>
+      <span class="art-status" id="art-status" role="status" data-label></span>
+      <span class="provenance" id="provenance" data-state="loading" data-label>Reading the render's record.</span>
+    </figcaption>
+  </figure>
+
+  <figure class="earth" aria-label="Earth's artifact for the same job, ghosted">
+    <div class="earth-view"><svg id="earth-svg" class="earth-svg" aria-hidden="true"></svg></div>
+    <figcaption class="earth-cap">
+      <span class="earth-name" data-label>The whale-oil street lamp</span>
+      <span class="dim-line" data-label>Earth's answer to the same job</span>
+      <span class="earth-tag" data-claim>Outline [ILLUSTRATIVE] on the render's ground line, not to scale</span>
+    </figcaption>
+  </figure>
+
+  <section class="reading" id="reading" aria-live="polite" aria-label="The chosen step's reading and its evidence"></section>
+</main>
+
+<script type="module" src="assets/js/orthogonal/main.js"></script>
+</body>
+</html>

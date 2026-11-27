@@ -1,0 +1,114 @@
+/* ============================================================
+   orthogonal-catalog.css: the catalogue of 42 drafted worlds, a
+   plate in the language of orthogonal.css (ink in fog, sentence
+   case, Fraunces for the title, gold only for what is chosen: the
+   world on the list, the part pressed).
+
+   Wide: the list of 42 beside the chosen world. Narrow: one world
+   a page, the list folded under a summary, the pager on top.
+   ============================================================ */
+
+body { font-size: 12px; line-height: 1.5; }
+body::before { background: radial-gradient(60% 55% at 50% 45%, rgba(159, 179, 214, .05), transparent 72%); }
+
+.sheet {
+  position: relative; z-index: 1; margin: 4px 24px; padding: 2px 16px 12px; border: 1px solid var(--line);
+  background-image: linear-gradient(rgba(159, 179, 214, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(159, 179, 214, .03) 1px, transparent 1px);
+  background-size: 32px 32px; background-position: -1px -1px;
+}
+.corner { position: absolute; width: 18px; height: 18px; border: 1px solid var(--text-dim); pointer-events: none; }
+.corner.tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.corner.tr { top: -1px; right: -1px; border-left: 0; border-bottom: 0; }
+.corner.bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; }
+.corner.br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+.head { padding: 4px 0 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 0 24px; }
+.head-main { min-width: 0; }
+.kick-line { margin: 0; font-size: 11px; color: var(--text-dim); }
+.kick-line .earlier { color: var(--text-dim); text-decoration: underline; text-underline-offset: 2px; }
+.back { font-size: 11px; letter-spacing: .06em; text-transform: none; padding: 4px 10px; flex: none; }
+.title { margin: 2px 0 0; font: italic 400 34px/1.1 'Fraunces', Georgia, serif; color: var(--text-bright); letter-spacing: -.01em; }
+
+/* ---------- layout ---------- */
+.cat { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 0 20px; align-items: start; }
+
+/* ---------- the list ---------- */
+.listwrap { min-width: 0; border-top: 1px solid var(--line); }
+.listwrap > summary { cursor: pointer; padding: 8px 0; font-size: 11px; color: var(--text-dim); list-style: none; }
+.listwrap > summary::-webkit-details-marker { display: none; }
+.listwrap > summary::before { content: '+ '; }
+.listwrap[open] > summary::before { content: '\2212  '; }
+.list { max-height: calc(100vh - 150px); overflow-y: auto; padding-right: 6px; }
+.dom { margin: 8px 0 2px; font-size: 11px; color: var(--text-dim); }
+.dom b { font-weight: 500; color: var(--horizon); }
+.list a {
+  display: flex; gap: 8px; align-items: baseline; padding: 3px 6px; color: var(--text); text-decoration: none;
+  border-left: 1px solid var(--line); font-size: 12px; line-height: 1.35;
+}
+.list a .id { color: var(--horizon); flex: none; width: 3ch; }
+.list a:hover, .list a:focus-visible { color: var(--text-bright); border-left-color: var(--horizon); }
+/* the chosen world is gold: it is the one decided */
+.list a[aria-current="true"] { color: var(--accretion-soft); border-left-color: var(--accretion); }
+.list a[aria-current="true"] .id { color: var(--accretion); }
+
+/* ---------- the chosen world ---------- */
+.world { min-width: 0; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+.pager { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pager .pos { color: var(--text-dim); font-size: 11px; min-width: 14ch; text-align: center; }
+.pager .act { text-transform: none; letter-spacing: .02em; font-size: 12px; min-height: 34px; padding: 5px 12px; }
+.pager #surprise { margin-left: auto; }
+.brief p { margin: 0 0 2px; font-size: 12.5px; color: var(--text-bright); max-width: 120ch; }
+.brief .lead { color: var(--text-dim); margin-right: 6px; }
+
+.chain { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.chain li { min-width: 0; }
+.chain button {
+  display: block; width: 100%; height: 100%; text-align: left; font: 11px/1.4 var(--font-mono); color: var(--text); background: rgba(11, 14, 19, .6);
+  border: 1px solid var(--line); padding: 6px 8px; cursor: pointer; border-radius: 0;
+}
+.chain button .n { display: block; color: var(--text-dim); margin-bottom: 2px; }
+.chain button:hover, .chain button:focus-visible { border-color: var(--horizon-dim); color: var(--text-bright); }
+.chain button[aria-pressed="true"] { border-color: var(--horizon); color: var(--text-bright); }
+.needs { margin: 0; font-size: 11.5px; color: var(--text); max-width: 130ch; min-height: 2.9em; }
+.needs b { font-weight: 500; color: var(--text-dim); }
+
+.art { margin: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.stage { position: relative; height: clamp(300px, calc(100vh - 520px), 520px); border: 1px solid var(--line); background: var(--void); overflow: hidden; min-width: 0; }
+.stage:focus-visible { outline: 2px solid var(--horizon); outline-offset: 2px; }
+.stage .artifact-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.stage .parts-text { position: absolute; inset: 0; margin: 0; padding: 14px 14px 14px 34px; overflow: auto; color: var(--text); font-size: 12px; }
+.art-cap { display: flex; flex-direction: column; gap: 1px; }
+.art-name { font: italic 400 22px/1.2 'Fraunces', Georgia, serif; color: var(--text-bright); }
+.art-fn { color: var(--text); max-width: 120ch; }
+/* the part pressed is the selection: the only gold in the drawing and its line */
+.art-sel { color: var(--text-dim); }
+.art-sel.on { color: var(--accretion-soft); }
+.art-hint { color: var(--text-dim); }
+
+.claim { margin: 0; font-size: 11.5px; color: var(--text); max-width: 130ch; }
+.claim .t.ill { color: var(--text-dim); }
+.status { margin: 0; min-height: 1.4em; color: var(--text-dim); font-size: 11.5px; }
+
+/* ---------- a phone: one world a page ---------- */
+@media (max-width: 899px) {
+  .sheet { margin: 4px 10px; padding: 2px 12px 12px; }
+  .title { font-size: 26px; }
+  .cat { grid-template-columns: minmax(0, 1fr); }
+  .listwrap { order: 2; margin-top: 12px; }
+  .list { max-height: none; }
+  .chain { grid-template-columns: minmax(0, 1fr); }
+  .pager { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; }
+  .pager #surprise { grid-column: 1 / -1; margin-left: 0; }
+  .stage { height: clamp(280px, 52vh, 420px); }
+  .needs { min-height: 0; }
+  /* the artifact comes first on a phone: it is what the page is for, and the chain of five is long */
+  .pager { order: 0; } .art { order: 1; } .brief { order: 2; } .chain { order: 3; } .needs { order: 4; } .claim { order: 5; } .status { order: 6; }
+}
+@media (max-width: 560px) {
+  .listwrap > summary { min-height: 44px; display: flex; align-items: center; }
+  .list a { min-height: 44px; align-items: center; }
+  .chain button { min-height: 44px; }
+  .pager .act { min-height: 44px; min-width: 44px; }
+  .back { min-height: 44px; display: inline-flex; align-items: center; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
