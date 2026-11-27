@@ -98,5 +98,150 @@
     "name": "a mutant with no \"to\" is accepted",
     "from": "m.from && typeof m.to === 'string')) errs.push(",
     "to": "m.from)) errs.push("
+  },
+  {
+    "name": "gated: the atlas list runs on every pull request",
+    "from": "  atlas: own('atlas', 'atlas'),\n",
+    "to": ""
+  },
+  {
+    "name": "gated: the atlas list runs on another tool and not its own",
+    "from": "atlas: own('atlas', 'atlas'),",
+    "to": "atlas: own('atlas', 'stories'),"
+  },
+  {
+    "name": "gated: the drive.waits list runs on every pull request",
+    "from": "  'drive.waits': [...CHROME_FILES, 'tools/mutants/drive.waits.json'],\n",
+    "to": ""
+  },
+  {
+    "name": "gated: the drive.waits list does not run when its list changed",
+    "from": "[...CHROME_FILES, 'tools/mutants/drive.waits.json']",
+    "to": "[...CHROME_FILES]"
+  },
+  {
+    "name": "gated: the evolution list runs on every pull request",
+    "from": "  evolution: own('evolution', 'evolution'),\n",
+    "to": ""
+  },
+  {
+    "name": "gated: the evolution list runs on a lab file",
+    "from": "evolution: own('evolution', 'evolution'),",
+    "to": "evolution: own('evolution', 'evolution', 'labs/assets/js/kit/fog.js'),"
+  },
+  {
+    "name": "gated: the lab_tests list runs on every pull request",
+    "from": "  lab_tests: own('lab_tests', 'lab_tests'),\n",
+    "to": ""
+  },
+  {
+    "name": "gated: the lab_tests list runs on another tool and not its own",
+    "from": "lab_tests: own('lab_tests', 'lab_tests'),",
+    "to": "lab_tests: own('lab_tests', 'atlas'),"
+  },
+  {
+    "name": "gated: the labs-wt list runs on every pull request",
+    "from": "  'labs-wt': own('labs-wt', 'labs-wt', 'tools/drive.mjs', 'tools/levels.mjs', 'tools/ship_pr.mjs'),\n",
+    "to": ""
+  },
+  {
+    "name": "gated: the labs-wt list does not run when drive.mjs changed",
+    "from": "'labs-wt', 'tools/drive.mjs', 'tools/levels.mjs',",
+    "to": "'labs-wt', 'tools/levels.mjs',"
+  },
+  {
+    "name": "gated: the labs-wt list does not run when levels.mjs changed",
+    "from": "'tools/drive.mjs', 'tools/levels.mjs', 'tools/ship_pr.mjs'),",
+    "to": "'tools/drive.mjs', 'tools/ship_pr.mjs'),"
+  },
+  {
+    "name": "gated: the labs-wt list does not run when ship_pr.mjs changed",
+    "from": "'tools/levels.mjs', 'tools/ship_pr.mjs'),",
+    "to": "'tools/levels.mjs'),"
+  },
+  {
+    "name": "gated: the mutate.core list runs on every pull request",
+    "from": "  'mutate.core': own('mutate.core', 'mutate', 'tools/drive.mjs'),\n",
+    "to": ""
+  },
+  {
+    "name": "gated: the core list does not run when drive.mjs changed",
+    "from": "own('mutate.core', 'mutate', 'tools/drive.mjs')",
+    "to": "own('mutate.core', 'mutate')"
+  },
+  {
+    "name": "gated: the ship_pr list runs on every pull request",
+    "from": "  ship_pr: own('ship_pr', 'ship_pr'),\n",
+    "to": ""
+  },
+  {
+    "name": "gated: the ship_pr list runs on a lab file",
+    "from": "ship_pr: own('ship_pr', 'ship_pr'),",
+    "to": "ship_pr: own('ship_pr', 'ship_pr', 'labs/assets/js/kit/fog.js'),"
+  },
+  {
+    "name": "gated: the stories list runs on every pull request",
+    "from": "  stories: own('stories', 'stories'),\n",
+    "to": ""
+  },
+  {
+    "name": "gated: the stories list runs on another tool and not its own",
+    "from": "stories: own('stories', 'stories'),",
+    "to": "stories: own('stories', 'evolution'),"
+  },
+  {
+    "name": "gated: a list does not run when its tool changed",
+    "from": "[...new Set([`tools/${tool}.mjs`, `tools/mutants/${list}.json`, ...reads, ...RUNNER])]",
+    "to": "[...new Set([`tools/mutants/${list}.json`, ...reads, ...RUNNER])]"
+  },
+  {
+    "name": "gated: a list does not run when its own list changed",
+    "from": "[...new Set([`tools/${tool}.mjs`, `tools/mutants/${list}.json`, ...reads, ...RUNNER])]",
+    "to": "[...new Set([`tools/${tool}.mjs`, ...reads, ...RUNNER])]"
+  },
+  {
+    "name": "gated: a list does not run when a sibling its tool reads changed",
+    "from": "[...new Set([`tools/${tool}.mjs`, `tools/mutants/${list}.json`, ...reads, ...RUNNER])]",
+    "to": "[...new Set([`tools/${tool}.mjs`, `tools/mutants/${list}.json`, ...RUNNER])]"
+  },
+  {
+    "name": "gated: a list does not run when mutate.mjs or the gates workflow changed",
+    "from": "[...new Set([`tools/${tool}.mjs`, `tools/mutants/${list}.json`, ...reads, ...RUNNER])]",
+    "to": "[...new Set([`tools/${tool}.mjs`, `tools/mutants/${list}.json`, ...reads])]"
+  },
+  {
+    "name": "gated: the lists do not run when mutate.mjs changed",
+    "from": "const RUNNER = ['tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const RUNNER = ['.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "gated: the lists do not run when the gates workflow changed",
+    "from": "const RUNNER = ['tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const RUNNER = ['tools/mutate.mjs'];"
+  },
+  {
+    "name": "gated: the lists run on every lab file",
+    "from": "const RUNNER = ['tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const RUNNER = ['tools/mutate.mjs', '.github/workflows/gates.yml', 'labs/assets/js/kit/fog.js'];"
+  },
+  {
+    "name": "siblings: a sibling quoted after ./ is not counted",
+    "from": "(\\\\./)?${s.replace(",
+    "to": "${s.replace("
+  },
+  {
+    "name": "siblings: a repository path counts as a sibling read",
+    "from": "(\\\\./)?${s.replace(",
+    "to": "([\\\\w./]*)?${s.replace("
+  },
+  {
+    "name": "siblings: a name inside a longer name counts",
+    "from": "new RegExp(`['\"\\`](\\\\./)?",
+    "to": "new RegExp(`(\\\\./)?"
+  },
+  {
+    "name": "siblings: the tool counts as its own sibling",
+    "from": "s !== self && new RegExp(",
+    "to": "new RegExp("
   }
 ]

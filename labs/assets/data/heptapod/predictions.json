@@ -108,6 +108,61 @@
       "measure": "scratch g4_two.py, on inkfig 0.6.1 figures.",
       "filmValueKnownNote": "inkfig 0.6 on the same 170: fine max 0.687, coarse median 0.692.",
       "ifConfirmed": "Rule 6 holds."
+    },
+    {
+      "date": "2026-11-21",
+      "filmValueKnown": false,
+      "id": "C5-P1",
+      "feature": "ink is conserved while it moves",
+      "derivation": "Luis, 2026-11-21: \"the transitions between logograms have to be organic, not disappear and appearing like the ink changing itself\". The ink is made conserved: it only moves. A new ring's ink is the ink already in the disc (the ring before, and ink dissolved in the fog), carried along a least-work plan (weighted sliced optimal transport, Rabin, Peyre, Delon and Bernot, SSVM 2011, regularised toward a smooth map), with a divergence-free swirl and a spread that follows sin(pi s); the fog gives what the ring lacks and takes what it does not need; the last 18% of the move settles the ink into its strokes in place.",
+      "prediction": "From the end of the fog's inflow (20% of the move) to the start of the settling (82%), the total ink in the disc changes by less than 0.5% in every move measured.",
+      "measure": "labs/assets/js/heptapod/tests/medium.test.mjs: per gate species, the greeting from an empty disc, and scenes 0 to 3 each written over the settled ring before it; N 300, span 3.44, the step the scene uses (1/30 s).",
+      "filmValueKnownNote": "A scratch prototype (not the chamber's code) was rendered and measured on species 1 only: fog to greeting, greeting to scene 5, scene 5 to scene 12. The predictions below are measured on all three gate species through pod/medium.js as the chamber runs it.",
+      "ifConfirmed": "The moving ink ships with the numbers on record."
+    },
+    {
+      "date": "2026-11-21",
+      "filmValueKnown": false,
+      "id": "C5-P2",
+      "feature": "the move is not a crossfade",
+      "derivation": "Luis, 2026-11-21: \"the transitions between logograms have to be organic, not disappear and appearing like the ink changing itself\". The ink is made conserved: it only moves. A new ring's ink is the ink already in the disc (the ring before, and ink dissolved in the fog), carried along a least-work plan (weighted sliced optimal transport, Rabin, Peyre, Delon and Bernot, SSVM 2011, regularised toward a smooth map), with a divergence-free swirl and a spread that follows sin(pi s); the fog gives what the ring lacks and takes what it does not need; the last 18% of the move settles the ink into its strokes in place.",
+      "prediction": "At mid-move, the L1 distance between the ink and the crossfade of the two ends, (S + T) / 2, is at least half the new ring's ink, in every move measured.",
+      "measure": "labs/assets/js/heptapod/tests/medium.test.mjs: per gate species, the greeting from an empty disc, and scenes 0 to 3 each written over the settled ring before it; N 300, span 3.44, the step the scene uses (1/30 s).",
+      "filmValueKnownNote": "A scratch prototype (not the chamber's code) was rendered and measured on species 1 only: fog to greeting, greeting to scene 5, scene 5 to scene 12. The predictions below are measured on all three gate species through pod/medium.js as the chamber runs it.",
+      "ifConfirmed": "The moving ink ships with the numbers on record."
+    },
+    {
+      "date": "2026-11-21",
+      "filmValueKnown": false,
+      "id": "C5-P3",
+      "feature": "the settling is local",
+      "derivation": "Luis, 2026-11-21: \"the transitions between logograms have to be organic, not disappear and appearing like the ink changing itself\". The ink is made conserved: it only moves. A new ring's ink is the ink already in the disc (the ring before, and ink dissolved in the fog), carried along a least-work plan (weighted sliced optimal transport, Rabin, Peyre, Delon and Bernot, SSVM 2011, regularised toward a smooth map), with a divergence-free swirl and a spread that follows sin(pi s); the fog gives what the ring lacks and takes what it does not need; the last 18% of the move settles the ink into its strokes in place.",
+      "prediction": "Of the ink the settling must still add when it starts, at least 70% lies within 6 px (at N 300) of ink the move has brought, in every move measured.",
+      "measure": "labs/assets/js/heptapod/tests/medium.test.mjs: per gate species, the greeting from an empty disc, and scenes 0 to 3 each written over the settled ring before it; N 300, span 3.44, the step the scene uses (1/30 s).",
+      "filmValueKnownNote": "A scratch prototype (not the chamber's code) was rendered and measured on species 1 only: fog to greeting, greeting to scene 5, scene 5 to scene 12. The predictions below are measured on all three gate species through pod/medium.js as the chamber runs it.",
+      "ifConfirmed": "The moving ink ships with the numbers on record."
+    },
+    {
+      "date": "2026-11-21",
+      "filmValueKnown": false,
+      "id": "C5-P4",
+      "feature": "the ring arrives whole at once (Chiang: a semagram is written all at once)",
+      "derivation": "Luis, 2026-11-21: \"the transitions between logograms have to be organic, not disappear and appearing like the ink changing itself\". The ink is made conserved: it only moves. A new ring's ink is the ink already in the disc (the ring before, and ink dissolved in the fog), carried along a least-work plan (weighted sliced optimal transport, Rabin, Peyre, Delon and Bernot, SSVM 2011, regularised toward a smooth map), with a divergence-free swirl and a spread that follows sin(pi s); the fog gives what the ring lacks and takes what it does not need; the last 18% of the move settles the ink into its strokes in place.",
+      "prediction": "Every cell of the new ring with target above 0.25 crosses half its target within the move, and the crossing times of all of them spread over at most 30% of the move, in every move measured.",
+      "measure": "labs/assets/js/heptapod/tests/medium.test.mjs: per gate species, the greeting from an empty disc, and scenes 0 to 3 each written over the settled ring before it; N 300, span 3.44, the step the scene uses (1/30 s).",
+      "filmValueKnownNote": "A scratch prototype (not the chamber's code) was rendered and measured on species 1 only: fog to greeting, greeting to scene 5, scene 5 to scene 12. The predictions below are measured on all three gate species through pod/medium.js as the chamber runs it.",
+      "ifConfirmed": "The moving ink ships with the numbers on record."
+    },
+    {
+      "date": "2026-11-21",
+      "filmValueKnown": false,
+      "id": "C5-P5",
+      "feature": "the plan is cheap enough to make on an act",
+      "derivation": "Luis, 2026-11-21: \"the transitions between logograms have to be organic, not disappear and appearing like the ink changing itself\". The ink is made conserved: it only moves. A new ring's ink is the ink already in the disc (the ring before, and ink dissolved in the fog), carried along a least-work plan (weighted sliced optimal transport, Rabin, Peyre, Delon and Bernot, SSVM 2011, regularised toward a smooth map), with a divergence-free swirl and a spread that follows sin(pi s); the fog gives what the ring lacks and takes what it does not need; the last 18% of the move settles the ink into its strokes in place.",
+      "prediction": "The plan takes at most 150 ms per move in Node on this machine at N 300 (the median over the moves measured).",
+      "measure": "labs/assets/js/heptapod/tests/medium.test.mjs: per gate species, the greeting from an empty disc, and scenes 0 to 3 each written over the settled ring before it; N 300, span 3.44, the step the scene uses (1/30 s).",
+      "filmValueKnownNote": "A scratch prototype (not the chamber's code) was rendered and measured on species 1 only: fog to greeting, greeting to scene 5, scene 5 to scene 12. The predictions below are measured on all three gate species through pod/medium.js as the chamber runs it.",
+      "ifConfirmed": "The moving ink ships with the numbers on record."
     }
   ]
 }
