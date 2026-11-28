@@ -3,6 +3,44 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-28, Seed's rule fields have names (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
+  today, and the 2026-11-17 sweep has no finding left the routine can fix, so this run swept again: the 29 published
+  pages outside tools/ and _archive/ (labs/bh_animation_page.html and its v1 left out, as on 2026-11-17) in headless
+  Chromium at 1280 px and 390 px over a local http server, recording script errors, failed local requests, the
+  document scroll width, a language, a title, a description, images without alt text, and buttons, links and form
+  fields without an accessible name.
+- Found: on labs/seed.html the two rule fields (the bodies of the rewrite rules for X and F) had no accessible name,
+  so a screen reader announced two bare text boxes; the 2026-11-18 fix named the five fields above them and not
+  these, which the page writes from its script. Not counted: the three range sliders on the home page sit in the
+  Tweaks panel (src/ui/spa-tweaks.js), which is display:none unless a parent editing frame opens it, so a visitor
+  never reaches them; the 20 bed-lane buttons on labs/ai-health.html are aria-hidden with tabindex -1 by design.
+  No page is wider than the screen, and the console errors are the expected ones (labs probing for a local model,
+  The Roaster's live request refused by CORS from localhost, labs/claude-prep/ requesting seal.json).
+- Changed (labs/seed.html, one line): each rule field the page writes gets the name "rule for " and its symbol.
+  Measured in headless Chromium at 1280 and 390 px: 0 textboxes named "rule for ..." before, 2 after ("rule for X"
+  and "rule for F"), and the fields keep their names after a press of grow redraws them; their values and widths
+  (248 px and 298 px) are unchanged. Nothing a visitor sees changed.
+- Still open for later runs of item 1: labs/claude-prep/ has no meta description and requests seal.json, which
+  returns 404 (Luis decides; its source is not in this repository). Item 2: no tracked file outside _archive/
+  references labs/weather/ today (a search of the .js, .html and .json files finds the word only in lab data and
+  comments), so there is no link to remove; Luis may strike or close it.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 31 pages, 0 findings; levels 32 labs, 0
+  errors (levels selftest 12 of 12); lab tests 105 files, 0 failed; atlas selftest 114 of 114, stories 87 of 87,
+  evolution 109 of 109, and their checks pass (stories prints NOT_CHECKED for the private plans); anti-tells
+  selftest 27 of 27, no new tells, and node tools/anti_tells.mjs scan labs/seed.html lists 7 tells before and
+  after, none on the changed line. The change is inside an inline script of an HTML page, so there is no separate
+  file for node --check; the page ran it in Chromium with 0 errors. The mutate run was not repeated (no tool
+  changed) and runs in the gates workflow. Render: labs/seed.html at 1280 px and 390 px in headless Chromium over a
+  local http server, 0 console errors, and the document scroll width equal to the screen width. Forbidden-name
+  check: runs in the gates workflow on the pull request.
+- Gates on pull request #101: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed, on
+  the first commit of the branch, with main unchanged since the branch was made. The run applies tools/ship_pr.mjs's
+  rules by hand over the GitHub API, as on 2026-11-27: both required checks and every other check must pass on the
+  head commit, and the branch contains main.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
+
 ## 2026-11-27, The hero prototype has a meta description (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 31 pages and 0 findings on main
