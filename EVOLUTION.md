@@ -35,6 +35,11 @@ merged. A run that changed nothing still writes its entry, with the reason.
   changed) and runs in the gates workflow. Render: labs/seed.html at 1280 px and 390 px in headless Chromium over a
   local http server, 0 console errors, and the document scroll width equal to the screen width. Forbidden-name
   check: runs in the gates workflow on the pull request.
+- Gates on pull request #101: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed, on
+  the first commit of the branch, with main unchanged since the branch was made. The run applies tools/ship_pr.mjs's
+  rules by hand over the GitHub API, as on 2026-11-27: both required checks and every other check must pass on the
+  head commit, and the branch contains main.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-27, The hero prototype has a meta description (roadmap item 1)
 
