@@ -358,7 +358,7 @@
     baseKeys.forEach(function(k){
       var d=document.createElement('div'); d.className='rule';
       d.innerHTML='<span class="sym">'+k+' &rarr;</span>';
-      var inp=document.createElement('input'); inp.className='s'; inp.value=S.base[k]; inp.spellcheck=false;
+      var inp=document.createElement('input'); inp.className='s'; inp.value=S.base[k]; inp.spellcheck=false; inp.setAttribute('aria-label','rule for '+k);
       inp.addEventListener('change',function(){ S.base[k]=inp.value; });
       d.appendChild(inp); host.appendChild(d);
     });

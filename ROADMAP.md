@@ -16,6 +16,9 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-28: Item 1, one finding: on Seed (labs/seed.html) the two rule fields had no accessible name; each now
+  carries "rule for" and its symbol. Item 1 stays in "Next". Pull request "evolve 2026-11-28: seed rule fields have
+  names".
 - 2026-11-27: Item 1, one finding: the hero prototype (hero_proto.html) had no meta description; it now has one
   taken from its name, plate, figure and counts. Item 1 stays in "Next". Pull request "evolve 2026-11-27: hero
   prototype has a meta description".
